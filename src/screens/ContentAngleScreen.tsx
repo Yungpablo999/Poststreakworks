@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useMascotThinking } from '../mascot/mascot';
 import {
   StyleSheet,
   View,
-  Text,
   ScrollView,
   Pressable,
   Platform,
@@ -12,12 +12,22 @@ import {
   SafeAreaView,
   StatusBar,
 } from 'react-native';
+import { Text } from '../components/ui/AppText';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import Svg, { Path, Circle } from 'react-native-svg';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
+import { FreeAppHeader } from '../components/FreeAppHeader';
+import { sFont, sPadding, isNarrowScreen } from '../utils/responsive';
+import Reanimated, { FadeIn, FadeInUp, FadeOut } from 'react-native-reanimated';
+import { GlassBackdrop } from '../components/glass/GlassBackdrop';
+import { FitLines } from '../components/ui/FitLines';
+import { ChipRow, TopPickCard, IdeaRow, IdeaRowSkeleton, QuotaCard, SavedRow, TopicIdeasCard, UnlimitedIdeasCard } from '../components/ideas/IdeasBlocks';
+import { ComposerToast } from '../components/composer/ComposerBlocks';
+import { getIdeaFeed, getTopicIdeas, IDEA_GOALS, NICHE_LABELS, normalizeNiches, type IdeaGoal } from '../data';
+import { ds } from '../theme/colors';
 
 interface ContentAngleScreenProps {
   onBack: () => void;
@@ -25,10 +35,12 @@ interface ContentAngleScreenProps {
   onOpenSchedule?: () => void;
   onOpenJarvisPro?: () => void;
   onNavigateTab?: (tab: TabType) => void;
-  onUseIdea?: (ideaTitle: string) => void;
-  onOpenMessages?: () => void;
+  onUseIdea?: (ideaTitle: string, format?: string, goal?: IdeaGoal, hook?: string) => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
+  /** Pro members: unlimited ideas and ideas about their own topic. */
+  tier?: 'free' | 'pro';
+  onSwitchToFree?: () => void;
 }
 
 interface NotificationItem {
@@ -52,6 +64,40 @@ interface IdeaCardItem {
   bookmarked: boolean;
 }
 
+interface SavedIdeaItem {
+  id: string;
+  title: string;
+  format: string;
+  savedTime: string;
+}
+
+const INITIAL_SAVED_IDEAS: SavedIdeaItem[] = [
+  {
+    id: 'saved_1',
+    title: 'My morning setup routine',
+    format: 'Short Reel',
+    savedTime: 'Saved 2 h ago',
+  },
+  {
+    id: 'saved_2',
+    title: 'My simple content planning routine',
+    format: 'Carousel',
+    savedTime: 'Saved Yesterday',
+  },
+  {
+    id: 'saved_3',
+    title: 'How I turn 1 idea into 4 different posts across platforms',
+    format: 'Carousel / Reel',
+    savedTime: 'Saved 3 days ago',
+  },
+  {
+    id: 'saved_4',
+    title: '3 creator habits that made posting easier',
+    format: 'Short Reel',
+    savedTime: 'Saved 5 days ago',
+  },
+];
+
 const NOTIFICATIONS: NotificationItem[] = [
   {
     id: 'n1',
@@ -66,7 +112,7 @@ const NOTIFICATIONS: NotificationItem[] = [
   {
     id: 'n2',
     title: 'Streak Saver Ready',
-    body: "Convert today's idea into a post to keep your 47-day streak.",
+    body: "Convert today's idea into a post to kick off your creator streak.",
     time: '2h ago',
     unread: true,
     iconEmoji: '🔥',
@@ -141,10 +187,11 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
   onOpenJarvisPro,
   onNavigateTab,
   onUseIdea,
-  onOpenMessages,
 
   userProfile,
-  onSaveProfile,}) => {
+  onSaveProfile,
+  tier = 'free',
+  onSwitchToFree,}) => {
   const isDark = false;
   const [activeTab, setActiveTab] = useState<TabType>('create');
 
@@ -156,15 +203,21 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
   const [isHeroSaved, setIsHeroSaved] = useState(false);
   const [allIdeas, setAllIdeas] = useState<IdeaCardItem[]>(ALL_IDEAS_LIST);
   const [showAllIdeas, setShowAllIdeas] = useState(false);
-  const [savedIdeasCount, setSavedIdeasCount] = useState(2);
+  const [savedIdeasList, setSavedIdeasList] = useState<SavedIdeaItem[]>(INITIAL_SAVED_IDEAS);
+  const [showAllSavedIdeas, setShowAllSavedIdeas] = useState(false);
   const [quotaUsed, setQuotaUsed] = useState(3);
   const [selectedAngleFilters, setSelectedAngleFilters] = useState<string[]>(['faster']);
   const [selectedJarvisChips, setSelectedJarvisChips] = useState<string[]>([]);
 
+  // Three-dot Idea Action Menu & Filter States
+  const [selectedIdeaForMenu, setSelectedIdeaForMenu] = useState<IdeaCardItem | null>(null);
+  const [showIdeaMenuModal, setShowIdeaMenuModal] = useState(false);
+  const [hiddenIdeaIds, setHiddenIdeaIds] = useState<string[]>([]);
+  const [actionToast, setActionToast] = useState<string | null>(null);
+
   // Modals
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const [showChatModal, setShowChatModal] = useState(false);
   const [showCelebrationModal, setShowCelebrationModal] = useState(false);
   const [celebrationTitle, setCelebrationTitle] = useState('Idea Generated!');
   const [celebrationSubtitle, setCelebrationSubtitle] = useState('New batch of viral content angles added to your vault.');
@@ -173,27 +226,8 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
   const [notificationsList, setNotificationsList] = useState<NotificationItem[]>(NOTIFICATIONS);
 
   // Animations
-  const flameFloatY = useRef(new Animated.Value(0)).current;
   const modalPopScale = useRef(new Animated.Value(0.9)).current;
 
-  useEffect(() => {
-    const floatAnim = Animated.loop(
-      Animated.sequence([
-        Animated.timing(flameFloatY, {
-          toValue: -4,
-          duration: 1800,
-          useNativeDriver: true,
-        }),
-        Animated.timing(flameFloatY, {
-          toValue: 0,
-          duration: 1800,
-          useNativeDriver: true,
-        }),
-      ])
-    );
-    floatAnim.start();
-    return () => floatAnim.stop();
-  }, [flameFloatY]);
 
   const triggerModalAnim = () => {
     modalPopScale.setValue(0.9);
@@ -203,6 +237,44 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
       friction: 8,
       useNativeDriver: true,
     }).start();
+  };
+
+  const triggerToast = (msg: string) => {
+    setActionToast(msg);
+    setTimeout(() => {
+      setActionToast((prev) => (prev === msg ? null : prev));
+    }, 3000);
+  };
+
+  const handleOpenIdeaMenu = (idea: IdeaCardItem) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setSelectedIdeaForMenu(idea);
+    triggerModalAnim();
+    setShowIdeaMenuModal(true);
+  };
+
+  const handleMenuAction = (action: 'save' | 'hide' | 'not_relevant' | 'report') => {
+    if (!selectedIdeaForMenu) return;
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    const currentIdea = selectedIdeaForMenu;
+    setShowIdeaMenuModal(false);
+
+    if (action === 'save') {
+      toggleBookmark(currentIdea.id);
+      triggerToast(currentIdea.bookmarked ? 'Idea removed from saved' : 'Idea saved to bookmarks');
+    } else if (action === 'hide') {
+      setHiddenIdeaIds((prev) => [...prev, currentIdea.id]);
+      triggerToast('Idea hidden from feed');
+    } else if (action === 'not_relevant') {
+      setHiddenIdeaIds((prev) => [...prev, currentIdea.id]);
+      triggerToast('Thanks! Jarvis will recommend fewer ideas like this');
+    } else if (action === 'report') {
+      triggerToast('Report received. Thank you for your feedback');
+    }
   };
 
   const handleTabPress = (tab: TabType) => {
@@ -265,13 +337,23 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
     }
     const nextSaved = !isHeroSaved;
     setIsHeroSaved(nextSaved);
-    setSavedIdeasCount((c) => (nextSaved ? c + 1 : Math.max(0, c - 1)));
 
     if (nextSaved) {
+      setSavedIdeasList((prev) => [
+        {
+          id: 'saved_hero',
+          title: 'One thing I wish I knew before I started creating',
+          format: 'Short Reel',
+          savedTime: 'Saved just now',
+        },
+        ...prev.filter((s) => s.id !== 'saved_hero'),
+      ]);
       setCelebrationTitle('Idea Saved!');
       setCelebrationSubtitle('"One thing I wish I knew before I started creating" has been saved to your vault.');
-      setCelebrationSpeech('47-day streak protected! Idea ready to turn into a post anytime.');
+      setCelebrationSpeech('Day 1 idea saved! Ready to turn into a post anytime.');
       setShowCelebrationModal(true);
+    } else {
+      setSavedIdeasList((prev) => prev.filter((s) => s.id !== 'saved_hero'));
     }
   };
 
@@ -280,6 +362,7 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
     let savedTitle = '';
+    let savedFormat = 'Short Reel';
     let becameSaved = false;
 
     setAllIdeas((prev) =>
@@ -288,7 +371,7 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
           const next = !item.bookmarked;
           becameSaved = next;
           savedTitle = item.title;
-          setSavedIdeasCount((c) => (next ? c + 1 : Math.max(0, c - 1)));
+          savedFormat = item.format;
           return { ...item, bookmarked: next };
         }
         return item;
@@ -296,19 +379,30 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
     );
 
     if (becameSaved) {
+      setSavedIdeasList((prev) => [
+        {
+          id: `saved_${id}`,
+          title: savedTitle,
+          format: savedFormat,
+          savedTime: 'Saved just now',
+        },
+        ...prev.filter((s) => s.id !== `saved_${id}`),
+      ]);
       setCelebrationTitle('Idea Saved!');
       setCelebrationSubtitle(`"${savedTitle}" has been saved to your vault.`);
-      setCelebrationSpeech('47-day streak protected! Idea ready in your vault.');
+      setCelebrationSpeech('Day 1 idea saved! Ready in your vault.');
       setShowCelebrationModal(true);
+    } else {
+      setSavedIdeasList((prev) => prev.filter((s) => s.id !== `saved_${id}`));
     }
   };
 
-  const handleSelectIdea = (ideaTitle: string) => {
+  const handleSelectIdea = (ideaTitle: string, format?: string, hook?: string) => {
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
     if (onUseIdea) {
-      onUseIdea(ideaTitle);
+      onUseIdea(ideaTitle, format, goal, hook);
     }
   };
 
@@ -320,12 +414,17 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
   };
 
   const handleGenerateMoreIdeas = () => {
+    if (quotaUsed >= 5) {
+      if (Platform.OS !== 'web') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      }
+      if (onOpenJarvisPro) onOpenJarvisPro();
+      return;
+    }
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-    if (quotaUsed < 5) {
-      setQuotaUsed((q) => q + 1);
-    }
+    setQuotaUsed((q) => Math.min(5, q + 1));
 
     const newIdea: IdeaCardItem = {
       id: `idea_${Date.now()}`,
@@ -339,126 +438,121 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
     setAllIdeas([newIdea, ...allIdeas]);
     setCelebrationTitle('New Ideas Generated!');
     setCelebrationSubtitle('Fresh angles tailored for your niche are ready to create.');
-    setCelebrationSpeech('47-day streak protected! Keep up this awesome momentum.');
+    setCelebrationSpeech('Day 1 momentum active! Keep up this awesome focus.');
     setShowCelebrationModal(true);
   };
 
   const unreadNotifCount = notificationsList.filter((n) => n.unread).length;
-  const displayedIdeas = showAllIdeas ? allIdeas : allIdeas.slice(0, 2);
+
+  // ── Ideas feed: the creator's niches + one goal drive the ideas ──────────
+  const [niches, setNiches] = useState<string[]>(() => {
+    const n = normalizeNiches(userProfile?.niches);
+    return n.length ? n : ['lifestyle'];
+  });
+  const [goal, setGoal] = useState<IdeaGoal>('followers');
+  const [editNiches, setEditNiches] = useState(false);
+  const feed = React.useMemo(
+    () => getIdeaFeed(niches, goal, userProfile?.connectedPlatforms ?? []),
+    [niches, goal, userProfile?.connectedPlatforms],
+  );
+  const [topIndex, setTopIndex] = useState(0);
+  const [pickThinking, setPickThinking] = useState(false);
+  const [listCount, setListCount] = useState(3);
+  const [generating, setGenerating] = useState(false);
+  useMascotThinking(generating);
+  const top = feed[topIndex % feed.length];
+  const isPro = tier === 'pro';
+  const [topicIdeas, setTopicIdeas] = useState<typeof feed>([]);
+  const [topicBusy, setTopicBusy] = useState(false);
+  const [lastTopic, setLastTopic] = useState('');
+  const [topicRound, setTopicRound] = useState(0);
+  const askTopic = (t: string, g: IdeaGoal = goal, fresh = false) => {
+    if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setTopicBusy(true);
+    // Same topic again = the next 3; new topic or goal = start over
+    const round = !fresh && t === lastTopic && g === goal && topicIdeas.length ? topicRound + 1 : 0;
+    setTopicRound(round);
+    setLastTopic(t);
+    setTimeout(() => {
+      setTopicIdeas(getTopicIdeas(t, g, feed[0]?.format, round));
+      setTopicBusy(false);
+    }, 800);
+  };
+  // Changing the goal reshapes the topic ideas
+  useEffect(() => {
+    if (lastTopic) askTopic(lastTopic, goal, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [goal]);
+  const listIdeas = feed.filter((i) => i.id !== top.id).slice(0, listCount);
+  const savedIds = savedIdeasList.map((s) => s.id);
+  const isSaved = (id: string) => savedIds.includes(`feed_${id}`);
+
+  useEffect(() => {
+    setTopIndex(0);
+    setListCount(3);
+  }, [niches, goal]);
+
+  const toggleNicheId = (id: string) =>
+    setNiches((prev) => (prev.includes(id) ? (prev.length > 1 ? prev.filter((n) => n !== id) : prev) : [...prev, id]));
+
+  const showAnotherPick = () => {
+    if (pickThinking) return;
+    setPickThinking(true);
+    setTimeout(() => {
+      setTopIndex((i) => i + 1);
+      setPickThinking(false);
+    }, 550);
+  };
+
+  const toggleSaveIdea = (idea: { id: string; title: string; format: string }) => {
+    const key = `feed_${idea.id}`;
+    if (savedIds.includes(key)) {
+      setSavedIdeasList((prev) => prev.filter((s) => s.id !== key));
+      triggerToast('Removed from saved ideas');
+    } else {
+      setSavedIdeasList((prev) => [{ id: key, title: idea.title, format: idea.format, savedTime: 'Saved just now' }, ...prev]);
+      triggerToast('Saved. Find it under Saved ideas');
+    }
+  };
+
+  const generateIdeas = () => {
+    if (generating || (!isPro && quotaUsed >= 5)) return;
+    if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setGenerating(true);
+    setTimeout(() => {
+      setQuotaUsed((q) => Math.min(5, q + 1));
+      setListCount((c) => c + 2);
+      setGenerating(false);
+    }, 900);
+  };
+  const displayedIdeas = allIdeas
+    .filter((item) => !hiddenIdeaIds.includes(item.id))
+    .slice(0, showAllIdeas ? allIdeas.length : 2);
+  const displayedSavedIdeas = showAllSavedIdeas ? savedIdeasList : savedIdeasList.slice(0, 2);
 
   return (
     <SafeAreaView style={[styles.safeArea, isDark && { backgroundColor: '#0C0A12' }]}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={isDark ? "#0C0A12" : "#FAF8F5"} />
       <View style={[styles.container, isDark && { backgroundColor: '#0C0A12' }]}>
-        {/* 1. TOP AIRY HEADER BAR (UNIFIED APP-WIDE) */}
-        <View style={styles.headerBar}>
-          <View style={styles.headerLeftGroup}>
-            <Pressable
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                onBack();
-              }}
-              style={({ pressed }) => [styles.backCircleBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-            >
-              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                <Path d="M15 18L9 12L15 6" stroke="#171420" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-              </Svg>
-            </Pressable>
-
-            {/* Mascot Logo with Floating Animation */}
-            <Animated.View
-              style={[
-                styles.headerLogoWrapper,
-                { transform: [{ translateY: flameFloatY }] },
-              ]}
-            >
-              <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerGhostLogo}
-                resizeMode="contain"
-              />
-            </Animated.View>
-          </View>
-
-          {/* Right Icons: Messages, Notification Bell, Profile */}
-          <View style={styles.headerRightGroup}>
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                if (onOpenMessages) {
-                  onOpenMessages();
-                } else {
-                  triggerModalAnim();
-                  setShowChatModal(true);
-                }
-              }}
-            >
-              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                triggerModalAnim();
-                setShowNotificationModal(true);
-              }}
-            >
-              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <Path
-                  d="M13.73 21a2 2 0 0 1-3.46 0"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-              {unreadNotifCount > 0 && <View style={styles.notificationDot} />}
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                triggerModalAnim();
-                setShowProfileModal(true);
-              }}
-            >
-              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <Circle cx="12" cy="7" r="4" stroke="#171420" strokeWidth="2.2" />
-              </Svg>
-            </Pressable>
-          </View>
-        </View>
+        <GlassBackdrop />
+        {/* 1. TOP AIRY HEADER BAR */}
+        <FreeAppHeader
+          backgroundColor="transparent"
+          onBack={onBack}
+          onOpenJarvisPro={onOpenJarvisPro}
+          onSwitchToFree={onSwitchToFree}
+          onOpenNotifications={() => {
+            triggerModalAnim();
+            setShowNotificationModal(true);
+          }}
+          onOpenProfile={() => {
+            triggerModalAnim();
+            setShowProfileModal(true);
+          }}
+          userProfile={userProfile}
+          unreadCount={unreadNotifCount}
+          isDark={isDark}
+        />
 
         {/* 2. MAIN SCROLLABLE CONTENT */}
         <ScrollView
@@ -466,362 +560,130 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
           showsVerticalScrollIndicator={false}
           bounces={true}
         >
-          {/* Top Pill Badge (Free Ideas) */}
-          <View style={styles.topBadgesRow}>
-            <View style={styles.freeIdeasPill}>
-              <View style={styles.freeIdeasDot} />
-              <Text style={styles.freeIdeasPillText}>Free Ideas</Text>
-            </View>
-          </View>
+          {/* HEADLINE — same two-line structure on every screen size */}
+          <Reanimated.View entering={FadeInUp.duration(500)} style={styles.headline}>
+            <FitLines
+              lines={['Find your next', <Text key="i" style={styles.headlineAccent}>post idea</Text>]}
+              textStyle={styles.headlineText}
+              maxFontSize={34}
+              align="left"
+              accessibilityLabel="Find your next post idea"
+            />
+          </Reanimated.View>
 
-          {/* Main Headline & Subtitle */}
-          <Text style={styles.mainTitle}>Find your next content angle.</Text>
-          <Text style={styles.mainSubtitle}>
-            Choose your niche and goal, then generate ideas you can turn into posts.
-          </Text>
-
-          {/* 1. NICHE PILLS ROW (SELECT & UNSELECT) */}
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.filterPillsRow}
-          >
-            {['Creator Advice', 'Lifestyle', 'Comedy', 'Education', 'Fitness'].map((niche) => {
-              const isSelected = selectedNiches.includes(niche);
-              return (
-                <Pressable
-                  key={niche}
-                  onPress={() => toggleNiche(niche)}
-                  style={[
-                    styles.filterPill,
-                    isSelected && styles.filterPillActive,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.filterPillText,
-                      isSelected && styles.filterPillTextActive,
-                    ]}
-                  >
-                    {niche}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
-
-          {/* 2. GOAL PILLS ROW (SELECT & UNSELECT) */}
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.filterPillsRow}
-          >
-            {[
-              { id: 'Grow engagement', label: 'Grow engagement' },
-              { id: 'Protect streak', label: '⚡ Protect streak' },
-              { id: 'Get saves', label: 'Get saves' },
-              { id: 'Start conversation', label: 'Start conversation' },
-            ].map((goal) => {
-              const isSelected = selectedGoals.includes(goal.id);
-              return (
-                <Pressable
-                  key={goal.id}
-                  onPress={() => toggleGoal(goal.id)}
-                  style={[
-                    styles.filterPill,
-                    isSelected && styles.filterPillActive,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.filterPillText,
-                      isSelected && styles.filterPillTextActive,
-                    ]}
-                  >
-                    {goal.label}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
-
-          {/* 3. HERO STREAK SAVER PICK CARD */}
-          <View style={styles.heroIdeaCard}>
-            {/* Header Badge */}
-            <View style={styles.heroBadgeRow}>
-              <View style={styles.streakSaverPickBadge}>
-                <Text style={styles.streakSaverPickStar}>⭐</Text>
-                <Text style={styles.streakSaverPickText}>STREAK SAVER PICK</Text>
-              </View>
-            </View>
-
-            {/* Title & Desc */}
-            <Text style={styles.heroIdeaTitle}>
-              &ldquo;One thing I wish I knew before I started creating&rdquo;
-            </Text>
-            <Text style={styles.heroIdeaDesc}>
-              Share one honest lesson that would help another creator stay consistent or avoid a mistake.
-            </Text>
-
-            {/* Why It Works Inner Box */}
-            <View style={styles.whyItWorksBox}>
-              <Text style={styles.whyItWorksLabel}>WHY IT WORKS</Text>
-              <Text style={styles.whyItWorksText}>
-                Personal lessons are fast to create and easy for audiences to save.
+          {/* NICHES + GOAL */}
+          <Reanimated.View entering={FadeInUp.delay(80).duration(500)} style={styles.filters}>
+            {/* Niches come from onboarding; one line, with Change if they want other ideas */}
+            <View style={styles.nicheLine}>
+              <Text style={styles.nicheText} numberOfLines={1}>
+                Ideas for <Text style={styles.nicheBold}>{niches.map((n) => NICHE_LABELS[n]).join(' · ')}</Text>
               </Text>
-            </View>
-
-            {/* Tags Row */}
-            <View style={styles.heroTagsRow}>
-              <View style={styles.heroTagPill}>
-                <Text style={styles.heroTagPillText}>Personal Lesson</Text>
-              </View>
-              <View style={styles.heroTagPill}>
-                <Text style={styles.heroTagPillText}>30-sec Reel</Text>
-              </View>
-              <View style={styles.heroSaveTagPill}>
-                <Text style={styles.heroSaveTagPillText}>High Save Potential</Text>
-              </View>
-            </View>
-
-            {/* Action Row: Use Idea + Bookmark */}
-            <View style={styles.heroActionRow}>
-              <Pressable
-                style={({ pressed }) => [styles.useIdeaMainBtn, pressed && styles.btnPressed]}
-                onPress={() => handleSelectIdea('One thing I wish I knew before I started creating')}
-              >
-                <LinearGradient
-                  colors={['#7C3AED', '#582CDB']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.useIdeaMainGradient}
-                >
-                  <Text style={styles.useIdeaMainBtnText}>Use Idea</Text>
-                </LinearGradient>
-              </Pressable>
-
-              <Pressable
-                style={({ pressed }) => [
-                  styles.bookmarkIconBtn,
-                  isHeroSaved && styles.bookmarkIconBtnActive,
-                  pressed && styles.btnPressed,
-                ]}
-                onPress={handleToggleHeroSave}
-              >
-                <Svg width={20} height={20} viewBox="0 0 24 24" fill={isHeroSaved ? '#FFFFFF' : 'none'}>
-                  <Path
-                    d="M19 21L12 16L5 21V5C5 3.89543 5.89543 3 7 3H17C18.1046 3 19 3.89543 19 5V21Z"
-                    stroke={isHeroSaved ? '#FFFFFF' : '#582CDB'}
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </Svg>
+              <Pressable onPress={() => setEditNiches((v) => !v)} hitSlop={8} accessibilityRole="button">
+                <Text style={styles.link}>{editNiches ? 'Done' : 'Change'}</Text>
               </Pressable>
             </View>
-          </View>
-
-          {/* 4. MORE IDEAS SECTION (BEAUTIFIED & SEAMLESS EXPANSION) */}
-          <View style={styles.moreIdeasHeaderRow}>
-            <Text style={styles.moreIdeasTitle}>More Ideas</Text>
-            <Pressable onPress={handleToggleViewAll} hitSlop={8}>
-              <Text style={styles.viewAllLink}>
-                {showAllIdeas ? 'Show Less ‹' : `View All (${allIdeas.length}) ›`}
-              </Text>
-            </Pressable>
-          </View>
-
-          {/* Quick Filters (Select & Unselect Support) */}
-          <View style={styles.quickFilterRow}>
-            {[
-              { id: 'faster', label: 'Faster formats' },
-              { id: 'saves', label: 'Higher save potential' },
-              { id: 'trend', label: 'Trend-based' },
-            ].map((f) => {
-              const isActive = selectedAngleFilters.includes(f.id);
-              return (
-                <Pressable
-                  key={f.id}
-                  onPress={() => toggleAngleFilter(f.id)}
-                  style={[
-                    styles.quickFilterPill,
-                    isActive && styles.quickFilterPillActive,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.quickFilterPillText,
-                      isActive && styles.quickFilterPillTextActive,
-                    ]}
-                  >
-                    {f.label}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
-
-          {/* More Idea Cards (Clean & Compact) */}
-          {displayedIdeas.map((item) => (
-            <View key={item.id} style={styles.moreIdeaCard}>
-              <View style={styles.moreIdeaCardHeader}>
-                <Text style={styles.moreIdeaCardTitle}>&ldquo;{item.title}&rdquo;</Text>
-                <Pressable hitSlop={8}>
-                  <Text style={styles.moreIdeaDots}>•••</Text>
-                </Pressable>
-              </View>
-
-              <View style={styles.moreIdeaMetaRow}>
-                <Text style={styles.moreIdeaMetaText}>🎬 {item.format}</Text>
-                <Text style={styles.moreIdeaMetaText}>📈 {item.goal}</Text>
-              </View>
-
-              <View style={styles.moreIdeaActionRow}>
-                <Pressable
-                  style={({ pressed }) => [styles.moreIdeaUseBtn, pressed && styles.btnPressed]}
-                  onPress={() => handleSelectIdea(item.title)}
-                >
-                  <Text style={styles.moreIdeaUseBtnText}>Use Idea</Text>
-                </Pressable>
-
-                <Pressable
-                  style={[
-                    styles.moreIdeaBookmarkBtn,
-                    item.bookmarked && styles.moreIdeaBookmarkBtnActive,
-                  ]}
-                  onPress={() => toggleBookmark(item.id)}
-                >
-                  <Svg width={17} height={17} viewBox="0 0 24 24" fill={item.bookmarked ? '#FFFFFF' : 'none'}>
-                    <Path
-                      d="M19 21L12 16L5 21V5C5 3.89543 5.89543 3 7 3H17C18.1046 3 19 3.89543 19 5V21Z"
-                      stroke={item.bookmarked ? '#FFFFFF' : '#582CDB'}
-                      strokeWidth="2.2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </Svg>
-                </Pressable>
-              </View>
-            </View>
-          ))}
-
-          {/* 5. DAILY QUOTA CARD */}
-          <View style={styles.quotaCard}>
-            <View style={styles.quotaHeaderRow}>
-              <Text style={styles.quotaLabel}>DAILY QUOTA</Text>
-              <Pressable
-                onPress={() => {
-                  if (onOpenJarvisPro) onOpenJarvisPro();
-                }}
-                hitSlop={8}
-              >
-                <Text style={styles.quotaUpgradeLink}>Upgrade ⚡</Text>
-              </Pressable>
-            </View>
-
-            <Text style={styles.quotaCountText}>{quotaUsed} / 5 used today</Text>
-
-            {/* Gold/Amber Progress Track */}
-            <View style={styles.quotaProgressTrack}>
-              <View style={[styles.quotaProgressFill, { width: `${(quotaUsed / 5) * 100}%` }]} />
-            </View>
-
-            <Pressable
-              style={({ pressed }) => [styles.quotaGenerateBtn, pressed && styles.btnPressed]}
-              onPress={handleGenerateMoreIdeas}
-            >
-              <Text style={styles.quotaGenerateBtnText}>Generate More</Text>
-            </Pressable>
-          </View>
-
-          {/* 6. JARVIS INSIGHT CARD (HARMONIOUS LAVENDER-CREAM) */}
-          <LinearGradient
-            colors={['#FFFFFF', '#F8F5FE']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.jarvisCard}
-          >
-            <View style={styles.jarvisHeaderRow}>
-              <View style={styles.jarvisFlameIconBox}>
-                <Image
-                  source={require('../../assets/images/jarvis-ghost-clean.png')}
-                  style={styles.jarvisFlameImage}
-                  resizeMode="contain"
+            {editNiches && (
+              <Reanimated.View entering={FadeInUp.duration(220)} exiting={FadeOut.duration(150)}>
+                <ChipRow
+                  label="Pick your niches"
+                  items={Object.keys(NICHE_LABELS).map((id) => ({ id, label: NICHE_LABELS[id] }))}
+                  selected={niches}
+                  onToggle={toggleNicheId}
                 />
-              </View>
-              <Text style={styles.jarvisTitle}>Jarvis Insight</Text>
-            </View>
+              </Reanimated.View>
+            )}
+            <ChipRow label="Goal" items={IDEA_GOALS} selected={[goal]} onToggle={(id) => setGoal(id as IdeaGoal)} />
+          </Reanimated.View>
 
-            <Text style={styles.jarvisBodyText}>
-              Ideas based on personal lessons are easier to finish quickly and protect your streak.
-            </Text>
+          {/* PRO: ideas about your own topic */}
+          {isPro && (
+            <Reanimated.View entering={FadeInUp.delay(120).duration(550)} style={styles.section}>
+              <TopicIdeasCard
+                busy={topicBusy}
+                onAsk={(t) => askTopic(t)}
+                goalLabel={IDEA_GOALS.find((g) => g.id === goal)?.label ?? 'Grow followers'}
+                results={topicIdeas}
+                isSaved={isSaved}
+                onUse={(idea) => handleSelectIdea(idea.title, idea.format, idea.hook)}
+                onSave={toggleSaveIdea}
+              />
+            </Reanimated.View>
+          )}
 
-            {/* Jarvis Chips (Select & Unselect Support) */}
-            <View style={styles.jarvisChipsRow}>
-              {[
-                { id: 'personal', label: 'Make It Personal' },
-                { id: 'hook', label: 'Add Hook' },
-              ].map((chip) => {
-                const isChipActive = selectedJarvisChips.includes(chip.id);
-                return (
-                  <Pressable
-                    key={chip.id}
-                    onPress={() => toggleJarvisChip(chip.id)}
-                    style={[
-                      styles.jarvisChip,
-                      isChipActive && styles.jarvisChipActive,
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.jarvisChipText,
-                        isChipActive && styles.jarvisChipTextActive,
-                      ]}
-                    >
-                      {chip.label}
-                    </Text>
+          {/* TOP PICK */}
+          <Reanimated.View entering={FadeInUp.delay(160).duration(550)} style={styles.section}>
+            <TopPickCard
+              idea={top}
+              thinking={pickThinking}
+              saved={isSaved(top.id)}
+              onAnother={showAnotherPick}
+              onUse={() => handleSelectIdea(top.title, top.format, top.hook)}
+              onSave={() => toggleSaveIdea(top)}
+            />
+          </Reanimated.View>
+
+
+          {/* MORE IDEAS */}
+          <Text style={styles.sectionLabel}>More ideas</Text>
+          <View style={styles.stack}>
+            {generating && <IdeaRowSkeleton />}
+            {listIdeas.map((idea, i) => (
+              <Reanimated.View
+                key={`${goal}-${idea.id}`}
+                entering={FadeInUp.delay(i < 3 ? 60 * i : 0).duration(320)}
+                exiting={FadeOut.duration(150)}
+               
+              >
+                <IdeaRow
+                  idea={idea}
+                  saved={isSaved(idea.id)}
+                  onUse={() => handleSelectIdea(idea.title, idea.format, idea.hook)}
+                  onSave={() => toggleSaveIdea(idea)}
+                />
+              </Reanimated.View>
+            ))}
+          </View>
+
+          {/* DAILY IDEAS */}
+          <View style={styles.section}>
+            {isPro ? (
+              <UnlimitedIdeasCard generating={generating} onGenerate={generateIdeas} />
+            ) : (
+              <QuotaCard used={quotaUsed} limit={5} generating={generating} onGenerate={generateIdeas} onPro={() => onOpenJarvisPro?.()} />
+            )}
+          </View>
+
+          {/* SAVED IDEAS */}
+          {savedIdeasList.length > 0 && (
+            <>
+              <View style={styles.savedHead}>
+                <Text style={[styles.sectionLabel, styles.sectionLabelInline]}>Saved ideas</Text>
+                {savedIdeasList.length > 2 && (
+                  <Pressable onPress={() => setShowAllSavedIdeas((v) => !v)} hitSlop={8} accessibilityRole="button">
+                    <Text style={styles.link}>{showAllSavedIdeas ? 'Show less' : `See all ${savedIdeasList.length}`}</Text>
                   </Pressable>
-                );
-              })}
-            </View>
-          </LinearGradient>
-
-          {/* 7. SAVED IDEAS SECTION */}
-          <Text style={styles.sectionHeaderLabel}>SAVED IDEAS ({savedIdeasCount})</Text>
-          <Pressable
-            style={styles.savedIdeaItemCard}
-            onPress={() => handleSelectIdea('My morning setup routine')}
-          >
-            <View style={styles.savedIdeaIconBox}>
-              <Text style={{ fontSize: 16, color: '#64748B' }}>≡</Text>
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.savedIdeaTitle}>My morning setup routine...</Text>
-              <Text style={styles.savedIdeaTime}>Saved 2 h ago</Text>
-            </View>
-            <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-              <Path d="M9 18L15 12L9 6" stroke="#94A3B8" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-            </Svg>
-          </Pressable>
-
-          {/* 8. PRIMARY BOTTOM ACTION: GENERATE MORE IDEAS */}
-          <Pressable
-            style={({ pressed }) => [styles.generateMoreMainBtn, pressed && styles.btnPressed]}
-            onPress={handleGenerateMoreIdeas}
-          >
-            <LinearGradient
-              colors={['#7C3AED', '#582CDB']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={styles.generateMoreMainGradient}
-            >
-              <Text style={styles.generateMoreMainBtnText}>✨ Generate More Ideas</Text>
-            </LinearGradient>
-          </Pressable>
-
-          {/* Bottom spacing to clear floating tab bar */}
-          <View style={{ height: 110 }} />
+                )}
+              </View>
+              <View style={styles.stack}>
+                {displayedSavedIdeas.map((s) => (
+                  <Reanimated.View key={s.id} entering={FadeIn.duration(250)} exiting={FadeOut.duration(150)}>
+                    <SavedRow
+                      title={s.title}
+                      meta={`${s.savedTime} · ${s.format}`}
+                      onPress={() => handleSelectIdea(s.title, s.format)}
+                      onUnsave={() => {
+                        setSavedIdeasList((prev) => prev.filter((x) => x.id !== s.id));
+                        triggerToast('Removed from saved ideas');
+                      }}
+                    />
+                  </Reanimated.View>
+                ))}
+              </View>
+            </>
+          )}
         </ScrollView>
+
+        {actionToast && <ComposerToast message={actionToast} />}
 
         {/* UNIFIED SIGNATURE FLOATING TAB BAR */}
         <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
@@ -887,22 +749,24 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
           onSaveProfile={onSaveProfile}
         />
 
-        {/* MODAL: CREATOR CHAT */}
+        {/* IDEA OPTIONS THREE-DOT MENU MODAL */}
         <Modal
-          visible={showChatModal}
+          visible={showIdeaMenuModal}
           transparent={true}
           animationType="fade"
-          onRequestClose={() => setShowChatModal(false)}
+          onRequestClose={() => setShowIdeaMenuModal(false)}
         >
           <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Jarvis AI Chat</Text>
-                  <Text style={styles.modalSubtitle}>Real-time creative assistant</Text>
+            <Animated.View style={[styles.ideaMenuCard, { transform: [{ scale: modalPopScale }] }]}>
+              <View style={styles.ideaMenuHeaderRow}>
+                <View style={{ flex: 1, paddingRight: 10 }}>
+                  <Text style={styles.ideaMenuSubtitle}>IDEA OPTIONS</Text>
+                  <Text style={styles.ideaMenuTitle} numberOfLines={1}>
+                    &ldquo;{selectedIdeaForMenu?.title}&rdquo;
+                  </Text>
                 </View>
                 <Pressable
-                  onPress={() => setShowChatModal(false)}
+                  onPress={() => setShowIdeaMenuModal(false)}
                   style={styles.modalCloseCircle}
                   hitSlop={8}
                 >
@@ -910,19 +774,82 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
                 </Pressable>
               </View>
 
-              <View style={styles.chatCard}>
-                <Text style={styles.chatSpeaker}>Jarvis AI</Text>
-                <Text style={styles.chatMsg}>
-                  I filtered these angles based on your 47-day streak history! Personal lessons have your highest completion rate.
-                </Text>
-              </View>
+              <View style={styles.ideaMenuList}>
+                {/* 1. Save / Unsave */}
+                <Pressable
+                  style={({ pressed }) => [styles.ideaMenuItem, pressed && styles.btnPressed]}
+                  onPress={() => handleMenuAction('save')}
+                >
+                  <View style={styles.ideaMenuIconCircle}>
+                    <Svg width={16} height={16} viewBox="0 0 24 24" fill={selectedIdeaForMenu?.bookmarked ? '#582CDB' : 'none'}>
+                      <Path
+                        d="M19 21L12 16L5 21V5C5 3.89543 5.89543 3 7 3H17C18.1046 3 19 3.89543 19 5V21Z"
+                        stroke="#582CDB"
+                        strokeWidth="2.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </Svg>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.ideaMenuItemTitle}>
+                      {selectedIdeaForMenu?.bookmarked ? 'Remove from Saved' : 'Save idea'}
+                    </Text>
+                    <Text style={styles.ideaMenuItemSub}>
+                      {selectedIdeaForMenu?.bookmarked ? 'Remove bookmark from your vault' : 'Bookmark to your inspiration vault'}
+                    </Text>
+                  </View>
+                </Pressable>
 
-              <Pressable
-                style={styles.modalFullBtn}
-                onPress={() => setShowChatModal(false)}
-              >
-                <Text style={styles.modalFullBtnText}>Close Chat</Text>
-              </Pressable>
+                {/* 2. Hide idea */}
+                <Pressable
+                  style={({ pressed }) => [styles.ideaMenuItem, pressed && styles.btnPressed]}
+                  onPress={() => handleMenuAction('hide')}
+                >
+                  <View style={styles.ideaMenuIconCircle}>
+                    <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                      <Path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24M1 1l22 22" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </Svg>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.ideaMenuItemTitle}>Hide idea</Text>
+                    <Text style={styles.ideaMenuItemSub}>Hide from your current idea feed</Text>
+                  </View>
+                </Pressable>
+
+                {/* 3. Not relevant */}
+                <Pressable
+                  style={({ pressed }) => [styles.ideaMenuItem, pressed && styles.btnPressed]}
+                  onPress={() => handleMenuAction('not_relevant')}
+                >
+                  <View style={styles.ideaMenuIconCircle}>
+                    <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                      <Circle cx="12" cy="12" r="10" stroke="#64748B" strokeWidth="2" />
+                      <Path d="M4.93 4.93l14.14 14.14" stroke="#64748B" strokeWidth="2" strokeLinecap="round" />
+                    </Svg>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.ideaMenuItemTitle}>Not relevant</Text>
+                    <Text style={styles.ideaMenuItemSub}>Tune Jarvis to suggest fewer like this</Text>
+                  </View>
+                </Pressable>
+
+                {/* 4. Report */}
+                <Pressable
+                  style={({ pressed }) => [styles.ideaMenuItem, styles.ideaMenuItemLast, pressed && styles.btnPressed]}
+                  onPress={() => handleMenuAction('report')}
+                >
+                  <View style={[styles.ideaMenuIconCircle, { backgroundColor: '#FEE2E2' }]}>
+                    <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                      <Path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7" stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </Svg>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.ideaMenuItemTitle, { color: '#DC2626' }]}>Report</Text>
+                    <Text style={styles.ideaMenuItemSub}>Flag inappropriate or broken idea</Text>
+                  </View>
+                </Pressable>
+              </View>
             </Animated.View>
           </View>
         </Modal>
@@ -935,7 +862,7 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
           speechBubble={celebrationSpeech}
           badgeText="IDEAS READY"
           xpEarned={30}
-          streakCount={47}
+          streakCount={userProfile?.streakCount || 1}
           actionText="Keep Exploring ➔"
           onDismiss={() => {
             setShowCelebrationModal(false);
@@ -949,20 +876,33 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FAF8F5',
+    backgroundColor: ds.bg,
   },
   container: {
     flex: 1,
-    backgroundColor: '#FAF8F5',
+    width: '100%',
   },
+  headline: { marginTop: 4, marginBottom: 16 },
+  headlineText: { fontWeight: '800', letterSpacing: -0.8, color: ds.ink },
+  headlineAccent: { color: ds.purple },
+  filters: { gap: 14 },
+  section: { marginTop: 20 },
+  sectionLabel: { fontSize: 17, fontWeight: '800', color: ds.ink, letterSpacing: -0.2, marginTop: 24, marginBottom: 10 },
+  sectionLabelInline: { marginTop: 0, marginBottom: 0 },
+  savedHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 24, marginBottom: 10 },
+  link: { fontSize: 13.5, fontWeight: '800', color: ds.purple },
+  nicheLine: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  nicheText: { flex: 1, fontSize: 13.5, color: ds.text2 },
+  nicheBold: { fontWeight: '800', color: ds.ink },
+  stack: { gap: 10 },
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 8,
-    paddingBottom: 24,
+    paddingBottom: 120,
   },
   btnPressed: {
-    opacity: 0.78,
-    transform: [{ scale: 0.97 }],
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
   },
 
   // 1. TOP HEADER
@@ -1063,17 +1003,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#F59E0B',
   },
   freeIdeasPillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#6D28D9',
     letterSpacing: 0.4,
   },
 
   mainTitle: {
-    fontSize: 23,
-    fontWeight: '800',
+    fontSize: Platform.OS === 'web' ? ('clamp(15px, 3.8vw, 17px)' as any) : sFont(16),
+    fontWeight: '700',
     color: '#171420',
-    letterSpacing: -0.4,
+    letterSpacing: -0.35,
+    lineHeight: 22,
     marginBottom: 4,
     marginTop: 4,
   },
@@ -1094,7 +1035,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 100,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     paddingVertical: 7,
     paddingHorizontal: 14,
     shadowColor: '#582CDB',
@@ -1152,8 +1093,8 @@ const styles = StyleSheet.create({
   },
   streakSaverPickText: {
     fontSize: 10,
-    fontWeight: '900',
-    color: '#78350F',
+    fontWeight: '700',
+    color: '#B45309',
     letterSpacing: 0.5,
   },
   heroIdeaTitle: {
@@ -1178,8 +1119,8 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   whyItWorksLabel: {
-    fontSize: 9.5,
-    fontWeight: '900',
+    fontSize: 10,
+    fontWeight: '700',
     color: '#6D28D9',
     letterSpacing: 0.6,
     marginBottom: 4,
@@ -1191,31 +1132,35 @@ const styles = StyleSheet.create({
   },
   heroTagsRow: {
     flexDirection: 'row',
+    alignItems: 'center',
     flexWrap: 'wrap',
     gap: 6,
+    rowGap: 6,
     marginBottom: 16,
   },
   heroTagPill: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#EDE9FE',
-    paddingVertical: 4.5,
-    paddingHorizontal: 10,
-    borderRadius: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 9,
+    borderRadius: 100,
+    flexShrink: 0,
   },
   heroTagPillText: {
-    fontSize: 11,
+    fontSize: sFont(11),
     fontWeight: '700',
     color: '#475569',
   },
   heroSaveTagPill: {
     backgroundColor: '#EDE9FE',
-    paddingVertical: 4.5,
-    paddingHorizontal: 10,
-    borderRadius: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 9,
+    borderRadius: 100,
+    flexShrink: 0,
   },
   heroSaveTagPillText: {
-    fontSize: 11,
+    fontSize: sFont(11),
     fontWeight: '800',
     color: '#6D28D9',
   },
@@ -1231,7 +1176,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 10,
     elevation: 4,
   },
@@ -1266,7 +1211,7 @@ const styles = StyleSheet.create({
     borderColor: '#582CDB',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.12,
     shadowRadius: 8,
     elevation: 4,
   },
@@ -1291,13 +1236,14 @@ const styles = StyleSheet.create({
   quickFilterRow: {
     flexDirection: 'row',
     gap: 8,
-    marginBottom: 14,
+    paddingHorizontal: 2,
+    paddingVertical: 2,
   },
   quickFilterPill: {
     backgroundColor: '#F1F5F9',
     borderRadius: 100,
     paddingVertical: 5,
-    paddingHorizontal: 11,
+    paddingHorizontal: 12,
   },
   quickFilterPillActive: {
     backgroundColor: '#EDE9FE',
@@ -1305,7 +1251,7 @@ const styles = StyleSheet.create({
     borderColor: '#DDD6FE',
   },
   quickFilterPillText: {
-    fontSize: 11,
+    fontSize: 11.5,
     fontWeight: '700',
     color: '#64748B',
   },
@@ -1353,7 +1299,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   moreIdeaMetaText: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
     fontWeight: '600',
   },
@@ -1407,13 +1353,13 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   quotaLabel: {
-    fontSize: 9.5,
-    fontWeight: '900',
+    fontSize: 10,
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.6,
   },
   quotaUpgradeLink: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#582CDB',
   },
@@ -1422,6 +1368,11 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#171420',
     marginBottom: 10,
+  },
+  quotaCardReached: {
+    backgroundColor: '#FFFBEB',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
   },
   quotaProgressTrack: {
     height: 8,
@@ -1434,6 +1385,9 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: '#F59E0B',
     borderRadius: 4,
+  },
+  quotaProgressFillMax: {
+    backgroundColor: '#D97706',
   },
   quotaGenerateBtn: {
     height: 42,
@@ -1448,6 +1402,21 @@ const styles = StyleSheet.create({
     fontSize: 12.5,
     fontWeight: '800',
     color: '#1E293B',
+  },
+  quotaReachedBtn: {
+    height: 42,
+    borderRadius: 12,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#F59E0B',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+  },
+  quotaReachedBtnText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#B45309',
   },
 
   // 6. Jarvis Insight Card
@@ -1484,7 +1453,7 @@ const styles = StyleSheet.create({
   },
   jarvisTitle: {
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   jarvisBodyText: {
@@ -1495,7 +1464,9 @@ const styles = StyleSheet.create({
   },
   jarvisChipsRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
+    rowGap: 8,
   },
   jarvisChip: {
     backgroundColor: '#FFFFFF',
@@ -1504,28 +1475,45 @@ const styles = StyleSheet.create({
     borderColor: '#EDE9FE',
     paddingVertical: 5,
     paddingHorizontal: 11,
+    flexShrink: 0,
   },
   jarvisChipActive: {
     backgroundColor: '#EDE9FE',
     borderColor: '#DDD6FE',
   },
   jarvisChipText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#64748B',
   },
   jarvisChipTextActive: {
     color: '#582CDB',
-    fontWeight: '900',
+    fontWeight: '700',
   },
 
   // 7. Saved Ideas Section
+  savedIdeasSection: {
+    marginBottom: 16,
+  },
+  savedIdeasHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
   sectionHeaderLabel: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#7F7894',
     letterSpacing: 0.6,
-    marginBottom: 8,
+  },
+  viewAllSavedLink: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  savedIdeasList: {
+    gap: 8,
   },
   savedIdeaItemCard: {
     flexDirection: 'row',
@@ -1536,7 +1524,6 @@ const styles = StyleSheet.create({
     borderColor: '#EFEBF8',
     padding: 14,
     gap: 12,
-    marginBottom: 18,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,
@@ -1547,7 +1534,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 10,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#EDE9FE',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -1561,6 +1548,17 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: '#94A3B8',
   },
+  viewAllSavedBottomBtn: {
+    paddingVertical: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 4,
+  },
+  viewAllSavedBottomBtnText: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
 
   // 8. Generate More Ideas Main Action
   generateMoreMainBtn: {
@@ -1569,7 +1567,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 14,
     elevation: 5,
   },
@@ -1580,7 +1578,7 @@ const styles = StyleSheet.create({
   },
   generateMoreMainBtnText: {
     fontSize: 15,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: 0.4,
   },
@@ -1603,7 +1601,7 @@ const styles = StyleSheet.create({
     padding: 20,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.08,
     shadowRadius: 24,
     elevation: 8,
   },
@@ -1619,7 +1617,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   modalSubtitle: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
     marginTop: 2,
   },
@@ -1644,7 +1642,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: '#F1F5F9',
+    borderColor: '#F5F2EC',
   },
   notifCardUnread: {
     backgroundColor: '#F5F3FF',
@@ -1670,7 +1668,7 @@ const styles = StyleSheet.create({
     lineHeight: 15,
   },
   notifTime: {
-    fontSize: 9.5,
+    fontSize: 10,
     color: '#94A3B8',
     marginTop: 4,
   },
@@ -1683,7 +1681,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   modalFullBtnText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#FFFFFF',
   },
@@ -1722,7 +1720,7 @@ const styles = StyleSheet.create({
     borderColor: '#FDE68A',
   },
   profileModalLevelText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#B45309',
   },
@@ -1736,7 +1734,7 @@ const styles = StyleSheet.create({
   },
   chatSpeaker: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.5,
     marginBottom: 4,
@@ -1745,5 +1743,92 @@ const styles = StyleSheet.create({
     fontSize: 12.5,
     color: '#171420',
     lineHeight: 18,
+  },
+
+  // Action Toast Notice
+  actionToastBanner: {
+    backgroundColor: '#EDE9FE',
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+    borderRadius: 12,
+    paddingVertical: 9,
+    paddingHorizontal: 14,
+    marginBottom: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  actionToastText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#582CDB',
+    textAlign: 'center',
+  },
+
+  // Idea Options Three-Dot Menu
+  ideaMenuCard: {
+    width: '100%',
+    maxWidth: 400,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 22,
+    padding: 20,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 8,
+  },
+  ideaMenuHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingBottom: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+    marginBottom: 8,
+  },
+  ideaMenuSubtitle: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#64748B',
+    letterSpacing: 0.6,
+    marginBottom: 2,
+  },
+  ideaMenuTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  ideaMenuList: {
+    paddingTop: 4,
+  },
+  ideaMenuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F8FAFC',
+  },
+  ideaMenuItemLast: {
+    borderBottomWidth: 0,
+    paddingBottom: 4,
+  },
+  ideaMenuIconCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#EDE9FE',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  ideaMenuItemTitle: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#171420',
+    marginBottom: 2,
+  },
+  ideaMenuItemSub: {
+    fontSize: 11,
+    color: '#64748B',
   },
 });

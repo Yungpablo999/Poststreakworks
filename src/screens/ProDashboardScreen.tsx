@@ -1,8 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import {
   StyleSheet,
   View,
-  Text,
   Pressable,
   ScrollView,
   Platform,
@@ -12,10 +11,14 @@ import {
   Animated,
   Modal,
   Dimensions,
-  TextInput,
+  FlatList,
   NativeSyntheticEvent,
   NativeScrollEvent,
 } from 'react-native';
+import { Text, TextInput } from '../components/ui/AppText';
+import { BrandLogo } from '../components/BrandLogo';
+import { HomeDayZero } from '../components/home/HomeDayZero';
+import { getVoiceCloneSummary } from '../data';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -23,6 +26,8 @@ import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { CreatorStoryModal, CreatorStoryData } from '../components/CreatorStoryModal';
+import { ProNotificationsModal, ProNotificationItem, DEFAULT_PRO_NOTIFICATIONS } from '../components/ProNotificationsModal';
+import { sFont, sPadding, moderateScale, isNarrowScreen } from '../utils/responsive';
 
 export const TinyGoldCheck = ({ size = 13 }: { size?: number }) => (
   <View
@@ -35,9 +40,9 @@ export const TinyGoldCheck = ({ size = 13 }: { size?: number }) => (
       borderColor: '#FFFFFF',
       justifyContent: 'center',
       alignItems: 'center',
-      shadowColor: '#CA8A04',
+      shadowColor: '#F59E0B',
       shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.35,
+      shadowOpacity: 0.12,
       shadowRadius: 2,
       elevation: 2,
     }}
@@ -55,21 +60,22 @@ export const TinyGoldCheck = ({ size = 13 }: { size?: number }) => (
 );
 
 
+import { HeaderDualModePills, UserPersona } from '../components/HeaderDualModePills';
+
 interface ProDashboardScreenProps {
   onLogout?: () => void;
   onStartMission?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onOpenJarvisPro?: () => void;
   onOpenSchedule?: () => void;
-  onOpenMessages?: (threadId?: string) => void;
   onOpenPostComposer?: (prefillTitle?: string) => void;
-  onOpenEarnings?: () => void;
   onOpenQuests?: () => void;
   onOpenGrowth?: () => void;
-  onOpenMatch?: () => void;
   onOpenCreate?: () => void;
   onOpenVoiceStudio?: () => void;
   onSwitchToFree?: () => void;
+  onTogglePersona?: () => void;
+  userPersona?: UserPersona;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
 }
@@ -90,9 +96,9 @@ const FULL_YEAR_CALENDAR: MonthData[] = [
   {
     id: 'jan',
     monthName: 'January',
-    year: 2024,
+    year: 2026,
     daysCount: 31,
-    startOffset: 0,
+    startOffset: 3,
     completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31],
     scheduledDays: [],
     freezeDays: [],
@@ -100,19 +106,19 @@ const FULL_YEAR_CALENDAR: MonthData[] = [
   {
     id: 'feb',
     monthName: 'February',
-    year: 2024,
-    daysCount: 29,
-    startOffset: 3,
-    completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29],
+    year: 2026,
+    daysCount: 28,
+    startOffset: 6,
+    completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28],
     scheduledDays: [],
-    freezeDays: [14],
+    freezeDays: [],
   },
   {
     id: 'mar',
     monthName: 'March',
-    year: 2024,
+    year: 2026,
     daysCount: 31,
-    startOffset: 4,
+    startOffset: 6,
     completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31],
     scheduledDays: [],
     freezeDays: [],
@@ -120,80 +126,80 @@ const FULL_YEAR_CALENDAR: MonthData[] = [
   {
     id: 'apr',
     monthName: 'April',
-    year: 2024,
+    year: 2026,
     daysCount: 30,
-    startOffset: 0,
+    startOffset: 2,
     completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30],
     scheduledDays: [],
-    freezeDays: [8],
+    freezeDays: [],
   },
   {
     id: 'may',
     monthName: 'May',
-    year: 2024,
+    year: 2026,
     daysCount: 31,
-    startOffset: 2,
-    completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
-    scheduledDays: [20, 22, 24, 26, 28, 30],
-    freezeDays: [11],
-    isCurrent: true,
+    startOffset: 4,
+    completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31],
+    scheduledDays: [],
+    freezeDays: [],
   },
   {
     id: 'jun',
     monthName: 'June',
-    year: 2024,
+    year: 2026,
     daysCount: 30,
-    startOffset: 5,
-    completedDays: [],
-    scheduledDays: [1, 3, 5, 8, 12, 15, 19, 22, 26, 29],
+    startOffset: 0,
+    completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30],
+    scheduledDays: [],
     freezeDays: [],
   },
   {
     id: 'jul',
     monthName: 'July',
-    year: 2024,
+    year: 2026,
     daysCount: 31,
-    startOffset: 0,
-    completedDays: [],
-    scheduledDays: [2, 6, 9, 14, 18, 21, 25, 28],
+    startOffset: 2,
+    completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31],
+    scheduledDays: [],
     freezeDays: [],
   },
   {
     id: 'aug',
     monthName: 'August',
-    year: 2024,
+    year: 2026,
     daysCount: 31,
-    startOffset: 3,
-    completedDays: [],
-    scheduledDays: [1, 5, 10, 15, 20, 25, 30],
+    startOffset: 5,
+    completedDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31],
+    scheduledDays: [],
     freezeDays: [],
   },
   {
     id: 'sep',
     monthName: 'September',
-    year: 2024,
+    year: 2026,
     daysCount: 30,
-    startOffset: 6,
-    completedDays: [],
-    scheduledDays: [],
+    startOffset: 1,
+    completedDays: [1, 2, 3, 4],
+    scheduledDays: [8, 11, 15, 18, 22, 25, 29],
     freezeDays: [],
+    isCurrent: true,
   },
   {
     id: 'oct',
     monthName: 'October',
-    year: 2024,
+    year: 2026,
     daysCount: 31,
-    startOffset: 1,
+    startOffset: 3,
     completedDays: [],
-    scheduledDays: [],
+    scheduledDays: [2, 6, 9, 13, 16, 20, 23, 27, 30],
     freezeDays: [],
   },
   {
     id: 'nov',
     monthName: 'November',
-    year: 2024,
+    year: 2026,
     daysCount: 30,
-    startOffset: 4,
+    startOffset: 6,
     completedDays: [],
     scheduledDays: [],
     freezeDays: [],
@@ -201,60 +207,12 @@ const FULL_YEAR_CALENDAR: MonthData[] = [
   {
     id: 'dec',
     monthName: 'December',
-    year: 2024,
+    year: 2026,
     daysCount: 31,
-    startOffset: 6,
+    startOffset: 1,
     completedDays: [],
     scheduledDays: [],
     freezeDays: [],
-  },
-];
-
-interface NotificationItem {
-  id: string;
-  type: 'streak' | 'collab' | 'quest' | 'level' | 'growth';
-  title: string;
-  body: string;
-  time: string;
-  unread: boolean;
-  iconEmoji: string;
-  badgeBg: string;
-  badgeBorder: string;
-}
-
-const INITIAL_NOTIFICATIONS: NotificationItem[] = [
-  {
-    id: 'n1',
-    type: 'streak',
-    title: 'Streak Lock Reminder 🔥',
-    body: 'Post 1 Reel before 11:30 AM today to lock in Day 48 and protect your consistency score.',
-    time: '15m ago',
-    unread: true,
-    iconEmoji: '🔥',
-    badgeBg: '#FEF3C7',
-    badgeBorder: '#FDE68A',
-  },
-  {
-    id: 'n2',
-    type: 'quest',
-    title: 'GlowUp Skincare Launch ($450 Bounty)',
-    body: 'Brand deal application unlocked for Pro Creators. Tap to review submission brief.',
-    time: '1h ago',
-    unread: true,
-    iconEmoji: '🎯',
-    badgeBg: '#EDE8FC',
-    badgeBorder: '#DDD6FE',
-  },
-  {
-    id: 'n3',
-    type: 'collab',
-    title: 'Collab Match Suggested',
-    body: 'Amara Okafor (94% Audience Overlap) is active and open for squad collab.',
-    time: '3h ago',
-    unread: true,
-    iconEmoji: '🤝',
-    badgeBg: '#E0F2FE',
-    badgeBorder: '#BAE6FD',
   },
 ];
 
@@ -264,26 +222,37 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
   onNavigateTab,
   onOpenJarvisPro,
   onOpenSchedule,
-  onOpenMessages,
   onOpenPostComposer,
-  onOpenEarnings,
   onOpenQuests,
   onOpenGrowth,
-  onOpenMatch,
   onOpenCreate,
   onOpenVoiceStudio,
   onSwitchToFree,
+  onTogglePersona,
+  userPersona,
   userProfile,
   onSaveProfile,
 }) => {
+  const isNewUser = (userPersona || userProfile?.userPersona) === 'new';
+  const voiceClone = getVoiceCloneSummary(isNewUser ? 'new' : 'returning');
+  const streakDays = userProfile?.streakCount && userProfile.streakCount > 1 ? userProfile.streakCount : 48;
   const [activeTab, setActiveTab] = useState<TabType>('home');
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showCalendarModal, setShowCalendarModal] = useState(false);
   const [showVoiceStudioModal, setShowVoiceStudioModal] = useState(false);
-  
   const [showBrandQuestModal, setShowBrandQuestModal] = useState(false);
   const [showCreatorLevelModal, setShowCreatorLevelModal] = useState(false);
+  const [dashboardMonthOffset, setDashboardMonthOffset] = useState(0);
+  
+  const currentDashboardDate = new Date();
+  currentDashboardDate.setMonth(currentDashboardDate.getMonth() + dashboardMonthOffset);
+  const monthNamesList = [
+    'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
+    'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'
+  ];
+  const displayedMonthName = monthNamesList[currentDashboardDate.getMonth()];
+  const displayedYear = currentDashboardDate.getFullYear();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [selectedStoryData, setSelectedStoryData] = useState<CreatorStoryData | null>(null);
 
@@ -328,14 +297,14 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
   };
 
   // Calendar State
-  const [selectedMonthIndex, setSelectedMonthIndex] = useState(4); // May
+  const [selectedMonthIndex, setSelectedMonthIndex] = useState(8); // September
   const [selectedDayInfo, setSelectedDayInfo] = useState<string | null>(null);
-  const [pagerWidth, setPagerWidth] = useState(Dimensions.get('window').width - 68);
-  const calendarScrollRef = useRef<ScrollView>(null);
+  const [calendarWidth, setCalendarWidth] = useState(Dimensions.get('window').width - 56);
+  const calendarFlatListRef = useRef<FlatList<MonthData>>(null);
   const monthChipsScrollRef = useRef<ScrollView>(null);
 
   // Notifications
-  const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState<ProNotificationItem[]>(DEFAULT_PRO_NOTIFICATIONS);
 
   // Voice Studio State
   const [selectedVoiceTone, setSelectedVoiceTone] = useState('Energetic Narrator');
@@ -348,6 +317,26 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
   const ghostScale = useRef(new Animated.Value(1)).current;
   const waveformAnim = useRef(new Animated.Value(0.4)).current;
   const modalPopScale = useRef(new Animated.Value(0.92)).current;
+
+  useEffect(() => {
+    if (showCalendarModal) {
+      setSelectedMonthIndex(8);
+      selectedMonthIndexRef.current = 8;
+      setSelectedDayInfo(null);
+      setTimeout(() => {
+        try {
+          calendarFlatListRef.current?.scrollToIndex({
+            index: 8,
+            animated: false,
+          });
+        } catch (e) {}
+        monthChipsScrollRef.current?.scrollTo({
+          x: Math.max(0, 8 * 68 - 100),
+          animated: false,
+        });
+      }, 60);
+    }
+  }, [showCalendarModal]);
 
   useEffect(() => {
     Animated.loop(
@@ -423,54 +412,69 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
     }
   };
 
-  const scrollToMonth = (index: number) => {
-    setSelectedMonthIndex(index);
-    if (calendarScrollRef.current) {
-      calendarScrollRef.current.scrollTo({
-        x: index * pagerWidth,
-        animated: true,
-      });
+  const proCalendarMonthsData: MonthData[] = useMemo(() => {
+    if (isNewUser) {
+      return FULL_YEAR_CALENDAR.map((m) => ({
+        ...m,
+        completedDays: [],
+        scheduledDays: [],
+        freezeDays: [],
+      }));
     }
-    if (monthChipsScrollRef.current) {
-      monthChipsScrollRef.current.scrollTo({
-        x: Math.max(0, index * 68 - 100),
-        animated: true,
-      });
-    }
-  };
+    return FULL_YEAR_CALENDAR;
+  }, [isNewUser]);
 
-  const handleCalendarScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const offsetX = e.nativeEvent.contentOffset.x;
-    const index = Math.round(offsetX / pagerWidth);
-    if (index >= 0 && index < FULL_YEAR_CALENDAR.length && index !== selectedMonthIndex) {
-      if (Platform.OS !== 'web') {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      }
+  const proStreakGrid: ('completed' | 'scheduled' | 'freeze' | 'empty')[][] = isNewUser
+    ? [
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+      ]
+    : [
+        ['empty', 'empty', 'completed', 'completed', 'completed', 'completed', 'completed'],
+        ['completed', 'completed', 'completed', 'completed', 'completed', 'completed', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+      ];
+
+  const selectedMonthIndexRef = useRef(selectedMonthIndex);
+  useEffect(() => {
+    selectedMonthIndexRef.current = selectedMonthIndex;
+  }, [selectedMonthIndex]);
+
+  const scrollToMonth = (index: number, animated = true) => {
+    if (index >= 0 && index < proCalendarMonthsData.length) {
       setSelectedMonthIndex(index);
+      selectedMonthIndexRef.current = index;
+      setSelectedDayInfo(null);
       if (monthChipsScrollRef.current) {
         monthChipsScrollRef.current.scrollTo({
           x: Math.max(0, index * 68 - 100),
           animated: true,
         });
       }
+      if (Platform.OS !== 'web') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+      try {
+        calendarFlatListRef.current?.scrollToIndex({
+          index,
+          animated,
+        });
+      } catch (e) {
+        // fallback
+      }
     }
   };
 
   const handlePrevMonth = () => {
-    if (selectedMonthIndex > 0) {
-      if (Platform.OS !== 'web') {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      }
-      scrollToMonth(selectedMonthIndex - 1);
+    if (selectedMonthIndexRef.current > 0) {
+      scrollToMonth(selectedMonthIndexRef.current - 1, true);
     }
   };
 
   const handleNextMonth = () => {
-    if (selectedMonthIndex < FULL_YEAR_CALENDAR.length - 1) {
-      if (Platform.OS !== 'web') {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      }
-      scrollToMonth(selectedMonthIndex + 1);
+    if (selectedMonthIndexRef.current < proCalendarMonthsData.length - 1) {
+      scrollToMonth(selectedMonthIndexRef.current + 1, true);
     }
   };
 
@@ -481,24 +485,59 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
     const isCompleted = month.completedDays.includes(day);
     const isScheduled = month.scheduledDays.includes(day);
     const isFreeze = month.freezeDays.includes(day);
-    const isToday = month.isCurrent && day === 19;
+    const isToday = month.isCurrent && day === 5;
 
     let info = '';
-    if (isToday) {
-      info = `⚡ Today, May 19: 🔥 Day 47 Locked In! Scheduled Reel: 11:30 AM`;
-    } else if (isCompleted) {
-      info = `🔥 ${month.monthName} ${day}: Posted 2 Reels • 94% Retention • +1,420 Views`;
-    } else if (isScheduled) {
-      info = `⚡ ${month.monthName} ${day}: Autopilot Post Queued (Instagram & TikTok)`;
-    } else if (isFreeze) {
-      info = `🛡️ ${month.monthName} ${day}: Pro Streak Shield Used • Streak Protected!`;
+    if (isNewUser) {
+      if (isToday) {
+        info = `⚡ Today, September 5, 2026: Day 1 Habit Launch 🚀 • Ready to post your first Pro Reel!`;
+      } else {
+        info = `🗓️ ${month.monthName} ${day}, 2026 • Post daily to log verified streaks`;
+      }
     } else {
-      info = `🗓️ ${month.monthName} ${day}, 2024 • Target: 1 Reel to advance Streak`;
+      if (isToday) {
+        info = `⚡ Today, September 5, 2026: 🔥 Daily Streak Locked In! Next Post: 7:30 PM`;
+      } else if (isCompleted) {
+        info = `🔥 ${month.monthName} ${day}, 2026: Posted 2 Reels • 94% Retention • +1,420 Views ✓`;
+      } else if (isScheduled) {
+        info = `⚡ ${month.monthName} ${day}, 2026: Autopilot Post Queued (Instagram & TikTok)`;
+      } else if (isFreeze) {
+        info = `🛡️ ${month.monthName} ${day}, 2026: Pro Streak Shield Used • Streak Protected!`;
+      } else {
+        info = `🗓️ ${month.monthName} ${day}, 2026 • Target: 1 Reel to advance Streak`;
+      }
     }
     setSelectedDayInfo(info);
   };
 
   const unreadCount = notifications.filter((n) => n.unread).length;
+
+  const handleNotifAction = (actionKey: string, notif: ProNotificationItem) => {
+    switch (actionKey) {
+      case 'open_voice_studio':
+      case 'open_script':
+      case 'open_hook_studio':
+      case 'open_repurpose':
+        if (onOpenVoiceStudio) onOpenVoiceStudio();
+        else if (onOpenCreate) onOpenCreate();
+        else if (onNavigateTab) onNavigateTab('create');
+        break;
+      case 'create_reel':
+        if (onOpenPostComposer) onOpenPostComposer();
+        else if (onOpenCreate) onOpenCreate();
+        else if (onNavigateTab) onNavigateTab('create');
+        break;
+      case 'open_growth':
+        if (onOpenGrowth) onOpenGrowth();
+        else if (onNavigateTab) onNavigateTab('growth');
+        break;
+      case 'open_schedule':
+        if (onOpenSchedule) onOpenSchedule();
+        break;
+      default:
+        break;
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -507,77 +546,26 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
         {/* 1. TOP HEADER BAR */}
         <View style={styles.headerBar}>
           {/* Top-Left: Ghost Logo Mascot + Mode Switcher */}
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <Animated.View
-              style={[
-                styles.headerLogoWrapper,
-                {
-                  transform: [
-                    { translateY: ghostFloatY },
-                    { scale: ghostScale },
-                  ],
-                },
-              ]}
-            >
-              <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerGhostLogo}
-                resizeMode="contain"
-              />
-            </Animated.View>
+          <View style={{ alignItems: 'flex-start', gap: 6, flexShrink: 1 }}>
+            <BrandLogo size="sm" />
 
-            <Pressable
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                }
+            <HeaderDualModePills
+              tier="pro"
+              persona={isNewUser ? 'new' : 'returning'}
+              onToggleTier={() => {
                 if (onSwitchToFree) {
                   onSwitchToFree();
                 } else if (onSaveProfile && userProfile) {
                   onSaveProfile({ ...userProfile, tier: 'free' });
                 }
               }}
-              hitSlop={8}
-            >
-              <LinearGradient
-                colors={['#FDE047', '#EAB308', '#CA8A04']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.proHeaderBadge}
-              >
-                <Text style={styles.proHeaderBadgeText}>👑 PRO</Text>
-              </LinearGradient>
-            </Pressable>
+              onTogglePersona={onTogglePersona}
+              isDark={false}
+            />
           </View>
 
-          {/* Right Action Icons: Messages, Notification Bell & Profile Avatar */}
+          {/* Right Action Icons: Notification Bell & Profile Avatar */}
           <View style={styles.headerRightGroup}>
-            {/* Chat Messages */}
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.headerIconBtnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                if (onOpenMessages) {
-                  onOpenMessages();
-                } else if (onNavigateTab) {
-                  onNavigateTab('match');
-                }
-              }}
-            >
-              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
-                  stroke="#1A1626"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-            </Pressable>
-
             {/* Notification Bell */}
             <Pressable
               style={({ pressed }) => [styles.headerIconBtn, pressed && styles.headerIconBtnPressed]}
@@ -625,11 +613,36 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
               ]}
               hitSlop={8}
             >
-              <Image
-                source={userProfile?.avatarSource || require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerCustomAvatarImage}
-                resizeMode="cover"
-              />
+              {userProfile?.customAvatarUri ? (
+                <Image
+                  source={{ uri: userProfile.customAvatarUri }}
+                  style={styles.headerCustomAvatarImage}
+                  resizeMode="cover"
+                />
+              ) : (userProfile?.avatarSource && userProfile.avatarId && userProfile.avatarId !== 'ghost') ? (
+                <Image
+                  source={userProfile.avatarSource}
+                  style={styles.headerCustomAvatarImage}
+                  resizeMode="cover"
+                />
+              ) : (
+                <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
+                  <Path
+                    d="M20 21V19C20 17.9 19.5 16.9 18.7 16.2C17.9 15.5 16.9 15 15.8 15H8.2C7.1 15 6.1 15.5 5.3 16.2C4.5 16.9 4 17.9 4 19V21"
+                    stroke="#F59E0B"
+                    strokeWidth="2.3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <Circle
+                    cx="12"
+                    cy="7"
+                    r="4"
+                    stroke="#F59E0B"
+                    strokeWidth="2.3"
+                  />
+                </Svg>
+              )}
               <View style={{ position: 'absolute', bottom: -2, right: -2 }}>
                 <TinyGoldCheck size={14} />
               </View>
@@ -643,40 +656,214 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
           showsVerticalScrollIndicator={false}
           bounces={true}
         >
+          {/* New creators get a true day-0 Home: no stats, one clear next step. */}
+          {isNewUser ? (
+            <HomeDayZero
+              tier="pro"
+              firstName={userProfile?.name?.split(' ')[0]}
+              onPlanFirstPost={() => onOpenCreate?.()}
+              onOpenSchedule={onOpenSchedule}
+              onOpenGrowth={onOpenGrowth}
+              onOpenVoiceStudio={onOpenVoiceStudio}
+            />
+          ) : (
+          <>
           {/* CARD 1: TODAY'S PRO PLAN HERO */}
           <View style={styles.proPlanHeroCard}>
             <View style={styles.proPlanHeaderRow}>
               <View style={styles.proPlanTagBox}>
-                <Text style={styles.proPlanTagText}>TODAY&apos;S PRO PLAN</Text>
+                <Text style={styles.proPlanTagText}>
+                  {isNewUser ? "JARVIS PRO DAY 1 LAUNCH 🚀" : "TODAY'S PRO PLAN"}
+                </Text>
               </View>
             </View>
 
-            <Text style={styles.proPlanHeadline}>
-              Publish your Reel, then turn your next script into a voiceover.
-            </Text>
+            {isNewUser ? (
+              <>
+                <Text
+                  style={styles.proPlanHeadline}
+                  numberOfLines={2}
+                >
+                  Welcome to Jarvis Pro Suite!
+                </Text>
+                <Text style={styles.proPlanSubheadline}>
+                  Calibrate your AI voice studio and generate your first 3 viral hooks.
+                </Text>
+              </>
+            ) : (
+              <Text
+                style={styles.proPlanHeadline}
+                numberOfLines={2}
+              >
+                Publish your Reel. Record your voiceover.
+              </Text>
+            )}
 
             <View style={styles.proPlanBadgesRow}>
               <View style={styles.proPillPurple}>
-                <Text style={styles.proPillPurpleText}>Level {userProfile?.level ?? 1}</Text>
+                <Text style={styles.proPillPurpleText}>
+                  {isNewUser ? "Level 1" : "Level 4"}
+                </Text>
               </View>
 
               <View style={styles.proPillGold}>
-                <Text style={styles.proPillGoldText}>{userProfile?.streakCount ?? 0}-Day Streak</Text>
+                <Text style={styles.proPillGoldText}>
+                  {isNewUser ? "Start Streak 🔥" : `${streakDays}-Day Streak`}
+                </Text>
               </View>
 
-              {/* Platform count isn't on UserProfileData yet — SocialPlatformsService.listPlatforms()
-                  isn't wired into this screen. Real gap, not silently hidden: see PROJECT_STATE.md. */}
               <View style={styles.proPillGray}>
-                <Text style={styles.proPillGrayText}>5 Platforms Connected</Text>
+                <Text style={styles.proPillGrayText}>
+                  {isNewUser ? "0 Platforms Connected" : "2 Platforms Connected"}
+                </Text>
               </View>
 
               <View style={styles.proPillActiveGold}>
-                <Text style={styles.proPillActiveGoldText}>✨ Pro Active</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <View style={{ width: 18, height: 18, justifyContent: 'center', alignItems: 'center' }}>
+                    <Text style={{ fontSize: 13, lineHeight: 16 }}>✨</Text>
+                  </View>
+                  <Text style={styles.proPillActiveGoldText}>Pro Active</Text>
+                </View>
               </View>
             </View>
           </View>
 
-          {/* CARD 2: YOUR STREAK HEATMAP (TAP FOR PREMIUM PRO CALENDAR) */}
+          {/* PRO DAY 1 QUICKSTART ACCELERATOR CARD */}
+          {isNewUser && (
+            <View style={[styles.dashboardCard, { borderColor: '#F59E0B', backgroundColor: '#FFFBEB' }]}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, gap: 8 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
+                  <View style={{ width: 18, height: 18, justifyContent: 'center', alignItems: 'center', flexShrink: 0 }}>
+                    <Text style={{ fontSize: 13, lineHeight: 16 }}>⚡</Text>
+                  </View>
+                  <Text
+                    style={styles.acceleratorEyebrowText}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.75}
+                  >
+                    JARVIS PRO DAY 1 ACCELERATOR
+                  </Text>
+                </View>
+                <View style={{ backgroundColor: '#FEF3C7', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 100, flexShrink: 0 }}>
+                  <Text style={styles.acceleratorBadgeEyebrowText}>
+                    1 OF 4 COMPLETED
+                  </Text>
+                </View>
+              </View>
+
+              <View style={{ gap: 8 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <Text style={{ color: '#16A34A', fontWeight: '800', fontSize: 14, flexShrink: 0, lineHeight: 16 }}>✓</Text>
+                  <Text style={styles.acceleratorActivatedText} numberOfLines={1}>
+                    Jarvis AI Pro Suite Activated
+                  </Text>
+                </View>
+                <Pressable
+                  onPress={() => (onOpenVoiceStudio ? onOpenVoiceStudio() : undefined)}
+                  style={({ pressed }) => [
+                    {
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      backgroundColor: '#FFFFFF',
+                      paddingVertical: 9,
+                      paddingHorizontal: 10,
+                      borderRadius: 10,
+                      borderWidth: 1,
+                      borderColor: '#FDE68A',
+                      gap: 8,
+                      overflow: 'hidden',
+                    },
+                    pressed && { opacity: 0.85, transform: [{ scale: 0.99 }] },
+                  ]}
+                >
+                  <View style={{ flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 7 }}>
+                    <Text style={{ color: '#D97706', fontWeight: '800', fontSize: 12, flexShrink: 0, lineHeight: 14 }}>●</Text>
+                    <Text
+                      style={{ flex: 1, fontSize: sFont(11.5), color: '#1F2937', fontWeight: '700' }}
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.8}
+                    >
+                      Calibrate AI Voice Studio (Record sample)
+                    </Text>
+                  </View>
+                  <Text style={{ fontSize: sFont(10.5), color: '#B45309', fontWeight: '800', letterSpacing: 0.3, flexShrink: 0 }} numberOfLines={1}>OPEN ›</Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => (onOpenCreate ? onOpenCreate() : undefined)}
+                  style={({ pressed }) => [
+                    {
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      backgroundColor: '#FFFFFF',
+                      paddingVertical: 9,
+                      paddingHorizontal: 10,
+                      borderRadius: 10,
+                      borderWidth: 1,
+                      borderColor: '#FDE68A',
+                      gap: 8,
+                      overflow: 'hidden',
+                    },
+                    pressed && { opacity: 0.85, transform: [{ scale: 0.99 }] },
+                  ]}
+                >
+                  <View style={{ flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 7 }}>
+                    <Text style={{ color: '#9CA3AF', fontWeight: '800', fontSize: 12, flexShrink: 0, lineHeight: 14 }}>○</Text>
+                    <Text
+                      style={{ flex: 1, fontSize: sFont(11.5), color: '#4B5563', fontWeight: '600' }}
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.8}
+                    >
+                      Generate 3 AI Hook Variations in Studio
+                    </Text>
+                  </View>
+                  <Text style={{ fontSize: sFont(10.5), color: '#6B7280', fontWeight: '700', letterSpacing: 0.3, flexShrink: 0 }} numberOfLines={1}>STUDIO ›</Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => (onOpenSchedule ? onOpenSchedule() : undefined)}
+                  style={({ pressed }) => [
+                    {
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      backgroundColor: '#FFFFFF',
+                      paddingVertical: 9,
+                      paddingHorizontal: 10,
+                      borderRadius: 10,
+                      borderWidth: 1,
+                      borderColor: '#FDE68A',
+                      gap: 8,
+                      overflow: 'hidden',
+                    },
+                    pressed && { opacity: 0.85, transform: [{ scale: 0.99 }] },
+                  ]}
+                >
+                  <View style={{ flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 7 }}>
+                    <Text style={{ color: '#9CA3AF', fontWeight: '800', fontSize: 12, flexShrink: 0, lineHeight: 14 }}>○</Text>
+                    <Text
+                      style={{ flex: 1, fontSize: sFont(11.5), color: '#4B5563', fontWeight: '600' }}
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.8}
+                    >
+                      Auto-Schedule 7-Day Content Plan
+                    </Text>
+                  </View>
+                  <Text style={{ fontSize: sFont(10.5), color: '#6B7280', fontWeight: '700', letterSpacing: 0.3, flexShrink: 0 }} numberOfLines={1}>PLAN ›</Text>
+                </Pressable>
+              </View>
+            </View>
+          )}
+
+          {/* CARD 2: YOUR STREAK HEATMAP */}
           <Pressable
             onPress={() => {
               if (Platform.OS !== 'web') {
@@ -687,55 +874,111 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
             }}
             style={({ pressed }) => [styles.dashboardCard, pressed && styles.cardPressed]}
           >
-            <View style={styles.streakCardHeader}>
-              <Text style={styles.streakLabel}>YOUR STREAK (TAP TO EXPAND)</Text>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2 }}>
-                <Text style={styles.streakBigCount}>{userProfile?.streakCount ?? 0}-Day Streak</Text>
-                <Animated.Text style={{ fontSize: 20, transform: [{ scale: flamePulse }] }}>
+            {/* 1. Header: YOUR STREAK, 48-Day Streak 🔥, 96% Consistent */}
+            <Text style={styles.streakLabel}>YOUR STREAK</Text>
+
+            <View style={[styles.cardHeaderRow, { gap: 8 }]}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, flexShrink: 0 }}>
+                <Text style={styles.streakBigHeadline}>
+                  {isNewUser ? 'Start Your Streak' : ((userProfile?.streakCount && userProfile.streakCount > 1) ? userProfile.streakCount : 48) + '-Day Streak'}
+                </Text>
+                <Animated.Text style={{ fontSize: 16, transform: [{ scale: flamePulse }] }}>
                   🔥
                 </Animated.Text>
               </View>
+              <View style={[styles.streakStatusPill, { flexShrink: 1, minWidth: 0 }]}>
+                <Text
+                  style={styles.streakStatusHighlight}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.8}
+                >
+                  {isNewUser ? 'Ready to Post' : '96% Consistent'}
+                </Text>
+              </View>
             </View>
 
-            <View style={styles.monthHeaderRow}>
-              <Text style={styles.monthLabelText}>MAY 2024  ›</Text>
+            {/* 2. Dynamic Month Header with Navigation */}
+            <View style={styles.calendarMetaRow}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <Pressable
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setDashboardMonthOffset((prev) => prev - 1);
+                  }}
+                  hitSlop={8}
+                >
+                  <Text style={styles.monthNavArrow}>‹</Text>
+                </Pressable>
+                <Text style={styles.monthLabel}>{displayedMonthName} {displayedYear}</Text>
+                <Pressable
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setDashboardMonthOffset((prev) => prev + 1);
+                  }}
+                  hitSlop={8}
+                >
+                  <Text style={styles.monthNavArrow}>›</Text>
+                </Pressable>
+              </View>
             </View>
 
+            {/* 3. Weekday Columns */}
             <View style={styles.daysHeaderRow}>
               {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, idx) => (
-                <Text key={`pro_day_col_${idx}`} style={styles.dayColHeaderText}>
+                <Text key={`pro_day_col_${idx}`} style={styles.dayColHeader}>
                   {d}
                 </Text>
               ))}
             </View>
 
-            <View style={styles.heatmapGridContainer}>
-              <View style={styles.heatmapRow}>
-                <View style={styles.heatmapCellInactive} />
-                <View style={styles.heatmapCellInactive} />
-                {[1, 2, 3, 4, 5].map((_, i) => (
-                  <View key={`pro_r1_${i}`} style={styles.heatmapCellActive}>
-                    <Text style={styles.checkMarkText}>✓</Text>
-                  </View>
-                ))}
-              </View>
-
-              <View style={styles.heatmapRow}>
-                {[1, 2, 3, 4, 5, 6, 7].map((_, i) => (
-                  <View key={`pro_r2_${i}`} style={styles.heatmapCellActive}>
-                    <Text style={styles.checkMarkText}>✓</Text>
-                  </View>
-                ))}
-              </View>
+            {/* 4. Compact Apple Health-Style 3-Row Grid */}
+            <View style={styles.heatmapGrid}>
+              {proStreakGrid.map((row, rIdx) => (
+                <View key={`pro_row_${rIdx}`} style={styles.heatmapRow}>
+                  {row.map((cellState, cIdx) => (
+                    <View
+                      key={`pro_cell_${rIdx}_${cIdx}`}
+                      style={[
+                        styles.heatmapCell,
+                        cellState === 'completed' && styles.heatmapCellCompleted,
+                        cellState === 'scheduled' && styles.heatmapCellScheduled,
+                        cellState === 'freeze' && styles.heatmapCellFreeze,
+                        cellState === 'empty' && styles.heatmapCellEmpty,
+                      ]}
+                    >
+                      {cellState === 'completed' && (
+                        <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
+                          <Path d="M20 6L9 17L4 12" stroke="#FFFFFF" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
+                        </Svg>
+                      )}
+                      {cellState === 'scheduled' && (
+                        <Svg width={9} height={9} viewBox="0 0 24 24" fill="none">
+                          <Circle cx="12" cy="12" r="9" stroke="#7C3AED" strokeWidth="2.4" strokeDasharray="3,2" />
+                          <Path d="M12 7V12L15 14" stroke="#7C3AED" strokeWidth="2.4" strokeLinecap="round" />
+                        </Svg>
+                      )}
+                      {cellState === 'freeze' && (
+                        <Svg width={9} height={9} viewBox="0 0 24 24" fill="none">
+                          <Path d="M12 2V22M2 12H22M4.93 4.93L19.07 19.07M19.07 4.93L4.93 19.07" stroke="#0284C7" strokeWidth="2" strokeLinecap="round" />
+                        </Svg>
+                      )}
+                    </View>
+                  ))}
+                </View>
+              ))}
             </View>
 
-            <View style={styles.topCreatorCalloutBanner}>
-              <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
-                style={{ width: 22, height: 22 }}
-                resizeMode="contain"
-              />
-              <Text style={styles.topCreatorText}>Top 1% of creators this month.</Text>
+            {/* 5. Subtle Jarvis Momentum Line */}
+            <View style={styles.subtleJarvisRow}>
+              <View style={{ width: 18, height: 18, justifyContent: 'center', alignItems: 'center', flexShrink: 0 }}>
+                <Text style={{ fontSize: 14, lineHeight: 17 }}>🔥</Text>
+              </View>
+              <Text style={styles.subtleJarvisText}>
+                <Text style={styles.subtleJarvisBold}>Jarvis:</Text> You’re building momentum. Keep it going tomorrow.
+              </Text>
             </View>
           </Pressable>
 
@@ -754,23 +997,25 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
               <View>
                 <Text style={styles.scheduledLabel}>POSTS SCHEDULED</Text>
                 <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6, marginTop: 4 }}>
-                  <Text style={styles.scheduledBigNumber}>8</Text>
-                  <Text style={styles.scheduledThisWeek}>+4 this week</Text>
+                  <Text style={styles.scheduledBigNumber}>{isNewUser ? '0' : '1'}</Text>
+                  <Text style={styles.scheduledThisWeek}>{isNewUser ? '0 this week' : '+1 this week'}</Text>
                 </View>
               </View>
 
               <View style={styles.calendarIconSquare}>
-                <Text style={{ fontSize: 18 }}>🗓️</Text>
+                <Text style={styles.calendarIconText}>🗓️</Text>
               </View>
             </View>
 
             <View style={styles.scheduledDivider} />
 
             <View style={styles.scheduledBottomRow}>
-              <Text style={styles.nextPostTimeText}>Next: 11:30 AM</Text>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                <Text style={{ fontSize: 12 }}>⚡</Text>
-                <Text style={styles.autopilotActiveText}>Autopilot Active</Text>
+              <Text style={styles.nextPostTimeText}>{isNewUser ? 'Next: None scheduled' : 'Next: Today 7:30 PM'}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <View style={{ width: 18, height: 18, justifyContent: 'center', alignItems: 'center' }}>
+                  <Text style={{ fontSize: 13, lineHeight: 16 }}>⚡</Text>
+                </View>
+                <Text style={styles.autopilotActiveText}>Autopilot Ready</Text>
               </View>
             </View>
           </Pressable>
@@ -788,20 +1033,61 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
           >
             <View style={styles.insightHeaderRow}>
               <View style={styles.trendingIconBox}>
-                <Text style={{ fontSize: 14 }}>📈</Text>
+                <Text style={styles.trendingIconText}>📈</Text>
               </View>
               <Text style={styles.insightBodyText}>
-                Your Reels perform <Text style={styles.highlightGreen}>31% better</Text> between 7:00 PM and 9:00 PM.
+                {isNewUser ? (
+                  <>
+                    Optimal posting window: <Text style={styles.highlightGreen}>7:00 PM – 9:00 PM</Text>. Jarvis personalizes this after your first Reels.
+                  </>
+                ) : (
+                  <>
+                    Your Reels perform <Text style={styles.highlightGreen}>31% better</Text> between 7:00 PM and 9:00 PM.
+                  </>
+                )}
               </Text>
             </View>
 
-            <View style={styles.hourlyChartContainer}>
-              <View style={[styles.hourlyBar, { height: 10, backgroundColor: '#F1F5F9' }]} />
-              <View style={[styles.hourlyBar, { height: 16, backgroundColor: '#E2E8F0' }]} />
-              <View style={[styles.hourlyBar, { height: 38, backgroundColor: '#6366F1' }]} />
-              <View style={[styles.hourlyBar, { height: 44, backgroundColor: '#582CDB' }]} />
-              <View style={[styles.hourlyBar, { height: 34, backgroundColor: '#6366F1' }]} />
-              <View style={[styles.hourlyBar, { height: 12, backgroundColor: '#F1F5F9' }]} />
+            {/* 5-Hour Performance Bar Chart with Peak Window Highlight */}
+            <View style={styles.hourlyChartSection}>
+              <View style={styles.hourlyChartContainer}>
+                {/* 6 PM */}
+                <View style={styles.hourlyColumn}>
+                  <View style={[styles.hourlyBar, { height: 14, backgroundColor: '#E2E8F0' }]} />
+                  <Text style={styles.hourLabel}>6 PM</Text>
+                </View>
+
+                {/* 7 PM (Peak Window Start) */}
+                <View style={styles.hourlyColumn}>
+                  <View style={[styles.hourlyBar, { height: 40, backgroundColor: '#6366F1' }]} />
+                  <Text style={[styles.hourLabel, styles.hourLabelPeak]}>7 PM</Text>
+                </View>
+
+                {/* 8 PM (Highest Peak) */}
+                <View style={styles.hourlyColumn}>
+                  <View style={[styles.hourlyBar, { height: 48, backgroundColor: '#582CDB', shadowColor: '#582CDB', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 4, elevation: 2 }]} />
+                  <Text style={[styles.hourLabel, styles.hourLabelPeak]}>8 PM</Text>
+                </View>
+
+                {/* 9 PM (Peak Window End) */}
+                <View style={styles.hourlyColumn}>
+                  <View style={[styles.hourlyBar, { height: 36, backgroundColor: '#6366F1' }]} />
+                  <Text style={[styles.hourLabel, styles.hourLabelPeak]}>9 PM</Text>
+                </View>
+
+                {/* 10 PM */}
+                <View style={styles.hourlyColumn}>
+                  <View style={[styles.hourlyBar, { height: 16, backgroundColor: '#E2E8F0' }]} />
+                  <Text style={styles.hourLabel}>10 PM</Text>
+                </View>
+              </View>
+
+              {/* Data Transparency Footer Line */}
+              <View style={styles.peakWindowNoteRow}>
+                <Text style={styles.dataTransparencyText}>
+                  {isNewUser ? 'Benchmark data · Calibrates as you post' : 'Based on your last 20 Reels'}
+                </Text>
+              </View>
             </View>
           </Pressable>
 
@@ -821,36 +1107,26 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                 colors={['#8B5CF6', '#7C3AED', '#A855F7']}
                 style={styles.levelCircleBadge}
               >
-                <Text style={styles.levelCircleNumber}>{userProfile?.level ?? 1}</Text>
+                <Text style={styles.levelCircleNumber}>1</Text>
               </LinearGradient>
 
               <View style={{ flex: 1 }}>
-                <Text style={styles.levelTitleText}>Elite Storyteller</Text>
-                <Text style={styles.levelXpText}>
-                  {(userProfile?.xp ?? 0).toLocaleString()} / {(userProfile?.nextLevelXp ?? 250).toLocaleString()} XP
-                </Text>
+                <Text style={styles.levelTitleText}>Starter</Text>
+                <Text style={styles.levelXpText}>0 / 100 XP</Text>
               </View>
             </View>
 
             <View style={styles.xpTrackBg}>
               <LinearGradient
-                colors={['#6366F1', '#8B5CF6', '#EAB308', '#FDE047']}
+                colors={['#6366F1', '#8B5CF6', '#F59E0B', '#F59E0B']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
-                style={[
-                  styles.xpTrackFill,
-                  {
-                    width: `${Math.min(
-                      100,
-                      Math.round(((userProfile?.xp ?? 0) / Math.max(1, userProfile?.nextLevelXp ?? 250)) * 100),
-                    )}%`,
-                  },
-                ]}
+                style={[styles.xpTrackFill, { width: '0%' }]}
               />
             </View>
           </Pressable>
 
-          {/* CARD 6: ACTIVE PRO BRAND QUEST ("GlowUp Skincare Launch") */}
+          {/* CARD 6: AVAILABLE PRO SPRINT QUEST */}
           <Pressable
             onPress={() => {
               if (Platform.OS !== 'web') {
@@ -863,19 +1139,23 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
               <View style={styles.brandIconSquare}>
-                <Text style={{ fontSize: 22 }}>🎁</Text>
+                <Text style={{ fontSize: 22 }}>⚡</Text>
               </View>
 
               <View style={{ flex: 1 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                <View style={{ marginBottom: 3 }}>
                   <View style={styles.proPriorityPill}>
-                    <Text style={styles.proPriorityText}>👑 ACTIVE BRAND QUEST</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                      <View style={{ width: 18, height: 18, justifyContent: 'center', alignItems: 'center' }}>
+                        <Text style={{ fontSize: 13, lineHeight: 16 }}>👑</Text>
+                      </View>
+                      <Text style={styles.proPriorityText}>AVAILABLE PRO SPRINT</Text>
+                    </View>
                   </View>
-                  <Text style={styles.brandQuestSubLabel}>+$450 BOUNTY</Text>
                 </View>
-                <Text style={styles.brandQuestTitle}>GlowUp Skincare Launch</Text>
-                <Text style={{ fontSize: 11, color: '#64748B', marginTop: 1 }}>
-                  Product Integration Reel • +350 XP &amp; $450 Bounty
+                <Text style={styles.brandQuestTitle}>Viral Hook Sprint Challenge</Text>
+                <Text style={styles.brandQuestSubText}>
+                  3-Hook Storytelling Challenge • +350 XP
                 </Text>
               </View>
 
@@ -883,41 +1163,6 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
             </View>
           </Pressable>
 
-          {/* CARD 7: MONTHLY EARNINGS ($4,250.00) */}
-          <View style={styles.dashboardCard}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Text style={styles.earningsCardLabel}>MONTHLY EARNINGS</Text>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                <Text style={styles.earningsMonthText}>MAY 2024</Text>
-                <View style={{ flexDirection: 'row', gap: 3 }}>
-                  <View style={[styles.dot, styles.dotActive]} />
-                  <View style={styles.dot} />
-                  <View style={styles.dot} />
-                </View>
-              </View>
-            </View>
-
-            <View style={{ marginVertical: 10 }}>
-              <Text style={styles.earningsBigAmount}>$4,250.00</Text>
-              <Text style={styles.earningsGrowthRate}>+18% vs last month</Text>
-            </View>
-
-            <Pressable
-              style={({ pressed }) => [styles.viewEarningsBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                }
-                if (onOpenEarnings) {
-                  onOpenEarnings();
-                } else if (onNavigateTab) {
-                  onNavigateTab('growth');
-                }
-              }}
-            >
-              <Text style={styles.viewEarningsBtnText}>View Earnings</Text>
-            </Pressable>
-          </View>
 
           {/* CARD 8: VOICE STUDIO PRO */}
           <View style={styles.dashboardCard}>
@@ -946,13 +1191,22 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
             </View>
 
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 14 }}>
-              <View>
-                <Text style={styles.voiceMinsCount}>118 <Text style={styles.voiceMinsTotal}>/ 150 mins</Text></Text>
-                <Text style={styles.savedVoiceSub}>Saved Voice — Energetic Narrator</Text>
+              <View style={{ flex: 1, paddingRight: 8 }}>
+                <Text style={styles.voiceMinsCount}>{voiceClone.minutesUsed} <Text style={styles.voiceMinsTotal}>/ {voiceClone.minutesIncluded} min used</Text></Text>
+                <Text style={styles.savedVoiceSub}>
+                  {voiceClone.voiceName ? `Saved voice: ${voiceClone.voiceName}` : 'Not cloned yet'}
+                </Text>
+                {voiceClone.accuracy !== null && (
+                  <Text style={styles.voiceAccuracyHint}>Voice accuracy: how closely your AI voice sounds like you.</Text>
+                )}
               </View>
 
-              <View style={styles.voiceProgressCircle}>
-                <Text style={styles.voiceProgressText}>78%</Text>
+              {/* Voice-clone accuracy score (not Creator Match) */}
+              <View style={styles.voiceAccuracyCol} accessibilityLabel={voiceClone.accuracy !== null ? `Voice accuracy ${voiceClone.accuracy} percent` : 'Voice not cloned yet'}>
+                <View style={styles.voiceProgressCircle}>
+                  <Text style={styles.voiceProgressText}>{voiceClone.accuracy !== null ? `${voiceClone.accuracy}%` : '–'}</Text>
+                </View>
+                <Text style={styles.voiceProgressSub}>VOICE{'\n'}ACCURACY</Text>
               </View>
             </View>
 
@@ -971,7 +1225,12 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                   }
                 }}
               >
-                <Text style={styles.createVoiceBtnText}>✨ Create Voice</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                  <View style={{ width: 18, height: 18, justifyContent: 'center', alignItems: 'center' }}>
+                    <Text style={{ fontSize: 13, lineHeight: 16 }}>✨</Text>
+                  </View>
+                  <Text style={styles.createVoiceBtnText}>Create Voice</Text>
+                </View>
               </Pressable>
 
               <Pressable
@@ -992,67 +1251,15 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
               </Pressable>
             </View>
           </View>
-
-          {/* CARD 9: CREATOR MATCH */}
-          <View style={[styles.dashboardCard, { marginBottom: 120 }]}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-              <Pressable
-                onPress={() => openCreatorStory('amara')}
-                style={{ position: 'relative' }}
-                hitSlop={8}
-              >
-                <Image
-                  source={require('../../assets/images/amara-avatar.jpg')}
-                  style={styles.matchAvatarImage}
-                  resizeMode="cover"
-                />
-                <View style={{ position: 'absolute', bottom: -1, right: -1 }}>
-                  <TinyGoldCheck size={13} />
-                </View>
-              </Pressable>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.matchCreatorName}>Amara Okafor</Text>
-                <Text style={styles.matchOverlapTag}>94% Audience overlap</Text>
-              </View>
-            </View>
-
-            <View style={styles.whyMatchCalloutRow}>
-              <Text style={{ fontSize: 13 }}>✨</Text>
-              <Text style={styles.whyMatchInlineText}>
-                <Text style={{ fontWeight: '900', color: '#582CDB' }}>Why this match? </Text>
-                Similar niche, active streak, open to collab.
-              </Text>
-            </View>
-
-            <View style={styles.matchRecommendationBox}>
-              <Text style={styles.matchRecommendationText}>
-                Recommended for a collaborative &lsquo;Behind the Scenes&rsquo; series based on your audience.
-              </Text>
-            </View>
-
-            <Pressable
-              style={({ pressed }) => [styles.connectMatchOutlineBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                }
-                if (onOpenMatch) {
-                  onOpenMatch();
-                } else if (onNavigateTab) {
-                  onNavigateTab('match');
-                }
-              }}
-            >
-              <Text style={styles.connectMatchBtnText}>Connect</Text>
-            </Pressable>
-          </View>
+          </>
+          )}
         </ScrollView>
 
         {/* 10. FLOATING LIQUID GLASS BOTTOM NAVIGATION BAR */}
         <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
 
         {/* ============================================================ */}
-        {/* MODAL: ULTRA-PREMIUM SWIPEABLE PRO STREAK CALENDAR MODAL     */}
+        {/* MODAL: ULTRA-PREMIUM PRO STREAK CALENDAR MODAL               */}
         {/* ============================================================ */}
         <Modal
           visible={showCalendarModal}
@@ -1070,242 +1277,333 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
               {/* Pro Modal Header */}
               <View style={styles.calendarModalHeader}>
                 <View style={styles.calendarModalTitleGroup}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    <Text style={styles.calendarModalMainTitle}>Streak Calendar 2024</Text>
-                    <LinearGradient
-                      colors={['#FDE047', '#EAB308', '#CA8A04']}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 0 }}
-                      style={styles.proBadgePill}
-                    >
-                      <Text style={styles.proBadgeText}>👑 PRO</Text>
-                    </LinearGradient>
-                  </View>
-                  <Text style={styles.calendarModalSubtitle}>Swipe across months • Autopilot Shield Active</Text>
+                  <Text
+                    style={styles.calendarModalMainTitle}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.8}
+                  >
+                    Streak & Activity Calendar 2026
+                  </Text>
+                  <Text style={styles.calendarModalSubtitle} numberOfLines={1}>
+                    Swipe or tap to browse across months
+                  </Text>
                 </View>
 
                 <Pressable
                   onPress={() => setShowCalendarModal(false)}
-                  style={styles.calendarCloseButton}
+                  style={({ pressed }) => [styles.calendarCloseButton, pressed && styles.btnPressed]}
                   hitSlop={8}
                 >
-                  <Text style={styles.modalCloseCross}>✕</Text>
+                  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                    <Path d="M18 6L6 18M6 6L18 18" stroke="#171420" strokeWidth="2.2" strokeLinecap="round" />
+                  </Svg>
                 </Pressable>
               </View>
 
-              {/* Pro Quick Stats Banner */}
-              <View style={styles.calendarStatsRow}>
-                <View style={styles.calendarStatCard}>
-                  <Text style={styles.calendarStatValue}>47 Days 🔥</Text>
-                  <Text style={styles.calendarStatLabel}>Current</Text>
-                </View>
-                <View style={[styles.calendarStatCard, { backgroundColor: '#FEF9C3', borderColor: '#FDE047' }]}>
-                  <Text style={[styles.calendarStatValue, { color: '#B45309' }]}>Top 1% 👑</Text>
-                  <Text style={[styles.calendarStatLabel, { color: '#A16207' }]}>Worldwide</Text>
-                </View>
-                <View style={styles.calendarStatCard}>
-                  <Text style={styles.calendarStatValue}>99.2% ⚡</Text>
-                  <Text style={styles.calendarStatLabel}>Consistency</Text>
-                </View>
-                <View style={[styles.calendarStatCard, { backgroundColor: '#EDE9FE', borderColor: '#C4B5FD' }]}>
-                  <Text style={[styles.calendarStatValue, { color: '#582CDB' }]}>2 Freezes 🛡️</Text>
-                  <Text style={[styles.calendarStatLabel, { color: '#6D28D9' }]}>Pro Shield</Text>
-                </View>
-              </View>
-
-              {/* Horizontal Month Chips (Jan -> Dec) */}
+              {/* Scrollable Calendar Body */}
               <ScrollView
-                ref={monthChipsScrollRef}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.monthChipsContainer}
+                style={styles.calendarModalScroll}
+                contentContainerStyle={styles.calendarModalScrollContent}
+                showsVerticalScrollIndicator={false}
+                bounces={true}
               >
-                {FULL_YEAR_CALENDAR.map((m, idx) => {
-                  const isSelected = selectedMonthIndex === idx;
-                  return (
-                    <Pressable
-                      key={`chip_${m.id}`}
-                      onPress={() => {
-                        if (Platform.OS !== 'web') {
-                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        }
-                        scrollToMonth(idx);
-                      }}
-                      style={[
-                        styles.monthChipPill,
-                        isSelected && styles.monthChipPillActive,
-                      ]}
+                {/* Pro Quick Stats Banner */}
+                <View style={styles.calendarStatsRow}>
+                  <View style={styles.calendarStatCard}>
+                    <Text
+                      style={styles.calendarStatValue}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.85}
                     >
-                      <Text
+                      {isNewUser ? 'Day 1 🔥' : ((userProfile?.streakCount && userProfile.streakCount > 1) ? userProfile.streakCount : 48) + ' Days 🔥'}
+                    </Text>
+                    <Text style={styles.calendarStatLabel} numberOfLines={1}>
+                      Streak
+                    </Text>
+                  </View>
+                  <View style={[styles.calendarStatCard, { backgroundColor: '#FEF9C3', borderColor: '#F59E0B' }]}>
+                    <Text
+                      style={[styles.calendarStatValue, { color: '#B45309' }]}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.85}
+                    >
+                      {isNewUser ? 'Starter 🚀' : 'Top 1% 👑'}
+                    </Text>
+                    <Text style={[styles.calendarStatLabel, { color: '#A16207' }]} numberOfLines={1}>
+                      {isNewUser ? 'Rank Tier' : 'Worldwide'}
+                    </Text>
+                  </View>
+                  <View style={styles.calendarStatCard}>
+                    <Text
+                      style={styles.calendarStatValue}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.85}
+                    >
+                      {isNewUser ? 'Ready ⚡' : '99.2% ⚡'}
+                    </Text>
+                    <Text style={styles.calendarStatLabel} numberOfLines={1}>
+                      Consistency
+                    </Text>
+                  </View>
+                  <View style={[styles.calendarStatCard, { backgroundColor: '#EDE9FE', borderColor: '#C4B5FD' }]}>
+                    <Text
+                      style={[styles.calendarStatValue, { color: '#582CDB' }]}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.85}
+                    >
+                      {isNewUser ? 'Day 1' : '21 days'}
+                    </Text>
+                    <Text style={[styles.calendarStatLabel, { color: '#6D28D9' }]} numberOfLines={1}>
+                      Best run
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Horizontal Month Chips (Jan -> Dec) */}
+                <ScrollView
+                  ref={monthChipsScrollRef}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.monthChipsContainer}
+                >
+                  {proCalendarMonthsData.map((m, idx) => {
+                    const isSelected = selectedMonthIndex === idx;
+                    return (
+                      <Pressable
+                        key={`chip_${m.id}`}
+                        onPress={() => {
+                          if (Platform.OS !== 'web') {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          }
+                          scrollToMonth(idx);
+                        }}
                         style={[
-                          styles.monthChipText,
-                          isSelected && styles.monthChipTextActive,
+                          styles.monthChipPill,
+                          isSelected && styles.monthChipPillActive,
                         ]}
                       >
-                        {m.monthName.slice(0, 3)}
-                      </Text>
-                      {m.isCurrent && (
-                        <View style={[styles.monthChipCurrentDot, isSelected && styles.monthChipCurrentDotActive]} />
-                      )}
+                        <Text
+                          style={[
+                            styles.monthChipText,
+                            isSelected && styles.monthChipTextActive,
+                          ]}
+                        >
+                          {m.monthName.slice(0, 3)}
+                        </Text>
+                        {m.isCurrent && (
+                          <View style={[styles.monthChipCurrentDot, isSelected && styles.monthChipCurrentDotActive]} />
+                        )}
+                      </Pressable>
+                    );
+                  })}
+                </ScrollView>
+
+                {/* Selected Day Toast/Info Banner */}
+                {selectedDayInfo && (
+                  <View style={styles.selectedDayBanner}>
+                    <Text style={styles.selectedDayText}>{selectedDayInfo}</Text>
+                  </View>
+                )}
+
+                {/* Active Month Calendar Container with Smooth Swiping */}
+                <View
+                  style={styles.pagerOuterContainer}
+                  onLayout={(e) => {
+                    const measuredWidth = Math.floor(e.nativeEvent.layout.width);
+                    if (measuredWidth > 0 && Math.abs(measuredWidth - calendarWidth) > 1) {
+                      setCalendarWidth(measuredWidth);
+                    }
+                  }}
+                >
+                  {/* Month Navigator Header with ‹ and › */}
+                  <View style={styles.monthNavHeader}>
+                    <Pressable
+                      onPress={handlePrevMonth}
+                      disabled={selectedMonthIndex === 0}
+                      style={[
+                        styles.monthNavChevronBtn,
+                        selectedMonthIndex === 0 && styles.monthNavChevronDisabled,
+                      ]}
+                      hitSlop={8}
+                    >
+                      <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                        <Path d="M15 18L9 12L15 6" stroke={selectedMonthIndex === 0 ? '#CBD5E1' : '#582CDB'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </Svg>
                     </Pressable>
-                  );
-                })}
-              </ScrollView>
 
-              {/* Selected Day Toast/Info Banner */}
-              {selectedDayInfo && (
-                <View style={styles.selectedDayBanner}>
-                  <Text style={styles.selectedDayText}>{selectedDayInfo}</Text>
-                </View>
-              )}
+                    <View style={styles.monthNameTitleGroup}>
+                      <Text style={styles.focusedMonthTitle}>
+                        {proCalendarMonthsData[selectedMonthIndex].monthName} 2026
+                      </Text>
+                      {proCalendarMonthsData[selectedMonthIndex].isCurrent && (
+                        <View style={styles.currentMonthBadge}>
+                          <Text style={styles.currentMonthBadgeText}>CURRENT 🔥</Text>
+                        </View>
+                      )}
+                    </View>
 
-              {/* SWIPEABLE HORIZONTAL PAGER FOR ALL MONTHS */}
-              <View
-                style={styles.pagerOuterContainer}
-                onLayout={(e) => {
-                  const measuredWidth = Math.floor(e.nativeEvent.layout.width - 16);
-                  if (measuredWidth > 0 && Math.abs(measuredWidth - pagerWidth) > 1) {
-                    setPagerWidth(measuredWidth);
-                  }
-                }}
-              >
-                {/* Month Navigator Header with ‹ and › */}
-                <View style={styles.monthNavHeader}>
-                  <Pressable
-                    onPress={handlePrevMonth}
-                    disabled={selectedMonthIndex === 0}
-                    style={[
-                      styles.monthNavChevronBtn,
-                      selectedMonthIndex === 0 && styles.monthNavChevronDisabled,
-                    ]}
-                    hitSlop={8}
-                  >
-                    <Text style={{ fontSize: 18, color: selectedMonthIndex === 0 ? '#CBD5E1' : '#582CDB', fontWeight: '900' }}>‹</Text>
-                  </Pressable>
-
-                  <View style={styles.monthNameTitleGroup}>
-                    <Text style={styles.focusedMonthTitle}>
-                      {FULL_YEAR_CALENDAR[selectedMonthIndex].monthName} 2024
-                    </Text>
-                    {FULL_YEAR_CALENDAR[selectedMonthIndex].isCurrent && (
-                      <View style={styles.currentMonthBadge}>
-                        <Text style={styles.currentMonthBadgeText}>CURRENT 🔥</Text>
-                      </View>
-                    )}
+                    <Pressable
+                      onPress={handleNextMonth}
+                      disabled={selectedMonthIndex === proCalendarMonthsData.length - 1}
+                      style={[
+                        styles.monthNavChevronBtn,
+                        selectedMonthIndex === proCalendarMonthsData.length - 1 && styles.monthNavChevronDisabled,
+                      ]}
+                      hitSlop={8}
+                    >
+                      <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                        <Path d="M9 18L15 12L9 6" stroke={selectedMonthIndex === proCalendarMonthsData.length - 1 ? '#CBD5E1' : '#582CDB'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </Svg>
+                    </Pressable>
                   </View>
 
-                  <Pressable
-                    onPress={handleNextMonth}
-                    disabled={selectedMonthIndex === FULL_YEAR_CALENDAR.length - 1}
-                    style={[
-                      styles.monthNavChevronBtn,
-                      selectedMonthIndex === FULL_YEAR_CALENDAR.length - 1 && styles.monthNavChevronDisabled,
-                    ]}
-                    hitSlop={8}
-                  >
-                    <Text style={{ fontSize: 18, color: selectedMonthIndex === FULL_YEAR_CALENDAR.length - 1 ? '#CBD5E1' : '#582CDB', fontWeight: '900' }}>›</Text>
-                  </Pressable>
-                </View>
+                  {/* Day-of-Week Column Headers */}
+                  <View style={styles.calendarDayNamesRow}>
+                    {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((dayHeader, dIdx) => (
+                      <Text key={`pro_cal_col_${dIdx}`} style={styles.calendarDayNameText}>
+                        {dayHeader}
+                      </Text>
+                    ))}
+                  </View>
 
-                {/* Day-of-Week Column Headers */}
-                <View style={styles.dayColHeadersRow}>
-                  {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((dayHeader, dIdx) => (
-                    <Text key={`pro_cal_col_${dIdx}`} style={styles.dayColHeaderLabel}>
-                      {dayHeader}
-                    </Text>
-                  ))}
-                </View>
+                  {/* High-Performance 120fps Native Paging Carousel */}
+                  <FlatList
+                    ref={calendarFlatListRef}
+                    data={proCalendarMonthsData}
+                    keyExtractor={(item) => item.id}
+                    horizontal
+                    pagingEnabled
+                    showsHorizontalScrollIndicator={false}
+                    nestedScrollEnabled={true}
+                    directionalLockEnabled={true}
+                    decelerationRate="fast"
+                    snapToInterval={calendarWidth}
+                    snapToAlignment="center"
+                    scrollEventThrottle={16}
+                    getItemLayout={(_, index) => ({
+                      length: calendarWidth,
+                      offset: calendarWidth * index,
+                      index,
+                    })}
+                    initialScrollIndex={8}
+                    onScrollToIndexFailed={(info) => {
+                      setTimeout(() => {
+                        try {
+                          calendarFlatListRef.current?.scrollToIndex({
+                            index: info.index,
+                            animated: false,
+                          });
+                        } catch (e) {}
+                      }, 80);
+                    }}
+                    onScroll={(e) => {
+                      const offsetX = e.nativeEvent.contentOffset.x;
+                      if (calendarWidth > 0) {
+                        const activeIdx = Math.round(offsetX / calendarWidth);
+                        if (
+                          activeIdx >= 0 &&
+                          activeIdx < proCalendarMonthsData.length &&
+                          activeIdx !== selectedMonthIndexRef.current
+                        ) {
+                          selectedMonthIndexRef.current = activeIdx;
+                          setSelectedMonthIndex(activeIdx);
+                          setSelectedDayInfo(null);
+                          monthChipsScrollRef.current?.scrollTo({
+                            x: Math.max(0, activeIdx * 68 - 100),
+                            animated: true,
+                          });
+                          if (Platform.OS !== 'web') {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          }
+                        }
+                      }
+                    }}
+                    renderItem={({ item: currentMonth }) => (
+                      <View style={{ width: calendarWidth, paddingHorizontal: 1 }}>
+                        <View style={styles.calendarMonthGrid}>
+                          {Array.from({
+                            length:
+                              Math.ceil((currentMonth.daysCount + currentMonth.startOffset) / 7) * 7,
+                          }).map((_, cellIdx) => {
+                            const dayNumber = cellIdx - currentMonth.startOffset + 1;
+                            const isValidDay = dayNumber >= 1 && dayNumber <= currentMonth.daysCount;
 
-                {/* Horizontal Paging ScrollView */}
-                <ScrollView
-                  ref={calendarScrollRef}
-                  horizontal
-                  pagingEnabled
-                  showsHorizontalScrollIndicator={false}
-                  onMomentumScrollEnd={handleCalendarScrollEnd}
-                  contentContainerStyle={{ width: pagerWidth * FULL_YEAR_CALENDAR.length }}
-                  decelerationRate="fast"
-                >
-                  {FULL_YEAR_CALENDAR.map((month) => {
-                    const totalGridCells = Math.ceil((month.daysCount + month.startOffset) / 7) * 7;
-                    const cells = Array.from({ length: totalGridCells });
-
-                    return (
-                      <View key={`month_page_${month.id}`} style={[styles.singleMonthPage, { width: pagerWidth }]}>
-                        <View style={styles.monthGridWrap}>
-                          {cells.map((_, cIdx) => {
-                            const dayNumber = cIdx - month.startOffset + 1;
-                            const isDayInMonth = dayNumber >= 1 && dayNumber <= month.daysCount;
-                            const isCompleted = isDayInMonth && month.completedDays.includes(dayNumber);
-                            const isScheduled = isDayInMonth && month.scheduledDays.includes(dayNumber);
-                            const isFreeze = isDayInMonth && month.freezeDays.includes(dayNumber);
-                            const isToday = month.isCurrent && dayNumber === 19;
-
-                            if (!isDayInMonth) {
-                              return <View key={`pro_empty_${month.id}_${cIdx}`} style={styles.dayCellEmpty} />;
+                            if (!isValidDay) {
+                              return <View key={`pro_empty_${currentMonth.id}_${cellIdx}`} style={styles.calendarCellEmpty} />;
                             }
+
+                            const isCompleted = currentMonth.completedDays.includes(dayNumber);
+                            const isScheduled = currentMonth.scheduledDays.includes(dayNumber);
+                            const isFreeze = currentMonth.freezeDays.includes(dayNumber);
+                            const isToday = currentMonth.isCurrent && dayNumber === 5;
 
                             return (
                               <Pressable
-                                key={`pro_day_${month.id}_${dayNumber}`}
-                                onPress={() => handleDayPress(dayNumber, month)}
-                                style={[
-                                  styles.dayCellBase,
-                                  isCompleted && styles.dayCellCompleted,
-                                  isScheduled && styles.dayCellScheduled,
-                                  isFreeze && styles.dayCellFreeze,
-                                  isToday && styles.dayCellTodayPro,
+                                key={`pro_day_${currentMonth.id}_${dayNumber}`}
+                                onPress={() => handleDayPress(dayNumber, currentMonth)}
+                                style={({ pressed }) => [
+                                  styles.calendarCell,
+                                  isCompleted && styles.calendarCellCompleted,
+                                  isScheduled && styles.calendarCellScheduled,
+                                  isFreeze && styles.calendarCellFreeze,
+                                  isToday && styles.calendarCellToday,
+                                  pressed && styles.calendarCellPressed,
                                 ]}
                               >
                                 <Text
                                   style={[
-                                    styles.dayCellNumber,
-                                    (isCompleted || isToday) && styles.dayCellNumberCompleted,
-                                    isScheduled && styles.dayCellNumberScheduled,
-                                    isFreeze && styles.dayCellNumberFreeze,
+                                    styles.calendarCellDayNumber,
+                                    isCompleted && styles.calendarCellTextCompleted,
+                                    isScheduled && styles.calendarCellTextScheduled,
+                                    isFreeze && styles.calendarCellTextFreeze,
+                                    isToday && styles.calendarCellTextToday,
                                   ]}
                                 >
                                   {dayNumber}
                                 </Text>
 
-                                {isCompleted && <Text style={styles.dayCellCheckIcon}>✓</Text>}
-                                {isScheduled && <Text style={styles.dayCellScheduledIcon}>⚡</Text>}
-                                {isFreeze && <Text style={styles.dayCellFreezeIcon}>🛡️</Text>}
+                                {isCompleted && <Text style={styles.cellMiniIcon}>✓</Text>}
+                                {isScheduled && <Text style={styles.cellMiniIconScheduled}>⚡</Text>}
+                                {isFreeze && <Text style={styles.cellMiniIconFreeze}>🛡️</Text>}
+                                {isToday && <View style={styles.dayCellTodayDot} />}
                               </Pressable>
                             );
                           })}
                         </View>
                       </View>
-                    );
-                  })}
-                </ScrollView>
-              </View>
+                    )}
+                  />
+                </View>
 
-              {/* Legend & Pro Autopilot Shield Footer */}
-              <View style={styles.legendContainer}>
-                <View style={styles.legendItem}>
-                  <View style={[styles.legendDot, { backgroundColor: '#582CDB' }]} />
-                  <Text style={styles.legendLabel}>Completed (✓)</Text>
+                {/* Legend & Pro Autopilot Shield Footer */}
+                <View style={styles.calendarLegendBox}>
+                  <View style={styles.legendItemsGrid}>
+                    <View style={styles.legendItem}>
+                      <View style={[styles.legendDot, { backgroundColor: '#582CDB' }]} />
+                      <Text style={styles.legendLabel}>Completed (✓)</Text>
+                    </View>
+                    <View style={styles.legendItem}>
+                      <View style={[styles.legendDot, { backgroundColor: '#F59E0B' }]} />
+                      <Text style={styles.legendLabel}>Autopilot (⚡)</Text>
+                    </View>
+                    <View style={styles.legendItem}>
+                      <View style={[styles.legendDot, { backgroundColor: '#5B3EE8' }]} />
+                      <Text style={styles.legendLabel}>Today</Text>
+                    </View>
+                  </View>
                 </View>
-                <View style={styles.legendItem}>
-                  <View style={[styles.legendDot, { backgroundColor: '#F59E0B' }]} />
-                  <Text style={styles.legendLabel}>Autopilot (⚡)</Text>
-                </View>
-                <View style={styles.legendItem}>
-                  <View style={[styles.legendDot, { backgroundColor: '#38BDF8' }]} />
-                  <Text style={styles.legendLabel}>Pro Shield (🛡️)</Text>
-                </View>
-                <View style={styles.legendItem}>
-                  <View style={[styles.legendDot, { backgroundColor: '#EF4444' }]} />
-                  <Text style={styles.legendLabel}>Today</Text>
-                </View>
-              </View>
+              </ScrollView>
 
               <Pressable
-                style={styles.modalFullBtn}
+                style={({ pressed }) => [styles.donePrimaryBtn, pressed && styles.btnPressed]}
                 onPress={() => setShowCalendarModal(false)}
               >
-                <Text style={styles.modalFullBtnText}>Done</Text>
+                <Text style={styles.donePrimaryBtnText}>Done ✓</Text>
               </Pressable>
             </Animated.View>
           </View>
@@ -1321,8 +1619,8 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <View style={{ flex: 1, minWidth: 0, marginRight: 10 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                     <Text style={styles.modalTitle}>AI Voice Studio Pro</Text>
                     <View style={styles.proUnlockedPill}>
                       <Text style={styles.proUnlockedText}>PRO UNLOCKED</Text>
@@ -1391,7 +1689,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
 
 
                         {/* ============================================================ */}
-        {/* MODAL: ACTIVE PRO BRAND QUEST MODAL                          */}
+        {/* MODAL: ACTIVE PRO SPRINT QUEST MODAL                         */}
         {/* ============================================================ */}
         <Modal
           visible={showBrandQuestModal}
@@ -1405,10 +1703,10 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                 {/* Header */}
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                   <View style={styles.proPriorityPill}>
-                    <Text style={styles.proPriorityText}>👑 ACTIVE BRAND CAMPAIGN</Text>
+                    <Text style={styles.proPriorityText}>👑 AVAILABLE CREATOR SPRINT</Text>
                   </View>
                   <Pressable onPress={() => setShowBrandQuestModal(false)} hitSlop={8}>
-                    <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '900' }}>✕</Text>
+                    <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '700' }}>✕</Text>
                   </Pressable>
                 </View>
 
@@ -1421,48 +1719,86 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                 >
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
                     <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255, 255, 255, 0.15)', justifyContent: 'center', alignItems: 'center' }}>
-                      <Text style={{ fontSize: 22 }}>🎁</Text>
+                      <Text style={{ fontSize: 22 }}>⚡</Text>
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={{ fontSize: 17, fontWeight: '900', color: '#FFFFFF' }}>GlowUp Skincare Launch</Text>
-                      <Text style={{ fontSize: 11, color: '#C7D2FE', marginTop: 1, fontWeight: '700' }}>Verified Sponsor • 2 Days Remaining</Text>
+                      <Text style={{ fontSize: 17, fontWeight: '700', color: '#FFFFFF' }}>Viral Hook Sprint Challenge</Text>
+                      <Text style={{ fontSize: 11, color: '#C7D2FE', marginTop: 1, fontWeight: '700' }}>Creator Milestone Sprint • Go at your own pace</Text>
                     </View>
                   </View>
 
                   <View style={{ flexDirection: 'row', gap: 8, marginTop: 12 }}>
-                    <View style={{ backgroundColor: 'rgba(245, 158, 11, 0.25)', borderWidth: 1, borderColor: '#F59E0B', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 }}>
-                      <Text style={{ fontSize: 11, fontWeight: '900', color: '#FDE68A' }}>💰 $450 Guaranteed Bounty</Text>
+                    <View
+                      style={{
+                        flex: 1,
+                        backgroundColor: 'rgba(245, 158, 11, 0.25)',
+                        borderWidth: 1,
+                        borderColor: '#F59E0B',
+                        paddingHorizontal: 6,
+                        paddingVertical: 5,
+                        borderRadius: 8,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <Text
+                        style={{ fontSize: sFont(11), fontWeight: '700', color: '#FDE68A', textAlign: 'center' }}
+                        numberOfLines={1}
+                      >
+                        ⚡ +350 XP
+                      </Text>
                     </View>
-                    <View style={{ backgroundColor: 'rgba(139, 92, 246, 0.25)', borderWidth: 1, borderColor: '#8B5CF6', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 }}>
-                      <Text style={{ fontSize: 11, fontWeight: '900', color: '#EDE9FE' }}>⚡ +350 XP Reward</Text>
+                    <View
+                      style={{
+                        flex: 1,
+                        backgroundColor: 'rgba(139, 92, 246, 0.25)',
+                        borderWidth: 1,
+                        borderColor: '#8B5CF6',
+                        paddingHorizontal: 6,
+                        paddingVertical: 5,
+                        borderRadius: 8,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <Text
+                        style={{ fontSize: sFont(11), fontWeight: '700', color: '#EDE9FE', textAlign: 'center' }}
+                        numberOfLines={1}
+                      >
+                        ⚡ +350 XP Reward
+                      </Text>
                     </View>
                   </View>
                 </LinearGradient>
 
                 {/* Deliverables & Brief */}
-                <Text style={styles.modalSubheadingTitle}>CAMPAIGN DELIVERABLES</Text>
+                <Text style={styles.modalSubheadingTitle}>SPRINT OBJECTIVES</Text>
                 <View style={{ gap: 8, marginTop: 8 }}>
                   <View style={styles.xpActivityRow}>
-                    <Text style={{ fontSize: 18 }}>🎬</Text>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.xpActivityTitle}>1x 9:16 Video Integration Reel</Text>
-                      <Text style={styles.xpActivityTime}>Include 3-second texture hook &amp; routine demo</Text>
+                    <View style={styles.deliverableIconBox}>
+                      <Text style={{ fontSize: 18 }}>🎬</Text>
+                    </View>
+                    <View style={{ flex: 1, minWidth: 0 }}>
+                      <Text style={styles.xpActivityTitle}>1x 9:16 Storytelling Hook Reel</Text>
+                      <Text style={styles.xpActivityTime}>Include 3-second contrarian hook &amp; core lesson</Text>
                     </View>
                   </View>
                   <View style={styles.xpActivityRow}>
-                    <Text style={{ fontSize: 18 }}>🔗</Text>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.xpActivityTitle}>Custom Bio Link &amp; Promo Code</Text>
-                      <Text style={styles.xpActivityTime}>Tag @glowupskin with 15% audience discount</Text>
+                    <View style={styles.deliverableIconBox}>
+                      <Text style={{ fontSize: 18 }}>📑</Text>
+                    </View>
+                    <View style={{ flex: 1, minWidth: 0 }}>
+                      <Text style={styles.xpActivityTitle}>Pin High-Value Carousel Breakdown</Text>
+                      <Text style={styles.xpActivityTime}>Share step-by-step checklist to drive bookmarks &amp; saves</Text>
                     </View>
                   </View>
                 </View>
 
                 {/* Jarvis AI Recommendation */}
                 <View style={[styles.nextLevelPreviewBox, { backgroundColor: '#F5F3FF', borderColor: '#C4B5FD', marginTop: 12 }]}>
-                  <Text style={[styles.nextLevelPreviewTitle, { color: '#582CDB' }]}>🪄 JARVIS MATCH INSIGHT</Text>
+                  <Text style={[styles.nextLevelPreviewTitle, { color: '#582CDB' }]}>🪄 JARVIS SPRINT INSIGHT</Text>
                   <Text style={[styles.nextLevelPreviewBody, { color: '#4338CA' }]}>
-                    Your audience has a 94% affinity with aesthetic lifestyle routines. Filming during your 7:30 PM slot gives this brief maximum sponsored reach.
+                    Strong audience alignment with high-retention formats. Completing this sprint challenge awards +350 XP and unlocks Level 2 Creator status!
                   </Text>
                 </View>
 
@@ -1472,7 +1808,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                   onPress={() => {
                     setShowBrandQuestModal(false);
                     if (onOpenPostComposer) {
-                      onOpenPostComposer('My 3-Step Morning Skincare Secret (GlowUp Collab)');
+                      onOpenPostComposer('3 Creator Mistakes I Stopped Making');
                     } else if (onStartMission) {
                       onStartMission();
                     }
@@ -1484,29 +1820,17 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                     end={{ x: 1, y: 1 }}
                     style={styles.modalGoldBtnGradient}
                   >
-                    <Text style={styles.modalGoldActionBtnText}>
-                      ✨ Start Campaign in Composer (+350 XP) ➔
+                    <Text style={styles.modalGoldActionBtnText} numberOfLines={1}>
+                      ✨ Accept &amp; Start Sprint (+350 XP) ➔
                     </Text>
                   </LinearGradient>
-                </Pressable>
-
-                <Pressable
-                  style={styles.modalSecondaryOutlineBtn}
-                  onPress={() => {
-                    setShowBrandQuestModal(false);
-                    if (onOpenMessages) onOpenMessages('conv_glowup');
-                  }}
-                >
-                  <Text style={styles.modalSecondaryOutlineBtnText}>
-                    💬 Message Brand Sponsor ➔
-                  </Text>
                 </Pressable>
 
                 <Pressable
                   style={styles.modalCancelBtn}
                   onPress={() => setShowBrandQuestModal(false)}
                 >
-                  <Text style={styles.modalCancelBtnText}>Close Brief</Text>
+                  <Text style={styles.modalCancelBtnText}>Close Sprint</Text>
                 </Pressable>
               </ScrollView>
             </Animated.View>
@@ -1531,7 +1855,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                     <Text style={styles.proPriorityText}>👑 LEVEL &amp; BADGE PROGRESSION</Text>
                   </View>
                   <Pressable onPress={() => setShowCreatorLevelModal(false)} hitSlop={8}>
-                    <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '900' }}>✕</Text>
+                    <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '700' }}>✕</Text>
                   </Pressable>
                 </View>
 
@@ -1544,74 +1868,63 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                 >
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
                     <View style={styles.heroLevelNumberCircle}>
-                      <Text style={styles.heroLevelNumberText}>{userProfile?.level ?? 1}</Text>
+                      <Text style={styles.heroLevelNumberText}>1</Text>
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={styles.heroLevelTitle}>Elite Storyteller</Text>
-                      <Text style={styles.heroLevelSub}>Master Tier Creator • Top 3% Consistency</Text>
+                      <Text style={styles.heroLevelTitle}>Starter</Text>
+                      <Text style={styles.heroLevelSub}>Novice Tier Creator • Day 1 Active</Text>
                     </View>
                   </View>
 
                   {/* XP Progress Bar */}
                   <View style={{ marginTop: 14 }}>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
-                      <Text style={styles.heroXpCurrentText}>{(userProfile?.xp ?? 0).toLocaleString()} XP</Text>
-                      <Text style={styles.heroXpTargetText}>
-                        {(userProfile?.nextLevelXp ?? 250).toLocaleString()} XP (Level {(userProfile?.level ?? 1) + 1})
-                      </Text>
+                      <Text style={styles.heroXpCurrentText}>0 XP</Text>
+                      <Text style={styles.heroXpTargetText}>100 XP (Level 2)</Text>
                     </View>
                     <View style={styles.heroXpTrackBg}>
                       <LinearGradient
                         colors={['#FDE68A', '#F59E0B', '#D97706']}
                         start={{ x: 0, y: 0 }}
                         end={{ x: 1, y: 0 }}
-                        style={[
-                          styles.heroXpTrackFill,
-                          {
-                            width: `${Math.min(
-                              100,
-                              Math.round(((userProfile?.xp ?? 0) / Math.max(1, userProfile?.nextLevelXp ?? 250)) * 100),
-                            )}%`,
-                          },
-                        ]}
+                        style={[styles.heroXpTrackFill, { width: '0%' }]}
                       />
                     </View>
                     <Text style={styles.heroXpRemainingSub}>
-                      🔥 Only {Math.max(0, (userProfile?.nextLevelXp ?? 250) - (userProfile?.xp ?? 0)).toLocaleString()} XP needed to unlock{' '}
-                      <Text style={{ fontWeight: '900', color: '#FDE68A' }}>Level {(userProfile?.level ?? 1) + 1} Master Storyteller</Text>
+                      🔥 Only 100 XP needed to unlock <Text style={{ fontWeight: '700', color: '#FDE68A' }}>Level 2 Content Creator</Text>
                     </Text>
                   </View>
                 </LinearGradient>
 
                 {/* BADGE SHOWCASE GRID */}
-                <Text style={[styles.modalSubheadingTitle, { marginTop: 16 }]}>EARNED CREATOR BADGES (4/8)</Text>
+                <Text style={[styles.modalSubheadingTitle, { marginTop: 16 }]}>EARNED CREATOR BADGES (2/8)</Text>
                 <View style={styles.badgeShowcaseGrid}>
                   {/* Badge 1 */}
                   <View style={styles.badgeShowcaseItem}>
-                    <Text style={{ fontSize: 24, marginBottom: 4 }}>🏆</Text>
-                    <Text style={styles.badgeShowcaseName}>Elite Storyteller</Text>
-                    <Text style={styles.badgeShowcaseDesc}>40+ high-retention narrative videos</Text>
+                    <Text style={{ fontSize: 24, marginBottom: 4 }}>✨</Text>
+                    <Text style={styles.badgeShowcaseName}>Pro Pioneer</Text>
+                    <Text style={styles.badgeShowcaseDesc}>Upgraded to PostStreak Pro</Text>
                   </View>
 
                   {/* Badge 2 */}
                   <View style={styles.badgeShowcaseItem}>
                     <Text style={{ fontSize: 24, marginBottom: 4 }}>🔥</Text>
-                    <Text style={styles.badgeShowcaseName}>52-Day Streak</Text>
-                    <Text style={styles.badgeShowcaseDesc}>Unbroken daily publishing momentum</Text>
+                    <Text style={styles.badgeShowcaseName}>Streak Starter</Text>
+                    <Text style={styles.badgeShowcaseDesc}>Started daily posting streak</Text>
                   </View>
 
                   {/* Badge 3 */}
-                  <View style={styles.badgeShowcaseItem}>
-                    <Text style={{ fontSize: 24, marginBottom: 4 }}>🎙️</Text>
+                  <View style={[styles.badgeShowcaseItem, { opacity: 0.6 }]}>
+                    <Text style={{ fontSize: 24, marginBottom: 4 }}>🔒</Text>
                     <Text style={styles.badgeShowcaseName}>Voice Studio Pro</Text>
-                    <Text style={styles.badgeShowcaseDesc}>10+ batches voiced with Jarvis AI</Text>
+                    <Text style={styles.badgeShowcaseDesc}>Generate first AI voiceover</Text>
                   </View>
 
                   {/* Badge 4 */}
-                  <View style={styles.badgeShowcaseItem}>
-                    <Text style={{ fontSize: 24, marginBottom: 4 }}>👑</Text>
-                    <Text style={styles.badgeShowcaseName}>Multi-Sync Pioneer</Text>
-                    <Text style={styles.badgeShowcaseDesc}>4-channel automatic distribution</Text>
+                  <View style={[styles.badgeShowcaseItem, { opacity: 0.6 }]}>
+                    <Text style={{ fontSize: 24, marginBottom: 4 }}>🔒</Text>
+                    <Text style={styles.badgeShowcaseName}>Quest Master</Text>
+                    <Text style={styles.badgeShowcaseDesc}>Complete first brand quest</Text>
                   </View>
                 </View>
 
@@ -1619,10 +1932,9 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                 <Text style={[styles.modalSubheadingTitle, { marginTop: 16 }]}>RECENT XP ACTIVITY</Text>
                 <View style={{ gap: 8, marginTop: 6 }}>
                   {[
-                    { title: 'Daily 7:30 PM Video Published', time: 'Today', xp: '+50 XP' },
-                    { title: 'Multi-Platform Sync Configured', time: 'Yesterday', xp: '+25 XP' },
-                    { title: 'Squad Live Duel Victory with Elena', time: '2 days ago', xp: '+75 XP' },
-                    { title: '50-Day Consistency Milestone Trophy', time: '3 days ago', xp: '+250 XP' },
+                    { title: 'Upgraded to PostStreak Pro', time: 'Today', xp: '+0 XP' },
+                    { title: 'Streak Kickoff Active', time: 'Today', xp: '+0 XP' },
+                    { title: isNewUser ? 'Ready to Connect Channels' : 'Connected 2 Channels', time: 'Today', xp: '+0 XP' },
                   ].map((item, idx) => (
                     <View key={idx} style={styles.xpActivityRow}>
                       <View style={{ flex: 1 }}>
@@ -1636,13 +1948,13 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                   ))}
                 </View>
 
-                {/* NEXT LEVEL UNLOCKS (LEVEL 43 PREVIEW) */}
+                {/* NEXT LEVEL UNLOCKS (LEVEL 2 PREVIEW) */}
                 <View style={styles.nextLevelPreviewBox}>
-                  <Text style={styles.nextLevelPreviewTitle}>🌟 LEVEL 43 MILESTONE UNLOCKS</Text>
+                  <Text style={styles.nextLevelPreviewTitle}>🌟 LEVEL 2 MILESTONE UNLOCKS</Text>
                   <Text style={styles.nextLevelPreviewBody}>
-                    • Master Storyteller Gold Profile Badge{"\n"}
-                    • Priority Brand Deal &amp; Sponsor Matching ($500+ brief pool){"\n"}
-                    • +500 Squad XP Multiplier Boost
+                    • Custom Reel Stencils &amp; Templates{"\n"}
+                    • Unlocks Squad Live Duels &amp; Collabs{"\n"}
+                    • +50 Daily XP Multiplier Boost
                   </Text>
                 </View>
 
@@ -1661,8 +1973,8 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                     end={{ x: 1, y: 1 }}
                     style={styles.modalGoldBtnGradient}
                   >
-                    <Text style={styles.modalGoldActionBtnText}>
-                      ⚡ Earn More XP on Today&apos;s Mission (+150 XP) ➔
+                    <Text style={styles.modalGoldActionBtnText} numberOfLines={1}>
+                      ⚡ Start Today&apos;s Mission (+150 XP) ➔
                     </Text>
                   </LinearGradient>
                 </Pressable>
@@ -1674,7 +1986,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                     if (onOpenQuests) onOpenQuests();
                   }}
                 >
-                  <Text style={styles.modalSecondaryOutlineBtnText}>
+                  <Text style={styles.modalSecondaryOutlineBtnText} numberOfLines={1}>
                     📜 View Complete Creator Passport ➔
                   </Text>
                 </Pressable>
@@ -1690,43 +2002,15 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
           </View>
         </Modal>
 
-        {/* MODAL: NOTIFICATIONS */}
-        <Modal
+        {/* MODAL: PRO ADVANCED NOTIFICATIONS */}
+        <ProNotificationsModal
           visible={showNotificationModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowNotificationModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Activity &amp; Alerts</Text>
-                  <Text style={styles.modalSubtitle}>Autonomous co-pilot notifications</Text>
-                </View>
-                <Pressable onPress={() => setShowNotificationModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
-              </View>
-
-              <ScrollView style={{ maxHeight: 300, marginVertical: 10 }}>
-                {notifications.map((n) => (
-                  <View key={n.id} style={styles.notifCard}>
-                    <Text style={{ fontSize: 20 }}>{n.iconEmoji}</Text>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.notifTitle}>{n.title}</Text>
-                      <Text style={styles.notifBody}>{n.body}</Text>
-                    </View>
-                  </View>
-                ))}
-              </ScrollView>
-
-              <Pressable style={styles.modalFullBtn} onPress={() => setShowNotificationModal(false)}>
-                <Text style={styles.modalFullBtnText}>Close</Text>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
+          onClose={() => setShowNotificationModal(false)}
+          notifications={notifications}
+          onNotificationsChange={setNotifications}
+          onActionPress={handleNotifAction}
+          onToast={showToast}
+        />
 
         {/* CREATOR STORY MODAL */}
         <CreatorStoryModal
@@ -1739,7 +2023,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
           }}
           onSendCollabPitch={(creator) => {
             setSelectedStoryData(null);
-            if (onOpenMessages) onOpenMessages();
+            showToast(`Collab request sent to ${creator.name}!`);
           }}
         />
 
@@ -1764,68 +2048,72 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FAF8F5',
+    backgroundColor: '#FAF9FD',
   },
   container: {
     flex: 1,
-    backgroundColor: '#FAF8F5',
+    width: '100%',
+    backgroundColor: '#FAF9FD',
   },
   headerBar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 12,
-    backgroundColor: '#FAF8F5',
+    paddingHorizontal: 14,
+    paddingTop: 8,
+    paddingBottom: 10,
+    backgroundColor: '#FAF9FD',
   },
   headerLogoWrapper: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: '#171420',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
+    shadowOpacity: 0.04,
     shadowRadius: 6,
     elevation: 2,
+    borderWidth: 1,
+    borderColor: 'rgba(23, 20, 32, 0.06)',
   },
   headerGhostLogo: {
-    width: 28,
-    height: 28,
+    width: 26,
+    height: 26,
   },
   proHeaderBadge: {
-    paddingHorizontal: 6,
-    paddingVertical: 2,
+    paddingHorizontal: 7,
+    paddingVertical: 2.5,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#FBBF24',
+    borderColor: '#FEF3C7',
+    backgroundColor: '#FFFBEB',
   },
   proHeaderBadgeText: {
-    fontSize: 8.5,
-    fontWeight: '900',
-    color: '#92400E',
-    letterSpacing: 0.3,
+    fontSize: 9.5,
+    fontWeight: '700',
+    color: '#D97706',
+    letterSpacing: 0.4,
   },
   headerRightGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 6,
   },
   headerIconBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#EFECE6',
+    borderColor: 'rgba(23, 20, 32, 0.07)',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: '#171420',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
+    shadowOpacity: 0.03,
     shadowRadius: 4,
     elevation: 1,
   },
@@ -1837,68 +2125,68 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 7,
     right: 7,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
     backgroundColor: '#EF4444',
-    borderWidth: 1.5,
+    borderWidth: 1.2,
     borderColor: '#FFFFFF',
   },
   profilePhotoBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     backgroundColor: '#FFFFFF',
     borderWidth: 1.5,
-    borderColor: '#EFECE6',
+    borderColor: 'rgba(23, 20, 32, 0.08)',
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
   },
   profilePhotoBtnPro: {
-    borderColor: '#F59E0B',
-    borderWidth: 2,
+    borderColor: '#D97706',
+    borderWidth: 1.5,
   },
   headerCustomAvatarImage: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
   },
   addPhotoPlusBadge: {
     position: 'absolute',
     bottom: -2,
     right: -2,
-    width: 14,
-    height: 14,
-    borderRadius: 7,
+    width: 13,
+    height: 13,
+    borderRadius: 6.5,
     backgroundColor: '#582CDB',
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1.5,
+    borderWidth: 1.2,
     borderColor: '#FFFFFF',
   },
   addPhotoPlusText: {
     color: '#FFFFFF',
     fontSize: 8,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 8,
-    paddingBottom: 40,
+    paddingBottom: Platform.OS === 'ios' ? 88 : 80,
   },
   proPlanHeroCard: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#EFECE6',
-    borderRadius: 24,
+    borderColor: 'rgba(23, 20, 32, 0.07)',
+    borderRadius: 20,
     padding: 20,
     marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowColor: '#171420',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.04,
+    shadowRadius: 16,
+    elevation: 3,
   },
   proPlanHeaderRow: {
     flexDirection: 'row',
@@ -1906,194 +2194,316 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   proPlanTagBox: {
-    backgroundColor: '#FEF3C7',
+    backgroundColor: '#FFFBEB',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#FEF3C7',
   },
   proPlanTagText: {
-    fontSize: 10,
-    fontWeight: '900',
-    color: '#000000',
-    letterSpacing: 0.4,
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#B45309',
+    letterSpacing: 0.66,
+    lineHeight: 14,
   },
   proPlanHeadline: {
-    fontSize: 15,
+    fontSize: Platform.OS === 'web' ? ('clamp(15px, 3.8vw, 17px)' as any) : sFont(16),
     fontWeight: '700',
     color: '#171420',
+    letterSpacing: -0.35,
     lineHeight: 22,
+    marginBottom: 8,
+  },
+  proPlanSubheadline: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#5E576E',
+    letterSpacing: 0,
+    lineHeight: 20.3,
     marginBottom: 14,
   },
   proPlanBadgesRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 6,
+    alignItems: 'center',
   },
   proPillPurple: {
-    backgroundColor: '#EDE9FE',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    backgroundColor: '#F4F0FF',
+    paddingHorizontal: 9,
+    paddingVertical: 4.5,
     borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(88, 44, 219, 0.12)',
+    minHeight: 26,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   proPillPurpleText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#6D28D9',
+    fontSize: sFont(10.5),
+    fontWeight: '700',
+    color: '#582CDB',
+    letterSpacing: -0.1,
+    lineHeight: 14,
   },
+  // Streak pill — brand purple (gold is reserved for Pro badges).
   proPillGold: {
-    backgroundColor: '#FEF3C7',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    backgroundColor: '#F5F3FF',
+    paddingHorizontal: 9,
+    paddingVertical: 4.5,
     borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#EDE9FE',
+    minHeight: 26,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   proPillGoldText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#92400E',
+    fontSize: sFont(10.5),
+    fontWeight: '700',
+    color: '#5B3EE8',
+    letterSpacing: -0.1,
+    lineHeight: 14,
   },
   proPillGray: {
-    backgroundColor: '#F1F5F9',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    backgroundColor: '#F8FAFC',
+    paddingHorizontal: 9,
+    paddingVertical: 4.5,
     borderRadius: 10,
+    minHeight: 26,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   proPillGrayText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#475569',
+    fontSize: sFont(10.5),
+    fontWeight: '600',
+    color: '#5E576E',
+    letterSpacing: -0.1,
+    lineHeight: 14,
   },
   proPillActiveGold: {
-    backgroundColor: '#F59E0B',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    backgroundColor: '#D97706',
+    paddingHorizontal: 9,
+    paddingVertical: 4.5,
     borderRadius: 10,
+    minHeight: 26,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   proPillActiveGoldText: {
-    fontSize: 11,
-    fontWeight: '900',
+    fontSize: sFont(10.5),
+    fontWeight: '700',
     color: '#FFFFFF',
+    letterSpacing: -0.1,
+    lineHeight: 14,
   },
   dashboardCard: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#EFECE6',
-    borderRadius: 24,
+    borderColor: 'rgba(23, 20, 32, 0.07)',
+    borderRadius: 20,
     padding: 20,
     marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowColor: '#171420',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.04,
+    shadowRadius: 16,
+    elevation: 3,
+    overflow: 'hidden',
   },
   cardPressed: {
     transform: [{ scale: 0.985 }],
     opacity: 0.95,
   },
-  streakCardHeader: {
-    marginBottom: 12,
+  acceleratorEyebrowText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#92400E',
+    letterSpacing: 0.66,
+    flex: 1,
+  },
+  acceleratorBadgeEyebrowText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#B45309',
+    letterSpacing: 0.66,
+  },
+  acceleratorActivatedText: {
+    fontSize: 14,
+    lineHeight: 20.3,
+    letterSpacing: 0,
+    color: '#92400E',
+    fontWeight: '600',
+    flex: 1,
   },
   streakLabel: {
     fontSize: 11,
     fontWeight: '800',
     color: '#64748B',
-    letterSpacing: 0.5,
+    letterSpacing: 0.66,
+    marginBottom: 6,
   },
-  streakBigCount: {
-    fontSize: 22,
-    fontWeight: '900',
+  streakBigHeadline: {
+    fontSize: sFont(17),
+    fontWeight: '700',
     color: '#171420',
+    letterSpacing: -0.3,
   },
-  monthHeaderRow: {
+  cardHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 8,
   },
-  monthLabelText: {
-    fontSize: 11,
+  cardSectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#171420',
+    letterSpacing: -0.3,
+  },
+  streakStatusPill: {
+    backgroundColor: 'rgba(88, 44, 219, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(88, 44, 219, 0.15)',
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+  },
+  streakStatusHighlight: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: '#582CDB',
+    letterSpacing: -0.1,
+  },
+  calendarMetaRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+    paddingHorizontal: 2,
+  },
+  monthLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#7F7894',
+    letterSpacing: -0.1,
+  },
+  monthNavArrow: {
+    fontSize: 13,
     fontWeight: '800',
-    color: '#94A3B8',
-    letterSpacing: 0.5,
+    color: '#582CDB',
+    paddingHorizontal: 2,
   },
   daysHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 8,
     paddingHorizontal: 2,
+    marginBottom: 6,
+    width: '100%',
   },
-  dayColHeaderText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#94A3B8',
-    width: 32,
+  dayColHeader: {
+    fontSize: 10.5,
+    fontWeight: '600',
+    color: '#8E869E',
+    flex: 1,
+    maxWidth: 34,
     textAlign: 'center',
   },
-  heatmapGridContainer: {
-    gap: 6,
-    marginBottom: 14,
+  heatmapGrid: {
+    gap: 5,
+    width: '100%',
   },
   heatmapRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    width: '100%',
   },
-  heatmapCellInactive: {
-    width: 34,
-    height: 34,
-    borderRadius: 8,
-    backgroundColor: '#F8FAFC',
-  },
-  heatmapCellActive: {
-    width: 34,
-    height: 34,
-    borderRadius: 8,
-    backgroundColor: '#6366F1',
+  heatmapCell: {
+    flex: 1,
+    maxWidth: 34,
+    height: 23,
+    borderRadius: 6,
     justifyContent: 'center',
     alignItems: 'center',
+    marginHorizontal: 1.5,
   },
-  checkMarkText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '900',
+  heatmapCellCompleted: {
+    backgroundColor: '#582CDB',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.12,
+    shadowRadius: 2,
+    elevation: 1,
   },
-  topCreatorCalloutBanner: {
+  heatmapCellScheduled: {
+    backgroundColor: '#F5F3FF',
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+  },
+  heatmapCellFreeze: {
+    backgroundColor: '#F0F9FF',
+    borderWidth: 1,
+    borderColor: '#BAE6FD',
+  },
+  heatmapCellEmpty: {
+    backgroundColor: 'rgba(23, 20, 32, 0.03)',
+    borderWidth: 1,
+    borderColor: 'rgba(23, 20, 32, 0.04)',
+  },
+  subtleJarvisRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8FAFC',
-    padding: 12,
-    borderRadius: 14,
-    gap: 10,
+    marginTop: 10,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(23, 20, 32, 0.05)',
+    gap: 8,
   },
-  topCreatorText: {
-    fontSize: 13,
+  subtleJarvisText: {
+    fontSize: 14,
+    lineHeight: 20.3,
+    letterSpacing: 0,
+    color: '#64748B',
+    flex: 1,
+  },
+  subtleJarvisBold: {
     fontWeight: '700',
-    color: '#171420',
+    color: '#582CDB',
   },
   scheduledLabel: {
     fontSize: 11,
     fontWeight: '800',
     color: '#64748B',
-    letterSpacing: 0.5,
+    letterSpacing: 0.66,
   },
   scheduledBigNumber: {
     fontSize: 28,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
+    letterSpacing: -0.5,
   },
   scheduledThisWeek: {
-    fontSize: 14,
-    fontWeight: '700',
+    fontSize: sFont(13.5),
+    fontWeight: '600',
     color: '#171420',
+    letterSpacing: -0.1,
   },
   calendarIconSquare: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    backgroundColor: '#EDE9FE',
+    width: 24,
+    height: 24,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  calendarIconText: {
+    fontSize: 20,
+    lineHeight: 24,
   },
   scheduledDivider: {
     height: 1,
     backgroundColor: '#F1F5F9',
-    marginVertical: 14,
+    marginVertical: 12,
   },
   scheduledBottomRow: {
     flexDirection: 'row',
@@ -2101,50 +2511,89 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   nextPostTimeText: {
-    fontSize: 13,
-    fontWeight: '700',
+    fontSize: sFont(12.5),
+    fontWeight: '600',
     color: '#171420',
+    letterSpacing: -0.1,
   },
   autopilotActiveText: {
-    fontSize: 12,
-    fontWeight: '800',
+    fontSize: sFont(11.5),
+    fontWeight: '700',
     color: '#15803D',
+    letterSpacing: -0.1,
   },
   insightHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 8,
     marginBottom: 16,
   },
   trendingIconBox: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
+    width: 24,
+    height: 24,
+    borderRadius: 6,
     backgroundColor: '#DCFCE7',
     justifyContent: 'center',
     alignItems: 'center',
   },
+  trendingIconText: {
+    fontSize: 14,
+    lineHeight: 18,
+  },
   insightBodyText: {
     flex: 1,
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '600',
     color: '#171420',
-    lineHeight: 19,
+    lineHeight: 20.3,
+    letterSpacing: 0,
   },
   highlightGreen: {
     color: '#15803D',
-    fontWeight: '900',
+    fontWeight: '700',
+  },
+  hourlyChartSection: {
+    marginTop: 6,
   },
   hourlyChartContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-end',
-    height: 48,
-    paddingHorizontal: 8,
+    height: 70,
+    paddingHorizontal: 6,
+  },
+  hourlyColumn: {
+    alignItems: 'center',
+    gap: 6,
+    flex: 1,
   },
   hourlyBar: {
-    width: 44,
+    width: 36,
     borderRadius: 8,
+    maxWidth: '85%',
+  },
+  hourLabel: {
+    fontSize: 10.5,
+    fontWeight: '600',
+    color: '#94A3B8',
+  },
+  hourLabelPeak: {
+    color: '#582CDB',
+    fontWeight: '700',
+  },
+  peakWindowNoteRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 10,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(23, 20, 32, 0.04)',
+  },
+  dataTransparencyText: {
+    fontSize: 10.5,
+    color: '#94A3B8',
+    fontWeight: '500',
   },
   levelCircleBadge: {
     width: 44,
@@ -2154,23 +2603,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     shadowColor: '#7C3AED',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.12,
     shadowRadius: 6,
     elevation: 3,
   },
   levelCircleNumber: {
     color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   levelTitleText: {
-    fontSize: 16,
-    fontWeight: '900',
+    fontSize: sFont(15.5),
+    fontWeight: '700',
     color: '#171420',
+    letterSpacing: -0.2,
   },
   levelXpText: {
-    fontSize: 11,
-    fontWeight: '700',
+    fontSize: sFont(11),
+    fontWeight: '600',
     color: '#64748B',
     marginTop: 2,
   },
@@ -2197,23 +2647,34 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
+    alignSelf: 'flex-start',
   },
   proPriorityText: {
-    fontSize: 9,
-    fontWeight: '900',
-    color: '#92400E',
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#B45309',
+    letterSpacing: 0.66,
   },
   brandQuestSubLabel: {
     fontSize: 10,
     fontWeight: '800',
     color: '#64748B',
     letterSpacing: 0.4,
+    flexShrink: 0,
   },
   brandQuestTitle: {
-    fontSize: 17,
-    fontWeight: '900',
+    fontSize: sFont(16),
+    fontWeight: '700',
     color: '#171420',
+    letterSpacing: -0.2,
     marginTop: 4,
+  },
+  brandQuestSubText: {
+    fontSize: 14,
+    lineHeight: 20.3,
+    letterSpacing: 0,
+    color: '#64748B',
+    marginTop: 2,
   },
   chevronRight: {
     fontSize: 22,
@@ -2245,7 +2706,7 @@ const styles = StyleSheet.create({
   },
   earningsBigAmount: {
     fontSize: 32,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   earningsGrowthRate: {
@@ -2262,20 +2723,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 3,
   },
   viewEarningsBtnText: {
     color: '#FFFFFF',
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   voiceStudioLabel: {
     fontSize: 11,
     fontWeight: '800',
-    color: '#171420',
-    letterSpacing: 0.5,
+    color: '#64748B',
+    letterSpacing: 0.66,
   },
   proUnlockedPill: {
     backgroundColor: '#FEF9C3',
@@ -2284,9 +2745,10 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   proUnlockedText: {
-    fontSize: 9,
-    fontWeight: '900',
+    fontSize: 11,
+    fontWeight: '800',
     color: '#A16207',
+    letterSpacing: 0.66,
   },
   waveformContainerBox: {
     backgroundColor: '#F5F3FF',
@@ -2307,8 +2769,9 @@ const styles = StyleSheet.create({
   },
   voiceMinsCount: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
+    letterSpacing: -0.3,
   },
   voiceMinsTotal: {
     fontSize: 12,
@@ -2316,24 +2779,46 @@ const styles = StyleSheet.create({
     color: '#94A3B8',
   },
   savedVoiceSub: {
-    fontSize: 11,
-    fontWeight: '700',
+    fontSize: 14,
+    fontWeight: '600',
     color: '#64748B',
+    lineHeight: 20.3,
+    letterSpacing: 0,
     marginTop: 2,
   },
   voiceProgressCircle: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     borderWidth: 2,
-    borderColor: '#E2E8F0',
+    borderColor: '#EDE9FE',
+    backgroundColor: '#FAF5FF',
     justifyContent: 'center',
     alignItems: 'center',
   },
   voiceProgressText: {
-    fontSize: 11,
-    fontWeight: '900',
-    color: '#171420',
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#7C3AED',
+    lineHeight: 14,
+  },
+  voiceProgressSub: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#6D28D9',
+    letterSpacing: 0.5,
+    lineHeight: 11,
+    marginTop: 5,
+    textAlign: 'center',
+  },
+  voiceAccuracyCol: {
+    alignItems: 'center',
+  },
+  voiceAccuracyHint: {
+    fontSize: 12,
+    lineHeight: 16,
+    color: '#8E869E',
+    marginTop: 4,
   },
   createVoiceBtn: {
     backgroundColor: '#582CDB',
@@ -2349,13 +2834,13 @@ const styles = StyleSheet.create({
   },
   createVoiceBtnText: {
     color: '#FFFFFF',
-    fontSize: 13.5,
-    fontWeight: '900',
+    fontSize: 14,
+    fontWeight: '700',
   },
   openStudioOutlineBtn: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     paddingVertical: 12,
     borderRadius: 14,
     alignItems: 'center',
@@ -2375,7 +2860,7 @@ const styles = StyleSheet.create({
   },
   matchCreatorName: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   matchOverlapTag: {
@@ -2418,179 +2903,197 @@ const styles = StyleSheet.create({
   },
   connectMatchBtnText: {
     color: '#582CDB',
-    fontSize: 13.5,
-    fontWeight: '900',
+    fontSize: 14,
+    fontWeight: '700',
   },
   btnPressed: {
-    opacity: 0.85,
+    opacity: 0.9,
     transform: [{ scale: 0.98 }],
   },
 
   // ULTRA-PREMIUM PRO CALENDAR MODAL STYLES
   calendarModalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(15, 10, 30, 0.75)',
+    backgroundColor: 'rgba(23, 20, 32, 0.55)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 16,
+    padding: sPadding(14),
   },
   calendarModalCard: {
     width: '100%',
     maxWidth: 420,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 26,
-    padding: 20,
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.2,
-    shadowRadius: 24,
-    elevation: 10,
+    maxHeight: '90%',
+    backgroundColor: 'rgba(255, 255, 255, 0.98)',
+    borderRadius: 28,
+    paddingTop: sPadding(16),
+    paddingHorizontal: sPadding(14),
+    paddingBottom: sPadding(12),
+    shadowColor: '#171420',
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.16,
+    shadowRadius: 32,
+    elevation: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(235, 230, 248, 0.95)',
+    overflow: 'hidden',
+  },
+  calendarModalScroll: {
+    flexGrow: 0,
+  },
+  calendarModalScrollContent: {
+    paddingBottom: 4,
   },
   calendarModalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 14,
+    alignItems: 'center',
+    marginBottom: 10,
   },
   calendarModalTitleGroup: {
     flex: 1,
+    minWidth: 0,
+    marginRight: 8,
   },
   calendarModalMainTitle: {
-    fontSize: 18,
-    fontWeight: '900',
+    fontSize: sFont(16),
+    fontWeight: '800',
     color: '#171420',
-  },
-  proBadgePill: {
-    paddingVertical: 2,
-    paddingHorizontal: 7,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: '#FBBF24',
-  },
-  proBadgeText: {
-    fontSize: 9,
-    fontWeight: '900',
-    color: '#92400E',
-    letterSpacing: 0.5,
+    letterSpacing: -0.4,
   },
   calendarModalSubtitle: {
-    fontSize: 11.5,
-    color: '#64748B',
-    marginTop: 2,
+    fontSize: sFont(11),
+    color: '#7F7894',
+    marginTop: 1,
   },
   calendarCloseButton: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: 'rgba(250, 248, 255, 0.9)',
+    borderWidth: 1,
+    borderColor: 'rgba(235, 230, 248, 0.9)',
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 0,
   },
   calendarStatsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     gap: 6,
-    marginBottom: 12,
+    marginBottom: 10,
+    width: '100%',
   },
   calendarStatCard: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: 'rgba(250, 248, 255, 0.8)',
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
-    borderRadius: 12,
-    paddingVertical: 8,
-    paddingHorizontal: 4,
+    borderColor: 'rgba(237, 232, 252, 0.85)',
+    paddingVertical: 6,
+    paddingHorizontal: 2,
     alignItems: 'center',
+    minWidth: 0,
   },
   calendarStatValue: {
-    fontSize: 12,
-    fontWeight: '900',
+    fontSize: sFont(10.5),
+    fontWeight: '800',
     color: '#171420',
+    marginBottom: 2,
+    textAlign: 'center',
   },
   calendarStatLabel: {
-    fontSize: 9.5,
+    fontSize: sFont(9),
     fontWeight: '700',
-    color: '#64748B',
-    marginTop: 2,
+    color: '#582CDB',
+    textAlign: 'center',
   },
   monthChipsContainer: {
     flexDirection: 'row',
     gap: 6,
-    paddingBottom: 10,
+    paddingBottom: 8,
+    paddingHorizontal: 2,
   },
   monthChipPill: {
-    paddingHorizontal: 12,
+    position: 'relative',
     paddingVertical: 6,
-    borderRadius: 16,
-    backgroundColor: '#F1F5F9',
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    backgroundColor: 'rgba(243, 238, 251, 0.8)',
+    borderWidth: 1,
+    borderColor: 'rgba(226, 220, 242, 0.9)',
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
   },
   monthChipPillActive: {
     backgroundColor: '#582CDB',
+    borderColor: '#582CDB',
   },
   monthChipText: {
-    fontSize: 11,
+    fontSize: sFont(11),
     fontWeight: '700',
-    color: '#475569',
+    color: '#7F7894',
   },
   monthChipTextActive: {
     color: '#FFFFFF',
-    fontWeight: '900',
   },
   monthChipCurrentDot: {
+    position: 'absolute',
+    top: 4,
+    right: 5,
     width: 5,
     height: 5,
     borderRadius: 2.5,
     backgroundColor: '#F59E0B',
   },
   monthChipCurrentDotActive: {
-    backgroundColor: '#FDE047',
+    backgroundColor: '#FBBF24',
+    borderWidth: 0.8,
+    borderColor: '#FFFFFF',
   },
   selectedDayBanner: {
-    backgroundColor: '#FEF9C3',
-    borderWidth: 1,
-    borderColor: '#FDE047',
+    backgroundColor: 'rgba(237, 232, 252, 0.9)',
     borderRadius: 12,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    marginBottom: 10,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(221, 214, 254, 0.9)',
   },
   selectedDayText: {
-    fontSize: 11.5,
-    fontWeight: '800',
-    color: '#92400E',
+    fontSize: sFont(11),
+    fontWeight: '700',
+    color: '#582CDB',
     textAlign: 'center',
   },
   pagerOuterContainer: {
-    backgroundColor: '#FAF8F5',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderRadius: 18,
     borderWidth: 1,
-    borderColor: '#EFECE6',
+    borderColor: 'rgba(235, 230, 248, 0.9)',
     paddingVertical: 10,
-    paddingHorizontal: 8,
-    marginBottom: 12,
+    paddingHorizontal: 0,
+    marginBottom: 8,
+    overflow: 'hidden',
   },
   monthNavHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 8,
     marginBottom: 8,
+    paddingHorizontal: 10,
   },
   monthNavChevronBtn: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: '#FFFFFF',
+    width: 30,
+    height: 30,
+    borderRadius: 9,
+    backgroundColor: 'rgba(250, 248, 255, 0.8)',
+    borderWidth: 1,
+    borderColor: 'rgba(235, 230, 248, 0.85)',
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
   },
   monthNavChevronDisabled: {
-    opacity: 0.4,
+    opacity: 0.35,
   },
   monthNameTitleGroup: {
     flexDirection: 'row',
@@ -2598,129 +3101,175 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   focusedMonthTitle: {
-    fontSize: 14,
-    fontWeight: '900',
+    fontSize: sFont(14.5),
+    fontWeight: '700',
     color: '#171420',
   },
   currentMonthBadge: {
-    backgroundColor: '#FEF3C7',
-    paddingHorizontal: 6,
+    backgroundColor: '#582CDB',
+    borderRadius: 6,
     paddingVertical: 2,
-    borderRadius: 4,
+    paddingHorizontal: 5,
   },
   currentMonthBadgeText: {
-    fontSize: 8.5,
-    fontWeight: '900',
-    color: '#92400E',
-  },
-  dayColHeadersRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 6,
-    paddingHorizontal: 4,
-  },
-  dayColHeaderLabel: {
-    width: 32,
-    textAlign: 'center',
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: '800',
-    color: '#94A3B8',
-  },
-  singleMonthPage: {
-    alignItems: 'center',
-  },
-  monthGridWrap: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-around',
-    width: '100%',
-    rowGap: 6,
-  },
-  dayCellEmpty: {
-    width: 34,
-    height: 34,
-  },
-  dayCellBase: {
-    width: 34,
-    height: 34,
-    borderRadius: 8,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  dayCellCompleted: {
-    backgroundColor: '#582CDB',
-    borderColor: '#4C1D95',
-  },
-  dayCellScheduled: {
-    backgroundColor: '#FEF9C3',
-    borderColor: '#FDE047',
-  },
-  dayCellFreeze: {
-    backgroundColor: '#E0F2FE',
-    borderColor: '#7DD3FC',
-  },
-  dayCellTodayPro: {
-    borderWidth: 2,
-    borderColor: '#F59E0B',
-    backgroundColor: '#582CDB',
-  },
-  dayCellNumber: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#334155',
-  },
-  dayCellNumberCompleted: {
     color: '#FFFFFF',
-    fontWeight: '900',
+    letterSpacing: 0.4,
   },
-  dayCellNumberScheduled: {
-    color: '#B45309',
-    fontWeight: '900',
-  },
-  dayCellNumberFreeze: {
-    color: '#0369A1',
-    fontWeight: '900',
-  },
-  dayCellCheckIcon: {
-    fontSize: 8,
-    color: '#FFFFFF',
-    fontWeight: '900',
-    position: 'absolute',
-    bottom: 2,
-  },
-  dayCellScheduledIcon: {
-    fontSize: 7.5,
-    position: 'absolute',
-    bottom: 2,
-  },
-  dayCellFreezeIcon: {
-    fontSize: 7,
-    position: 'absolute',
-    bottom: 2,
-  },
-  legendContainer: {
+  calendarDayNamesRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    marginBottom: 6,
     paddingHorizontal: 6,
-    marginBottom: 12,
+  },
+  calendarDayNameText: {
+    width: '14.28%',
+    fontSize: sFont(10),
+    fontWeight: '700',
+    color: '#64748B',
+    textAlign: 'center',
+  },
+  monthPageCard: {
+    paddingHorizontal: 6,
+    overflow: 'hidden',
+  },
+  calendarMonthGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-start',
+    rowGap: 4,
+  },
+  calendarCell: {
+    width: '13.4%',
+    height: sPadding(36),
+    borderRadius: 9,
+    backgroundColor: 'rgba(250, 248, 255, 0.8)',
+    borderWidth: 1,
+    borderColor: 'rgba(237, 232, 252, 0.85)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: '0.44%',
+  },
+  calendarCellEmpty: {
+    width: '13.4%',
+    height: sPadding(36),
+    marginHorizontal: '0.44%',
+  },
+  calendarCellCompleted: {
+    backgroundColor: '#582CDB',
+    borderColor: '#582CDB',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  calendarCellScheduled: {
+    backgroundColor: '#FEF9C3',
+    borderColor: '#FDE68A',
+  },
+  calendarCellFreeze: {
+    backgroundColor: '#E0F2FE',
+    borderColor: '#BAE6FD',
+  },
+  calendarCellToday: {
+    borderWidth: 2,
+    borderColor: '#5B3EE8',
+    backgroundColor: '#FEF2F2',
+  },
+  calendarCellPressed: {
+    transform: [{ scale: 0.92 }],
+  },
+  calendarCellDayNumber: {
+    fontSize: sFont(11),
+    fontWeight: '700',
+    color: '#171420',
+  },
+  calendarCellTextCompleted: {
+    color: '#FFFFFF',
+  },
+  calendarCellTextScheduled: {
+    color: '#B45309',
+  },
+  calendarCellTextFreeze: {
+    color: '#0284C7',
+  },
+  calendarCellTextToday: {
+    color: '#5B3EE8',
+    fontWeight: '800',
+  },
+  cellMiniIcon: {
+    fontSize: 8,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    marginTop: 1,
+  },
+  cellMiniIconScheduled: {
+    fontSize: 7.5,
+    marginTop: 1,
+  },
+  cellMiniIconFreeze: {
+    fontSize: 7,
+    marginTop: 1,
+  },
+  dayCellTodayDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+    backgroundColor: '#5B3EE8',
+    position: 'absolute',
+    bottom: 2,
+  },
+  calendarLegendBox: {
+    backgroundColor: 'rgba(250, 248, 255, 0.75)',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(235, 230, 248, 0.85)',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    marginBottom: 10,
+  },
+  legendItemsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    rowGap: 6,
   },
   legendItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    width: '48%',
+    gap: 6,
   },
   legendDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 3.5,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    flexShrink: 0,
   },
   legendLabel: {
-    fontSize: 9.5,
-    color: '#64748B',
-    fontWeight: '700',
+    fontSize: sFont(10),
+    fontWeight: '600',
+    color: '#5E576E',
+  },
+  donePrimaryBtn: {
+    backgroundColor: '#582CDB',
+    borderRadius: 14,
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  donePrimaryBtnText: {
+    fontSize: sFont(13.5),
+    fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: 0.2,
   },
 
   // COMMON MODALS
@@ -2748,10 +3297,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginBottom: 14,
+    width: '100%',
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   modalSubtitle: {
@@ -2766,11 +3316,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#F1F5F9',
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 0,
   },
   modalCloseCross: {
     fontSize: 12,
     color: '#64748B',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   modalFullBtn: {
     backgroundColor: '#582CDB',
@@ -2782,11 +3333,11 @@ const styles = StyleSheet.create({
   modalFullBtnText: {
     color: '#FFFFFF',
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   inputSectionHeader: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.5,
     marginTop: 8,
@@ -2798,7 +3349,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8FAFC',
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
   },
   voiceToneChipActive: {
     backgroundColor: '#EDE9FE',
@@ -2811,12 +3362,12 @@ const styles = StyleSheet.create({
   },
   voiceToneChipTextActive: {
     color: '#582CDB',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   voiceTextInput: {
     backgroundColor: '#F8FAFC',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     borderRadius: 12,
     padding: 12,
     fontSize: 13,
@@ -2868,12 +3419,12 @@ const styles = StyleSheet.create({
   },
   heroLevelNumberText: {
     fontSize: 20,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
   heroLevelTitle: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
   heroLevelSub: {
@@ -2884,7 +3435,7 @@ const styles = StyleSheet.create({
   },
   heroXpCurrentText: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FDE68A',
   },
   heroXpTargetText: {
@@ -2903,14 +3454,14 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   heroXpRemainingSub: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#E9D5FF',
     marginTop: 6,
     fontWeight: '600',
   },
   modalSubheadingTitle: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.5,
   },
@@ -2931,7 +3482,7 @@ const styles = StyleSheet.create({
   },
   badgeShowcaseName: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     textAlign: 'center',
   },
@@ -2941,25 +3492,37 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 2,
   },
+  deliverableIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: '#FAF5FF',
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+    flexShrink: 0,
+  },
   xpActivityRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     backgroundColor: '#FAF8F5',
-    borderRadius: 12,
-    padding: 10,
+    borderRadius: 14,
+    padding: 12,
     borderWidth: 1,
     borderColor: '#EFECE6',
   },
   xpActivityTitle: {
-    fontSize: 12,
+    fontSize: sFont(12.5),
     fontWeight: '800',
     color: '#171420',
   },
   xpActivityTime: {
-    fontSize: 10,
-    color: '#94A3B8',
-    marginTop: 1,
+    fontSize: sFont(11),
+    color: '#64748B',
+    marginTop: 2,
+    lineHeight: 15,
   },
   xpActivityBadge: {
     backgroundColor: '#EDE9FE',
@@ -2969,11 +3532,11 @@ const styles = StyleSheet.create({
   },
   xpActivityBadgeText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   nextLevelPreviewBox: {
-    backgroundColor: '#FFFBEB',
+    backgroundColor: '#FEF3C7',
     borderRadius: 14,
     padding: 12,
     borderWidth: 1,
@@ -2982,13 +3545,13 @@ const styles = StyleSheet.create({
   },
   nextLevelPreviewTitle: {
     fontSize: 11,
-    fontWeight: '900',
-    color: '#92400E',
+    fontWeight: '700',
+    color: '#B45309',
     marginBottom: 4,
   },
   nextLevelPreviewBody: {
     fontSize: 11,
-    color: '#78350F',
+    color: '#B45309',
     lineHeight: 16,
     fontWeight: '600',
   },
@@ -2998,12 +3561,13 @@ const styles = StyleSheet.create({
     marginTop: 8,
     shadowColor: '#F59E0B',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.12,
     shadowRadius: 8,
     elevation: 4,
   },
   modalGoldBtnGradient: {
     paddingVertical: 13,
+    paddingHorizontal: 12,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 14,
@@ -3012,22 +3576,26 @@ const styles = StyleSheet.create({
   },
   modalGoldActionBtnText: {
     color: '#0C0A12',
-    fontSize: 13.5,
-    fontWeight: '900',
+    fontSize: sFont(13),
+    fontWeight: '700',
+    textAlign: 'center',
   },
   modalSecondaryOutlineBtn: {
     backgroundColor: '#FAF8F5',
     borderWidth: 1.5,
     borderColor: '#DDD6FE',
     paddingVertical: 12,
+    paddingHorizontal: 12,
     borderRadius: 14,
     alignItems: 'center',
+    justifyContent: 'center',
     marginTop: 8,
   },
   modalSecondaryOutlineBtnText: {
     color: '#582CDB',
-    fontSize: 13,
-    fontWeight: '900',
+    fontSize: sFont(13),
+    fontWeight: '700',
+    textAlign: 'center',
   },
   modalCancelBtn: {
     paddingVertical: 10,
@@ -3055,7 +3623,7 @@ const styles = StyleSheet.create({
   toastText: {
     color: '#FFFFFF',
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.2,
   },
 });

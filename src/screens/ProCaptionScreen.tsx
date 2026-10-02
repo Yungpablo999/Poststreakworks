@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   StyleSheet,
   View,
-  Text,
   ScrollView,
   Pressable,
   Platform,
@@ -12,8 +11,9 @@ import {
   Dimensions,
   SafeAreaView,
   StatusBar,
-  TextInput,
 } from 'react-native';
+import { Text, TextInput } from '../components/ui/AppText';
+import { BrandLogo } from '../components/BrandLogo';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
@@ -23,15 +23,95 @@ import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { BrandToast } from '../components/BrandToast';
 import { TinyGoldCheck } from '../components/CreatorStoryModal';
 import { SocialBrandIcon } from '../components/SocialBrandIcon';
+import { sFont } from '../utils/responsive';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+interface PlatformVariation {
+  id: string;
+  tabLabel: string;
+  name: string;
+  icon: 'tiktok' | 'instagram' | 'youtube';
+  badge: string;
+  caption: string;
+  charCount: number;
+  targetLength: string;
+  specs: string[];
+  tone: string;
+  ctaStrategy: string;
+  optimizationScore: {
+    score: number;
+    label: string;
+  };
+  keyAdvantage: string;
+  editingPlatformName: string;
+}
+
+const PLATFORM_VARIATIONS: PlatformVariation[] = [
+  {
+    id: 'tiktok',
+    tabLabel: 'TikTok',
+    name: 'TikTok',
+    icon: 'tiktok',
+    badge: 'SHORT, DIRECT',
+    caption: '3 creator mistakes slowing you down. System > Ideas. Which one is yours? 👇',
+    charCount: 79,
+    targetLength: 'Recommended: <80 chars',
+    specs: ['⚡ Punchy Hook', '💬 High Comments', '⏱️ Recommended: <80 chars'],
+    tone: 'Direct & Punchy',
+    ctaStrategy: 'Comment Spike: "Which one is yours? 👇"',
+    optimizationScore: {
+      score: 94,
+      label: 'Retention Hook',
+    },
+    keyAdvantage: 'Designed to stop fast swipes and encourage comments.',
+    editingPlatformName: 'TikTok',
+  },
+  {
+    id: 'instagram',
+    tabLabel: 'Instagram',
+    name: 'Instagram Reel',
+    icon: 'instagram',
+    badge: 'REELS & CAROUSEL',
+    caption: '3 mistakes that stop creators from scaling. Save this for when you need a reminder to keep posting.',
+    charCount: 108,
+    targetLength: 'Recommended: <125 chars',
+    specs: ['📌 Bookmark Focused', '✨ Clean Spacing', '⏱️ Recommended: <125 chars'],
+    tone: 'Educational & Empowering',
+    ctaStrategy: 'Bookmark & Save: "Save this for when you need a reminder..."',
+    optimizationScore: {
+      score: 96,
+      label: 'Save Potential',
+    },
+    keyAdvantage: 'Designed to keep CTA visible above the fold to encourage saves and bookmarks.',
+    editingPlatformName: 'Instagram · Reel',
+  },
+  {
+    id: 'youtube',
+    tabLabel: 'YouTube',
+    name: 'YouTube · Short',
+    icon: 'youtube',
+    badge: 'SHORTS & SEO',
+    caption: 'Why 90% of creators stay stuck (and the 3 habits that fix it). Full breakdown in comments.',
+    charCount: 98,
+    targetLength: 'Recommended: <100 chars',
+    specs: ['🔍 Search Optimized', '🎥 Click Intent', '⏱️ Recommended: <100 chars'],
+    tone: 'Analytical & High-Authority',
+    ctaStrategy: 'Comment Funnel: "Full breakdown in comments"',
+    optimizationScore: {
+      score: 91,
+      label: 'Search & Click Intent',
+    },
+    keyAdvantage: 'Designed to align with search intent and direct viewers to the comments.',
+    editingPlatformName: 'YouTube · Short',
+  },
+];
 
 interface ProCaptionScreenProps {
   ideaTitle?: string;
   onBack: () => void;
   onLogout?: () => void;
   onOpenSchedule?: () => void;
-  onOpenMessages?: () => void;
   onOpenJarvisPro?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onAddToPost?: (captionText: string, hashtags: string) => void;
@@ -46,7 +126,6 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
   onBack,
   onLogout,
   onOpenSchedule,
-  onOpenMessages,
   onOpenJarvisPro,
   onNavigateTab,
   onAddToPost,
@@ -60,6 +139,8 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [showHashtagModal, setShowHashtagModal] = useState(false);
+  const [showAllPlatformsModal, setShowAllPlatformsModal] = useState(false);
+  const [expandedPlatforms, setExpandedPlatforms] = useState<string[]>([]);
   const [newHashtagInput, setNewHashtagInput] = useState('');
   const [hashtagList, setHashtagList] = useState<string[]>([
     'creatorhabits',
@@ -82,12 +163,13 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
   ]);
 
   const [activePlatformCaptionIndex, setActivePlatformCaptionIndex] = useState(0);
-  const [activeEditingPlatform, setActiveEditingPlatform] = useState('Instagram Reel');
+  const [activeEditingPlatform, setActiveEditingPlatform] = useState('TikTok');
   const scrollViewRef = useRef<ScrollView>(null);
   const captionInputRef = useRef<TextInput>(null);
+  const touchStartX = useRef(0);
 
   const [mainCaption, setMainCaption] = useState(
-    '3 mistakes that slow down new creators: waiting for perfect ideas, posting too late, and ignoring what your audience already responds to. Start small, stay consistent, and improve as you go.'
+    '3 creator mistakes slowing you down. System > Ideas. Which one is yours? 👇'
   );
 
   const [selectedCTA, setSelectedCTA] = useState<string | null>(
@@ -149,17 +231,71 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
     }).start();
   };
 
+  const handleSelectPlatformIndex = (index: number, autoLoad = false) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setActivePlatformCaptionIndex(index);
+    const selected = PLATFORM_VARIATIONS[index];
+    if (autoLoad || selected.editingPlatformName === activeEditingPlatform) {
+      setMainCaption(selected.caption);
+      setActiveEditingPlatform(selected.editingPlatformName);
+      showToast(`✓ Loaded ${selected.name} Caption`);
+    }
+  };
+
+  const handlePrevPlatform = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    const newIdx = activePlatformCaptionIndex > 0 ? activePlatformCaptionIndex - 1 : PLATFORM_VARIATIONS.length - 1;
+    setActivePlatformCaptionIndex(newIdx);
+  };
+
+  const handleNextPlatform = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    const newIdx = activePlatformCaptionIndex < PLATFORM_VARIATIONS.length - 1 ? activePlatformCaptionIndex + 1 : 0;
+    setActivePlatformCaptionIndex(newIdx);
+  };
+
+  const handleCopyCaptionText = (textToCopy: string, platformLabel: string) => {
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    if (Platform.OS === 'web' && typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(textToCopy);
+    }
+    showToast(`📋 Copied ${platformLabel} caption!`);
+  };
+
   const handleEditPlatformCaption = (platformName: string, captionText: string) => {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
     setMainCaption(captionText);
     setActiveEditingPlatform(platformName);
+    const foundIdx = PLATFORM_VARIATIONS.findIndex((p) => p.editingPlatformName === platformName);
+    if (foundIdx !== -1) {
+      setActivePlatformCaptionIndex(foundIdx);
+    }
     scrollViewRef.current?.scrollTo({ y: 360, animated: true });
     setTimeout(() => {
       captionInputRef.current?.focus();
     }, 280);
-    showToast(`✏️ Editing ${platformName} caption in editor above`);
+    showToast(`✏️ Editing ${platformName} caption in editor below`);
+  };
+
+  const handleTogglePlatformExpanded = (platformId: string) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setExpandedPlatforms((prev) =>
+      prev.includes(platformId)
+        ? prev.filter((id) => id !== platformId)
+        : [...prev, platformId]
+    );
   };
 
   const handleAddHashtag = (tagToAdd?: string) => {
@@ -204,12 +340,13 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     if (selectedTones.includes(tone)) {
-      if (selectedTones.length > 1) {
-        setSelectedTones(selectedTones.filter((t) => t !== tone));
-      } else {
-        showToast('At least 1 tone must remain selected');
-      }
+      setSelectedTones(selectedTones.filter((t) => t !== tone));
+      showToast(`Removed ${tone} tone`);
     } else {
+      if (selectedTones.length >= 3) {
+        showToast('Choose up to 3 tones');
+        return;
+      }
       setSelectedTones([...selectedTones, tone]);
       showToast(`✓ Added ${tone} tone`);
     }
@@ -219,28 +356,33 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-    if (modifier === 'Make Shorter') {
+    if (modifier === 'Shorten' || modifier === 'Make Shorter') {
       setMainCaption(
         '3 creator mistakes: waiting for perfection, late posting, ignoring data. Start small, stay consistent, iterate.'
       );
       showToast('✂️ Trimmed caption to 110 characters');
-    } else if (modifier === 'Make More Personal') {
+    } else if (modifier === 'Personalize' || modifier === 'Make More Personal') {
       setMainCaption(
         'I spent my first 6 months making 3 big mistakes: waiting for "perfect" ideas, posting at random times, and ignoring the comments. Everything changed when I built a simple system.'
       );
       showToast('👤 Injected personal creator story');
-    } else if (modifier === 'Add Stronger CTA') {
+    } else if (modifier === 'Strong CTA' || modifier === 'Add Stronger CTA') {
       setMainCaption(
         `${mainCaption}\n\n👉 Which of these 3 is your biggest roadblock today? Drop 1, 2, or 3 below.`
       );
       showToast('💬 Added high-converting comment CTA');
-    } else if (modifier === 'Platform-Specific') {
+    } else if (modifier === 'Platform Sync' || modifier === 'Platform-Specific') {
       showToast('📱 Optimized formatting for 9:16 Reels');
-    } else if (modifier === 'Improve First Line') {
+    } else if (modifier === 'Improve Hook' || modifier === 'Improve First Line') {
       setMainCaption(
         'Stop waiting for perfect ideas—it is costing you 10,000 views. Here are the 3 mistakes slowing you down and how to fix them today.'
       );
       showToast('✨ Boosted hook strength to 94%');
+    } else if (modifier === 'Viral Spark') {
+      setMainCaption(
+        'Most creators fail for one reason: they rely on motivation instead of discipline. Here are the 3 non-negotiables that changed everything.'
+      );
+      showToast('🔥 Injected viral creator energy');
     }
   };
 
@@ -248,12 +390,56 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
+
+    const allCtaChoices = [
+      'Which mistake slows you down the most?',
+      'Save this for your next planning session.',
+      'Send this to a creator starting out.',
+      'Follow for daily creator systems & growth breakdowns.',
+      'Which one is yours? 👇',
+      'Which one slows you down the most? 👇',
+      'Which one are you guilty of? 👇',
+      'Which one is slowing you down the most? Let me know below.',
+      'Save this for when you need a reminder to keep posting.',
+      'Save this for your next filming day.',
+      'Full breakdown in comments.',
+      'Full breakdown in comments ⬇️',
+    ];
+
     if (selectedCTA === ctaText) {
+      // DESELECT: Remove current CTA from caption
       setSelectedCTA(null);
+      let newCaption = mainCaption;
+      if (newCaption.includes(ctaText)) {
+        newCaption = newCaption.replace(ctaText, '').trim();
+        newCaption = newCaption.replace(/\n\s*\n\s*$/, '').trim();
+      }
+      setMainCaption(newCaption);
       showToast('Unselected CTA');
     } else {
+      // SELECT: Replace previous CTA or append new CTA
+      const prevCTA = selectedCTA;
       setSelectedCTA(ctaText);
-      showToast(`✓ Applied CTA: "${ctaText.slice(0, 28)}..."`);
+
+      let newCaption = mainCaption;
+      if (prevCTA && newCaption.includes(prevCTA)) {
+        newCaption = newCaption.replace(prevCTA, ctaText);
+      } else {
+        let replaced = false;
+        for (const known of allCtaChoices) {
+          if (newCaption.includes(known)) {
+            newCaption = newCaption.replace(known, ctaText);
+            replaced = true;
+            break;
+          }
+        }
+        if (!replaced) {
+          newCaption = `${newCaption.trim()}\n\n${ctaText}`;
+        }
+      }
+
+      setMainCaption(newCaption);
+      showToast(`✓ Applied CTA: "${ctaText.slice(0, 26)}..."`);
     }
   };
 
@@ -267,9 +453,9 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
     setCompletionData({
       title: 'Jarvis Recommendation Applied!',
       subtitle: `Caption hook, high-converting CTA & structure calibrated for 94% retention.`,
-      badgeText: '✨ JARVIS AI OPTIMIZED (+50 XP)',
+      badgeText: '✨ JARVIS OPTIMIZED (+50 XP)',
       xpEarned: 50,
-      speechBubble: 'AI calibration complete, Pablo! First 80 characters fit above the fold perfectly! 🚀',
+      speechBubble: 'Jarvis calibration complete, Pablo! First 80 characters fit above the fold perfectly! 🚀',
     });
     setShowCompletionModal(true);
   };
@@ -363,18 +549,7 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
             </Pressable>
 
             {/* Mascot */}
-            <Animated.View
-              style={[
-                styles.headerLogoWrapper,
-                { transform: [{ translateY: flameFloatY }] },
-              ]}
-            >
-              <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerGhostLogo}
-                resizeMode="contain"
-              />
-            </Animated.View>
+            <BrandLogo size="sm" />
 
             {/* Pro Badge Pill */}
             <Pressable
@@ -391,37 +566,18 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
               hitSlop={8}
             >
               <LinearGradient
-                colors={['#FDE68A', '#F59E0B', '#D97706']}
+                colors={['#F59E0B', '#F59E0B', '#F59E0B']}
                 start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
+                end={{ x: 1, y: 0 }}
                 style={styles.proHeaderBadge}
               >
-                <Text style={styles.proHeaderBadgeText}>🔥 PRO</Text>
+                <Text style={styles.proHeaderBadgeText}>👑 PRO</Text>
               </LinearGradient>
             </Pressable>
           </View>
 
           {/* Right Header */}
           <View style={styles.headerRightGroup}>
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                if (onOpenMessages) onOpenMessages();
-                else if (onNavigateTab) onNavigateTab('match');
-              }}
-            >
-              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-            </Pressable>
-
             <Pressable
               style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
               hitSlop={8}
@@ -458,11 +614,36 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
               style={styles.profileAvatarWrapper}
               hitSlop={8}
             >
-              <Image
-                source={userProfile?.avatarSource || require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerUserAvatar}
-                resizeMode="cover"
-              />
+              {userProfile?.customAvatarUri ? (
+                <Image
+                  source={{ uri: userProfile.customAvatarUri }}
+                  style={styles.headerUserAvatar}
+                  resizeMode="cover"
+                />
+              ) : (userProfile?.avatarSource && userProfile.avatarId && userProfile.avatarId !== 'ghost') ? (
+                <Image
+                  source={userProfile.avatarSource}
+                  style={styles.headerUserAvatar}
+                  resizeMode="cover"
+                />
+              ) : (
+                <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
+                  <Path
+                    d="M20 21V19C20 17.9 19.5 16.9 18.7 16.2C17.9 15.5 16.9 15 15.8 15H8.2C7.1 15 6.1 15.5 5.3 16.2C4.5 16.9 4 17.9 4 19V21"
+                    stroke="#F59E0B"
+                    strokeWidth="2.3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <Circle
+                    cx="12"
+                    cy="7"
+                    r="4"
+                    stroke="#F59E0B"
+                    strokeWidth="2.3"
+                  />
+                </Svg>
+              )}
               <View style={styles.avatarTinyGoldCheckPos}>
                 <TinyGoldCheck size={14} />
               </View>
@@ -483,7 +664,12 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
               <Text style={styles.goldScriptBadgeText}>PRO CAPTION WRITER</Text>
             </View>
 
-            <Text style={styles.mainTitleText}>Write captions for every platform.</Text>
+            <Text
+              style={styles.mainTitleText}
+              numberOfLines={2}
+            >
+              Write captions for every platform.
+            </Text>
             <Text style={styles.mainSubText}>
               Create platform-specific captions, CTAs and hashtag sets designed for engagement.
             </Text>
@@ -522,7 +708,7 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
               Selected Idea: &ldquo;{currentIdeaTitle}&rdquo;
             </Text>
             <Text style={styles.sourceIdeaDesc}>
-              Context: short-form creator advice post about consistency and system building for long-term growth.
+              About this idea: short-form creator advice post about consistency and system building for long-term growth.
             </Text>
           </View>
 
@@ -531,67 +717,274 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
           {/* ============================================================ */}
           <View style={styles.toneSectionCard}>
             <View style={styles.toneCardHeaderRow}>
-              <View>
+              <View style={{ flex: 1, minWidth: 0, marginRight: 8 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                   <Text style={{ fontSize: 14 }}>🎭</Text>
-                  <Text style={styles.sectionHeaderTitle}>Caption Tone</Text>
+                  <Text style={styles.sectionHeaderTitle} numberOfLines={1}>Caption Tone</Text>
                 </View>
-                <Text style={styles.toneSubHint}>Select voice style for AI phrasing &amp; cadence</Text>
+                <Text style={styles.toneSubHint} numberOfLines={1}>Select 1–3 voice styles for Jarvis phrasing</Text>
               </View>
               <View style={styles.toneActiveCounterBadge}>
-                <Text style={styles.toneActiveCounterText}>{selectedTones.length} SELECTED</Text>
+                <Text style={styles.toneActiveCounterText} numberOfLines={1}>{selectedTones.length} OF 3 SELECTED</Text>
               </View>
             </View>
 
-            <View style={styles.toneChipsFlexGrid}>
+            <View style={{ gap: 6 }}>
               {[
-                { name: 'Helpful', emoji: '🤝' },
-                { name: 'Direct', emoji: '🎯' },
-                { name: 'Confident', emoji: '⚡' },
-                { name: 'Honest', emoji: '💡' },
-                { name: 'Motivational', emoji: '🔥' },
-                { name: 'Professional', emoji: '💼' },
-                { name: 'Bold', emoji: '💥' },
-                { name: 'Casual', emoji: '☕' },
-                { name: 'Story-driven', emoji: '📖' },
-              ].map((toneObj) => {
-                const isSelected = selectedTones.includes(toneObj.name);
-                return (
-                  <Pressable
-                    key={toneObj.name}
-                    style={({ pressed }) => [
-                      styles.toneChipPill,
-                      isSelected && styles.toneChipPillActive,
-                      pressed && styles.btnPressed,
-                    ]}
-                    onPress={() => handleToggleTone(toneObj.name)}
-                  >
-                    <Text style={{ fontSize: 12, marginRight: 4 }}>{toneObj.emoji}</Text>
-                    <Text
-                      style={[
-                        styles.toneChipText,
-                        isSelected && styles.toneChipTextActive,
-                      ]}
-                    >
-                      {toneObj.name}
-                    </Text>
-                    {isSelected && (
-                      <View style={styles.toneCheckMarkDot}>
-                        <Svg width={7} height={7} viewBox="0 0 12 12" fill="none">
-                          <Path d="M2.5 6.2L4.8 8.5L9.5 3.5" stroke="#FFFFFF" strokeWidth="2.8" strokeLinecap="round" />
-                        </Svg>
-                      </View>
-                    )}
-                  </Pressable>
-                );
-              })}
+                [
+                  { name: 'Helpful', emoji: '🤝' },
+                  { name: 'Direct', emoji: '🎯' },
+                  { name: 'Confident', emoji: '⚡' },
+                ],
+                [
+                  { name: 'Honest', emoji: '💡' },
+                  { name: 'Inspiring', emoji: '🔥' },
+                  { name: 'Expert', emoji: '💼' },
+                ],
+                [
+                  { name: 'Bold', emoji: '💥' },
+                  { name: 'Casual', emoji: '☕' },
+                  { name: 'Story', emoji: '📖' },
+                ],
+              ].map((row, rIdx) => (
+                <View key={rIdx} style={{ flexDirection: 'row', gap: 6 }}>
+                  {row.map((toneObj) => {
+                    const isSelected = selectedTones.includes(toneObj.name);
+                    return (
+                      <Pressable
+                        key={toneObj.name}
+                        style={({ pressed }) => [
+                          styles.toneChipPill,
+                          isSelected && styles.toneChipPillActive,
+                          pressed && styles.btnPressed,
+                        ]}
+                        onPress={() => handleToggleTone(toneObj.name)}
+                        accessibilityRole="button"
+                        accessibilityLabel={`${toneObj.name} tone, ${isSelected ? 'selected' : 'unselected'}`}
+                      >
+                        <Text style={{ fontSize: 12 }}>{toneObj.emoji}</Text>
+                        <Text
+                          style={[
+                            styles.toneChipText,
+                            isSelected && styles.toneChipTextActive,
+                          ]}
+                          numberOfLines={1}
+                        >
+                          {toneObj.name}
+                        </Text>
+                        {isSelected && (
+                          <View style={styles.toneCheckMarkDot}>
+                            <Svg width={5.5} height={5.5} viewBox="0 0 12 12" fill="none">
+                              <Path d="M2.5 6.2L4.8 8.5L9.5 3.5" stroke="#FFFFFF" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
+                            </Svg>
+                          </View>
+                        )}
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              ))}
             </View>
           </View>
 
           {/* ============================================================ */}
-          {/* CARD 3: SELECTED CAPTION (Instagram Reel)                    */}
+          {/* CARD 3: PLATFORM CAPTIONS (Full-Width Card + Segmented Tabs) */}
           {/* ============================================================ */}
           <View style={{ marginTop: 22 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <Text style={{ fontSize: 13 }}>📱</Text>
+                <Text style={styles.sectionHeaderTitle}>Platform Captions</Text>
+              </View>
+              <Pressable
+                style={({ pressed }) => [styles.compareAllFormatsBtn, pressed && styles.btnPressed]}
+                onPress={() => {
+                  triggerModalPop();
+                  setShowAllPlatformsModal(true);
+                }}
+                hitSlop={6}
+              >
+                <Text style={styles.compareAllFormatsBtnText}>📑 Compare All (3)</Text>
+              </Pressable>
+            </View>
+            <Text style={[styles.toneSubHint, { marginBottom: 10 }]}>
+              Tap tabs or swipe to switch platform format
+            </Text>
+
+            {/* Segmented Platform Tabs Bar */}
+            <View style={styles.platformTabsContainer}>
+              {PLATFORM_VARIATIONS.map((plat, idx) => {
+                const isSelected = activePlatformCaptionIndex === idx;
+                const isEditing = activeEditingPlatform === plat.editingPlatformName;
+                return (
+                  <Pressable
+                    key={plat.id}
+                    style={({ pressed }) => [
+                      styles.platformTabItem,
+                      isSelected && styles.platformTabItemActive,
+                      pressed && styles.btnPressed,
+                    ]}
+                    onPress={() => handleSelectPlatformIndex(idx)}
+                  >
+                    <SocialBrandIcon platform={plat.icon} size={13.5} />
+                    <Text
+                      style={[
+                        styles.platformTabText,
+                        isSelected && styles.platformTabTextActive,
+                      ]}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.8}
+                    >
+                      {plat.tabLabel}
+                    </Text>
+                    {isEditing && <View style={styles.tabEditingDot} />}
+                  </Pressable>
+                );
+              })}
+            </View>
+
+            {/* Full-Width Platform Hero Card (Zero Cutoff) */}
+            {(() => {
+              const currentPlat = PLATFORM_VARIATIONS[activePlatformCaptionIndex];
+              const isCurrentlyEditing = activeEditingPlatform === currentPlat.editingPlatformName;
+
+              return (
+                <View
+                  style={[
+                    styles.platformHeroCard,
+                    isCurrentlyEditing && styles.platformHeroCardActive,
+                  ]}
+                  onTouchStart={(e) => {
+                    touchStartX.current = e.nativeEvent.pageX;
+                  }}
+                  onTouchEnd={(e) => {
+                    const dx = e.nativeEvent.pageX - touchStartX.current;
+                    if (dx < -45) {
+                      handleNextPlatform();
+                    } else if (dx > 45) {
+                      handlePrevPlatform();
+                    }
+                  }}
+                >
+                  {/* Card Header */}
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                      <SocialBrandIcon platform={currentPlat.icon} size={20} />
+                      <View>
+                        <Text style={styles.platformHeroTitle}>{currentPlat.name}</Text>
+                        <Text style={styles.platformHeroFormat}>{currentPlat.badge}</Text>
+                      </View>
+                    </View>
+
+                    {isCurrentlyEditing ? (
+                      <View style={styles.activeEditingPill}>
+                        <Text style={styles.activeEditingPillText}>EDITING IN LIVE EDITOR ✓</Text>
+                      </View>
+                    ) : (
+                      <Pressable
+                        style={styles.loadToEditorQuickBtn}
+                        onPress={() => handleEditPlatformCaption(currentPlat.editingPlatformName, currentPlat.caption)}
+                      >
+                        <Text style={styles.loadToEditorQuickBtnText}>Load into Editor ⚡</Text>
+                      </Pressable>
+                    )}
+                  </View>
+
+                  {/* Full Caption Quote Box */}
+                  <View style={styles.platformHeroQuoteBox}>
+                    <Text style={styles.platformHeroQuoteText}>
+                      &ldquo;{currentPlat.caption}&rdquo;
+                    </Text>
+                  </View>
+
+                  {/* Specs & Performance Badges */}
+                  <View style={styles.platformSpecsRow}>
+                    {currentPlat.specs.map((spec, sIdx) => (
+                      <View key={sIdx} style={styles.platformSpecPill}>
+                        <Text style={styles.platformSpecPillText}>{spec}</Text>
+                      </View>
+                    ))}
+                    <View style={[styles.platformSpecPill, styles.platformCharCountPill]}>
+                      <Text style={styles.platformCharCountPillText}>
+                        {currentPlat.charCount} chars ✓
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* Primary Actions Row */}
+                  <View style={styles.platformHeroActionsRow}>
+                    <Pressable
+                      style={({ pressed }) => [
+                        styles.platformHeroPrimaryBtn,
+                        isCurrentlyEditing && styles.platformHeroPrimaryBtnActive,
+                        pressed && styles.btnPressed,
+                      ]}
+                      onPress={() => handleEditPlatformCaption(currentPlat.editingPlatformName, currentPlat.caption)}
+                    >
+                      <Text style={styles.platformHeroPrimaryBtnText}>
+                        {isCurrentlyEditing ? '✓ Active in Live Editor' : '✏️ Edit in Live Editor'}
+                      </Text>
+                    </Pressable>
+
+                    <Pressable
+                      style={({ pressed }) => [
+                        styles.platformHeroSecondaryBtn,
+                        pressed && styles.btnPressed,
+                      ]}
+                      onPress={() => handleCopyCaptionText(currentPlat.caption, currentPlat.name)}
+                    >
+                      <Text style={styles.platformHeroSecondaryBtnText}>📋 Copy</Text>
+                    </Pressable>
+                  </View>
+
+                  {/* Paging & Swipe Controls */}
+                  <View style={styles.platformPagingRow}>
+                    <Pressable
+                      style={styles.platformPageNavBtn}
+                      onPress={handlePrevPlatform}
+                      hitSlop={8}
+                    >
+                      <Text style={styles.platformPageNavBtnText}>‹ Prev</Text>
+                    </Pressable>
+
+                    <View style={styles.platformDotsContainer}>
+                      {PLATFORM_VARIATIONS.map((_, dotIdx) => (
+                        <Pressable
+                          key={dotIdx}
+                          onPress={() => handleSelectPlatformIndex(dotIdx)}
+                          hitSlop={6}
+                        >
+                          <View
+                            style={[
+                              styles.platformPagingDot,
+                              activePlatformCaptionIndex === dotIdx && styles.platformPagingDotActive,
+                            ]}
+                          />
+                        </Pressable>
+                      ))}
+                      <Text style={styles.platformPageCountText}>
+                        {activePlatformCaptionIndex + 1} of {PLATFORM_VARIATIONS.length}
+                      </Text>
+                    </View>
+
+                    <Pressable
+                      style={styles.platformPageNavBtn}
+                      onPress={handleNextPlatform}
+                      hitSlop={8}
+                    >
+                      <Text style={styles.platformPageNavBtnText}>Next ›</Text>
+                    </Pressable>
+                  </View>
+                </View>
+              );
+            })()}
+          </View>
+
+          {/* ============================================================ */}
+          {/* CARD 4: SELECTED CAPTION EDITOR                              */}
+          {/* ============================================================ */}
+          <View style={{ marginTop: 24 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 }}>
               <Text style={{ fontSize: 13 }}>📝</Text>
               <Text style={styles.sectionHeaderTitle}>Selected Caption ({activeEditingPlatform})</Text>
@@ -608,171 +1001,102 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
                   placeholder="Your caption text..."
                   placeholderTextColor="#94A3B8"
                 />
-                <View style={styles.charsCounterPill}>
-                  <Text style={styles.charsCounterText}>{mainCaption.length} chars</Text>
+                <View style={styles.captionInputFooterRow}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                    <Text style={styles.captionInputFooterHint}>Jarvis Generated</Text>
+                    <Text style={{ fontSize: 9.5, color: '#CBD5E1' }}>·</Text>
+                    <Text style={styles.captionInputEditActionHint}>✏️ Tap to edit</Text>
+                  </View>
+                  <View style={styles.charsCounterPill}>
+                    <Text style={styles.charsCounterText}>{mainCaption.length} chars</Text>
+                  </View>
                 </View>
               </View>
 
-              {/* Tri-Metrics Container */}
-              <View style={styles.captionMetricsRow}>
-                <View style={styles.captionMetricBox}>
-                  <Text style={styles.captionMetricHeader}>TONE</Text>
-                  <Text style={styles.captionMetricVal} numberOfLines={1}>
-                    {selectedTones.slice(0, 2).join(', ')}
-                  </Text>
+              {/* Live Editor Quality & Tone Bar (Spacious Layout - Zero Truncation) */}
+              <View style={styles.captionMetaSection}>
+                {/* Tone Pill Strip */}
+                <View style={styles.captionToneRow}>
+                  <Text style={styles.captionToneLabel}>TONE</Text>
+                  <View style={styles.captionTonePillsContainer}>
+                    {selectedTones.length > 0 ? (
+                      selectedTones.map((tone) => (
+                        <View key={tone} style={styles.captionTonePill}>
+                          <Text style={styles.captionTonePillText}>{tone}</Text>
+                        </View>
+                      ))
+                    ) : (
+                      <View style={styles.captionTonePill}>
+                        <Text style={styles.captionTonePillText}>Natural</Text>
+                      </View>
+                    )}
+                  </View>
                 </View>
 
-                <View style={styles.captionMetricBox}>
-                  <Text style={styles.captionMetricHeader}>SAVE POTENTIAL</Text>
-                  <Text style={[styles.captionMetricVal, { color: '#15803D' }]}>High</Text>
-                </View>
+                {/* 2 Equal Metric Cards */}
+                <View style={styles.captionMetricsRow}>
+                  <View style={styles.captionMetricBox}>
+                    <Text style={styles.captionMetricHeader}>SAVE POTENTIAL</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 }}>
+                      <Text style={[styles.captionMetricVal, { color: '#15803D' }]}>High</Text>
+                      <Text style={styles.captionMetricSubText}>• Top 10%</Text>
+                    </View>
+                  </View>
 
-                <View style={styles.captionMetricBox}>
-                  <Text style={styles.captionMetricHeader}>FIRST 80 CHAR FIT</Text>
-                  <Text style={styles.captionMetricVal}>91%</Text>
+                  <View style={styles.captionMetricBox}>
+                    <Text style={styles.captionMetricHeader}>FIRST 80 CHAR FIT</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 }}>
+                      <Text style={styles.captionMetricVal}>91%</Text>
+                      <Text style={styles.captionMetricSubText}>• Above Fold</Text>
+                    </View>
+                  </View>
                 </View>
               </View>
 
-              {/* Action Modifiers Chips */}
-              <View style={styles.captionModifiersRow}>
-                {[
-                  'Make Shorter',
-                  'Make More Personal',
-                  'Add Stronger CTA',
-                  'Platform-Specific',
-                  'Improve First Line',
-                ].map((mod) => (
-                  <Pressable
-                    key={mod}
-                    style={styles.captionModifierChip}
-                    onPress={() => handleApplyModifier(mod)}
-                  >
-                    <Text style={styles.captionModifierChipText}>
-                      {mod === 'Make Shorter' ? '➕ ' : mod === 'Make More Personal' ? '👤 ' : mod === 'Add Stronger CTA' ? '💬 ' : mod === 'Platform-Specific' ? '📱 ' : '✨ '}
-                      {mod}
-                    </Text>
-                  </Pressable>
-                ))}
+              {/* Action Modifiers Grid - 3 Rows x 2 Columns */}
+              <View style={styles.captionModifiersSection}>
+                <Text style={styles.captionModifiersLabel}>QUICK JARVIS MODIFIERS</Text>
+                <View style={{ gap: 7, marginTop: 7 }}>
+                  {[
+                    [
+                      { id: 'Shorten', label: 'Shorten', emoji: '✂️' },
+                      { id: 'Personalize', label: 'Personalize', emoji: '👤' },
+                    ],
+                    [
+                      { id: 'Strong CTA', label: 'Strong CTA', emoji: '💬' },
+                      { id: 'Platform Sync', label: 'Platform Sync', emoji: '📱' },
+                    ],
+                    [
+                      { id: 'Improve Hook', label: 'Improve Hook', emoji: '✨' },
+                      { id: 'Viral Spark', label: 'Viral Spark', emoji: '🔥' },
+                    ],
+                  ].map((row, rIdx) => (
+                    <View key={rIdx} style={{ flexDirection: 'row', gap: 8 }}>
+                      {row.map((mod) => (
+                        <Pressable
+                          key={mod.id}
+                          style={({ pressed }) => [
+                            styles.captionModifierChip,
+                            pressed && styles.btnPressed,
+                          ]}
+                          onPress={() => handleApplyModifier(mod.id)}
+                        >
+                          <Text style={{ fontSize: 13 }}>{mod.emoji}</Text>
+                          <Text
+                            style={styles.captionModifierChipText}
+                            numberOfLines={1}
+                            adjustsFontSizeToFit
+                            minimumFontScale={0.85}
+                          >
+                            {mod.label}
+                          </Text>
+                        </Pressable>
+                      ))}
+                    </View>
+                  ))}
+                </View>
               </View>
             </View>
-          </View>
-
-          {/* ============================================================ */}
-          {/* CARD 4: PLATFORM CAPTIONS CAROUSEL                           */}
-          {/* ============================================================ */}
-          <View style={{ marginTop: 24 }}>
-            <Text style={styles.sectionHeaderTitle}>Platform Captions</Text>
-
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ gap: 12, marginTop: 10 }}
-            >
-              {/* TikTok Card */}
-              <View style={styles.platformCaptionDeckCard}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    <SocialBrandIcon platform="tiktok" size={18} />
-                    <Text style={styles.platDeckTitle}>TikTok</Text>
-                  </View>
-                  <View style={styles.platDeckBadge}>
-                    <Text style={styles.platDeckBadgeText}>SHORT, DIRECT</Text>
-                  </View>
-                </View>
-
-                <Text style={styles.platDeckBodyText}>
-                  3 creator mistakes slowing you down. System &gt; Ideas. Which one is yours? 👇
-                </Text>
-
-                <View style={styles.platDeckBtnRow}>
-                  <Pressable
-                    style={({ pressed }) => [styles.platDeckEditBtn, pressed && styles.btnPressed]}
-                    onPress={() => handleEditPlatformCaption('TikTok', '3 creator mistakes slowing you down. System > Ideas. Which one is yours? 👇')}
-                  >
-                    <Text style={styles.platDeckEditBtnText}>Edit</Text>
-                  </Pressable>
-                  <Pressable
-                    style={styles.platDeckUseBtn}
-                    onPress={() => {
-                      setMainCaption('3 creator mistakes slowing you down. System > Ideas. Which one is yours? 👇');
-                      showToast('✓ Loaded TikTok Caption');
-                    }}
-                  >
-                    <Text style={styles.platDeckUseBtnText}>Use</Text>
-                  </Pressable>
-                </View>
-              </View>
-
-              {/* Instagram Card */}
-              <View style={styles.platformCaptionDeckCard}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    <SocialBrandIcon platform="instagram" size={18} />
-                    <Text style={styles.platDeckTitle}>Instagram</Text>
-                  </View>
-                  <View style={styles.platDeckBadge}>
-                    <Text style={styles.platDeckBadgeText}>REELS &amp; CAROUSEL</Text>
-                  </View>
-                </View>
-
-                <Text style={styles.platDeckBodyText}>
-                  3 mistakes that stop creators from scaling. Save this for when you need a reminder to keep posting.
-                </Text>
-
-                <View style={styles.platDeckBtnRow}>
-                  <Pressable
-                    style={({ pressed }) => [styles.platDeckEditBtn, pressed && styles.btnPressed]}
-                    onPress={() => handleEditPlatformCaption('Instagram Reel', '3 mistakes that stop creators from scaling. Save this for when you need a reminder to keep posting.')}
-                  >
-                    <Text style={styles.platDeckEditBtnText}>Edit</Text>
-                  </Pressable>
-                  <Pressable
-                    style={styles.platDeckUseBtn}
-                    onPress={() => {
-                      setMainCaption('3 mistakes that stop creators from scaling. Save this for when you need a reminder to keep posting.');
-                      showToast('✓ Loaded Instagram Caption');
-                    }}
-                  >
-                    <Text style={styles.platDeckUseBtnText}>Use</Text>
-                  </Pressable>
-                </View>
-              </View>
-
-              {/* YouTube Shorts Card */}
-              <View style={styles.platformCaptionDeckCard}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    <SocialBrandIcon platform="youtube" size={18} />
-                    <Text style={styles.platDeckTitle}>YouTube</Text>
-                  </View>
-                  <View style={styles.platDeckBadge}>
-                    <Text style={styles.platDeckBadgeText}>SHORTS &amp; SEO</Text>
-                  </View>
-                </View>
-
-                <Text style={styles.platDeckBodyText}>
-                  Why 90% of creators stay stuck (and the 3 habits that fix it). Full breakdown in comments.
-                </Text>
-
-                <View style={styles.platDeckBtnRow}>
-                  <Pressable
-                    style={({ pressed }) => [styles.platDeckEditBtn, pressed && styles.btnPressed]}
-                    onPress={() => handleEditPlatformCaption('YouTube Shorts', 'Why 90% of creators stay stuck (and the 3 habits that fix it). Full breakdown in comments.')}
-                  >
-                    <Text style={styles.platDeckEditBtnText}>Edit</Text>
-                  </Pressable>
-                  <Pressable
-                    style={styles.platDeckUseBtn}
-                    onPress={() => {
-                      setMainCaption('Why 90% of creators stay stuck (and the 3 habits that fix it). Full breakdown in comments.');
-                      showToast('✓ Loaded YouTube Caption');
-                    }}
-                  >
-                    <Text style={styles.platDeckUseBtnText}>Use</Text>
-                  </Pressable>
-                </View>
-              </View>
-            </ScrollView>
           </View>
 
           {/* ============================================================ */}
@@ -825,7 +1149,7 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
             <View style={styles.insightCalloutBox}>
               <Text style={{ fontSize: 13, marginRight: 6 }}>💡</Text>
               <Text style={styles.insightCalloutText}>
-                The caption is clear and saveable, but the CTA can be slightly sharper for comments.
+                The caption is clear and engaging, but the CTA can be slightly sharper to drive more comments.
               </Text>
             </View>
           </View>
@@ -845,28 +1169,28 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
                   id: 'recommended',
                   type: 'COMMENT SPIKE',
                   text: 'Which mistake slows you down the most?',
-                  desc: 'Best for comment volume & algorithm conversation spikes.',
+                  desc: 'Best for encouraging comments & conversation.',
                   isRecommended: true,
                 },
                 {
                   id: 'save',
                   type: 'SAVE',
                   text: 'Save this for your next planning session.',
-                  desc: 'Drives bookmarks for long-term algorithmic recall.',
+                  desc: 'Best for bookmarks and long-term reference.',
                   isRecommended: false,
                 },
                 {
                   id: 'share',
                   type: 'SHARE',
                   text: 'Send this to a creator starting out.',
-                  desc: 'Boosts DM shares & viral loop expansion.',
+                  desc: 'Best for encouraging shares and reaching new viewers.',
                   isRecommended: false,
                 },
                 {
                   id: 'follow',
                   type: 'FOLLOW',
                   text: 'Follow for daily creator systems & growth breakdowns.',
-                  desc: 'Direct acquisition hook for new followers.',
+                  desc: 'Best for attracting and growing new followers.',
                   isRecommended: false,
                 },
               ].map((cta) => {
@@ -977,9 +1301,9 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
             <View style={{ marginTop: 12, paddingTop: 10, borderTopWidth: 1, borderTopColor: '#F1EFE9' }}>
               <Text style={styles.streakLabel}>STREAK</Text>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 2 }}>
-                <Text style={styles.streakVal}>47 Days 🔥</Text>
+                <Text style={styles.streakVal}>{userProfile?.streakCount || 1} Day{userProfile?.streakCount === 1 ? '' : 's'} 🔥</Text>
                 <View style={styles.streakProtectedBadge}>
-                  <Text style={styles.streakProtectedBadgeText}>Always Protected</Text>
+                  <Text style={styles.streakProtectedBadgeText}>🛡️ Pro Streak Protected</Text>
                 </View>
               </View>
             </View>
@@ -998,14 +1322,14 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                 <View style={styles.jarvisHeroIconBox}>
                   <Image
-                    source={require('../../assets/images/jarvis-ghost-clean.png')}
+                    source={require('../../assets/images/jarvis-core-flame.png')}
                     style={{ width: 26, height: 26 }}
                     resizeMode="contain"
                   />
                 </View>
                 <View>
                   <Text style={styles.jarvisHeroTitle}>Jarvis Insight</Text>
-                  <Text style={styles.jarvisHeroSub}>PRO AI COACH</Text>
+                  <Text style={styles.jarvisHeroSub}>JARVIS PRO COACH</Text>
                 </View>
               </View>
               <View style={styles.jarvisActiveEnginePill}>
@@ -1036,7 +1360,7 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
               style={({ pressed }) => [styles.applyJarvisHeroBtn, pressed && styles.btnPressed]}
               onPress={handleApplyJarvisRecommendation}
             >
-              <Text style={styles.applyJarvisHeroBtnText}>✨ Apply Recommendation</Text>
+              <Text style={styles.applyJarvisHeroBtnText}>✨ Apply to Caption</Text>
             </Pressable>
           </LinearGradient>
 
@@ -1140,7 +1464,7 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderBetween}>
-                <View>
+                <View style={{ flex: 1, paddingRight: 8 }}>
                   <Text style={styles.modalTitle}>Hashtag Manager</Text>
                   <Text style={styles.modalSubTitle}>Add, remove, or customize hashtags</Text>
                 </View>
@@ -1170,7 +1494,7 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
 
               {/* Active Removable Hashtags */}
               <Text style={styles.modalSectionSubHeader}>ACTIVE HASHTAGS ({hashtagList.length})</Text>
-              <ScrollView style={{ maxHeight: 150 }} contentContainerStyle={styles.removableHashtagsGrid}>
+              <ScrollView style={{ maxHeight: 180 }} contentContainerStyle={[styles.removableHashtagsGrid, { paddingBottom: 4 }]}>
                 {hashtagList.map((tag) => (
                   <Pressable
                     key={tag}
@@ -1186,12 +1510,12 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
               </ScrollView>
 
               {/* Quick Suggestions Row */}
-              <Text style={[styles.modalSectionSubHeader, { marginTop: 14 }]}>TRENDING SUGGESTIONS</Text>
+              <Text style={[styles.modalSectionSubHeader, { marginTop: 14 }]}>JARVIS SUGGESTIONS</Text>
               <View style={styles.quickSuggestionsRow}>
-                {['creatoreconomy', 'growontiktok', 'reeltips', 'dailycontent', 'viralpost'].map((sug) => (
+                {['creatoreconomy', 'growontiktok', 'reeltips', 'dailycontent', 'creatortips', 'contentcreation'].map((sug) => (
                   <Pressable
                     key={sug}
-                    style={styles.suggestionPill}
+                    style={({ pressed }) => [styles.suggestionPill, pressed && styles.btnPressed]}
                     onPress={() => handleAddHashtag(sug)}
                   >
                     <Text style={styles.suggestionPillText}>+ #{sug}</Text>
@@ -1233,6 +1557,205 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
           </View>
         </Modal>
 
+        {/* ALL PLATFORMS COMPARISON STRATEGY MATRIX MODAL */}
+        <Modal
+          visible={showAllPlatformsModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowAllPlatformsModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }], maxHeight: '88%', paddingHorizontal: 16 }]}>
+              <View style={styles.modalHeaderBetween}>
+                <View style={{ flex: 1, paddingRight: 8 }}>
+                  <Text style={styles.modalTitle}>Platform Strategy Matrix</Text>
+                  <Text style={styles.modalSubTitle}>Compare formats across TikTok, Instagram & YouTube</Text>
+                </View>
+                <Pressable onPress={() => setShowAllPlatformsModal(false)} hitSlop={8}>
+                  <Text style={styles.modalCloseText}>✕</Text>
+                </Pressable>
+              </View>
+
+              <ScrollView style={{ marginTop: 12 }} showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: 14, paddingBottom: 12 }}>
+                {PLATFORM_VARIATIONS.map((plat, idx) => {
+                  const isEditingThis = activeEditingPlatform === plat.editingPlatformName;
+                  const isExpanded = expandedPlatforms.includes(plat.id);
+                  return (
+                    <View
+                      key={plat.id}
+                      style={[
+                        styles.compareMatrixCard,
+                        isEditingThis && styles.compareMatrixCardActive,
+                      ]}
+                    >
+                      {/* Platform Header with Tap-to-Toggle */}
+                      <Pressable
+                        style={styles.compareCardHeaderPressable}
+                        onPress={() => handleTogglePlatformExpanded(plat.id)}
+                        hitSlop={4}
+                      >
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7, flex: 1 }}>
+                          <SocialBrandIcon platform={plat.icon} size={18} />
+                          <View style={{ flex: 1 }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                              <Text style={styles.compareModalPlatformName}>{plat.name}</Text>
+                              <View style={styles.compareScorePill}>
+                                <Text style={styles.compareScorePillText}>{plat.optimizationScore.score}%</Text>
+                              </View>
+                            </View>
+                            <Text style={styles.compareModalPlatformBadge}>{plat.badge}</Text>
+                          </View>
+                        </View>
+
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                          {isEditingThis && (
+                            <View style={styles.compareActiveBadge}>
+                              <Text style={styles.compareActiveBadgeText}>EDITING ✓</Text>
+                            </View>
+                          )}
+                          <View style={styles.compareExpandIconBtn}>
+                            <Text style={styles.compareExpandIconText}>{isExpanded ? '▲' : '▼'}</Text>
+                          </View>
+                        </View>
+                      </Pressable>
+
+                      {/* 1. CAPTION PREVIEW */}
+                      <View style={styles.compareMatrixSection}>
+                        <View style={styles.compareCaptionBox}>
+                          <Text style={styles.compareCaptionText}>
+                            &ldquo;{plat.caption}&rdquo;
+                          </Text>
+                        </View>
+                      </View>
+
+                      {/* 2. SUMMARY METRICS (Always visible) */}
+                      <View style={styles.compareSummaryBadgesRow}>
+                        <View style={styles.compareSummaryBadge}>
+                          <Text style={styles.compareSummaryBadgeText}>📏 {plat.charCount} chars ✓</Text>
+                        </View>
+                        <View style={styles.compareSummaryBadge}>
+                          <Text style={styles.compareSummaryBadgeText}>⚡ {plat.optimizationScore.label} ✓</Text>
+                        </View>
+                        <View style={styles.compareSummaryBadge}>
+                          <Text style={styles.compareSummaryBadgeText}>🎯 {plat.targetLength.replace('Recommended: ', '')}</Text>
+                        </View>
+                      </View>
+
+                      {/* 3. DEEPER BREAKDOWN (Collapsible) */}
+                      {isExpanded && (
+                        <View style={styles.compareDeepBreakdownContainer}>
+                          {/* TONE & VOICE + TARGET */}
+                          <View style={{ flexDirection: 'row', gap: 8, marginTop: 4 }}>
+                            <View style={styles.compareMatrixMiniBox}>
+                              <Text style={styles.compareMatrixSectionLabel}>🎨 TONE &amp; VOICE</Text>
+                              <Text style={styles.compareMatrixValText}>
+                                {plat.tone}
+                              </Text>
+                            </View>
+
+                            <View style={styles.compareMatrixMiniBox}>
+                              <Text style={styles.compareMatrixSectionLabel}>⏱️ TARGET LENGTH</Text>
+                              <Text style={[styles.compareMatrixValText, { color: '#15803D' }]}>
+                                {plat.targetLength}
+                              </Text>
+                            </View>
+                          </View>
+
+                          {/* CTA STRATEGY */}
+                          <View style={[styles.compareMatrixSection, { marginTop: 8 }]}>
+                            <Text style={styles.compareMatrixSectionLabel}>🎯 CTA STRATEGY</Text>
+                            <View style={styles.compareStrategyBox}>
+                              <Text style={styles.compareStrategyText}>
+                                {plat.ctaStrategy}
+                              </Text>
+                            </View>
+                          </View>
+
+                          {/* OPTIMIZATION SCORE */}
+                          <View style={[styles.compareMatrixSection, { marginTop: 8 }]}>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                              <Text style={styles.compareMatrixSectionLabel}>📊 OPTIMIZATION SCORE</Text>
+                              <Text style={styles.compareScoreNumText}>
+                                {plat.optimizationScore.score}%
+                              </Text>
+                            </View>
+                            <View style={styles.compareScoreTrack}>
+                              <View style={[styles.compareScoreFill, { width: `${plat.optimizationScore.score}%` }]} />
+                            </View>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>
+                              <Text style={styles.compareScoreLabelText}>{plat.optimizationScore.label}</Text>
+                              <Text style={styles.compareScoreTargetText}>Target Met ✓</Text>
+                            </View>
+                          </View>
+
+                          {/* JARVIS STRATEGIC ADVANTAGE */}
+                          <View style={styles.compareAdvantageBox}>
+                            <Text style={{ fontSize: 11 }}>💡</Text>
+                            <Text style={styles.compareAdvantageText}>
+                              {plat.keyAdvantage}
+                            </Text>
+                          </View>
+                        </View>
+                      )}
+
+                      {/* PRIMARY ACTIONS ROW (2 spacious buttons - ZERO word cut) */}
+                      <View style={styles.compareActionsRow}>
+                        <Pressable
+                          style={({ pressed }) => [
+                            styles.compareModalEditBtn,
+                            isEditingThis && styles.compareModalEditBtnActive,
+                            pressed && styles.btnPressed,
+                          ]}
+                          onPress={() => {
+                            handleEditPlatformCaption(plat.editingPlatformName, plat.caption);
+                            setActivePlatformCaptionIndex(idx);
+                            setShowAllPlatformsModal(false);
+                          }}
+                        >
+                          <Text style={styles.compareModalEditBtnText}>
+                            {isEditingThis ? '✓ Active in Live Editor' : '✏️ Use in Live Editor'}
+                          </Text>
+                        </Pressable>
+
+                        <Pressable
+                          style={({ pressed }) => [
+                            styles.compareModalCopyBtn,
+                            pressed && styles.btnPressed,
+                          ]}
+                          onPress={() => handleCopyCaptionText(plat.caption, plat.name)}
+                        >
+                          <Text style={styles.compareModalCopyBtnText}>📋 Copy</Text>
+                        </Pressable>
+                      </View>
+
+                      {/* DEDICATED FULL-WIDTH EXPAND / COLLAPSE BAR */}
+                      <Pressable
+                        style={({ pressed }) => [
+                          styles.compareToggleExpandRow,
+                          pressed && styles.btnPressed,
+                        ]}
+                        onPress={() => handleTogglePlatformExpanded(plat.id)}
+                        hitSlop={6}
+                      >
+                        <Text style={styles.compareToggleExpandRowText}>
+                          {isExpanded ? 'Hide Strategy & Analysis ▴' : 'View Full Strategy & Analysis ▾'}
+                        </Text>
+                      </Pressable>
+                    </View>
+                  );
+                })}
+              </ScrollView>
+
+              <Pressable
+                style={[styles.modalCancelBtn, { marginTop: 10 }]}
+                onPress={() => setShowAllPlatformsModal(false)}
+              >
+                <Text style={styles.modalCancelBtnText}>Done</Text>
+              </Pressable>
+            </Animated.View>
+          </View>
+        </Modal>
+
         {/* 3D GHOST CELEBRATION MODAL */}
         <AnimatedCompletionModal
           visible={showCompletionModal}
@@ -1255,6 +1778,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+    width: '100%',
     backgroundColor: '#FAF8F5',
   },
   headerBar: {
@@ -1263,7 +1787,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingTop: 10,
-    paddingBottom: 12,
+    paddingBottom: 10,
     backgroundColor: '#FAF8F5',
   },
   backBtnCircle: {
@@ -1299,15 +1823,18 @@ const styles = StyleSheet.create({
     height: 26,
   },
   proHeaderBadge: {
-    paddingHorizontal: 9,
-    paddingVertical: 3.5,
-    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+    backgroundColor: '#F59E0B',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   proHeaderBadgeText: {
-    fontSize: 9.5,
+    fontSize: sFont(10),
     fontWeight: '900',
-    color: '#0C0A12',
-    letterSpacing: 0.3,
+    color: '#78350F',
+    letterSpacing: 0.4,
   },
   headerRightGroup: {
     flexDirection: 'row',
@@ -1317,7 +1844,7 @@ const styles = StyleSheet.create({
   headerIconBtn: {
     width: 38,
     height: 38,
-    borderRadius: 19,
+    borderRadius: 20,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#EFECE6',
@@ -1343,15 +1870,18 @@ const styles = StyleSheet.create({
   profileAvatarWrapper: {
     width: 38,
     height: 38,
-    borderRadius: 19,
-    borderWidth: 1.5,
+    borderRadius: 20,
+    borderWidth: 2,
     borderColor: '#F59E0B',
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
     position: 'relative',
   },
   headerUserAvatar: {
     width: '100%',
     height: '100%',
-    borderRadius: 19,
+    borderRadius: 18,
   },
   avatarTinyGoldCheckPos: {
     position: 'absolute',
@@ -1363,7 +1893,7 @@ const styles = StyleSheet.create({
     paddingBottom: 140,
   },
   topTitlesSection: {
-    marginTop: 8,
+    marginTop: 5,
     marginBottom: 16,
   },
   goldScriptBadge: {
@@ -1375,16 +1905,18 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   goldScriptBadgeText: {
-    fontSize: 9.5,
-    fontWeight: '900',
+    fontSize: 10,
+    fontWeight: '700',
     color: '#D97706',
     letterSpacing: 0.3,
   },
   mainTitleText: {
-    fontSize: 23,
-    fontWeight: '900',
+    fontSize: Platform.OS === 'web' ? ('clamp(15px, 3.8vw, 17px)' as any) : sFont(16),
+    fontWeight: '700',
     color: '#171420',
-    letterSpacing: -0.5,
+    letterSpacing: -0.35,
+    lineHeight: 22,
+    marginBottom: 4,
   },
   mainSubText: {
     fontSize: 12.5,
@@ -1399,8 +1931,8 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   purplePillText: {
-    fontSize: 10.5,
-    fontWeight: '900',
+    fontSize: 11,
+    fontWeight: '700',
     color: '#582CDB',
   },
   goldPill: {
@@ -1410,8 +1942,8 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   goldPillText: {
-    fontSize: 10.5,
-    fontWeight: '900',
+    fontSize: 11,
+    fontWeight: '700',
     color: '#D97706',
   },
 
@@ -1430,23 +1962,23 @@ const styles = StyleSheet.create({
   },
   sourceCardLabel: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   changeIdeaLink: {
-    fontSize: 11.5,
-    fontWeight: '900',
+    fontSize: 12,
+    fontWeight: '700',
     color: '#582CDB',
   },
   sourceIdeaHeadline: {
     fontSize: 14.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     marginTop: 10,
     marginBottom: 4,
   },
   sourceIdeaDesc: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
     lineHeight: 16,
   },
@@ -1471,69 +2003,73 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   sectionHeaderTitle: {
-    fontSize: 13,
-    fontWeight: '900',
+    fontSize: sFont(13),
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: 0.2,
   },
   toneSubHint: {
-    fontSize: 10.5,
+    fontSize: sFont(10.5),
     color: '#64748B',
     marginTop: 2,
   },
   toneActiveCounterBadge: {
     backgroundColor: '#EDE9FE',
-    paddingHorizontal: 8,
-    paddingVertical: 3.5,
+    paddingHorizontal: 7,
+    paddingVertical: 3,
     borderRadius: 6,
+    flexShrink: 0,
   },
   toneActiveCounterText: {
-    fontSize: 9,
-    fontWeight: '900',
+    fontSize: sFont(8.5),
+    fontWeight: '800',
     color: '#582CDB',
     letterSpacing: 0.3,
   },
-  toneChipsFlexGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 7,
-  },
   toneChipPill: {
+    flex: 1,
+    minWidth: 0,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: '#FAF8F5',
     borderWidth: 1.5,
-    borderColor: '#E2E8F0',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
+    borderColor: '#EFECE6',
+    paddingHorizontal: 2,
+    paddingVertical: 8.5,
+    borderRadius: 12,
+    gap: 4,
+    position: 'relative',
   },
   toneChipPillActive: {
     backgroundColor: '#582CDB',
     borderColor: '#582CDB',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.28,
+    shadowOpacity: 0.12,
     shadowRadius: 4,
     elevation: 2,
   },
   toneChipText: {
-    fontSize: 11.5,
-    fontWeight: '800',
+    fontSize: sFont(10.5),
+    fontWeight: '700',
     color: '#475569',
+    letterSpacing: -0.2,
   },
   toneChipTextActive: {
     color: '#FFFFFF',
-    fontWeight: '900',
+    fontWeight: '800',
   },
   toneCheckMarkDot: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    position: 'absolute',
+    top: 3.5,
+    right: 3.5,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: 6,
   },
 
   // CARD 3: SELECTED CAPTION EDITOR
@@ -1549,7 +2085,6 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
   },
   captionInputContainer: {
-    position: 'relative',
     backgroundColor: '#FAF8F5',
     borderRadius: 14,
     padding: 12,
@@ -1557,88 +2092,364 @@ const styles = StyleSheet.create({
     borderColor: '#EFECE6',
   },
   captionTextInput: {
-    fontSize: 12.5,
+    fontSize: sFont(12.5),
     lineHeight: 19,
     color: '#171420',
-    minHeight: 100,
+    minHeight: 90,
     textAlignVertical: 'top',
-    paddingBottom: 22,
+    padding: 0,
+  },
+  captionInputFooterRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 10,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#EFECE6',
+  },
+  captionInputFooterHint: {
+    fontSize: sFont(9.5),
+    fontWeight: '700',
+    color: '#94A3B8',
+  },
+  captionInputEditActionHint: {
+    fontSize: sFont(9.5),
+    fontWeight: '800',
+    color: '#582CDB',
   },
   charsCounterPill: {
-    position: 'absolute',
-    bottom: 8,
-    right: 8,
     backgroundColor: '#E2E8F0',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
+    paddingHorizontal: 7,
+    paddingVertical: 2.5,
     borderRadius: 6,
   },
   charsCounterText: {
-    fontSize: 9,
+    fontSize: sFont(9),
     fontWeight: '800',
     color: '#64748B',
+  },
+  captionMetaSection: {
+    marginTop: 12,
+    marginBottom: 10,
+    gap: 8,
+  },
+  captionToneRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FAF8F5',
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    gap: 8,
+  },
+  captionToneLabel: {
+    fontSize: sFont(8.5),
+    fontWeight: '800',
+    color: '#94A3B8',
+    letterSpacing: 0.3,
+  },
+  captionTonePillsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 5,
+    flex: 1,
+  },
+  captionTonePill: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 7,
+    paddingVertical: 2.5,
+    borderRadius: 6,
+  },
+  captionTonePillText: {
+    fontSize: sFont(10),
+    fontWeight: '700',
+    color: '#582CDB',
   },
   captionMetricsRow: {
     flexDirection: 'row',
     gap: 8,
-    marginVertical: 12,
   },
   captionMetricBox: {
     flex: 1,
     backgroundColor: '#FAF8F5',
     borderRadius: 10,
-    padding: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
     borderWidth: 1,
     borderColor: '#EFECE6',
   },
   captionMetricHeader: {
-    fontSize: 8.5,
-    fontWeight: '900',
+    fontSize: sFont(9),
+    fontWeight: '800',
     color: '#94A3B8',
     letterSpacing: 0.3,
   },
   captionMetricVal: {
-    fontSize: 11,
-    fontWeight: '900',
+    fontSize: sFont(12.5),
+    fontWeight: '800',
     color: '#171420',
-    marginTop: 2,
   },
-  captionModifiersRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
+  captionMetricSubText: {
+    fontSize: sFont(9.5),
+    fontWeight: '600',
+    color: '#64748B',
+  },
+  captionModifiersSection: {
     paddingTop: 10,
+    marginTop: 2,
     borderTopWidth: 1,
     borderTopColor: '#F1EFE9',
   },
+  captionModifiersLabel: {
+    fontSize: sFont(8.5),
+    fontWeight: '800',
+    color: '#94A3B8',
+    letterSpacing: 0.4,
+  },
   captionModifierChip: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    paddingHorizontal: 10,
+    paddingVertical: 8.5,
+    borderRadius: 10,
+    gap: 6,
+  },
+  captionModifierChipText: {
+    fontSize: sFont(11.5),
+    fontWeight: '700',
+    color: '#334155',
+  },
+
+  // CARD 3: PLATFORM CAPTIONS (Single Full-Width Card + Tabs + Comparison Modal)
+  compareAllFormatsBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 9,
+    paddingVertical: 4.5,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+  },
+  compareAllFormatsBtnText: {
+    fontSize: sFont(10.5),
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  platformTabsContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#F3EFE6',
+    borderRadius: 12,
+    padding: 3.5,
+    marginBottom: 10,
+    gap: 4,
+  },
+  platformTabItem: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 7,
+    paddingHorizontal: 4,
+    borderRadius: 9,
+    gap: 4.5,
+  },
+  platformTabItemActive: {
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  platformTabText: {
+    fontSize: sFont(10.5),
+    fontWeight: '700',
+    color: '#64748B',
+    letterSpacing: -0.2,
+  },
+  platformTabTextActive: {
+    color: '#171420',
+    fontWeight: '800',
+  },
+  tabEditingDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+    backgroundColor: '#582CDB',
+    marginLeft: 1,
+  },
+  platformHeroCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    padding: 16,
+    borderWidth: 1.5,
+    borderColor: '#EFECE6',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  platformHeroCardActive: {
+    borderColor: '#582CDB',
+    backgroundColor: '#FAF8FF',
+    shadowColor: '#582CDB',
+    shadowOpacity: 0.09,
+    shadowRadius: 8,
+  },
+  platformHeroTitle: {
+    fontSize: sFont(13),
+    fontWeight: '800',
+    color: '#171420',
+  },
+  platformHeroFormat: {
+    fontSize: sFont(9),
+    fontWeight: '700',
+    color: '#64748B',
+    marginTop: 1,
+    letterSpacing: 0.3,
+  },
+  activeEditingPill: {
+    backgroundColor: '#EDE9FE',
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  activeEditingPillText: {
+    fontSize: sFont(9),
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  loadToEditorQuickBtn: {
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
     borderColor: '#EFECE6',
     paddingHorizontal: 8,
-    paddingVertical: 5,
-    borderRadius: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
   },
-  captionModifierChipText: {
-    fontSize: 10,
-    fontWeight: '800',
+  loadToEditorQuickBtnText: {
+    fontSize: sFont(9.5),
+    fontWeight: '700',
+    color: '#64748B',
+  },
+  platformHeroQuoteBox: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 12,
+    padding: 13,
+    borderWidth: 1,
+    borderColor: '#F1EFE9',
+    marginVertical: 12,
+  },
+  platformHeroQuoteText: {
+    fontSize: sFont(12.5),
+    lineHeight: 18.5,
+    color: '#171420',
+    fontWeight: '500',
+  },
+  platformSpecsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginBottom: 14,
+  },
+  platformSpecPill: {
+    backgroundColor: '#F1EFE9',
+    paddingHorizontal: 8,
+    paddingVertical: 3.5,
+    borderRadius: 6,
+  },
+  platformSpecPillText: {
+    fontSize: sFont(9.5),
+    fontWeight: '700',
     color: '#475569',
   },
-
-  // CARD 4: PLATFORM CAPTIONS
-  platformCaptionDeckCard: {
-    width: 220,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 18,
-    padding: 14,
+  platformHeroActionsRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  platformHeroPrimaryBtn: {
+    flex: 1,
+    backgroundColor: '#582CDB',
+    paddingVertical: 9,
+    borderRadius: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  platformHeroPrimaryBtnActive: {
+    backgroundColor: '#431FB3',
+  },
+  platformHeroPrimaryBtnText: {
+    fontSize: sFont(11.5),
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  platformHeroSecondaryBtn: {
+    backgroundColor: '#FAF8F5',
     borderWidth: 1,
     borderColor: '#EFECE6',
-    justifyContent: 'space-between',
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderRadius: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  platDeckTitle: {
-    fontSize: 12,
-    fontWeight: '900',
+  platformHeroSecondaryBtnText: {
+    fontSize: sFont(11.5),
+    fontWeight: '700',
     color: '#171420',
+  },
+  platformPagingRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 12,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#F1EFE9',
+  },
+  platformPageNavBtn: {
+    paddingVertical: 3,
+    paddingHorizontal: 6,
+  },
+  platformPageNavBtnText: {
+    fontSize: sFont(11),
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  platformDotsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  platformPagingDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#CBD5E1',
+  },
+  platformPagingDotActive: {
+    width: 16,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#582CDB',
+  },
+  platformPageCountText: {
+    fontSize: sFont(10),
+    fontWeight: '700',
+    color: '#94A3B8',
+    marginLeft: 6,
   },
   platDeckBadge: {
     backgroundColor: '#FAF8F5',
@@ -1648,46 +2459,293 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: 4,
   },
+  platDeckBadgeActive: {
+    backgroundColor: '#EDE9FE',
+    borderColor: '#DDD6FE',
+  },
   platDeckBadgeText: {
     fontSize: 8,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
   },
-  platDeckBodyText: {
-    fontSize: 11,
-    color: '#171420',
-    lineHeight: 16,
-    marginVertical: 10,
+  platDeckBadgeTextActive: {
+    color: '#582CDB',
+    fontWeight: '800',
   },
-  platDeckBtnRow: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  platDeckEditBtn: {
-    flex: 1,
-    backgroundColor: '#FAF8F5',
+
+  platformCharCountPill: {
+    backgroundColor: '#EDE9FE',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
-    paddingVertical: 6,
-    borderRadius: 8,
+    borderColor: '#DDD6FE',
+  },
+  platformCharCountPillText: {
+    fontSize: sFont(9.5),
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+
+  // COMPARE ALL PLATFORMS STRATEGY MATRIX MODAL
+  compareMatrixCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1.5,
+    borderColor: '#EFECE6',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  compareMatrixCardActive: {
+    borderColor: '#582CDB',
+    backgroundColor: '#FAF8FF',
+    shadowColor: '#582CDB',
+    shadowOpacity: 0.08,
+  },
+  compareCardHeaderPressable: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
   },
-  platDeckEditBtnText: {
-    fontSize: 10.5,
+  compareModalPlatformName: {
+    fontSize: sFont(12.5),
     fontWeight: '800',
     color: '#171420',
   },
-  platDeckUseBtn: {
+  compareModalPlatformBadge: {
+    fontSize: sFont(9),
+    fontWeight: '700',
+    color: '#64748B',
+    marginTop: 1,
+  },
+  compareScorePill: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 6,
+    paddingVertical: 1.5,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+  },
+  compareScorePillText: {
+    fontSize: sFont(9),
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  compareExpandIconBtn: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#F1EFE9',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  compareExpandIconText: {
+    fontSize: sFont(8.5),
+    color: '#64748B',
+    fontWeight: '700',
+  },
+  compareActiveBadge: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+  },
+  compareActiveBadgeText: {
+    fontSize: sFont(8.5),
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  compareChannelTargetBadge: {
+    backgroundColor: '#F1EFE9',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  compareChannelTargetBadgeText: {
+    fontSize: sFont(8.5),
+    fontWeight: '700',
+    color: '#64748B',
+  },
+  compareSummaryBadgesRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginTop: 8,
+  },
+  compareSummaryBadge: {
+    backgroundColor: '#FAF8F5',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
+  compareSummaryBadgeText: {
+    fontSize: sFont(9.5),
+    fontWeight: '700',
+    color: '#334155',
+  },
+  compareDeepBreakdownContainer: {
+    marginTop: 4,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#F1EFE9',
+  },
+  compareMatrixSection: {
+    marginTop: 10,
+  },
+  compareMatrixSectionLabel: {
+    fontSize: sFont(8.5),
+    fontWeight: '800',
+    color: '#94A3B8',
+    letterSpacing: 0.4,
+    marginBottom: 4,
+  },
+  compareCaptionBox: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 10,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#F1EFE9',
+  },
+  compareCaptionText: {
+    fontSize: sFont(11.5),
+    lineHeight: 16.5,
+    color: '#171420',
+    fontWeight: '500',
+  },
+  compareMatrixMiniBox: {
+    flex: 1,
+    backgroundColor: '#FAF8F5',
+    borderRadius: 9,
+    padding: 8,
+    borderWidth: 1,
+    borderColor: '#F1EFE9',
+  },
+  compareMatrixValText: {
+    fontSize: sFont(11),
+    fontWeight: '700',
+    color: '#171420',
+  },
+  compareStrategyBox: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 9,
+    padding: 8,
+    borderWidth: 1,
+    borderColor: '#F1EFE9',
+  },
+  compareStrategyText: {
+    fontSize: sFont(11),
+    fontWeight: '600',
+    color: '#334155',
+  },
+  compareScoreNumText: {
+    fontSize: sFont(11.5),
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  compareScoreTrack: {
+    height: 5,
+    backgroundColor: '#E2E8F0',
+    borderRadius: 2.5,
+    overflow: 'hidden',
+    marginTop: 2,
+  },
+  compareScoreFill: {
+    height: '100%',
+    backgroundColor: '#582CDB',
+    borderRadius: 2.5,
+  },
+  compareScoreLabelText: {
+    fontSize: sFont(10),
+    fontWeight: '700',
+    color: '#64748B',
+  },
+  compareScoreTargetText: {
+    fontSize: sFont(9.5),
+    fontWeight: '800',
+    color: '#15803D',
+  },
+  compareAdvantageBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#FFFBEB',
+    borderRadius: 8,
+    paddingHorizontal: 9,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderColor: '#FEF3C7',
+    marginTop: 10,
+  },
+  compareAdvantageText: {
+    flex: 1,
+    fontSize: sFont(10.5),
+    color: '#92400E',
+    fontWeight: '600',
+  },
+  compareActionsRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 12,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#F1EFE9',
+  },
+  compareModalEditBtn: {
     flex: 1,
     backgroundColor: '#582CDB',
-    paddingVertical: 6,
-    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 9,
     alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 38,
   },
-  platDeckUseBtnText: {
-    fontSize: 10.5,
-    fontWeight: '900',
+  compareModalEditBtnActive: {
+    backgroundColor: '#431FB3',
+  },
+  compareModalEditBtnText: {
+    fontSize: sFont(11.5),
+    fontWeight: '800',
     color: '#FFFFFF',
+    textAlign: 'center',
+  },
+  compareModalCopyBtn: {
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 38,
+  },
+  compareModalCopyBtnText: {
+    fontSize: sFont(11.5),
+    fontWeight: '700',
+    color: '#171420',
+  },
+  compareToggleExpandRow: {
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    borderRadius: 9,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 8,
+  },
+  compareToggleExpandRowText: {
+    fontSize: sFont(10.5),
+    fontWeight: '700',
+    color: '#64748B',
+    textAlign: 'center',
   },
 
   // CARD 5: ENGAGEMENT SCORE
@@ -1703,12 +2761,12 @@ const styles = StyleSheet.create({
   },
   engagementCardTitle: {
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   engagementBigNum: {
     fontSize: 20,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   engagementDenom: {
@@ -1718,18 +2776,18 @@ const styles = StyleSheet.create({
   },
   strongCaptionTag: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.4,
   },
   scoreBarLabel: {
-    fontSize: 9.5,
-    fontWeight: '900',
+    fontSize: 10,
+    fontWeight: '700',
     color: '#64748B',
   },
   scoreBarVal: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   meterTrack: {
@@ -1789,7 +2847,7 @@ const styles = StyleSheet.create({
   },
   recommendedBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#D97706',
     letterSpacing: 0.3,
   },
@@ -1802,17 +2860,17 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   ctaCardTitleActive: {
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   ctaCardSub: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#64748B',
     lineHeight: 15,
   },
   ctaAltType: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     backgroundColor: '#EDE9FE',
     paddingHorizontal: 6,
@@ -1838,7 +2896,7 @@ const styles = StyleSheet.create({
   // CARD 7: HASHTAG SETS
   editHashtagsLink: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   hashtagsCard: {
@@ -1860,14 +2918,14 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   hashtagCategoryBadgeText: {
-    fontSize: 8.5,
-    fontWeight: '900',
+    fontSize: 9,
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.3,
   },
   hashtagsCountBadge: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#94A3B8',
   },
   hashtagPreviewGrid: {
@@ -1879,7 +2937,7 @@ const styles = StyleSheet.create({
   hashtagChipPreview: {
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
@@ -1892,9 +2950,10 @@ const styles = StyleSheet.create({
 
   // HASHTAG MANAGER MODAL
   modalSubTitle: {
-    fontSize: 11,
+    fontSize: sFont(11),
     color: '#64748B',
     marginTop: 2,
+    lineHeight: 15,
   },
   addHashtagBarRow: {
     flexDirection: 'row',
@@ -1908,7 +2967,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 9,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     fontSize: 12.5,
     color: '#171420',
   },
@@ -1922,11 +2981,11 @@ const styles = StyleSheet.create({
   addHashtagBtnText: {
     color: '#FFFFFF',
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   modalSectionSubHeader: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#94A3B8',
     letterSpacing: 0.4,
     marginBottom: 6,
@@ -1941,7 +3000,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     paddingLeft: 10,
     paddingRight: 6,
     paddingVertical: 5,
@@ -1949,7 +3008,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   removableHashtagText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#171420',
   },
@@ -1962,8 +3021,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   removeTagCrossText: {
-    fontSize: 8.5,
-    fontWeight: '900',
+    fontSize: 9,
+    fontWeight: '700',
     color: '#64748B',
   },
   quickSuggestionsRow: {
@@ -1980,7 +3039,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   suggestionPillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#582CDB',
   },
@@ -1988,7 +3047,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     paddingVertical: 11,
     borderRadius: 12,
     alignItems: 'center',
@@ -1996,7 +3055,7 @@ const styles = StyleSheet.create({
   resetHashtagsBtnText: {
     color: '#64748B',
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   saveHashtagsBtn: {
     flex: 2,
@@ -2008,7 +3067,7 @@ const styles = StyleSheet.create({
   saveHashtagsBtnText: {
     color: '#FFFFFF',
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
   },
 
   // CARD 8: STATUS & STREAK
@@ -2022,46 +3081,46 @@ const styles = StyleSheet.create({
   },
   statusLabel: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#94A3B8',
     letterSpacing: 0.4,
   },
   statusVal: {
-    fontSize: 11.5,
-    fontWeight: '900',
+    fontSize: 12,
+    fontWeight: '700',
     color: '#171420',
   },
   xpLabel: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#94A3B8',
     letterSpacing: 0.4,
   },
   xpVal: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   streakLabel: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#94A3B8',
     letterSpacing: 0.4,
   },
   streakVal: {
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   streakProtectedBadge: {
     backgroundColor: '#EDE9FE',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
   },
   streakProtectedBadgeText: {
-    fontSize: 8.5,
-    fontWeight: '900',
+    fontSize: sFont(9),
+    fontWeight: '800',
     color: '#582CDB',
   },
 
@@ -2074,7 +3133,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(139, 92, 246, 0.45)',
     shadowColor: '#7C3AED',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.12,
     shadowRadius: 10,
     elevation: 4,
   },
@@ -2090,13 +3149,13 @@ const styles = StyleSheet.create({
   },
   jarvisHeroTitle: {
     fontSize: 14.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: 0.2,
   },
   jarvisHeroSub: {
-    fontSize: 8.5,
-    fontWeight: '900',
+    fontSize: 9,
+    fontWeight: '700',
     color: '#A78BFA',
     letterSpacing: 0.5,
     marginTop: 1,
@@ -2110,8 +3169,8 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.18)',
   },
   jarvisActiveEnginePillText: {
-    fontSize: 8.5,
-    fontWeight: '900',
+    fontSize: 9,
+    fontWeight: '700',
     color: '#34D399',
     letterSpacing: 0.3,
   },
@@ -2138,14 +3197,14 @@ const styles = StyleSheet.create({
     borderColor: '#FDE68A',
     shadowColor: '#F59E0B',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.08,
     shadowRadius: 3,
     elevation: 2,
   },
   jarvisStrategyChipText: {
-    fontSize: 9.5,
-    fontWeight: '900',
-    color: '#92400E',
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#B45309',
     letterSpacing: 0.3,
   },
   applyJarvisHeroBtn: {
@@ -2159,7 +3218,7 @@ const styles = StyleSheet.create({
   applyJarvisHeroBtnText: {
     color: '#FFFFFF',
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
   },
 
   // BOTTOM ACTION BUTTONS
@@ -2171,20 +3230,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 3,
   },
   addToPostBtnText: {
     color: '#FFFFFF',
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   regenerateBtn: {
     flex: 1,
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     paddingVertical: 13,
     borderRadius: 14,
     alignItems: 'center',
@@ -2192,7 +3251,7 @@ const styles = StyleSheet.create({
   regenerateBtnText: {
     color: '#171420',
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   saveDraftFullBtn: {
     flexDirection: 'row',
@@ -2200,7 +3259,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#FAF8F5',
     borderWidth: 1.5,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     paddingVertical: 12,
     borderRadius: 14,
     marginTop: 2,
@@ -2213,7 +3272,7 @@ const styles = StyleSheet.create({
   saveDraftFullBtnText: {
     color: '#171420',
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.2,
   },
   saveDraftXpPill: {
@@ -2224,8 +3283,8 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   saveDraftXpPillText: {
-    fontSize: 9.5,
-    fontWeight: '900',
+    fontSize: 10,
+    fontWeight: '700',
     color: '#582CDB',
   },
 
@@ -2253,13 +3312,13 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   modalCloseText: {
     fontSize: 18,
     color: '#94A3B8',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   modalAlertItem: {
     backgroundColor: '#FAF8F5',
@@ -2278,7 +3337,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   btnPressed: {
-    transform: [{ scale: 0.96 }],
-    opacity: 0.85,
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
   },
 });

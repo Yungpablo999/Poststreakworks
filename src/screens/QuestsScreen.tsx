@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { TourTarget, useTourScroll } from '../components/tour/GhostTour';
+import { ResponsiveColumns } from '../components/ui/ResponsiveColumns';
 import {
   StyleSheet,
   View,
-  Text,
   Pressable,
   ScrollView,
   Platform,
@@ -12,12 +13,25 @@ import {
   Animated,
   Modal,
 } from 'react-native';
+import { Text } from '../components/ui/AppText';
+import { CheckInCard } from '../components/CheckInCard';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
-import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
+import { FreeAppHeader } from '../components/FreeAppHeader';
+import { sFont, isNarrowScreen, isSmallScreen, sPadding } from '../utils/responsive';
+
+import { UserPersona } from '../components/HeaderDualModePills';
+import Reanimated, { FadeInUp } from 'react-native-reanimated';
+import { GlassBackdrop } from '../components/glass/GlassBackdrop';
+import { FitLines } from '../components/ui/FitLines';
+import { JarvisOrb } from '../components/JarvisOrb';
+import { CalendarSheet } from '../components/home/CalendarSheet';
+import { ProUpsellCard } from '../components/home/ProUpsellCard';
+import { TodayQuestCard, QuestRow, LevelCard, ChallengeCard, JarvisTip } from '../components/quests/QuestBlocks';
+import { ds } from '../theme/colors';
 
 interface QuestsScreenProps {
   onBackToDashboard?: () => void;
@@ -26,9 +40,15 @@ interface QuestsScreenProps {
   onOpenMissionDetail?: () => void;
   onOpenCommunityChallenge?: () => void;
   onOpenSchedule?: () => void;
-  onOpenMessages?: () => void;
   onOpenJarvisPro?: () => void;
-  onOpenEarnings?: () => void;
+  onSwitchToPro?: () => void;
+  onSwitchToFree?: () => void;
+  /** Pro members: Pro quests instead of the upgrade card. */
+  tier?: 'free' | 'pro';
+  onOpenVoiceStudio?: () => void;
+  onOpenHookStudio?: () => void;
+  onTogglePersona?: () => void;
+  userPersona?: UserPersona;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
 }
@@ -40,12 +60,20 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
   onOpenMissionDetail,
   onOpenCommunityChallenge,
   onOpenSchedule,
-  onOpenMessages,
   onOpenJarvisPro,
-  onOpenEarnings,
-
+  onSwitchToPro,
+  onSwitchToFree,
+  tier = 'free',
+  onOpenVoiceStudio,
+  onOpenHookStudio,
+  onTogglePersona,
+  userPersona,
   userProfile,
-  onSaveProfile,}) => {
+  onSaveProfile,
+}) => {
+  // Lets Ghost's tour scroll this page
+  const tourScroll = useTourScroll();
+  const isNewUser = (userPersona || userProfile?.userPersona) === 'new';
   const isDark = false;
   const [activeTab, setActiveTab] = useState<TabType>('quests');
   const [completedQuests, setCompletedQuests] = useState<string[]>([]);
@@ -60,32 +88,11 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
 
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const [showChatModal, setShowChatModal] = useState(false);
-  const [showReputationModal, setShowReputationModal] = useState(false);
-  const [showBrandModal, setShowBrandModal] = useState(false);
+  const [calendarOpen, setCalendarOpen] = useState(false);
 
   // Animations
-  const flameFloatY = useRef(new Animated.Value(0)).current;
   const modalPopScale = useRef(new Animated.Value(0.88)).current;
 
-  useEffect(() => {
-    const flameLoop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(flameFloatY, {
-          toValue: -3,
-          duration: 1300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(flameFloatY, {
-          toValue: 3,
-          duration: 1300,
-          useNativeDriver: true,
-        }),
-      ])
-    );
-    flameLoop.start();
-    return () => flameLoop.stop();
-  }, [flameFloatY]);
 
   const triggerModalPop = () => {
     if (Platform.OS !== 'web') {
@@ -143,40 +150,14 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
 
     setCelebrationTitle('Quest Started!');
     setCelebrationSubtitle(`"${title}" is now active in your studio.`);
-    setCelebrationSpeech('Ghost says: Complete this quest today to level up your Creator Passport!');
+    setCelebrationSpeech(
+      isNewUser
+        ? 'Ghost says: Complete this quest today to level up your streak!'
+        : 'Ghost says: Complete this quest today to level up your Creator Level!'
+    );
     setCelebrationBadge('QUEST ACTIVE');
     setCelebrationXp(xp);
     setShowCelebrationModal(true);
-  };
-
-  const handleUnderstoodReputation = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
-    setShowReputationModal(false);
-    setTimeout(() => {
-      setCelebrationTitle('Reputation Goal Locked!');
-      setCelebrationSubtitle('Ghost is tracking your daily quests toward 100% Creator Passport rating.');
-      setCelebrationSpeech('Ghost says: Consistency is your secret weapon Amara! Keep up your 47-day streak!');
-      setCelebrationBadge('PASSPORT ACTIVE');
-      setCelebrationXp(40);
-      setShowCelebrationModal(true);
-    }, 200);
-  };
-
-  const handleUnderstoodBrand = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
-    setShowBrandModal(false);
-    setTimeout(() => {
-      setCelebrationTitle('Brand Goal Target Set!');
-      setCelebrationSubtitle('Ghost will alert you as soon as you reach Level 3 requirements for sponsored campaigns.');
-      setCelebrationSpeech("Ghost says: Paid opportunities unlock soon! You're on fire today!");
-      setCelebrationBadge('BRAND RADAR');
-      setCelebrationXp(50);
-      setShowCelebrationModal(true);
-    }, 200);
   };
 
   const handleExplorePro = () => {
@@ -194,530 +175,170 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
     <SafeAreaView style={[styles.safeArea, isDark && { backgroundColor: '#0C0A12' }]}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={isDark ? "#0C0A12" : "#FAF8F5"} />
       <View style={[styles.container, isDark && { backgroundColor: '#0C0A12' }]}>
+        <GlassBackdrop />
         {/* 1. TOP AIRY HEADER BAR */}
-        <View style={styles.headerBar}>
-          {/* Top-Left: Ghost Logo Mascot */}
-          <Animated.View
-            style={[
-              styles.headerLogoWrapper,
-              { transform: [{ translateY: flameFloatY }] },
-            ]}
-          >
-            <Image
-              source={require('../../assets/images/jarvis-ghost-clean.png')}
-              style={styles.headerGhostLogo}
-              resizeMode="contain"
-            />
-          </Animated.View>
-
-          {/* Right Icons: Messages, Notification Bell, Profile */}
-          <View style={styles.headerRightGroup}>
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                if (onOpenMessages) {
-                  onOpenMessages();
-                } else {
-                  triggerModalPop();
-                  setShowChatModal(true);
-                }
-              }}
-            >
-              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                triggerModalPop();
-                setShowNotificationModal(true);
-              }}
-            >
-              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <Path
-                  d="M13.73 21a2 2 0 0 1-3.46 0"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-              <View style={styles.notificationDot} />
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                triggerModalPop();
-                setShowProfileModal(true);
-              }}
-            >
-              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <Circle cx="12" cy="7" r="4" stroke="#171420" strokeWidth="2.2" />
-              </Svg>
-            </Pressable>
-          </View>
-        </View>
+        <FreeAppHeader
+          backgroundColor="transparent"
+          onSwitchToPro={onSwitchToPro}
+          onSwitchToFree={onSwitchToFree}
+          onOpenJarvisPro={onOpenJarvisPro}
+          onTogglePersona={onTogglePersona}
+          userPersona={userPersona}
+          onOpenNotifications={() => {
+            triggerModalPop();
+            setShowNotificationModal(true);
+          }}
+          onOpenProfile={() => {
+            triggerModalPop();
+            setShowProfileModal(true);
+          }}
+          userProfile={userProfile}
+          isDark={isDark}
+        />
 
         {/* 2. MAIN SCROLLABLE CONTENT */}
         <ScrollView
+          {...tourScroll}
+          style={{ flex: 1 }}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           bounces={true}
         >
-          {/* TOP PILL BADGES */}
-          <View style={styles.topBadgesRow}>
-            <View style={styles.questsPill}>
-              <Text style={styles.questsPillText}>QUESTS</Text>
+          {/* HEADLINE — same two-line structure on every screen size */}
+          <Reanimated.View entering={FadeInUp.duration(500)} style={styles.headline}>
+            <FitLines
+              lines={['Small quests,', <Text key="r" style={styles.headlineAccent}>steady rhythm</Text>]}
+              textStyle={styles.headlineText}
+              maxFontSize={34}
+              align="left"
+              accessibilityLabel="Small quests, steady rhythm"
+            />
+          </Reanimated.View>
+
+          {/* Desktop: today's quest and check-in on the left, the rest beside them */}
+          <ResponsiveColumns split={2} gap={16}>
+          {/* 1. TODAY'S QUEST */}
+          <Reanimated.View entering={FadeInUp.delay(100).duration(550)}>
+            <TourTarget id="quest-card">
+            <TodayQuestCard
+              title={isNewUser ? 'Complete your first Studio session' : 'Share one post today'}
+              body={
+                isNewUser
+                  ? 'Try one Studio tool to get your first idea ready.'
+                  : 'Whenever suits you. One post keeps your rhythm going.'
+              }
+              xp={80}
+              done={completedQuests.includes('today_quest')}
+              onStart={handleStartTodayQuest}
+            />
+            </TourTarget>
+          </Reanimated.View>
+
+          {/* 2. LEVEL (returning only) + CHECK-IN */}
+          <Reanimated.View entering={FadeInUp.delay(200).duration(550)} style={styles.stack}>
+            {!isNewUser && <LevelCard level={12} xp="8.4k" active={3} progress={0.65} />}
+            <CheckInCard
+              persona={isNewUser ? 'new' : 'returning'}
+              isDark={isDark}
+              onOpenCalendar={() => setCalendarOpen(true)}
+            />
+          </Reanimated.View>
+
+          {/* 3. QUESTS LIST */}
+          <Reanimated.View entering={FadeInUp.delay(300).duration(550)}>
+            <Text style={styles.sectionLabel}>{isNewUser ? 'Starter quests' : 'This week'}</Text>
+            <View style={styles.stack}>
+              <QuestRow
+                icon="idea"
+                title="Create your next post idea"
+                xp={60}
+                cadence="Daily"
+                action="Start"
+                onPress={() => handleStartStarterQuest('q1', 'Create your next post idea', 60, 'create')}
+              />
+              <QuestRow
+                icon="audience"
+                title="See what your audience likes"
+                xp={90}
+                cadence="Suggested"
+                action="View"
+                onPress={() => handleStartStarterQuest('q2', 'See what your audience likes', 90, 'growth')}
+              />
+              <QuestRow
+                icon="calendar"
+                title="Schedule your next post"
+                xp={50}
+                cadence="Weekly"
+                action="Plan"
+                onPress={() => {
+                  if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  if (onOpenSchedule) onOpenSchedule();
+                  else if (onNavigateTab) onNavigateTab('schedule' as TabType);
+                }}
+              />
             </View>
+          </Reanimated.View>
 
-            <View style={styles.earnRankPill}>
-              <Text style={styles.earnRankPillText}>EARN RANK</Text>
-            </View>
-          </View>
+          {/* 4. WEEKLY CHALLENGE */}
+          <Reanimated.View entering={FadeInUp.delay(400).duration(550)} style={styles.section}>
+            <ChallengeCard done={isNewUser ? 0 : 1} goal={3} onJoin={handleJoinCommunityChallenge} />
+          </Reanimated.View>
 
-          {/* HEADLINE & SUBTITLE */}
-          <Text style={styles.mainHeading}>Complete quests. Build your streak.</Text>
-          <Text style={styles.mainSubtitle}>
-            Daily missions, creator challenges and reputation goals that help you stay consistent.
-          </Text>
-
-          {/* 1. TODAY'S QUEST HERO CARD */}
-          <View style={styles.todayQuestCard}>
-            <View style={styles.todayQuestHeaderRow}>
-              <Text style={styles.todayQuestTag}>TODAY&apos;S QUEST</Text>
-              <View style={styles.flameIconCircle}>
-                <Text style={{ fontSize: 16 }}>🔥</Text>
-              </View>
-            </View>
-
-            <Text style={styles.todayQuestTitle}>Post once before 9 PM</Text>
-            <Text style={styles.todayQuestSub}>
-              Protect your 47-day streak and keep your creator momentum alive.
-            </Text>
-
-            {/* Progress Row & Bar */}
-            <View style={styles.progressLabelRow}>
-              <Text style={styles.progressLabelLeft}>PROGRESS</Text>
-              <Text style={styles.progressLabelRight}>0 / 1 COMPLETED</Text>
-            </View>
-            <View style={styles.progressBarTrack}>
-              <View style={styles.progressBarFill} />
-            </View>
-
-            {/* Bottom Row */}
-            <View style={styles.todayQuestFooterRow}>
-              <Text style={styles.todayQuestRewardsText}>
-                <Text style={{ fontWeight: '800', color: '#D97706' }}>+80 XP</Text>  •  Streak Protected
-              </Text>
-
-              <Pressable
-                style={({ pressed }) => [styles.startQuestBtn, pressed && styles.btnPressed]}
-                onPress={handleStartTodayQuest}
-              >
-                <Text style={styles.startQuestBtnText}>Start Quest</Text>
-              </Pressable>
-            </View>
-          </View>
-
-          {/* 2. CREATOR STATS 3-COLUMN BAR & LEVEL PROGRESS */}
-          <View style={styles.statsBarContainer}>
-            <View style={styles.statsRow}>
-              <View style={styles.statCol}>
-                <Text style={styles.statColLabel}>ACTIVE QUESTS</Text>
-                <Text style={[styles.statColValue, { color: '#582CDB' }]}>3</Text>
-              </View>
-
-              <View style={styles.statColDivider} />
-
-              <View style={styles.statCol}>
-                <Text style={styles.statColLabel}>TOTAL XP</Text>
-                <Text style={styles.statColValue}>8.4k</Text>
-              </View>
-
-              <View style={styles.statColDivider} />
-
-              <View style={styles.statCol}>
-                <Text style={styles.statColLabel}>LEVEL</Text>
-                <Text style={[styles.statColValue, { color: '#D97706' }]}>12</Text>
-              </View>
-            </View>
-
-            {/* Level Progress Indicator */}
-            <View style={styles.levelProgressContainer}>
-              <Text style={styles.levelProgressLabel}>LV 12</Text>
-              <View style={styles.levelTrack}>
-                <LinearGradient
-                  colors={['#FDE047', '#EAB308', '#CA8A04']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={[styles.levelFill, { width: '65%' }]}
+          {/* 5. PRO: Pro quests for members, the upgrade card for free (gold = Pro only) */}
+          {tier === 'pro' ? (
+            <Reanimated.View entering={FadeInUp.delay(500).duration(550)}>
+              <Text style={styles.sectionLabel}>Pro quests</Text>
+              <View style={styles.stack}>
+                <QuestRow
+                  pro
+                  icon="voice"
+                  title={isNewUser ? 'Set up your voice' : 'Make a voiceover for your next post'}
+                  xp={120}
+                  cadence={isNewUser ? 'One time' : 'Weekly'}
+                  action="Start"
+                  onPress={() => onOpenVoiceStudio?.()}
+                />
+                <QuestRow
+                  pro
+                  icon="hook"
+                  title="Try 3 openings for one idea"
+                  xp={80}
+                  cadence="Weekly"
+                  action="Start"
+                  onPress={() => onOpenHookStudio?.()}
                 />
               </View>
-              <Text style={styles.levelProgressLabel}>LV 13</Text>
-            </View>
-          </View>
+            </Reanimated.View>
+          ) : (
+          <Reanimated.View entering={FadeInUp.delay(500).duration(550)} style={styles.section}>
+            <ProUpsellCard
+              title="Get more with Jarvis Pro"
+              benefits={['A daily brief from Jarvis', 'Unlimited repurposing', 'Voice Studio']}
+              buttonTitle="Explore Pro"
+              onUpgrade={handleExplorePro}
+            />
+          </Reanimated.View>
+          )}
 
-          {/* 3. STARTER QUESTS SECTION */}
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionHeading}>Starter Quests</Text>
-          </View>
+          {/* 6. JARVIS TIP */}
+          <Reanimated.View entering={FadeInUp.delay(600).duration(550)} style={styles.section}>
+            <JarvisTip
+              orb={<JarvisOrb size={30} />}
+              text="Start with today's quest. Small daily steps add up faster than you'd think."
+            />
+          </Reanimated.View>
 
-          <View style={styles.starterQuestsList}>
-            {/* Quest 1 */}
-            <View style={styles.starterQuestCard}>
-              <View style={styles.starterQuestLeft}>
-                <View style={styles.starterQuestBadgeRow}>
-                  <Text style={styles.xpPillGold}>+60 XP</Text>
-                  <Text style={styles.typePill}>Daily</Text>
-                </View>
-                <Text style={styles.starterQuestTitle}>Create your next content idea</Text>
-              </View>
-              <Pressable
-                style={({ pressed }) => [styles.starterQuestActionBtn, pressed && styles.btnPressed]}
-                onPress={() => handleStartStarterQuest('q1', 'Create your next content idea', 60, 'create')}
-                hitSlop={8}
-              >
-                <Text style={styles.starterQuestActionText}>Start</Text>
-              </Pressable>
-            </View>
-
-            {/* Quest 2 */}
-            <View style={styles.starterQuestCard}>
-              <View style={styles.starterQuestLeft}>
-                <View style={styles.starterQuestBadgeRow}>
-                  <Text style={styles.xpPillGold}>+90 XP</Text>
-                  <Text style={styles.typePill}>Recommended</Text>
-                </View>
-                <Text style={styles.starterQuestTitle}>Connect with one creator</Text>
-              </View>
-              <Pressable
-                style={({ pressed }) => [styles.starterQuestActionBtn, pressed && styles.btnPressed]}
-                onPress={() => handleStartStarterQuest('q2', 'Connect with one creator', 90, 'match')}
-                hitSlop={8}
-              >
-                <Text style={styles.starterQuestActionText}>Find Match</Text>
-              </Pressable>
-            </View>
-
-            {/* Quest 3 */}
-            <View style={styles.starterQuestCard}>
-              <View style={styles.starterQuestLeft}>
-                <View style={styles.starterQuestBadgeRow}>
-                  <Text style={styles.xpPillGold}>+50 XP</Text>
-                  <Text style={styles.typePill}>Every</Text>
-                </View>
-                <Text style={styles.starterQuestTitle}>Schedule your next post</Text>
-              </View>
-              <Pressable
-                style={({ pressed }) => [styles.starterQuestActionBtn, pressed && styles.btnPressed]}
-                onPress={() => {
-                  if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                  }
-                  if (onOpenSchedule) {
-                    onOpenSchedule();
-                  } else if (onNavigateTab) {
-                    onNavigateTab('schedule' as TabType);
-                  }
-                }}
-                hitSlop={8}
-              >
-                <Text style={styles.starterQuestActionText}>Schedule</Text>
-              </Pressable>
-            </View>
-          </View>
-
-          {/* 4. COMMUNITY CHALLENGE HERO CARD (ROYAL PURPLE GRADIENT) */}
-          <View style={styles.communityCard}>
-            <View style={styles.communityTopBanner}>
-              <Text style={styles.communityTopBannerText}>COMMUNITY CHALLENGE</Text>
-            </View>
-
-            <View style={styles.communityBody}>
-              <Text style={styles.communityTitle}>7-Day Consistency Challenge</Text>
-              <Text style={styles.communitySub}>
-                Post 3 times this week and climb the creator leaderboard.
-              </Text>
-
-              {/* Progress */}
-              <View style={styles.communityProgressLabelRow}>
-                <Text style={styles.communityProgressLabel}>PROGRESS</Text>
-                <Text style={styles.communityProgressLabel}>1 / 3 POSTS</Text>
-              </View>
-              <View style={styles.communityProgressTrack}>
-                <View style={[styles.communityProgressFill, { width: '33%' }]} />
-              </View>
-
-              {/* Social Proof Pill */}
-              <View style={styles.socialProofPill}>
-                <View style={styles.stackedAvatarsRow}>
-                  <Image source={require('../../assets/images/elena-avatar.jpg')} style={[styles.miniAvatar, { zIndex: 3 }]} />
-                  <Image source={require('../../assets/images/marcus-avatar.jpg')} style={[styles.miniAvatar, { marginLeft: -8, zIndex: 2 }]} />
-                  <Image source={require('../../assets/images/david-avatar.jpg')} style={[styles.miniAvatar, { marginLeft: -8, zIndex: 1 }]} />
-                </View>
-                <Text style={styles.socialProofText}>42 creators are competing</Text>
-              </View>
-
-              {/* Bottom Row */}
-              <View style={styles.communityFooterRow}>
-                <Text style={styles.consistencyBadgeTag}>Consistency Badge</Text>
-
-                <Pressable
-                  style={({ pressed }) => [styles.joinChallengeBtn, pressed && styles.btnPressed]}
-                  onPress={handleJoinCommunityChallenge}
-                >
-                  <LinearGradient
-                    colors={['#FDE047', '#EAB308', '#CA8A04']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.joinChallengeGradient}
-                  >
-                    <Text style={styles.joinChallengeBtnText}>Join Challenge</Text>
-                  </LinearGradient>
-                </Pressable>
-              </View>
-            </View>
-          </View>
-
-          {/* 5. CREATOR REPUTATION CARD */}
-          <View style={styles.reputationCard}>
-            <Text style={styles.reputationMainTitle}>Creator Reputation</Text>
-            <Text style={styles.reputationSubtitle}>Your quest activity helps build your Creator Passport.</Text>
-
-            <View style={styles.repRow}>
-              <Text style={styles.repLabel}>Consistency</Text>
-              <Text style={styles.repValueStrong}>Strong</Text>
-            </View>
-
-            <View style={styles.repRow}>
-              <Text style={styles.repLabel}>Collaboration Proof</Text>
-              <Text style={styles.repValueMuted}>Not started</Text>
-            </View>
-
-            <View style={styles.repRow}>
-              <Text style={styles.repLabel}>Quest Completion</Text>
-              <Text style={styles.repValueDark}>1 / 3</Text>
-            </View>
-
-            {/* Bottom Row: 35% & Improve Reputation */}
-            <View style={styles.reputationFooterRow}>
-              <View>
-                <Text style={styles.repPercentText}>35%</Text>
-                <Text style={styles.repPercentSub}>Passport activity</Text>
-              </View>
-
-              <Pressable
-                style={({ pressed }) => [styles.improveRepBtn, pressed && styles.btnPressed]}
-                onPress={() => {
-                  triggerModalPop();
-                  setShowReputationModal(true);
-                }}
-              >
-                <Text style={styles.improveRepBtnText}>Improve Reputation</Text>
-              </Pressable>
-            </View>
-          </View>
-
-                    {/* CREATOR EARNINGS & MONETIZATION ENTRY CARD */}
-          <View style={styles.earningsHubCard}>
-            <View style={styles.earningsHubHeader}>
-              <View>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                  <Text style={styles.earningsHubTitle}>Creator Earnings</Text>
-                  <View style={styles.readinessTag}>
-                    <Text style={styles.readinessTagText}>35% READINESS</Text>
-                  </View>
-                </View>
-                <Text style={styles.earningsHubSub}>Build your path to paid brand campaigns</Text>
-              </View>
-              <View style={styles.earningsHubIconCircle}>
-                <Text style={{ fontSize: 18 }}>💰</Text>
-              </View>
-            </View>
-
-            <View style={styles.earningsHubStatsRow}>
-              <View style={styles.earningsHubStatCol}>
-                <Text style={styles.earningsHubStatLabel}>CURRENT BALANCE</Text>
-                <Text style={styles.earningsHubStatVal}>$0.00</Text>
-              </View>
-              <View style={styles.earningsHubDivider} />
-              <View style={styles.earningsHubStatCol}>
-                <Text style={styles.earningsHubStatLabel}>EST. TRACKED</Text>
-                <Text style={[styles.earningsHubStatVal, { color: '#582CDB' }]}>$1,420.50</Text>
-              </View>
-            </View>
-
-            <Pressable
-              style={({ pressed }) => [styles.earningsHubBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                }
-                if (onOpenEarnings) {
-                  onOpenEarnings();
-                } else {
-                  triggerModalPop();
-                  setShowBrandModal(true);
-                }
-              }}
-            >
-              <Text style={styles.earningsHubBtnText}>View Creator Earnings ➔</Text>
-            </Pressable>
-          </View>
-
-          {/* 6. BRAND QUEST PREVIEW CARD */}
-          <View style={styles.brandQuestCard}>
-            <View style={styles.brandQuestHeaderRow}>
-              <Text style={styles.brandQuestTag}>BRAND QUEST PREVIEW</Text>
-              <View style={styles.stampBadge}>
-                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                  <Path
-                    d="M12 2L15 5H19V9L22 12L19 15V19H15L12 22L9 19H5V15L2 12L5 9V5H9L12 2Z"
-                    stroke="#D97706"
-                    strokeWidth="1.8"
-                  />
-                  <Path d="M9 12L11 14L15 10" stroke="#D97706" strokeWidth="2" strokeLinecap="round" />
-                </Svg>
-              </View>
-            </View>
-
-            <Text style={styles.brandQuestTitle}>Starter Creator Campaigns</Text>
-            <Text style={styles.brandQuestSub}>
-              Complete quest requirements to qualify for future paid opportunities.
-            </Text>
-
-            {/* Requirements Checklist */}
-            <View style={styles.requirementsList}>
-              <View style={styles.reqItem}>
-                <Text style={{ color: '#582CDB', fontSize: 13, fontWeight: '800' }}>●</Text>
-                <Text style={styles.reqTextActive}>7-day streak</Text>
-              </View>
-              <View style={styles.reqItem}>
-                <Text style={{ color: '#94A3B8', fontSize: 13 }}>○</Text>
-                <Text style={styles.reqText}>Complete 3 starter quests</Text>
-              </View>
-              <View style={styles.reqItem}>
-                <Text style={{ color: '#94A3B8', fontSize: 13 }}>○</Text>
-                <Text style={styles.reqText}>Add creator profile</Text>
-              </View>
-              <View style={styles.reqItem}>
-                <Text style={{ color: '#94A3B8', fontSize: 13 }}>○</Text>
-                <Text style={styles.reqText}>Connect one platform</Text>
-              </View>
-            </View>
-
-            {/* Footer */}
-            <View style={styles.brandQuestFooter}>
-              <Text style={styles.unlocksAtLvlText}>🔒 Unlocks at lvl 3/4</Text>
-              <Pressable
-                onPress={() => {
-                  triggerModalPop();
-                  setShowBrandModal(true);
-                }}
-                hitSlop={6}
-              >
-                <Text style={styles.viewReqsLink}>View Requirements</Text>
-              </Pressable>
-            </View>
-          </View>
-
-          {/* 7. UNLOCK PRO QUESTS CARD */}
-          <View style={styles.unlockProCard}>
-            <View style={styles.unlockProHeaderRow}>
-              <Text style={styles.unlockProTitle}>Unlock Pro Quests</Text>
-              <View style={styles.proGoldBadge}>
-                <Text style={styles.proGoldBadgeText}>PRO</Text>
-              </View>
-            </View>
-
-            <Text style={styles.unlockProSubtitle}>
-              Pro gives you deeper squad missions, creator duels, and priority quests.
-            </Text>
-
-            <View style={styles.proFeaturesList}>
-              <Text style={styles.proFeatureItem}>👥  Squad Quests</Text>
-              <Text style={styles.proFeatureItem}>⚔️  Creator Duels</Text>
-              <Text style={styles.proFeatureItem}>⭐  Priority Quest Board</Text>
-            </View>
-
-            {/* Explore Pro Metallic Gold Button */}
-            <Pressable
-              style={({ pressed }) => [styles.exploreProBtn, pressed && styles.btnPressed]}
-              onPress={handleExplorePro}
-            >
-              <LinearGradient
-                colors={['#FDE047', '#EAB308', '#CA8A04', '#A16207']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.exploreProGradient}
-              >
-                <Text style={styles.exploreProBtnText}>Explore Pro</Text>
-              </LinearGradient>
-            </Pressable>
-          </View>
-
-          {/* 8. JARVIS FLOATING INSIGHT FOOTER */}
-          <View style={styles.jarvisFooterContainer}>
-            <Animated.View
-              style={[
-                styles.jarvisFooterFlameWrapper,
-                { transform: [{ translateY: flameFloatY }] },
-              ]}
-            >
-              <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.jarvisFooterFlame}
-                resizeMode="contain"
-              />
-            </Animated.View>
-
-            <Text style={styles.jarvisFooterQuote}>
-              &ldquo;Start with today&apos;s quest. Completing daily quests builds reputation and unlocks better opportunities over time.&rdquo;
-            </Text>
-
-            <Pressable
-              onPress={() => {
-                triggerModalPop();
-                setShowNotificationModal(true);
-              }}
-              hitSlop={6}
-            >
-              <Text style={styles.jarvisFooterLink}>View Insight ➔</Text>
-            </Pressable>
-          </View>
-
+          </ResponsiveColumns>
           {/* Bottom Space for Floating Tab Bar */}
           <View style={{ height: 110 }} />
         </ScrollView>
+
+        <CalendarSheet
+          visible={calendarOpen}
+          onClose={() => setCalendarOpen(false)}
+          persona={isNewUser ? 'new' : 'returning'}
+          onPlanPost={() => onNavigateTab?.('create')}
+        />
 
         {/* FLOATING LIQUID GLASS TAB BAR */}
         <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
@@ -730,81 +351,10 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
           speechBubble={celebrationSpeech}
           badgeText={celebrationBadge}
           xpEarned={celebrationXp}
-          streakCount={47}
+          streakCount={userProfile?.streakCount || 1}
           actionText="Continue ➔"
           onDismiss={() => setShowCelebrationModal(false)}
         />
-
-        {/* MODAL: REPUTATION DETAILS */}
-        <Modal
-          visible={showReputationModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowReputationModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Creator Passport</Text>
-                  <Text style={styles.modalSubtitle}>How to reach 100% Reputation:</Text>
-                </View>
-                <Pressable onPress={() => setShowReputationModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
-              </View>
-
-              <View style={{ gap: 10, marginVertical: 12 }}>
-                <View style={styles.repDetailRow}>
-                  <Text style={styles.repDetailTitle}>🔥 7-Day Consistency</Text>
-                  <Text style={styles.repDetailDesc}>+25% toward brand qualification score</Text>
-                </View>
-                <View style={styles.repDetailRow}>
-                  <Text style={styles.repDetailTitle}>🤝 Squad Collaborations</Text>
-                  <Text style={styles.repDetailDesc}>+20% proof of creator reliability</Text>
-                </View>
-                <View style={styles.repDetailRow}>
-                  <Text style={styles.repDetailTitle}>⚡ 30 Quests Finished</Text>
-                  <Text style={styles.repDetailDesc}>Unlocks verified Gold Passport seal</Text>
-                </View>
-              </View>
-
-              <Pressable style={styles.modalFullBtn} onPress={handleUnderstoodReputation}>
-                <Text style={styles.modalFullBtnText}>I Understood ✓</Text>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
-
-        {/* MODAL: BRAND REQUIREMENTS */}
-        <Modal
-          visible={showBrandModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowBrandModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Brand Campaign Tiers</Text>
-                  <Text style={styles.modalSubtitle}>Requirements for paid sponsorships</Text>
-                </View>
-                <Pressable onPress={() => setShowBrandModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
-              </View>
-
-              <Text style={{ fontSize: 13, color: '#475569', lineHeight: 19, marginVertical: 10 }}>
-                Brands filter for creators who maintain a minimum 14-day streak and Level 4 Passport status. Complete your daily missions to unlock brand invites!
-              </Text>
-
-              <Pressable style={styles.modalFullBtn} onPress={handleUnderstoodBrand}>
-                <Text style={styles.modalFullBtnText}>I Understood ✓</Text>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
 
         {/* NOTIFICATION MODAL */}
         <Modal
@@ -828,8 +378,12 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
               <View style={styles.notifCard}>
                 <Text style={{ fontSize: 18 }}>🔥</Text>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.notifTitle}>Post once before 9 PM</Text>
-                  <Text style={styles.notifBody}>Ends tonight • Streak protection ready.</Text>
+                  <Text style={styles.notifTitle}>
+                    {isNewUser ? 'Complete your first Studio session' : 'Share one post today'}
+                  </Text>
+                  <Text style={styles.notifBody}>
+                    {isNewUser ? 'Try one Studio tool to start your streak.' : 'Ends tonight • Streak protection ready.'}
+                  </Text>
                 </View>
               </View>
 
@@ -849,37 +403,6 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
           initialProfile={userProfile}
           onSaveProfile={onSaveProfile}
         />
-
-        {/* CHAT MODAL */}
-        <Modal
-          visible={showChatModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowChatModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Squad Chat</Text>
-                  <Text style={styles.modalSubtitle}>Creator Squad active messages</Text>
-                </View>
-                <Pressable onPress={() => setShowChatModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
-              </View>
-
-              <View style={styles.chatCard}>
-                <Text style={{ fontSize: 12, fontWeight: '800', color: '#582CDB', marginBottom: 2 }}>🤖 Jarvis Assistant</Text>
-                <Text style={{ fontSize: 13, color: '#334155' }}>42 creators are competing in the 7-Day Consistency Challenge!</Text>
-              </View>
-
-              <Pressable style={styles.modalFullBtn} onPress={() => setShowChatModal(false)}>
-                <Text style={styles.modalFullBtnText}>Close</Text>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
       </View>
     </SafeAreaView>
   );
@@ -888,15 +411,21 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FAF8F5',
+    backgroundColor: ds.bg,
   },
   container: {
     flex: 1,
-    backgroundColor: '#FAF8F5',
+    width: '100%',
   },
+  headline: { marginTop: 4, marginBottom: 16 },
+  headlineText: { fontWeight: '800', letterSpacing: -0.8, color: ds.ink },
+  headlineAccent: { color: ds.purple },
+  sectionLabel: { fontSize: 17, fontWeight: '800', color: ds.ink, letterSpacing: -0.2, marginTop: 24 },
+  stack: { gap: 12, marginTop: 12 },
+  section: { marginTop: 24 },
   btnPressed: {
-    opacity: 0.78,
-    transform: [{ scale: 0.97 }],
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
   },
 
   // 1. TOP HEADER BAR
@@ -912,7 +441,7 @@ const styles = StyleSheet.create({
   headerLogoWrapper: {
     width: 42,
     height: 42,
-    borderRadius: 21,
+    borderRadius: 20,
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.95)',
@@ -962,7 +491,7 @@ const styles = StyleSheet.create({
   },
 
   scrollContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: sPadding(18),
     paddingTop: 8,
   },
 
@@ -980,51 +509,57 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   questsPillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#FFFFFF',
     letterSpacing: 0.4,
   },
   earnRankPill: {
-    backgroundColor: '#FEF3C7',
+    backgroundColor: '#EDE9FE',
     paddingVertical: 4,
     paddingHorizontal: 12,
     borderRadius: 100,
   },
   earnRankPillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
-    color: '#D97706',
+    color: '#5B3EE8',
     letterSpacing: 0.4,
   },
 
   // HEADLINE
   mainHeading: {
-    fontSize: 26,
-    fontWeight: '800',
+    fontSize:
+      Platform.OS === 'web'
+        ? ('clamp(15px, 3.8vw, 17px)' as any)
+        : isNarrowScreen
+        ? 15
+        : 16,
+    fontWeight: '700',
     color: '#171420',
-    letterSpacing: -0.6,
+    letterSpacing: -0.35,
+    lineHeight: 22,
     marginBottom: 4,
   },
   mainSubtitle: {
-    fontSize: 13.5,
-    color: '#524C62',
-    lineHeight: 19,
-    marginBottom: 20,
-    fontWeight: '500',
+    fontSize: 13,
+    fontWeight: '400',
+    color: '#5E576E',
+    lineHeight: 18,
+    marginBottom: 16,
   },
 
   // 1. TODAY'S QUEST HERO CARD
   todayQuestCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 24,
+    borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#EFEBF8',
+    borderColor: 'rgba(23, 20, 32, 0.07)',
     padding: 20,
     marginBottom: 18,
-    shadowColor: '#582CDB',
+    shadowColor: '#171420',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.04,
     shadowRadius: 16,
     elevation: 3,
   },
@@ -1035,28 +570,31 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   todayQuestTag: {
-    fontSize: 10.5,
-    fontWeight: '800',
-    color: '#6B7280',
-    letterSpacing: 0.6,
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#8E869E',
+    letterSpacing: 0.3,
   },
   flameIconCircle: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#FEF3C7',
+    backgroundColor: '#FFFBEB',
+    borderWidth: 1,
+    borderColor: '#FEF3C7',
     justifyContent: 'center',
     alignItems: 'center',
   },
   todayQuestTitle: {
-    fontSize: 20,
-    fontWeight: '800',
+    fontSize: 19,
+    fontWeight: '700',
     color: '#171420',
     marginBottom: 3,
+    letterSpacing: -0.2,
   },
   todayQuestSub: {
     fontSize: 13,
-    color: '#64748B',
+    color: '#5E576E',
     lineHeight: 18,
     marginBottom: 14,
   },
@@ -1067,25 +605,24 @@ const styles = StyleSheet.create({
   },
   progressLabelLeft: {
     fontSize: 10,
-    fontWeight: '800',
+    fontWeight: '700',
     color: '#582CDB',
-    letterSpacing: 0.5,
+    letterSpacing: 0.3,
   },
   progressLabelRight: {
     fontSize: 10,
-    fontWeight: '800',
-    color: '#64748B',
-    letterSpacing: 0.5,
+    fontWeight: '600',
+    color: '#8E869E',
+    letterSpacing: 0.3,
   },
   progressBarTrack: {
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#E2E8F0',
+    backgroundColor: 'rgba(23, 20, 32, 0.06)',
     overflow: 'hidden',
     marginBottom: 14,
   },
   progressBarFill: {
-    width: '18%',
     height: '100%',
     backgroundColor: '#582CDB',
     borderRadius: 3,
@@ -1094,36 +631,58 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginTop: 8,
   },
   todayQuestRewardsText: {
     fontSize: 12.5,
-    fontWeight: '700',
+    fontWeight: '600',
     color: '#171420',
+    flex: 1,
+    minWidth: 140,
   },
   startQuestBtn: {
     backgroundColor: '#582CDB',
     paddingVertical: 8,
-    paddingHorizontal: 16,
+    paddingHorizontal: 18,
     borderRadius: 100,
+    flexShrink: 0,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.12,
     shadowRadius: 6,
   },
   startQuestBtnText: {
     fontSize: 12.5,
-    fontWeight: '800',
+    fontWeight: '700',
     color: '#FFFFFF',
+  },
+  completedQuestBtn: {
+    backgroundColor: '#ECFDF5',
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+    shadowOpacity: 0,
+  },
+  completedQuestBtnText: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#059669',
   },
 
   // 2. CREATOR STATS BAR & LEVEL
   statsBarContainer: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 18,
     borderWidth: 1,
-    borderColor: '#EFEBF8',
+    borderColor: 'rgba(23, 20, 32, 0.07)',
     padding: 16,
-    marginBottom: 20,
+    marginBottom: 18,
+    shadowColor: '#171420',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.03,
+    shadowRadius: 10,
+    elevation: 2,
   },
   statsRow: {
     flexDirection: 'row',
@@ -1136,37 +695,42 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statColLabel: {
-    fontSize: 9.5,
-    fontWeight: '800',
-    color: '#6B7280',
-    letterSpacing: 0.5,
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#8E869E',
+    letterSpacing: 0.3,
     marginBottom: 3,
   },
   statColValue: {
-    fontSize: 18,
-    fontWeight: '800',
+    fontSize: 17,
+    fontWeight: '700',
     color: '#171420',
   },
   statColDivider: {
     width: 1,
     height: 28,
-    backgroundColor: '#EFEBF8',
+    backgroundColor: 'rgba(23, 20, 32, 0.06)',
   },
   levelProgressContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    justifyContent: 'center',
+    gap: 10,
+    paddingHorizontal: 14,
+    marginTop: 2,
   },
   levelProgressLabel: {
-    fontSize: 10,
+    fontSize: 10.5,
     fontWeight: '800',
-    color: '#6B7280',
+    color: '#7F7894',
+    letterSpacing: 0.2,
   },
   levelTrack: {
     flex: 1,
+    maxWidth: 220,
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#E2E8F0',
+    backgroundColor: 'rgba(23, 20, 32, 0.06)',
     overflow: 'hidden',
   },
   levelFill: {
@@ -1179,51 +743,57 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   sectionHeading: {
-    fontSize: 18,
-    fontWeight: '800',
+    fontSize: 17,
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.3,
   },
   starterQuestsList: {
     gap: 10,
-    marginBottom: 22,
+    marginBottom: 20,
   },
   starterQuestCard: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: 18,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#EFEBF8',
+    borderColor: 'rgba(23, 20, 32, 0.07)',
     padding: 14,
-    shadowColor: '#000000',
+    shadowColor: '#171420',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.02,
     shadowRadius: 6,
   },
   starterQuestLeft: {
     flex: 1,
+    paddingRight: 10,
   },
   starterQuestBadgeRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 5,
     marginBottom: 4,
   },
   xpPillGold: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
-    color: '#D97706',
+    color: '#5B3EE8',
+  },
+  typePillDot: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#A39CB5',
   },
   typePill: {
-    fontSize: 10.5,
-    fontWeight: '700',
-    color: '#64748B',
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#5E576E',
   },
   starterQuestTitle: {
     fontSize: 14,
-    fontWeight: '800',
+    fontWeight: '700',
     color: '#171420',
   },
   starterQuestActionBtn: {
@@ -1232,19 +802,19 @@ const styles = StyleSheet.create({
   },
   starterQuestActionText: {
     fontSize: 13,
-    fontWeight: '800',
+    fontWeight: '700',
     color: '#582CDB',
   },
 
   // 4. COMMUNITY CHALLENGE HERO CARD
   communityCard: {
     backgroundColor: '#582CDB',
-    borderRadius: 24,
+    borderRadius: 20,
     overflow: 'hidden',
-    marginBottom: 20,
+    marginBottom: 18,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.12,
     shadowRadius: 14,
     elevation: 4,
   },
@@ -1255,18 +825,18 @@ const styles = StyleSheet.create({
   },
   communityTopBannerText: {
     fontSize: 10,
-    fontWeight: '800',
+    fontWeight: '700',
     color: '#E0E7FF',
-    letterSpacing: 0.6,
+    letterSpacing: 0.4,
   },
   communityBody: {
     padding: 20,
   },
   communityTitle: {
-    fontSize: 22,
-    fontWeight: '800',
+    fontSize: 21,
+    fontWeight: '700',
     color: '#FFFFFF',
-    letterSpacing: -0.4,
+    letterSpacing: -0.3,
     marginBottom: 4,
   },
   communitySub: {
@@ -1282,9 +852,9 @@ const styles = StyleSheet.create({
   },
   communityProgressLabel: {
     fontSize: 10,
-    fontWeight: '800',
+    fontWeight: '700',
     color: '#E0E7FF',
-    letterSpacing: 0.5,
+    letterSpacing: 0.3,
   },
   communityProgressTrack: {
     height: 6,
@@ -1320,7 +890,7 @@ const styles = StyleSheet.create({
     borderColor: '#FFFFFF',
   },
   socialProofText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '700',
     color: '#FFFFFF',
   },
@@ -1328,32 +898,47 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 10,
+    marginTop: 4,
   },
-  consistencyBadgeTag: {
-    fontSize: 13,
+  challengeRewardBox: {
+    flex: 1,
+    paddingRight: 6,
+    justifyContent: 'center',
+  },
+  challengeRewardTitle: {
+    fontSize: sFont(12),
     fontWeight: '800',
-    color: '#FDE047',
+    color: '#FEF08A',
+    letterSpacing: -0.3,
+    marginBottom: 2,
+  },
+  challengeRewardSub: {
+    fontSize: sFont(10.5),
+    fontWeight: '700',
+    color: 'rgba(255, 255, 255, 0.9)',
   },
   joinChallengeBtn: {
     borderRadius: 100,
     overflow: 'hidden',
-    shadowColor: '#FDE047',
+    shadowColor: '#F59E0B',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.12,
     shadowRadius: 6,
     elevation: 3,
+    flexShrink: 0,
   },
   joinChallengeGradient: {
-    paddingVertical: 9,
-    paddingHorizontal: 18,
+    paddingVertical: 8.5,
+    paddingHorizontal: 14,
     borderRadius: 100,
     alignItems: 'center',
     justifyContent: 'center',
   },
   joinChallengeBtnText: {
-    fontSize: 12.5,
-    fontWeight: '900',
-    color: '#171420',
+    fontSize: sFont(12),
+    fontWeight: '800',
+    color: '#FFFFFF',
     letterSpacing: -0.2,
   },
 
@@ -1411,27 +996,35 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 12,
+    rowGap: 10,
     marginTop: 14,
   },
+  repPercentGroup: {
+    flexShrink: 1,
+  },
   repPercentText: {
-    fontSize: 20,
+    fontSize: sFont(19),
     fontWeight: '800',
     color: '#582CDB',
   },
   repPercentSub: {
-    fontSize: 11,
+    fontSize: sFont(10.5),
     color: '#64748B',
+    fontWeight: '600',
   },
   improveRepBtn: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1.5,
     borderColor: '#582CDB',
-    paddingVertical: 7,
-    paddingHorizontal: 16,
+    paddingVertical: 6.5,
+    paddingHorizontal: 12,
     borderRadius: 100,
+    flexShrink: 0,
   },
   improveRepBtnText: {
-    fontSize: 12.5,
+    fontSize: sFont(11.5),
     fontWeight: '800',
     color: '#582CDB',
   },
@@ -1454,11 +1047,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 10,
     marginBottom: 12,
   },
+  earningsHubHeaderLeft: {
+    flex: 1,
+    flexShrink: 1,
+  },
+  earningsHubTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 6,
+    rowGap: 4,
+  },
   earningsHubTitle: {
-    fontSize: 16,
-    fontWeight: '900',
+    fontSize: sFont(15.5),
+    fontWeight: '700',
     color: '#171420',
   },
   readinessTag: {
@@ -1466,14 +1071,15 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     paddingHorizontal: 6,
     borderRadius: 4,
+    flexShrink: 0,
   },
   readinessTagText: {
-    fontSize: 8.5,
-    fontWeight: '900',
+    fontSize: sFont(9),
+    fontWeight: '700',
     color: '#582CDB',
   },
   earningsHubSub: {
-    fontSize: 11.5,
+    fontSize: sFont(11.5),
     color: '#64748B',
     marginTop: 2,
   },
@@ -1485,7 +1091,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#FDE047',
+    borderColor: '#F59E0B',
+    flexShrink: 0,
   },
   earningsHubStatsRow: {
     flexDirection: 'row',
@@ -1502,15 +1109,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   earningsHubStatLabel: {
-    fontSize: 8.5,
-    fontWeight: '900',
+    fontSize: 9,
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.4,
     marginBottom: 2,
   },
   earningsHubStatVal: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   earningsHubDivider: {
@@ -1528,7 +1135,7 @@ const styles = StyleSheet.create({
   },
   earningsHubBtnText: {
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
 
@@ -1552,7 +1159,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   brandQuestTag: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#D97706',
     letterSpacing: 0.6,
@@ -1597,16 +1204,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
+    rowGap: 4,
   },
   unlocksAtLvlText: {
-    fontSize: 11.5,
+    fontSize: sFont(11.5),
     fontWeight: '700',
     color: '#DC2626',
+    flexShrink: 1,
   },
   viewReqsLink: {
-    fontSize: 12.5,
+    fontSize: sFont(12),
     fontWeight: '800',
     color: '#582CDB',
+    flexShrink: 0,
   },
 
   // 7. UNLOCK PRO QUESTS CARD
@@ -1638,8 +1250,8 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   proGoldBadgeText: {
-    fontSize: 9.5,
-    fontWeight: '900',
+    fontSize: 10,
+    fontWeight: '700',
     color: '#171420',
   },
   unlockProSubtitle: {
@@ -1653,7 +1265,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   proFeatureItem: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '700',
     color: '#E5E1EE',
   },
@@ -1663,7 +1275,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#F59E0B',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.12,
     shadowRadius: 8,
   },
   exploreProGradient: {
@@ -1672,8 +1284,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   exploreProBtnText: {
-    fontSize: 13.5,
-    fontWeight: '900',
+    fontSize: 14,
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.2,
   },
@@ -1786,7 +1398,7 @@ const styles = StyleSheet.create({
     borderColor: '#EFEBF8',
   },
   repDetailTitle: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#171420',
     marginBottom: 2,
@@ -1812,7 +1424,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   notifBody: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
   },
   profileRing: {
@@ -1833,5 +1445,74 @@ const styles = StyleSheet.create({
     borderColor: '#EFEBF8',
     padding: 12,
     marginBottom: 10,
+  },
+  greenCheckBadge: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: '#DCFCE7',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 2,
+  },
+  greenCheckBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#15803D',
+  },
+  greyCircleBadge: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    borderWidth: 1.5,
+    borderColor: '#CBD5E1',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 2,
+  },
+  reqGoalBanner: {
+    backgroundColor: '#FAF5FF',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+    padding: 10,
+    marginTop: 10,
+    marginBottom: 12,
+  },
+  reqGoalBannerText: {
+    fontSize: 12,
+    color: '#475569',
+    lineHeight: 16,
+    fontWeight: '600',
+  },
+  reqListContainer: {
+    gap: 8,
+    marginBottom: 4,
+  },
+  reqItemRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: '#FAF8F5',
+    borderRadius: 12,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#EDE8E1',
+  },
+  reqItemTitle: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#171420',
+    marginBottom: 1,
+  },
+  reqItemStatusActive: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#15803D',
+  },
+  reqItemStatusPending: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#582CDB',
   },
 });

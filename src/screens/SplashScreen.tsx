@@ -2,13 +2,13 @@ import React, { useEffect, useRef } from 'react';
 import {
   StyleSheet,
   View,
-  Text,
   Animated,
   Image,
   useWindowDimensions,
   Platform,
   StatusBar,
 } from 'react-native';
+import { Text } from '../components/ui/AppText';
 import * as Haptics from 'expo-haptics';
 import { colors } from '../theme/colors';
 
@@ -49,14 +49,18 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
   const footerY = useRef(new Animated.Value(30)).current;
   const footerOpacity = useRef(new Animated.Value(0)).current;
 
-  // 4. Overall Exit Fade
-  const screenFade = useRef(new Animated.Value(1)).current;
+  // 4. Seamless Hero Morph Transition to Welcome Screen
+  const splashTextOpacity = useRef(new Animated.Value(1)).current;
+  const splashTextY = useRef(new Animated.Value(0)).current;
+  const ghostMorphY = useRef(new Animated.Value(0)).current;
+  const ghostMorphScale = useRef(new Animated.Value(1)).current;
+  const splashBgOpacity = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    // Safety auto-dismiss on web or slow devices
+    // Safety auto-dismiss fallback (generous so it never cuts animation prematurely)
     const fallbackTimer = setTimeout(() => {
       onFinish();
-    }, 2800);
+    }, 5500);
 
     // Grand Duolingo + PowerPoint Cinematic Opening Sequence
     const playOpeningSequence = () => {
@@ -94,7 +98,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
           }),
           Animated.timing(ghostRotate, {
             toValue: 1,
-            duration: 550,
+            duration: 500,
             useNativeDriver: true,
           }),
         ]),
@@ -103,22 +107,22 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
         Animated.parallel([
           Animated.timing(ghostRotate, {
             toValue: -0.6,
-            duration: 220,
+            duration: 200,
             useNativeDriver: true,
           }),
           Animated.timing(ghostY, {
             toValue: 14,
-            duration: 220,
+            duration: 200,
             useNativeDriver: true,
           }),
           Animated.timing(ghostStretchY, {
             toValue: 0.85,
-            duration: 220,
+            duration: 200,
             useNativeDriver: true,
           }),
           Animated.timing(ghostSquishX, {
             toValue: 1.2,
-            duration: 220,
+            duration: 200,
             useNativeDriver: true,
           }),
         ]),
@@ -156,18 +160,18 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
           }),
         ]),
 
-        // Step 4: PowerPoint-Style Kinetic Text Reveal #1 — Title "Zoom & Pop"
+        // Step 4: Kinetic Reveal #1 — Title "Zoom & Pop"
         Animated.parallel([
           Animated.timing(titleOpacity, {
             toValue: 1,
-            duration: 350,
+            duration: 320,
             useNativeDriver: true,
           }),
           Animated.spring(titleScale, {
             toValue: 1.0,
             useNativeDriver: true,
             speed: 24,
-            bounciness: 14, // Energetic PowerPoint pop
+            bounciness: 12,
           }),
           Animated.spring(titleY, {
             toValue: 0,
@@ -177,18 +181,18 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
           }),
         ]),
 
-        // Step 5: PowerPoint-Style Kinetic Text Reveal #2 — Tagline "Fly In from Left"
+        // Step 5: Kinetic Reveal #2 — Tagline "Fly In from Left" & Footer
         Animated.parallel([
           Animated.timing(taglineOpacity, {
             toValue: 1,
-            duration: 350,
+            duration: 320,
             useNativeDriver: true,
           }),
           Animated.spring(taglineX, {
             toValue: 0,
             useNativeDriver: true,
             speed: 20,
-            bounciness: 10, // Smooth slide overshoot
+            bounciness: 10,
           }),
           Animated.spring(tagScale, {
             toValue: 1.0,
@@ -198,7 +202,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
           }),
           Animated.timing(footerOpacity, {
             toValue: 1,
-            duration: 450,
+            duration: 400,
             useNativeDriver: true,
           }),
           Animated.spring(footerY, {
@@ -209,15 +213,42 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
           }),
         ]),
 
-        // Step 6: Admire the full composition
-        Animated.delay(1400),
+        // Step 6: Admire pause
+        Animated.delay(950),
 
-        // Step 7: Smooth Dissolve to Welcome Screen
-        Animated.timing(screenFade, {
-          toValue: 0,
-          duration: 400,
-          useNativeDriver: true,
-        }),
+        // Step 7: Continuous Ghost Morph — Text sinks away, Ghost gracefully floats UP to Welcome Hero spot
+        Animated.parallel([
+          // Splash texts fade & slide slightly down
+          Animated.timing(splashTextOpacity, {
+            toValue: 0,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+          Animated.timing(splashTextY, {
+            toValue: 24,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+
+          // Ghost smoothly floats UP and scales to Welcome Hero position
+          Animated.timing(ghostMorphY, {
+            toValue: isCompact ? -110 : -135,
+            duration: 650,
+            useNativeDriver: true,
+          }),
+          Animated.timing(ghostMorphScale, {
+            toValue: isCompact ? 0.78 : 0.76,
+            duration: 650,
+            useNativeDriver: true,
+          }),
+
+          // Background softly reveals Welcome Screen underneath
+          Animated.timing(splashBgOpacity, {
+            toValue: 0,
+            duration: 650,
+            useNativeDriver: true,
+          }),
+        ]),
       ]).start(() => {
         onFinish();
       });
@@ -282,9 +313,14 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
     tagScale,
     footerY,
     footerOpacity,
-    screenFade,
+    splashTextOpacity,
+    splashTextY,
+    ghostMorphY,
+    ghostMorphScale,
+    splashBgOpacity,
     hoverY,
     hoverTilt,
+    isCompact,
     onFinish,
   ]);
 
@@ -299,12 +335,20 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
   });
 
   return (
-    <Animated.View style={[styles.container, { opacity: screenFade }]}>
+    <Animated.View
+      pointerEvents="none"
+      style={[
+        styles.container,
+        {
+          opacity: splashBgOpacity,
+        },
+      ]}
+    >
       <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
 
       {/* Main Center Area: Extra-Large Mascot + PowerPoint Animated Typography */}
       <View style={styles.mascotArea}>
-        {/* 1. BIGGER HERO GHOST MASCOT */}
+        {/* 1. BIGGER HERO GHOST MASCOT (Morphs & Floats Up to Welcome Screen) */}
         <Animated.View
           style={[
             styles.ghostWrapper,
@@ -313,7 +357,9 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
               transform: [
                 { translateY: ghostY },
                 { translateY: hoverY },
+                { translateY: ghostMorphY },
                 { scale: ghostScale },
+                { scale: ghostMorphScale },
                 { scaleY: ghostStretchY },
                 { scaleX: ghostSquishX },
                 { rotate: rotation },
@@ -330,7 +376,15 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
         </Animated.View>
 
         {/* 2. POWERPOINT-STYLE ANIMATED BRANDING */}
-        <View style={styles.brandContainer}>
+        <Animated.View
+          style={[
+            styles.brandContainer,
+            {
+              opacity: splashTextOpacity,
+              transform: [{ translateY: splashTextY }],
+            },
+          ]}
+        >
           {/* Poststreak Title: "Zoom & Pop" Snap in Deep Solid Royal Purple */}
           <Animated.View
             style={[
@@ -344,7 +398,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
               },
             ]}
           >
-            <Text style={styles.solidBrandTitle}>Poststreak</Text>
+            <Text style={styles.solidBrandTitle}>PostStreak</Text>
           </Animated.View>
 
           {/* Tagline: "Fly In from Left" in Elegant Violet Frosted Pill Badge */}
@@ -364,7 +418,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
             <Text style={styles.taglineText}>Build your creator streak</Text>
             <Text style={styles.taglineEmoji}>🔥</Text>
           </Animated.View>
-        </View>
+        </Animated.View>
       </View>
 
       {/* 3. BOTTOM FOOTER: Kinetic Rise */}
@@ -372,8 +426,11 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish = () => {} 
         style={[
           styles.footer,
           {
-            opacity: footerOpacity,
-            transform: [{ translateY: footerY }],
+            opacity: Animated.multiply(footerOpacity, splashTextOpacity),
+            transform: [
+              { translateY: footerY },
+              { translateY: splashTextY },
+            ],
           },
         ]}
       >
@@ -419,8 +476,8 @@ const styles = StyleSheet.create({
   },
   solidBrandTitle: {
     fontSize: 50,
-    fontWeight: '900',
-    color: '#491ECC', // Deep Solid Royal Purple with ultra contrast
+    fontWeight: '800',
+    color: '#5B3EE8', // Brand primary purple
     letterSpacing: -1.8,
     textShadowColor: 'rgba(73, 30, 204, 0.18)',
     textShadowOffset: { width: 0, height: 6 },
@@ -456,7 +513,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   poweredBy: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#8E859E',
     letterSpacing: 2,
@@ -464,7 +521,7 @@ const styles = StyleSheet.create({
   },
   jarvisCore: {
     fontSize: 22,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#491ECC',
     letterSpacing: -0.4,
   },

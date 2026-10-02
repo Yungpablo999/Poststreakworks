@@ -1,37 +1,167 @@
-import React, { useState, useRef, useEffect } from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  Pressable,
-  ScrollView,
-  Platform,
-  Image,
-  SafeAreaView,
-  StatusBar,
-  Animated,
-  Modal,
-  Dimensions,
-} from 'react-native';
-import Svg, { Path, Circle, Rect } from 'react-native-svg';
-import * as Haptics from 'expo-haptics';
+import React, { useEffect, useState } from 'react';
+import { usePageWidth } from '../hooks/useBreakpoint';
+import { View, ScrollView, Pressable, StyleSheet, Platform, Image } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated, { Easing, FadeIn, FadeInUp, useAnimatedProps, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
+import Svg, { Circle, Defs, LinearGradient as SvgGradient, Path, Rect, Stop } from 'react-native-svg';
+import * as Haptics from 'expo-haptics';
+import { Text } from '../components/ui/AppText';
+import { AppButton } from '../components/ui/AppButton';
+import { FitLines } from '../components/ui/FitLines';
+import { GlassBackdrop } from '../components/glass/GlassBackdrop';
+import { GlassCard } from '../components/glass/GlassCard';
+import { JarvisOrb } from '../components/JarvisOrb';
+import { FreeAppHeader } from '../components/FreeAppHeader';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
-import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
-import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
+import { ProUpsellCard } from '../components/home/ProUpsellCard';
+import { WhoAudienceCard } from '../components/growth/ProInsights';
+import type { StudioVideo } from '../data';
+import { ds } from '../theme/colors';
+
+// "See why it worked" for the creator's best post (opened from Growth).
+// Sample numbers that match the Growth card (14.2K views, 42s, 84 shares).
+// It describes what stands out; it never claims to know exactly why a post
+// took off. Who watched is Pro; free sees a calm gold upgrade card.
+
+const pointer = Platform.OS === 'web' ? ({ cursor: 'pointer' } as object) : null;
+const tick = () => {
+  if (Platform.OS !== 'web') Haptics.selectionAsync();
+};
+const AnimatedPath = Animated.createAnimatedComponent(Path);
+
+const POST = {
+  title: '3 creator mistakes I stopped making this year',
+  hook: 'Stop making these 3 mistakes if you want to grow this year.',
+  seconds: 42,
+};
+
+const STATS = [
+  { label: 'Views', value: 14200, fmt: (n: number) => `${(n / 1000).toFixed(1)}K` },
+  { label: 'Likes', value: 1800, fmt: (n: number) => `${(n / 1000).toFixed(1)}K` },
+  { label: 'Shares', value: 84, fmt: (n: number) => `${Math.round(n)}` },
+];
+
+const VS_USUAL = [
+  { label: 'Views', value: '14.2K', note: '42% more than usual' },
+  { label: 'Watch time', value: '42s', note: '35% longer than usual' },
+  { label: 'New followers', value: '+320', note: 'Your most from one post' },
+  { label: 'Saves', value: '610', note: 'About 3× your usual' },
+];
+
+// Share of viewers still watching at each second
+const CURVE = [
+  { t: 0, p: 100, note: 'Everyone who saw it started watching.' },
+  { t: 3, p: 84, note: '84% were still watching after 3 seconds. Your opening did its job.' },
+  { t: 10, p: 71, note: 'Most stayed through the first mistake. Getting to the point fast helped.' },
+  { t: 20, p: 62, note: 'A small dip around the middle. A quicker cut here could keep a few more.' },
+  { t: 30, p: 55, note: 'Over half were still watching at 30 seconds.' },
+  { t: 42, p: 48, note: 'Almost half watched to the end, which is strong for a 42-second video.' },
+];
+
+const STANDS_OUT = [
+  { id: 'open', title: 'The opening', body: 'It named the problem in the first line, with no intro.' },
+  { id: 'pace', title: 'The pace', body: 'A new shot about every 2 seconds kept it moving.' },
+  { id: 'end', title: 'The ending', body: 'It asked which mistake people make. 248 people answered.' },
+];
+
+function CountUp({ to, fmt, style }: { to: number; fmt: (n: number) => string; style: object }) {
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    let raf = 0;
+    const start = Date.now();
+    const step = () => {
+      const t = Math.min(1, (Date.now() - start) / 900);
+      setN(to * (1 - Math.pow(1 - t, 3)));
+      if (t < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [to]);
+  return <Text style={style}>{fmt(n)}</Text>;
+}
+
+// ─── How long people watched ────────────────────────────────────────────────
+const CH = 130;
+function WatchCurve() {
+  const [w, setW] = useState(0);
+  const [sel, setSel] = useState(1);
+  const draw = useSharedValue(0);
+  useEffect(() => {
+    if (w > 0) draw.value = withDelay(200, withTiming(1, { duration: 1000, easing: Easing.out(Easing.cubic) }));
+  }, [w, draw]);
+  const pad = 10;
+  const x = (t: number) => pad + (t / POST.seconds) * (w - pad * 2);
+  const y = (p: number) => 8 + (1 - p / 100) * (CH - 16);
+  const d = CURVE.map((c, i) => `${i === 0 ? 'M' : 'L'} ${x(c.t)} ${y(c.p)}`).join(' ');
+  const len = w * 1.3;
+  const lineProps = useAnimatedProps(() => ({ strokeDashoffset: len * (1 - draw.value) }));
+  const c = CURVE[sel];
+  return (
+    <GlassCard strong radius={24} padding={16}>
+      <Text style={styles.cardTitle}>How long people watched</Text>
+      <Text style={styles.cardSub}>Tap a point on the line</Text>
+      <View style={styles.curveBox} onLayout={(e) => setW(e.nativeEvent.layout.width)}>
+        {w > 0 && (
+          <>
+            <Svg width={w} height={CH}>
+              <Defs>
+                <SvgGradient id="watchArea" x1="0" y1="0" x2="0" y2="1">
+                  <Stop offset="0" stopColor={ds.purple} stopOpacity={0.18} />
+                  <Stop offset="1" stopColor={ds.purple} stopOpacity={0} />
+                </SvgGradient>
+              </Defs>
+              <Path d={`${d} L ${x(POST.seconds)} ${CH} L ${x(0)} ${CH} Z`} fill="url(#watchArea)" />
+              <AnimatedPath d={d} stroke={ds.purple} strokeWidth={3} fill="none" strokeLinecap="round" strokeLinejoin="round" strokeDasharray={`${len} ${len}`} animatedProps={lineProps} />
+              <Rect x={x(c.t) - 0.75} y={0} width={1.5} height={CH} fill="rgba(91,62,232,0.25)" />
+              {CURVE.map((p, i) => (
+                <Circle key={p.t} cx={x(p.t)} cy={y(p.p)} r={i === sel ? 7 : 4.5} fill={i === sel ? ds.purple : '#FFFFFF'} stroke={ds.purple} strokeWidth={2.5} />
+              ))}
+            </Svg>
+            {CURVE.map((p, i) => (
+              <Pressable
+                key={`h-${p.t}`}
+                onPress={() => {
+                  tick();
+                  setSel(i);
+                }}
+                accessibilityRole="button"
+                accessibilityLabel={`${p.t} seconds, ${p.p}% still watching`}
+                style={[styles.curveHit, { left: x(p.t) - 18, top: y(p.p) - 18 }, pointer]}
+              />
+            ))}
+          </>
+        )}
+      </View>
+      <View style={styles.curveAxis}>
+        <Text style={styles.axisText}>0s</Text>
+        <Text style={styles.axisText}>{POST.seconds}s</Text>
+      </View>
+      <Animated.View key={sel} entering={FadeIn.duration(220)} style={styles.note}>
+        <View style={styles.rowBetween}>
+          <Text style={styles.noteTitle}>At {c.t}s</Text>
+          <Text style={styles.notePct}>{c.p}% still watching</Text>
+        </View>
+        <Text style={styles.noteText}>{c.note}</Text>
+      </Animated.View>
+    </GlassCard>
+  );
+}
 
 interface PostPerformanceScreenProps {
   onBack: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onOpenJarvisPro?: () => void;
-  onOpenMessages?: () => void;
   onOpenSchedule?: () => void;
   onOpenAudienceBreakdown?: () => void;
-  onOpenEarnings?: () => void;
   onOpenComposer?: (ideaTitle?: string) => void;
   onOpenScript?: (ideaTitle?: string) => void;
   onOpenContentAngle?: () => void;
+  /** Pro members see who watched instead of the upgrade card. */
+  tier?: 'free' | 'pro';
+  onMakeMoreLikeThis?: (video: StudioVideo) => void;
+  onReuseOpening?: (title: string, hook: string) => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
   onLogout?: () => void;
@@ -41,2087 +171,200 @@ export const PostPerformanceScreen: React.FC<PostPerformanceScreenProps> = ({
   onBack,
   onNavigateTab,
   onOpenJarvisPro,
-  onOpenMessages,
-  onOpenSchedule,
-  onOpenAudienceBreakdown,
-  onOpenEarnings,
-  onOpenComposer,
-  onOpenScript,
-  onOpenContentAngle,
+  tier = 'free',
+  onMakeMoreLikeThis,
+  onReuseOpening,
   userProfile,
   onSaveProfile,
   onLogout,
 }) => {
-  const [showNotificationModal, setShowNotificationModal] = useState(false);
-  const [activeTab, setActiveTab] = useState<TabType>('growth');
-  const [showProfileModal, setShowProfileModal] = useState(false);
-  const [showJarvisExplanationModal, setShowJarvisExplanationModal] = useState(false);
-  const [showCelebrationModal, setShowCelebrationModal] = useState(false);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  // Animations
-  const modalPopScale = useRef(new Animated.Value(0.88)).current;
-  const flameFloatY = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    const flameLoop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(flameFloatY, {
-          toValue: -3,
-          duration: 1300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(flameFloatY, {
-          toValue: 3,
-          duration: 1300,
-          useNativeDriver: true,
-        }),
-      ])
-    );
-    flameLoop.start();
-    return () => flameLoop.stop();
-  }, [flameFloatY]);
-
-  const showToast = (msg: string) => {
-    if (Platform.OS !== 'web') {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
-    setToastMessage(msg);
-    setTimeout(() => {
-      setToastMessage(null);
-    }, 2400);
-  };
-
-  const triggerModalPop = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    }
-    modalPopScale.setValue(0.88);
-    Animated.spring(modalPopScale, {
-      toValue: 1,
-      useNativeDriver: true,
-      speed: 26,
-      bounciness: 12,
-    }).start();
-  };
-
-  const handleTabPress = (tab: TabType) => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    setActiveTab(tab);
-    if (onNavigateTab) {
-      onNavigateTab(tab);
-    }
-  };
-
-  const handleCreateSimilarPost = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    }
-    if (onOpenComposer) {
-      onOpenComposer('3 creator mistakes that are killing your growth (Part 2)');
-    } else if (onOpenScript) {
-      onOpenScript('3 creator mistakes that are killing your growth (Part 2)');
-    } else {
-      showToast('Opening Creator Studio...');
-    }
-  };
-
-  const handleRepurposePost = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    }
-    if (onOpenContentAngle) {
-      onOpenContentAngle();
-    } else if (onOpenScript) {
-      onOpenScript('Repurposing: 3 creator mistakes into Instagram & LinkedIn format');
-    } else {
-      showToast('Repurposing post into 4 multi-channel formats...');
-    }
-  };
+  const pageWidth = usePageWidth();
+  const [showProfile, setShowProfile] = useState(false);
+  const [open, setOpen] = useState<string>('open');
+  const enter = (d: number) => FadeInUp.delay(d).duration(500).easing(Easing.out(Easing.cubic));
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
-      <View style={styles.container}>
-        {/* TOAST BANNER */}
-        <BrandToast message={toastMessage} />
+    <View style={styles.root}>
+      <GlassBackdrop />
+      <SafeAreaView style={styles.flex} edges={['top']}>
+        <FreeAppHeader backgroundColor="transparent" onBack={onBack} onOpenJarvisPro={onOpenJarvisPro} onOpenProfile={() => setShowProfile(true)} userProfile={userProfile} />
+        <ScrollView contentContainerStyle={[styles.scroll, pageWidth]} showsVerticalScrollIndicator={false}>
+          <Animated.View entering={enter(0)} style={styles.headline}>
+            <FitLines lines={['Why it', <Text key="a" style={styles.accent}>worked</Text>]} textStyle={styles.headlineText} maxFontSize={38} align="left" accessibilityLabel="Why it worked" />
+            <Text style={styles.sub}>A closer look at your best post lately.</Text>
+          </Animated.View>
 
-        {/* 1. TOP HEADER BAR (EXACT ICONS & BEHAVIOR AS ALL OTHER PAGES) */}
-        <View style={styles.header}>
-          <View style={styles.headerLeft}>
-            <Pressable
-              style={({ pressed }) => [styles.backBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                onBack();
-              }}
-              hitSlop={8}
-            >
-              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M19 12H5M12 19l-7-7 7-7"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+          {/* The post */}
+          <Animated.View entering={enter(60)}>
+            <GlassCard strong radius={26} padding={12}>
+              <View style={styles.cover}>
+                <Image source={require('../../assets/images/amara-portrait.jpg')} style={styles.coverImg} resizeMode="cover" />
+                <LinearGradient colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.65)']} style={StyleSheet.absoluteFill} />
+                <View style={styles.coverChip}>
+                  <Text style={styles.coverChipText}>TikTok · Video · 0:42</Text>
+                </View>
+                <View style={styles.playBtn}>
+                  <Svg width={18} height={18} viewBox="0 0 24 24">
+                    <Path d="M8 5v14l11-7z" fill="#FFFFFF" />
+                  </Svg>
+                </View>
+                <Text style={styles.coverTitle}>{POST.title}</Text>
+              </View>
+              <View style={styles.stats}>
+                {STATS.map((s) => (
+                  <View key={s.label} style={styles.stat}>
+                    <CountUp to={s.value} fmt={s.fmt} style={styles.statValue} />
+                    <Text style={styles.statLabel}>{s.label}</Text>
+                  </View>
+                ))}
+              </View>
+            </GlassCard>
+          </Animated.View>
+
+          {/* Compared with usual */}
+          <Animated.View entering={enter(120)}>
+            <Text style={styles.section}>Compared with your usual</Text>
+            <View style={styles.grid}>
+              {VS_USUAL.map((v, i) => (
+                <Animated.View key={v.label} entering={FadeInUp.delay(160 + i * 70).duration(380)} style={styles.tile}>
+                  <Text style={styles.tileLabel}>{v.label}</Text>
+                  <Text style={styles.tileValue}>{v.value}</Text>
+                  <Text style={styles.tileNote}>{v.note}</Text>
+                </Animated.View>
+              ))}
+            </View>
+          </Animated.View>
+
+          {/* Watch curve */}
+          <Animated.View entering={enter(200)} style={styles.section2}>
+            <WatchCurve />
+          </Animated.View>
+
+          {/* What stands out */}
+          <Animated.View entering={enter(260)}>
+            <Text style={styles.section}>What stands out</Text>
+            <GlassCard radius={24} padding={6}>
+              {STANDS_OUT.map((s, i) => {
+                const on = open === s.id;
+                return (
+                  <Pressable
+                    key={s.id}
+                    onPress={() => {
+                      tick();
+                      setOpen(on ? '' : s.id);
+                    }}
+                    accessibilityRole="button"
+                    accessibilityState={{ expanded: on }}
+                    style={[styles.stand, i < STANDS_OUT.length - 1 && styles.standLine, pointer]}
+                  >
+                    <View style={[styles.standNum, on && styles.standNumOn]}>
+                      <Text style={[styles.standNumText, on && { color: '#FFFFFF' }]}>{i + 1}</Text>
+                    </View>
+                    <View style={styles.flex}>
+                      <Text style={styles.standTitle}>{s.title}</Text>
+                      {on && (
+                        <Animated.View entering={FadeIn.duration(200)}>
+                          <Text style={styles.standBody}>{s.body}</Text>
+                          {s.id === 'open' && <Text style={styles.quote}>“{POST.hook}”</Text>}
+                        </Animated.View>
+                      )}
+                    </View>
+                  </Pressable>
+                );
+              })}
+            </GlassCard>
+          </Animated.View>
+
+          {/* Jarvis: what next */}
+          <Animated.View entering={enter(320)}>
+            <GlassCard strong radius={24} padding={16} style={styles.jarvis}>
+              <View style={styles.jarvisHead}>
+                <JarvisOrb size={32} />
+                <Text style={styles.jarvisTitle}>Make another like it</Text>
+              </View>
+              <Text style={styles.jarvisBody}>Keep the same shape: a problem in the first line, quick cuts, and a question at the end.</Text>
+              <View style={styles.actions}>
+                <AppButton
+                  title="Make more like this"
+                  onPress={() => onMakeMoreLikeThis?.({ name: POST.title, seconds: POST.seconds, source: 'post', platform: 'tiktok' })}
                 />
-              </Svg>
-            </Pressable>
-
-            <Animated.View
-              style={[
-                styles.headerLogoWrapper,
-                { transform: [{ translateY: flameFloatY }] },
-              ]}
-            >
-              <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerGhostLogo}
-                resizeMode="contain"
-              />
-            </Animated.View>
-          </View>
-
-          <View style={styles.headerCenter}>
-            <Text style={styles.headerTitleText}>Post Performance</Text>
-            <Text style={styles.headerSubtitleText}>DEEP DIVE ANALYTICS</Text>
-          </View>
-
-          <View style={styles.headerRight}>
-            {/* 1. Message Bubble Icon */}
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                if (onOpenMessages) {
-                  onOpenMessages();
-                } else if (onNavigateTab) {
-                  onNavigateTab('match');
-                }
-              }}
-            >
-              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-            </Pressable>
-
-            {/* 2. Notification Bell Icon */}
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                triggerModalPop();
-                setShowNotificationModal(true);
-              }}
-            >
-              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <Path
-                  d="M13.73 21a2 2 0 0 1-3.46 0"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-              <View style={styles.notificationDot} />
-            </Pressable>
-
-            {/* 3. User Profile Avatar */}
-            <Pressable
-              style={({ pressed }) => [styles.headerProfileBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                triggerModalPop();
-                setShowProfileModal(true);
-              }}
-              hitSlop={8}
-            >
-              <Image
-                source={userProfile?.avatarSource || require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerProfileImg}
-                resizeMode="cover"
-              />
-            </Pressable>
-          </View>
-        </View>
-
-        {/* 2. SCROLLABLE CONTENT */}
-        <ScrollView
-          style={styles.scrollContent}
-          contentContainerStyle={{ paddingBottom: 120 }}
-          showsVerticalScrollIndicator={false}
-        >
-          {/* HERO SECTION TITLE */}
-          <View style={styles.badgePillRow}>
-            <View style={styles.deepDivePill}>
-              <Text style={styles.deepDivePillText}>⚡ POST PERFORMANCE DEEP DIVE</Text>
-            </View>
-          </View>
-          <Text style={styles.mainTitle}>See why your best post worked.</Text>
-          <Text style={styles.mainSubtitle}>
-            Break down views, watch time, retention, hooks, and engagement psychology.
-          </Text>
-
-          {/* CARD 1: BEST POST HERO CARD */}
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>Best Post</Text>
-          </View>
-
-          <View style={styles.bestPostCard}>
-            {/* Video Thumbnail Box with Overlay */}
-            <View style={styles.videoPreviewContainer}>
-              <Image
-                source={require('../../assets/images/amara-portrait.jpg')}
-                style={styles.videoThumbnail}
-                resizeMode="cover"
-              />
-              <LinearGradient
-                colors={['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.3)', 'rgba(0,0,0,0.85)']}
-                style={StyleSheet.absoluteFill}
-              />
-
-              {/* Top Tag Pill */}
-              <View style={styles.topPostBadge}>
-                <Text style={styles.topPostBadgeText}>⚡ TOP POST • TIKTOK</Text>
+                <AppButton title="Reuse the opening" variant="glass" onPress={() => onReuseOpening?.(POST.title, POST.hook)} />
               </View>
+            </GlassCard>
+          </Animated.View>
 
-              {/* Play Button Overlay */}
-              <View style={styles.playButtonCircle}>
-                <Text style={styles.playIconTriangle}>▶</Text>
-              </View>
-
-              {/* Bottom Video Meta Info */}
-              <View style={styles.videoMetaContainer}>
-                <View style={styles.videoAuthorRow}>
-                  <Image
-                    source={userProfile?.avatarSource || require('../../assets/images/jarvis-ghost-clean.png')}
-                    style={styles.videoAuthorAvatar}
-                  />
-                  <Text style={styles.videoAuthorName}>
-                    {userProfile?.handle || '@pablo.creates'} • TikTok
-                  </Text>
-                </View>
-                <Text style={styles.videoPostTitle} numberOfLines={2}>
-                  3 creator mistakes that are killing your growth...
-                </Text>
-              </View>
-            </View>
-
-            {/* 3-Column Video Stats Bar */}
-            <View style={styles.postStatsBar}>
-              <View style={styles.postStatItem}>
-                <Text style={styles.postStatLabel}>VIEWS</Text>
-                <Text style={styles.postStatValue}>24.5K</Text>
-              </View>
-              <View style={styles.postStatDivider} />
-              <View style={styles.postStatItem}>
-                <Text style={styles.postStatLabel}>LIKES</Text>
-                <Text style={styles.postStatValue}>1,820</Text>
-              </View>
-              <View style={styles.postStatDivider} />
-              <View style={styles.postStatItem}>
-                <Text style={styles.postStatLabel}>SAVES</Text>
-                <Text style={styles.postStatValue}>3,420</Text>
-              </View>
-            </View>
-
-            {/* Estimated Post Earnings Revenue Chip */}
-            <Pressable
-              style={({ pressed }) => [styles.postEarningsChip, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                if (onOpenEarnings) {
-                  onOpenEarnings();
-                } else {
-                  showToast('Est. Revenue: $142.50 from this viral post');
-                }
-              }}
-            >
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                <Text style={{ fontSize: 13 }}>💰</Text>
-                <Text style={styles.postEarningsChipText}>
-                  Est. Post Revenue: <Text style={{ color: '#582CDB', fontWeight: '900' }}>$142.50</Text>
-                </Text>
-              </View>
-              <Text style={styles.postEarningsChipLink}>View Earnings ➔</Text>
-            </Pressable>
-
-            {/* Action Button */}
-            <Pressable
-              style={({ pressed }) => [styles.createSimilarBtn, pressed && styles.btnPressed]}
-              onPress={handleCreateSimilarPost}
-            >
-              <LinearGradient
-                colors={['#582CDB', '#4318FF']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.actionBtnGradient}
-              >
-                <Text style={styles.createSimilarBtnText}>✨ Create Similar Post</Text>
-              </LinearGradient>
-            </Pressable>
-          </View>
-
-          {/* CARD 2: PERFORMANCE 2x2 GRID */}
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>Performance</Text>
-          </View>
-
-          <View style={styles.perfGrid2x2}>
-            {/* 1. Total Views */}
-            <View style={styles.perfMetricBox}>
-              <Text style={styles.perfMetricLabel}>TOTAL VIEWS</Text>
-              <Text style={styles.perfMetricValue}>24,500</Text>
-              <View style={styles.perfSurgePillGreen}>
-                <Text style={styles.perfSurgeTextGreen}>📈 +41.2%</Text>
-              </View>
-            </View>
-
-            {/* 2. Completion Rate */}
-            <View style={styles.perfMetricBox}>
-              <Text style={styles.perfMetricLabel}>COMPLETION RATE</Text>
-              <Text style={styles.perfMetricValue}>71.6%</Text>
-              <View style={styles.perfSurgePillNeutral}>
-                <Text style={styles.perfSurgeTextNeutral}>⭐ Top 3% on TikTok</Text>
-              </View>
-            </View>
-
-            {/* 3. Followers Gained */}
-            <View style={styles.perfMetricBox}>
-              <Text style={styles.perfMetricLabel}>FOLLOWERS GAINED</Text>
-              <Text style={styles.perfMetricValue}>+910</Text>
-              <View style={styles.perfSurgePillPurple}>
-                <Text style={styles.perfSurgeTextPurple}>🎯 Single Post Record</Text>
-              </View>
-            </View>
-
-            {/* 4. Shares */}
-            <View style={styles.perfMetricBox}>
-              <Text style={styles.perfMetricLabel}>SHARES</Text>
-              <Text style={styles.perfMetricValue}>330</Text>
-              <View style={styles.perfSurgePillGold}>
-                <Text style={styles.perfSurgeTextGold}>🔥 3.4x avg video</Text>
-              </View>
-            </View>
-          </View>
-
-          {/* Highlight Callout Banner */}
-          <View style={styles.perfCalloutBanner}>
-            <Text style={{ fontSize: 16 }}>↗️</Text>
-            <Text style={styles.perfCalloutText}>
-              This post drove more than <Text style={{ fontWeight: '900', color: '#582CDB' }}>41%</Text> of your follower growth this month. Let's make more.
-            </Text>
-          </View>
-
-          {/* CARD 3: WHY IT WORKED */}
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>Why It Worked</Text>
-          </View>
-
-          <View style={styles.whyItWorkedCard}>
-            <View style={styles.whyItem}>
-              <View style={styles.whyCheckCircle}>
-                <Text style={styles.whyCheckMark}>✓</Text>
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.whyItemTitle}>Strong Visual Hook</Text>
-                <Text style={styles.whyItemBody}>
-                  First 2 seconds featured high-contrast text overlay and fast pattern interrupt.
-                </Text>
-              </View>
-            </View>
-
-            <View style={styles.whyDivider} />
-
-            <View style={styles.whyItem}>
-              <View style={styles.whyCheckCircle}>
-                <Text style={styles.whyCheckMark}>✓</Text>
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.whyItemTitle}>Low Friction Format</Text>
-                <Text style={styles.whyItemBody}>
-                  Bulleted advice format kept viewers watching until the final tip.
-                </Text>
-              </View>
-            </View>
-
-            <View style={styles.whyDivider} />
-
-            <View style={styles.whyItem}>
-              <View style={styles.whyCheckCircle}>
-                <Text style={styles.whyCheckMark}>✓</Text>
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.whyItemTitle}>Relatable Problem</Text>
-                <Text style={styles.whyItemBody}>
-                  Addressed common beginner creator frustration that drives comment debates.
-                </Text>
-              </View>
-            </View>
-
-            <View style={styles.whyDivider} />
-
-            <View style={styles.whyItem}>
-              <View style={styles.whyCheckCircle}>
-                <Text style={styles.whyCheckMark}>✓</Text>
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.whyItemTitle}>High Save-to-Share Ratio</Text>
-                <Text style={styles.whyItemBody}>
-                  Creators bookmarked this post as an actionable checklist for later.
-                </Text>
-              </View>
-            </View>
-          </View>
-
-          {/* CARD 4: RECOMMENDED CREATION (JARVIS TOPIC MATCH) */}
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>Recommended Creation</Text>
-          </View>
-
-          <View style={styles.recommendedCreationCard}>
-            <View style={styles.recommendedHeaderRow}>
-              <View style={styles.sparkleCircle}>
-                <Text style={{ fontSize: 14 }}>✨</Text>
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.recommendedSubtitle}>JARVIS AI AUTO-GENERATED TOPIC</Text>
-                <Text style={styles.recommendedTitle}>
-                  "3 tools every solo creator needs to save 10 hours a week"
-                </Text>
-              </View>
-            </View>
-
-            <View style={styles.recommendedMetaBox}>
-              <View style={styles.recommendedMetaItem}>
-                <Text style={styles.metaLabel}>ESTIMATED REACH</Text>
-                <Text style={styles.metaValue}>18K - 32K Views</Text>
-              </View>
-              <View style={styles.metaDivider} />
-              <View style={styles.recommendedMetaItem}>
-                <Text style={styles.metaLabel}>BEST POSTING TIME</Text>
-                <Text style={styles.metaValue}>Tomorrow, 6:30 PM</Text>
-              </View>
-            </View>
-
-            <Pressable
-              style={({ pressed }) => [styles.createTopicBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                }
-                if (onOpenComposer) {
-                  onOpenComposer('3 tools every solo creator needs to save 10 hours a week');
-                } else {
-                  showToast('Starting Studio Draft...');
-                }
-              }}
-            >
-              <LinearGradient
-                colors={['#582CDB', '#4318FF']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.actionBtnGradient}
-              >
-                <Text style={styles.createTopicBtnText}>✨ Create This Post ➔</Text>
-              </LinearGradient>
-            </Pressable>
-          </View>
-
-          {/* CARD 5: ENGAGEMENT QUALITY */}
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>Engagement Quality</Text>
-          </View>
-
-          <View style={styles.engagementQualityCard}>
-            {/* Saves */}
-            <View style={styles.engagementQualityRow}>
-              <View style={[styles.engagementIconBox, { backgroundColor: '#FEF3C7' }]}>
-                <Text style={{ fontSize: 18 }}>🔖</Text>
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.engagementNumber}>3,420 Saves</Text>
-                <Text style={styles.engagementSub}>Top 1% of all your posts</Text>
-              </View>
-              <View style={styles.qualityPillGold}>
-                <Text style={styles.qualityPillGoldText}>VERY HIGH</Text>
-              </View>
-            </View>
-
-            <View style={styles.engagementDivider} />
-
-            {/* Comments */}
-            <View style={styles.engagementQualityRow}>
-              <View style={[styles.engagementIconBox, { backgroundColor: '#EDE9FE' }]}>
-                <Text style={{ fontSize: 18 }}>💬</Text>
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.engagementNumber}>248 Comments</Text>
-                <Text style={styles.engagementSub}>High discussion &amp; question rate</Text>
-              </View>
-              <View style={styles.qualityPillPurple}>
-                <Text style={styles.qualityPillPurpleText}>STRONG</Text>
-              </View>
-            </View>
-
-            <View style={styles.engagementDivider} />
-
-            {/* Shares */}
-            <View style={styles.engagementQualityRow}>
-              <View style={[styles.engagementIconBox, { backgroundColor: '#ECFDF5' }]}>
-                <Text style={{ fontSize: 18 }}>↗️</Text>
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.engagementNumber}>330 Shares</Text>
-                <Text style={styles.engagementSub}>Sent to creator squads &amp; DMs</Text>
-              </View>
-              <View style={styles.qualityPillGreen}>
-                <Text style={styles.qualityPillGreenText}>HIGH</Text>
-              </View>
-            </View>
-          </View>
-
-          {/* CARD 6: JARVIS CORE INSIGHT */}
-          <View style={styles.jarvisCoreCard}>
-            <View style={styles.jarvisCoreAvatarBox}>
-              <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.jarvisCoreFlameImg}
-                resizeMode="contain"
-              />
-            </View>
-
-            <Text style={styles.jarvisCoreLabel}>JARVIS CORE INSIGHT</Text>
-            <Text style={styles.jarvisCoreText}>
-              This post succeeded because of high retention in the first 3 seconds. The pattern interrupt hook caused viewers to stop scrolling.
-            </Text>
-
-            <View style={styles.jarvisActionLinksRow}>
-              <Pressable
-                onPress={() => setShowJarvisExplanationModal(true)}
-                hitSlop={6}
-              >
-                <Text style={styles.jarvisLinkText}>How did you calculate this?</Text>
-              </Pressable>
-              <Pressable
-                onPress={() => {
-                  showToast('Remixing script in Creator Studio...');
-                  if (onOpenScript) {
-                    onOpenScript('Remix: 3 creator mistakes that are killing your growth');
-                  }
-                }}
-                hitSlop={6}
-              >
-                <Text style={styles.jarvisLinkText}>Remix this script ➔</Text>
-              </Pressable>
-            </View>
-          </View>
-
-          {/* CARD 7: WINNING CONTENT PATTERN */}
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>Winning Content Pattern</Text>
-          </View>
-
-          <View style={styles.patternGrid}>
-            <View style={styles.patternBox}>
-              <Text style={{ fontSize: 20, marginBottom: 4 }}>🗣️</Text>
-              <Text style={styles.patternLabel}>VOICE</Text>
-              <Text style={styles.patternValue}>Direct &amp; Actionable</Text>
-            </View>
-
-            <View style={styles.patternBox}>
-              <Text style={{ fontSize: 20, marginBottom: 4 }}>⏱️</Text>
-              <Text style={styles.patternLabel}>PACING</Text>
-              <Text style={styles.patternValue}>Fast Cuts (1.8s avg)</Text>
-            </View>
-
-            <View style={styles.patternBox}>
-              <Text style={{ fontSize: 20, marginBottom: 4 }}>📱</Text>
-              <Text style={styles.patternLabel}>FORMAT</Text>
-              <Text style={styles.patternValue}>Talking Head + Overlay</Text>
-            </View>
-          </View>
-
-          {/* CARD 8: THE HOOK BREAKDOWN */}
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>The Hook</Text>
-            <View style={styles.hookRetentionBadge}>
-              <Text style={styles.hookRetentionBadgeText}>+84% RETENTION</Text>
-            </View>
-          </View>
-
-          <View style={styles.hookCard}>
-            <Text style={styles.hookQuoteText}>
-              "3 creator mistakes that are killing your growth — stop doing #2 immediately!"
-            </Text>
-          </View>
-
-          {/* CARD 9: CAPTION & HASHTAG STRATEGY */}
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>Caption</Text>
-            <View style={styles.captionOptimizedBadge}>
-              <Text style={styles.captionOptimizedBadgeText}>OPTIMIZED ✓</Text>
-            </View>
-          </View>
-
-          <View style={styles.captionCard}>
-            <Text style={styles.captionBodyText}>
-              Stop making these mistakes if you want to grow in 2026. The 2nd one is why 90% of creators stay stuck at 1K followers. Comment 'GROWTH' and I'll send you the free checklist.
-            </Text>
-            <Text style={styles.captionHashtags}>
-              #creatoradvice #contentcreation #growontiktok #videoediting
-            </Text>
-          </View>
-
-          {/* CARD 10: REPURPOSE PREVIEW (SNEAK PEEK • LOCKED TO PRO) */}
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>Repurpose Preview</Text>
-            <View style={styles.proPillBadge}>
-              <Text style={styles.proPillBadgeText}>🔒 SNEAK PEEK • LOCKED TO PRO</Text>
-            </View>
-          </View>
-
-          <View style={styles.repurposeCard}>
-            <View style={styles.repurposeGrid}>
-              <View style={styles.repurposeGridItem}>
-                <View style={styles.repurposeItemHeader}>
-                  <Text style={styles.repurposeItemTitle}>📸 Instagram Reels</Text>
-                  <Text style={styles.repurposeFitBadge}>HIGH FIT</Text>
-                </View>
-                <Text style={styles.repurposeSnippetText}>"Hook adapted for 9:16 reels format..."</Text>
-                <Text style={styles.repurposeLockTag}>🔒 PRO PREVIEW</Text>
-              </View>
-
-              <View style={styles.repurposeGridItem}>
-                <View style={styles.repurposeItemHeader}>
-                  <Text style={styles.repurposeItemTitle}>▶️ YouTube Shorts</Text>
-                  <Text style={styles.repurposeFitBadge}>HIGH FIT</Text>
-                </View>
-                <Text style={styles.repurposeSnippetText}>"Loop pacing &amp; retention hook tuned..."</Text>
-                <Text style={styles.repurposeLockTag}>🔒 PRO PREVIEW</Text>
-              </View>
-
-              <View style={styles.repurposeGridItem}>
-                <View style={styles.repurposeItemHeader}>
-                  <Text style={styles.repurposeItemTitle}>💼 LinkedIn Post</Text>
-                  <Text style={styles.repurposeFitBadgeMedium}>MEDIUM FIT</Text>
-                </View>
-                <Text style={styles.repurposeSnippetText}>"Executive text breakdown with takeaways..."</Text>
-                <Text style={styles.repurposeLockTag}>🔒 PRO PREVIEW</Text>
-              </View>
-
-              <View style={styles.repurposeGridItem}>
-                <View style={styles.repurposeItemHeader}>
-                  <Text style={styles.repurposeItemTitle}>🧵 Threads Carousel</Text>
-                  <Text style={styles.repurposeFitBadge}>HIGH FIT</Text>
-                </View>
-                <Text style={styles.repurposeSnippetText}>"5-slide swipeable text hook..."</Text>
-                <Text style={styles.repurposeLockTag}>🔒 PRO PREVIEW</Text>
-              </View>
-            </View>
-
-            <Text style={styles.repurposeSubtext}>
-              Auto-convert this TikTok script into 4 optimized multi-platform assets with 1 click.
-            </Text>
-
-            <Pressable
-              style={({ pressed }) => [styles.repurposeUnlockBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                }
-                if (onOpenJarvisPro) {
-                  onOpenJarvisPro();
-                } else {
-                  handleRepurposePost();
-                }
-              }}
-            >
-              <LinearGradient
-                colors={['#FDE047', '#EAB308', '#CA8A04', '#A16207']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.repurposeUnlockGradient}
-              >
-                <Text style={styles.repurposeUnlockBtnText}>
-                  Unlock 1-Click Repurposing (Pro) ➔
-                </Text>
-              </LinearGradient>
-            </Pressable>
-          </View>
-
-          {/* CARD 11: AUDIENCE DEMOGRAPHICS FOR THIS POST */}
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>Audience for this post</Text>
-          </View>
-
-          <View style={styles.audienceForPostCard}>
-            <Text style={styles.audienceForPostSub}>
-              Viewers were primarily creators and aspiring influencers:
-            </Text>
-
-            <View style={styles.demographicRow}>
-              <View style={styles.demographicCol}>
-                <Text style={styles.demoLabel}>PRIMARY AGE</Text>
-                <Text style={styles.demoValue}>18-24 (58%)</Text>
-                <Text style={styles.demoSub}>25-34 (32%)</Text>
-              </View>
-              <View style={styles.demoDivider} />
-              <View style={styles.demographicCol}>
-                <Text style={styles.demoLabel}>TOP CITIES</Text>
-                <Text style={styles.demoValue}>London (24%)</Text>
-                <Text style={styles.demoSub}>Lagos, NYC, Toronto</Text>
-              </View>
-            </View>
-
-            <Pressable
-              style={({ pressed }) => [styles.unlockFullDemoBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                }
-                if (onOpenJarvisPro) {
-                  onOpenJarvisPro();
-                } else {
-                  showToast('Pro demographic analytics unlocked!');
-                }
-              }}
-            >
-              <LinearGradient
-                colors={['#FDE047', '#EAB308', '#CA8A04', '#A16207']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.unlockDemoGradient}
-              >
-                <Text style={styles.unlockFullDemoBtnText}>
-                  Unlock Full Demographic Report (Pro) ➔
-                </Text>
-              </LinearGradient>
-            </Pressable>
-          </View>
-
-          <View style={{ height: 100 }} />
+          {/* Who watched */}
+          <Animated.View entering={enter(380)}>
+            <Text style={styles.section}>Who watched</Text>
+            {tier === 'pro' ? (
+              <WhoAudienceCard />
+            ) : (
+              <ProUpsellCard title="See who watched this post" benefits={['Ages and places', 'When they were online', 'Who followed you after']} buttonTitle="Explore Pro" onUpgrade={() => onOpenJarvisPro?.()} />
+            )}
+          </Animated.View>
         </ScrollView>
+      </SafeAreaView>
 
-        {/* FLOATING LIQUID GLASS TAB BAR */}
-        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
-
-        
-        {/* NOTIFICATION MODAL */}
-        <Modal
-          visible={showNotificationModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowNotificationModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Notifications</Text>
-                  <Text style={styles.modalSubtitle}>Recent updates &amp; creator milestones</Text>
-                </View>
-                <Pressable onPress={() => setShowNotificationModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
-              </View>
-
-              <View style={styles.notifCard}>
-                <Text style={{ fontSize: 18 }}>🔥</Text>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.notifTitle}>Viral Post Milestone!</Text>
-                  <Text style={styles.notifBody}>Your TikTok post crossed 24.5K views with 71.6% retention.</Text>
-                </View>
-              </View>
-
-              <View style={[styles.notifCard, { marginTop: 8 }]}>
-                <Text style={{ fontSize: 18 }}>📈</Text>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.notifTitle}>+910 Followers Gained</Text>
-                  <Text style={styles.notifBody}>Single-post all-time high pace recorded by Jarvis.</Text>
-                </View>
-              </View>
-
-              <Pressable style={styles.modalFullBtn} onPress={() => setShowNotificationModal(false)}>
-                <Text style={styles.modalFullBtnText}>Close</Text>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
-
-        {/* PROFILE MODAL */}
-        <UserProfileModal
-          visible={showProfileModal}
-          onClose={() => setShowProfileModal(false)}
-          onLogout={onLogout}
-          initialProfile={userProfile}
-          onSaveProfile={onSaveProfile}
-        />
-
-        {/* JARVIS CALCULATION EXPLANATION MODAL */}
-        <Modal
-          visible={showJarvisExplanationModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowJarvisExplanationModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalCard}>
-              <View style={styles.modalHeaderRow}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                  <Text style={{ fontSize: 20 }}>🤖</Text>
-                  <Text style={styles.modalTitle}>Jarvis Performance Model</Text>
-                </View>
-                <Pressable
-                  onPress={() => setShowJarvisExplanationModal(false)}
-                  style={styles.modalCloseCircle}
-                  hitSlop={8}
-                >
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
-              </View>
-
-              <Text style={styles.modalBodyText}>
-                Jarvis computed this post's score by analyzing 4 core retention metrics:
-              </Text>
-
-              <View style={{ gap: 8, marginVertical: 12 }}>
-                <View style={styles.modalDetailRow}>
-                  <Text style={styles.modalDetailBullet}>1.</Text>
-                  <Text style={styles.modalDetailText}>
-                    <Text style={{ fontWeight: '900', color: '#171420' }}>First 3-Second Hook Retention:</Text> 84.2% stay rate (top 2% benchmark).
-                  </Text>
-                </View>
-                <View style={styles.modalDetailRow}>
-                  <Text style={styles.modalDetailBullet}>2.</Text>
-                  <Text style={styles.modalDetailText}>
-                    <Text style={{ fontWeight: '900', color: '#171420' }}>Save Multiplier:</Text> 3,420 saves (13.9% save rate vs 4.1% niche average).
-                  </Text>
-                </View>
-                <View style={styles.modalDetailRow}>
-                  <Text style={styles.modalDetailBullet}>3.</Text>
-                  <Text style={styles.modalDetailText}>
-                    <Text style={{ fontWeight: '900', color: '#171420' }}>Pacing Density:</Text> 1 cut every 1.8 seconds prevented drop-offs.
-                  </Text>
-                </View>
-              </View>
-
-              <Pressable
-                style={styles.modalDoneBtn}
-                onPress={() => setShowJarvisExplanationModal(false)}
-              >
-                <Text style={styles.modalDoneBtnText}>Understood ✓</Text>
-              </Pressable>
-            </View>
-          </View>
-        </Modal>
-
-        {/* CELEBRATION MODAL */}
-        <AnimatedCompletionModal
-          visible={showCelebrationModal}
-          title="Post Blueprint Unlocked! 🚀"
-          subtitle="You now have the exact retention and hook formula from your viral post."
-          badgeText="VIRAL BLUEPRINT"
-          xpEarned={100}
-          streakCount={47}
-          actionText="Create Next Post ➔"
-          onDismiss={() => {
-            setShowCelebrationModal(false);
-          }}
-        />
-      </View>
-    </SafeAreaView>
+      <FloatingTabBar activeTab="growth" onTabPress={(t) => onNavigateTab?.(t)} />
+      <UserProfileModal visible={showProfile} onClose={() => setShowProfile(false)} onLogout={onLogout} initialProfile={userProfile} onSaveProfile={onSaveProfile} />
+    </View>
   );
 };
 
+const glass = { backgroundColor: 'rgba(255, 255, 255, 0.82)', borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.95)' };
+
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#FAF8F5',
-  },
-  container: {
-    flex: 1,
-    backgroundColor: '#FAF8F5',
-  },
-  btnPressed: {
-    opacity: 0.78,
-    transform: [{ scale: 0.98 }],
-  },
+  root: { flex: 1, backgroundColor: ds.bg },
+  flex: { flex: 1 },
+  scroll: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 130, width: '100%', maxWidth: 560, alignSelf: 'center' },
+  headline: { marginTop: 4, marginBottom: 16 },
+  headlineText: { fontWeight: '800', letterSpacing: -0.9, color: ds.ink },
+  accent: { color: ds.purple },
+  sub: { fontSize: 14.5, lineHeight: 20, color: ds.text2, marginTop: 6 },
+  rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
+  section: { fontSize: 17, fontWeight: '800', color: ds.ink, letterSpacing: -0.2, marginTop: 24, marginBottom: 12 },
+  section2: { marginTop: 24 },
+  cardTitle: { fontSize: 17, fontWeight: '800', color: ds.ink },
+  cardSub: { fontSize: 12.5, fontWeight: '600', color: ds.text3, marginTop: 2 },
 
-  // 1. TOP HEADER
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F1EFEA',
-    backgroundColor: '#FAF8F5',
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  backBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#EDE8E1',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#171420',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  headerLogoWrapper: {
-    width: 32,
-    height: 32,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  headerGhostLogo: {
-    width: 28,
-    height: 28,
-  },
-  headerCenter: {
-    alignItems: 'center',
-  },
-  headerTitleText: {
-    fontSize: 16,
-    fontWeight: '900',
-    color: '#171420',
-    letterSpacing: -0.3,
-  },
-  headerSubtitleText: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#582CDB',
-    letterSpacing: 0.6,
-  },
-  headerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  headerIconBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#EDE8E1',
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
-  },
-  notificationDot: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#EF4444',
-  },
-  headerProfileBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    overflow: 'hidden',
-    borderWidth: 1.5,
-    borderColor: '#582CDB',
-  },
-  headerProfileImg: {
-    width: '100%',
-    height: '100%',
-  },
+  cover: { height: 220, borderRadius: 18, overflow: 'hidden', justifyContent: 'flex-end', padding: 14 },
+  coverImg: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' },
+  coverChip: { position: 'absolute', top: 12, left: 12, paddingHorizontal: 8, height: 24, borderRadius: 999, justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.45)' },
+  coverChipText: { fontSize: 11.5, fontWeight: '800', color: '#FFFFFF' },
+  playBtn: { position: 'absolute', top: '40%', alignSelf: 'center', width: 48, height: 48, borderRadius: 24, backgroundColor: 'rgba(0,0,0,0.4)', alignItems: 'center', justifyContent: 'center', paddingLeft: 3 },
+  coverTitle: { fontSize: 17, lineHeight: 22, fontWeight: '800', color: '#FFFFFF' },
+  stats: { flexDirection: 'row', marginTop: 12 },
+  stat: { flex: 1, alignItems: 'center' },
+  statValue: { fontSize: 20, fontWeight: '800', color: ds.ink },
+  statLabel: { fontSize: 11.5, fontWeight: '700', color: ds.text3, marginTop: 1 },
 
-  // SCROLL CONTENT
-  scrollContent: {
-    flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 12,
-  },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 10 },
+  tile: { width: '48.5%', padding: 12, borderRadius: 18, ...glass },
+  tileLabel: { fontSize: 11.5, fontWeight: '800', color: ds.text3 },
+  tileValue: { fontSize: 20, fontWeight: '800', color: ds.ink, marginTop: 2 },
+  tileNote: { fontSize: 12, lineHeight: 16, fontWeight: '700', color: ds.greenFill, marginTop: 4 },
 
-  // SECTION SWITCH CHIPS
-  sectionSwitchRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 16,
-  },
-  sectionSwitchChip: {
-    paddingVertical: 7,
-    paddingHorizontal: 14,
-    borderRadius: 100,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#EDE8E1',
-  },
-  sectionSwitchChipActive: {
-    backgroundColor: '#582CDB',
-    borderColor: '#582CDB',
-  },
-  sectionSwitchChipText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#64748B',
-    letterSpacing: 0.4,
-  },
-  sectionSwitchChipTextActive: {
-    color: '#FFFFFF',
-    fontWeight: '900',
-  },
+  curveBox: { height: CH, marginTop: 14 },
+  curveHit: { position: 'absolute', width: 36, height: 36 },
+  curveAxis: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 },
+  axisText: { fontSize: 11, fontWeight: '700', color: ds.text3 },
+  note: { marginTop: 12, padding: 12, borderRadius: 16, backgroundColor: 'rgba(245, 243, 255, 0.9)' },
+  noteTitle: { fontSize: 14, fontWeight: '800', color: ds.ink },
+  notePct: { fontSize: 13, fontWeight: '800', color: ds.purple },
+  noteText: { fontSize: 13.5, lineHeight: 19, color: ds.text2, marginTop: 4 },
 
-  // HERO TITLES
-  badgePillRow: {
-    marginBottom: 6,
-  },
-  deepDivePill: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#EDE9FE',
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 6,
-  },
-  deepDivePillText: {
-    fontSize: 10,
-    fontWeight: '900',
-    color: '#582CDB',
-    letterSpacing: 0.5,
-  },
-  mainTitle: {
-    fontSize: 24,
-    fontWeight: '900',
-    color: '#171420',
-    letterSpacing: -0.6,
-    marginBottom: 4,
-  },
-  mainSubtitle: {
-    fontSize: 13,
-    color: '#64748B',
-    lineHeight: 18,
-    marginBottom: 18,
-  },
+  stand: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, paddingHorizontal: 12, paddingVertical: 14 },
+  standLine: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: 'rgba(23, 20, 32, 0.08)' },
+  standNum: { width: 28, height: 28, borderRadius: 14, backgroundColor: ds.lavender, alignItems: 'center', justifyContent: 'center' },
+  standNumOn: { backgroundColor: ds.purple },
+  standNumText: { fontSize: 13, fontWeight: '800', color: ds.purple },
+  standTitle: { fontSize: 15.5, fontWeight: '800', color: ds.ink, marginTop: 4 },
+  standBody: { fontSize: 13.5, lineHeight: 19, color: ds.text2, marginTop: 4 },
+  quote: { fontSize: 14, lineHeight: 20, fontWeight: '700', fontStyle: 'italic', color: ds.purple, marginTop: 8 },
 
-  // SECTION HEADERS
-  sectionHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
-    marginTop: 6,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '900',
-    color: '#171420',
-    letterSpacing: -0.3,
-  },
-
-  // CARD 1: BEST POST HERO CARD
-  bestPostCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: '#EDE8E1',
-    padding: 14,
-    marginBottom: 18,
-    shadowColor: '#171420',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.06,
-    shadowRadius: 16,
-    elevation: 3,
-  },
-  videoPreviewContainer: {
-    width: '100%',
-    height: 240,
-    borderRadius: 18,
-    overflow: 'hidden',
-    position: 'relative',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  videoThumbnail: {
-    width: '100%',
-    height: '100%',
-  },
-  topPostBadge: {
-    position: 'absolute',
-    top: 12,
-    left: 12,
-    backgroundColor: '#FBBF24',
-    paddingVertical: 4,
-    paddingHorizontal: 9,
-    borderRadius: 6,
-  },
-  topPostBadgeText: {
-    fontSize: 9.5,
-    fontWeight: '900',
-    color: '#171420',
-    letterSpacing: 0.4,
-  },
-  playButtonCircle: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  playIconTriangle: {
-    fontSize: 18,
-    color: '#582CDB',
-    marginLeft: 3,
-  },
-  videoMetaContainer: {
-    position: 'absolute',
-    bottom: 12,
-    left: 12,
-    right: 12,
-  },
-  videoAuthorRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginBottom: 4,
-  },
-  videoAuthorAvatar: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#FFFFFF',
-  },
-  videoAuthorName: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    textShadowColor: 'rgba(0,0,0,0.5)',
-    textShadowRadius: 3,
-  },
-  videoPostTitle: {
-    fontSize: 14,
-    fontWeight: '900',
-    color: '#FFFFFF',
-    lineHeight: 18,
-    textShadowColor: 'rgba(0,0,0,0.6)',
-    textShadowRadius: 4,
-  },
-
-  // 3-Column Stats Bar
-  postStatsBar: {
-    flexDirection: 'row',
-    backgroundColor: '#FAF8F5',
-    borderRadius: 14,
-    paddingVertical: 10,
-    paddingHorizontal: 8,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#EDE8E1',
-  },
-  postStatItem: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  postStatLabel: {
-    fontSize: 9,
-    fontWeight: '900',
-    color: '#64748B',
-    letterSpacing: 0.5,
-    marginBottom: 2,
-  },
-  postStatValue: {
-    fontSize: 15,
-    fontWeight: '900',
-    color: '#171420',
-  },
-  postStatDivider: {
-    width: 1,
-    height: '80%',
-    backgroundColor: '#E2E8F0',
-    alignSelf: 'center',
-  },
-
-  // Dual Action Buttons
-  postActionsRow: {
-    gap: 8,
-  },
-  postEarningsChip: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#FAF5FF',
-    borderRadius: 12,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderWidth: 1,
-    borderColor: '#E9D5FF',
-    marginBottom: 12,
-  },
-  postEarningsChipText: {
-    fontSize: 11.5,
-    fontWeight: '800',
-    color: '#171420',
-  },
-  postEarningsChipLink: {
-    fontSize: 10.5,
-    fontWeight: '900',
-    color: '#582CDB',
-  },
-  createSimilarBtn: {
-    height: 46,
-    borderRadius: 14,
-    overflow: 'hidden',
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  actionBtnGradient: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  createSimilarBtnText: {
-    fontSize: 13,
-    fontWeight: '900',
-    color: '#FFFFFF',
-    letterSpacing: 0.3,
-  },
-  repurposeBtn: {
-    height: 44,
-    borderRadius: 14,
-    backgroundColor: '#FAF8F5',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  repurposeBtnText: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: '#171420',
-  },
-
-  // CARD 2: PERFORMANCE 2x2 GRID
-  perfGrid2x2: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-    marginBottom: 10,
-  },
-  perfMetricBox: {
-    width: '48.2%',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: '#EDE8E1',
-    padding: 14,
-    shadowColor: '#171420',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 1,
-  },
-  perfMetricLabel: {
-    fontSize: 9.5,
-    fontWeight: '900',
-    color: '#64748B',
-    letterSpacing: 0.4,
-    marginBottom: 4,
-  },
-  perfMetricValue: {
-    fontSize: 20,
-    fontWeight: '900',
-    color: '#171420',
-    letterSpacing: -0.4,
-    marginBottom: 6,
-  },
-  perfSurgePillGreen: {
-    backgroundColor: '#ECFDF5',
-    paddingVertical: 3,
-    paddingHorizontal: 7,
-    borderRadius: 6,
-    alignSelf: 'flex-start',
-  },
-  perfSurgeTextGreen: {
-    fontSize: 9.5,
-    fontWeight: '900',
-    color: '#059669',
-  },
-  perfSurgePillNeutral: {
-    backgroundColor: '#F1F5F9',
-    paddingVertical: 3,
-    paddingHorizontal: 7,
-    borderRadius: 6,
-    alignSelf: 'flex-start',
-  },
-  perfSurgeTextNeutral: {
-    fontSize: 9.5,
-    fontWeight: '800',
-    color: '#475569',
-  },
-  perfSurgePillPurple: {
-    backgroundColor: '#FAF5FF',
-    paddingVertical: 3,
-    paddingHorizontal: 7,
-    borderRadius: 6,
-    alignSelf: 'flex-start',
-  },
-  perfSurgeTextPurple: {
-    fontSize: 9.5,
-    fontWeight: '900',
-    color: '#582CDB',
-  },
-  perfSurgePillGold: {
-    backgroundColor: '#FEF3C7',
-    paddingVertical: 3,
-    paddingHorizontal: 7,
-    borderRadius: 6,
-    alignSelf: 'flex-start',
-  },
-  perfSurgeTextGold: {
-    fontSize: 9.5,
-    fontWeight: '900',
-    color: '#B45309',
-  },
-
-  // Highlight Callout Banner
-  perfCalloutBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    backgroundColor: '#EDE9FE',
-    borderRadius: 16,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: '#DDD6FE',
-    marginBottom: 18,
-  },
-  perfCalloutText: {
-    flex: 1,
-    fontSize: 12,
-    color: '#3B1A82',
-    lineHeight: 17,
-    fontWeight: '600',
-  },
-
-  // CARD 3: WHY IT WORKED
-  whyItWorkedCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#EDE8E1',
-    padding: 16,
-    marginBottom: 18,
-    shadowColor: '#171420',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.04,
-    shadowRadius: 10,
-    elevation: 2,
-  },
-  whyItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 10,
-  },
-  whyCheckCircle: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: '#EDE9FE',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 1,
-  },
-  whyCheckMark: {
-    fontSize: 12,
-    fontWeight: '900',
-    color: '#582CDB',
-  },
-  whyItemTitle: {
-    fontSize: 13,
-    fontWeight: '900',
-    color: '#171420',
-    marginBottom: 2,
-  },
-  whyItemBody: {
-    fontSize: 11.5,
-    color: '#64748B',
-    lineHeight: 16,
-  },
-  whyDivider: {
-    height: 1,
-    backgroundColor: '#F1F5F9',
-    marginVertical: 12,
-  },
-
-  // CARD 4: RECOMMENDED CREATION
-  recommendedCreationCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 22,
-    borderWidth: 1,
-    borderColor: '#EDE8E1',
-    padding: 16,
-    marginBottom: 18,
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    elevation: 2,
-  },
-  recommendedHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 10,
-    marginBottom: 12,
-  },
-  sparkleCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
-    backgroundColor: '#FAF5FF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E9D5FF',
-  },
-  recommendedSubtitle: {
-    fontSize: 9,
-    fontWeight: '900',
-    color: '#582CDB',
-    letterSpacing: 0.5,
-    marginBottom: 2,
-  },
-  recommendedTitle: {
-    fontSize: 14,
-    fontWeight: '900',
-    color: '#171420',
-    lineHeight: 19,
-  },
-  recommendedMetaBox: {
-    flexDirection: 'row',
-    backgroundColor: '#FAF8F5',
-    borderRadius: 14,
-    padding: 10,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#EDE8E1',
-  },
-  recommendedMetaItem: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  metaLabel: {
-    fontSize: 8.5,
-    fontWeight: '900',
-    color: '#64748B',
-    letterSpacing: 0.4,
-    marginBottom: 2,
-  },
-  metaValue: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: '#171420',
-  },
-  metaDivider: {
-    width: 1,
-    height: '80%',
-    backgroundColor: '#E2E8F0',
-    alignSelf: 'center',
-  },
-  createTopicBtn: {
-    height: 44,
-    borderRadius: 14,
-    overflow: 'hidden',
-  },
-  createTopicBtnText: {
-    fontSize: 13,
-    fontWeight: '900',
-    color: '#FFFFFF',
-    letterSpacing: 0.3,
-  },
-
-  // CARD 5: ENGAGEMENT QUALITY
-  engagementQualityCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#EDE8E1',
-    padding: 16,
-    marginBottom: 18,
-  },
-  engagementQualityRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  engagementIconBox: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  engagementNumber: {
-    fontSize: 14,
-    fontWeight: '900',
-    color: '#171420',
-  },
-  engagementSub: {
-    fontSize: 11,
-    color: '#64748B',
-    marginTop: 1,
-  },
-  qualityPillGold: {
-    backgroundColor: '#FEF3C7',
-    paddingVertical: 3,
-    paddingHorizontal: 8,
-    borderRadius: 6,
-  },
-  qualityPillGoldText: {
-    fontSize: 9,
-    fontWeight: '900',
-    color: '#B45309',
-  },
-  qualityPillPurple: {
-    backgroundColor: '#FAF5FF',
-    paddingVertical: 3,
-    paddingHorizontal: 8,
-    borderRadius: 6,
-  },
-  qualityPillPurpleText: {
-    fontSize: 9,
-    fontWeight: '900',
-    color: '#582CDB',
-  },
-  qualityPillGreen: {
-    backgroundColor: '#ECFDF5',
-    paddingVertical: 3,
-    paddingHorizontal: 8,
-    borderRadius: 6,
-  },
-  qualityPillGreenText: {
-    fontSize: 9,
-    fontWeight: '900',
-    color: '#059669',
-  },
-  engagementDivider: {
-    height: 1,
-    backgroundColor: '#F1F5F9',
-    marginVertical: 12,
-  },
-
-  // CARD 6: JARVIS CORE INSIGHT
-  jarvisCoreCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 22,
-    borderWidth: 1,
-    borderColor: '#EDE8E1',
-    padding: 18,
-    marginBottom: 18,
-    alignItems: 'center',
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 2,
-  },
-  jarvisCoreAvatarBox: {
-    width: 46,
-    height: 46,
-    borderRadius: 16,
-    backgroundColor: '#FAF5FF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  jarvisCoreFlameImg: {
-    width: 32,
-    height: 32,
-  },
-  jarvisCoreLabel: {
-    fontSize: 10,
-    fontWeight: '900',
-    color: '#582CDB',
-    letterSpacing: 0.6,
-    marginBottom: 4,
-  },
-  jarvisCoreText: {
-    fontSize: 13,
-    color: '#334155',
-    textAlign: 'center',
-    lineHeight: 18,
-    marginBottom: 12,
-  },
-  jarvisActionLinksRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 16,
-  },
-  jarvisLinkText: {
-    fontSize: 11.5,
-    fontWeight: '800',
-    color: '#582CDB',
-    textDecorationLine: 'underline',
-  },
-
-  // CARD 7: WINNING CONTENT PATTERN
-  patternGrid: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 18,
-  },
-  patternBox: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#EDE8E1',
-    padding: 12,
-    alignItems: 'center',
-  },
-  patternLabel: {
-    fontSize: 9,
-    fontWeight: '900',
-    color: '#64748B',
-    letterSpacing: 0.4,
-    marginBottom: 2,
-  },
-  patternValue: {
-    fontSize: 11.5,
-    fontWeight: '900',
-    color: '#171420',
-    textAlign: 'center',
-  },
-
-  // CARD 8: THE HOOK
-  hookRetentionBadge: {
-    backgroundColor: '#FEF3C7',
-    paddingVertical: 2,
-    paddingHorizontal: 6,
-    borderRadius: 4,
-  },
-  hookRetentionBadgeText: {
-    fontSize: 9,
-    fontWeight: '900',
-    color: '#B45309',
-  },
-  hookCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: '#EDE8E1',
-    padding: 16,
-    marginBottom: 18,
-    borderLeftWidth: 4,
-    borderLeftColor: '#582CDB',
-  },
-  hookQuoteText: {
-    fontSize: 13.5,
-    fontWeight: '800',
-    color: '#171420',
-    lineHeight: 19,
-    fontStyle: 'italic',
-  },
-
-  // CARD 9: CAPTION
-  captionOptimizedBadge: {
-    backgroundColor: '#DCFCE7',
-    paddingVertical: 2,
-    paddingHorizontal: 6,
-    borderRadius: 4,
-  },
-  captionOptimizedBadgeText: {
-    fontSize: 9,
-    fontWeight: '900',
-    color: '#15803D',
-  },
-  captionCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: '#EDE8E1',
-    padding: 16,
-    marginBottom: 18,
-  },
-  captionBodyText: {
-    fontSize: 12.5,
-    color: '#334155',
-    lineHeight: 18,
-    marginBottom: 8,
-  },
-  captionHashtags: {
-    fontSize: 11.5,
-    fontWeight: '700',
-    color: '#582CDB',
-    lineHeight: 16,
-  },
-
-  // CARD 10: REPURPOSE PREVIEW (LOCKED TO PRO)
-  proPillBadge: {
-    backgroundColor: '#FEF9C3',
-    paddingVertical: 3,
-    paddingHorizontal: 8,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: '#FDE047',
-  },
-  proPillBadgeText: {
-    fontSize: 9,
-    fontWeight: '900',
-    color: '#A16207',
-    letterSpacing: 0.3,
-  },
-  repurposeCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 22,
-    borderWidth: 1,
-    borderColor: '#FEF08A',
-    padding: 16,
-    marginBottom: 18,
-    shadowColor: '#FDE047',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 14,
-    elevation: 3,
-  },
-  repurposeGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 12,
-  },
-  repurposeGridItem: {
-    width: '48.5%',
-    backgroundColor: '#FAF8F5',
-    borderRadius: 14,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-  },
-  repurposeItemHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  repurposeItemTitle: {
-    fontSize: 10.5,
-    fontWeight: '800',
-    color: '#171420',
-  },
-  repurposeFitBadge: {
-    fontSize: 7.5,
-    fontWeight: '900',
-    color: '#059669',
-    backgroundColor: '#ECFDF5',
-    paddingVertical: 1.5,
-    paddingHorizontal: 4,
-    borderRadius: 4,
-  },
-  repurposeFitBadgeMedium: {
-    fontSize: 7.5,
-    fontWeight: '900',
-    color: '#B45309',
-    backgroundColor: '#FEF3C7',
-    paddingVertical: 1.5,
-    paddingHorizontal: 4,
-    borderRadius: 4,
-  },
-  repurposeSnippetText: {
-    fontSize: 10,
-    color: '#64748B',
-    fontStyle: 'italic',
-    lineHeight: 14,
-    marginVertical: 4,
-  },
-  repurposeLockTag: {
-    fontSize: 8.5,
-    fontWeight: '900',
-    color: '#A16207',
-    marginTop: 2,
-  },
-  repurposeSubtext: {
-    fontSize: 11.5,
-    color: '#64748B',
-    marginBottom: 12,
-    lineHeight: 16,
-  },
-  repurposeUnlockBtn: {
-    height: 46,
-    borderRadius: 14,
-    overflow: 'hidden',
-    shadowColor: '#FDE047',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  repurposeUnlockGradient: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  repurposeUnlockBtnText: {
-    fontSize: 12.5,
-    fontWeight: '900',
-    color: '#171420',
-    letterSpacing: -0.2,
-  },
-
-  // CARD 11: AUDIENCE DEMOGRAPHICS FOR THIS POST
-  audienceForPostCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#EDE8E1',
-    padding: 16,
-    marginBottom: 18,
-  },
-  audienceForPostSub: {
-    fontSize: 12,
-    color: '#64748B',
-    marginBottom: 12,
-  },
-  demographicRow: {
-    flexDirection: 'row',
-    backgroundColor: '#FAF8F5',
-    borderRadius: 14,
-    padding: 12,
-    marginBottom: 14,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-  },
-  demographicCol: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  demoLabel: {
-    fontSize: 8.5,
-    fontWeight: '900',
-    color: '#64748B',
-    letterSpacing: 0.4,
-    marginBottom: 2,
-  },
-  demoValue: {
-    fontSize: 13,
-    fontWeight: '900',
-    color: '#171420',
-  },
-  demoSub: {
-    fontSize: 10.5,
-    color: '#64748B',
-    marginTop: 2,
-  },
-  demoDivider: {
-    width: 1,
-    height: '80%',
-    backgroundColor: '#E2E8F0',
-    alignSelf: 'center',
-  },
-  unlockFullDemoBtn: {
-    height: 46,
-    borderRadius: 14,
-    overflow: 'hidden',
-    shadowColor: '#FDE047',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  unlockDemoGradient: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  unlockFullDemoBtnText: {
-    fontSize: 12.5,
-    fontWeight: '900',
-    color: '#171420',
-    letterSpacing: -0.2,
-  },
-
-  // MODALS
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(15, 12, 24, 0.65)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
-  modalCard: {
-    width: '100%',
-    maxWidth: 380,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    padding: 20,
-    shadowColor: '#171420',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.25,
-    shadowRadius: 28,
-    elevation: 8,
-  },
-  modalHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  modalCloseCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#F1F5F9',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalCloseCross: {
-    fontSize: 14,
-    color: '#64748B',
-    fontWeight: '800',
-  },
-  modalTitle: {
-    fontSize: 17,
-    fontWeight: '900',
-    color: '#171420',
-  },
-  modalBodyText: {
-    fontSize: 12.5,
-    color: '#475569',
-    lineHeight: 18,
-  },
-  modalDetailRow: {
-    flexDirection: 'row',
-    gap: 6,
-    alignItems: 'flex-start',
-  },
-  modalDetailBullet: {
-    fontSize: 12,
-    fontWeight: '900',
-    color: '#582CDB',
-  },
-  modalDetailText: {
-    flex: 1,
-    fontSize: 12,
-    color: '#475569',
-    lineHeight: 17,
-  },
-  modalDoneBtn: {
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: '#582CDB',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  modalDoneBtnText: {
-    fontSize: 13,
-    fontWeight: '900',
-    color: '#FFFFFF',
-  },
-
-  notifCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    backgroundColor: '#FAF8F5',
-    borderRadius: 14,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#EFEBF8',
-  },
-  notifTitle: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: '#171420',
-    marginBottom: 2,
-  },
-  notifBody: {
-    fontSize: 11.5,
-    color: '#64748B',
-  },
-  modalSubtitle: {
-    fontSize: 12,
-    color: '#64748B',
-    marginTop: 1,
-  },
-  modalFullBtn: {
-    height: 44,
-    borderRadius: 14,
-    backgroundColor: '#582CDB',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 14,
-  },
-  modalFullBtnText: {
-    fontSize: 13.5,
-    fontWeight: '900',
-    color: '#FFFFFF',
-  },
-
-  // TOAST
-  toastContainer: {
-    position: 'absolute',
-    top: Platform.OS === 'ios' ? 56 : 30,
-    left: 20,
-    right: 20,
-    backgroundColor: '#171420',
-    borderRadius: 14,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    zIndex: 9999,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
-    elevation: 8,
-    alignItems: 'center',
-  },
-  toastText: {
-    color: '#FFFFFF',
-    fontSize: 12.5,
-    fontWeight: '900',
-    letterSpacing: 0.2,
-  },
+  jarvis: { marginTop: 24 },
+  jarvisHead: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  jarvisTitle: { fontSize: 16, fontWeight: '800', color: ds.ink },
+  jarvisBody: { fontSize: 14, lineHeight: 20, color: ds.text2, marginTop: 10 },
+  actions: { gap: 10, marginTop: 14 },
 });

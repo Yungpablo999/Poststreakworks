@@ -2,15 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   StyleSheet,
   View,
-  Text,
   Modal,
   Image,
   Pressable,
   Platform,
   Dimensions,
   Animated,
-  TextInput,
 } from 'react-native';
+import { Text, TextInput } from './ui/AppText';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -28,9 +27,9 @@ export const TinyGoldCheck = ({ size = 13 }: { size?: number }) => (
       borderColor: '#FFFFFF',
       justifyContent: 'center',
       alignItems: 'center',
-      shadowColor: '#CA8A04',
+      shadowColor: '#F59E0B',
       shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.35,
+      shadowOpacity: 0.12,
       shadowRadius: 2,
       elevation: 2,
     }}
@@ -429,7 +428,7 @@ const styles = StyleSheet.create({
   headerAvatar: {
     width: 42,
     height: 42,
-    borderRadius: 21,
+    borderRadius: 20,
     borderWidth: 2,
     borderColor: '#FFFFFF',
   },
@@ -440,7 +439,7 @@ const styles = StyleSheet.create({
   },
   creatorNameText: {
     fontSize: 15,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
   streakBadgePill: {
@@ -451,7 +450,7 @@ const styles = StyleSheet.create({
   },
   streakBadgeText: {
     fontSize: 9.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
   storyTimeText: {
@@ -470,7 +469,7 @@ const styles = StyleSheet.create({
   closeCrossText: {
     color: '#FFFFFF',
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
   },
 
   // CONTENT
@@ -484,7 +483,7 @@ const styles = StyleSheet.create({
     padding: 22,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.08,
     shadowRadius: 20,
     elevation: 8,
   },
@@ -498,13 +497,13 @@ const styles = StyleSheet.create({
   },
   slideTagText: {
     fontSize: 9.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.5,
   },
   slideTitleText: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     marginBottom: 4,
   },
@@ -562,7 +561,7 @@ const styles = StyleSheet.create({
   },
   highlightViewsVal: {
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   highlightSavesVal: {
@@ -580,8 +579,8 @@ const styles = StyleSheet.create({
   },
   milestoneBadgePillText: {
     fontSize: 10,
-    fontWeight: '900',
-    color: '#92400E',
+    fontWeight: '700',
+    color: '#B45309',
   },
 
   // BOTTOM BAR
@@ -626,6 +625,6 @@ const styles = StyleSheet.create({
   collabPitchBtnText: {
     color: '#FFFFFF',
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
   },
 });

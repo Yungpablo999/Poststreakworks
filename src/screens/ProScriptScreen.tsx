@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   StyleSheet,
   View,
-  Text,
   ScrollView,
   Pressable,
   Platform,
@@ -10,10 +9,12 @@ import {
   Modal,
   Image,
   Dimensions,
+  useWindowDimensions,
   SafeAreaView,
   StatusBar,
-  TextInput,
 } from 'react-native';
+import { Text, TextInput } from '../components/ui/AppText';
+import { BrandLogo } from '../components/BrandLogo';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
@@ -23,15 +24,125 @@ import { UserProfileModal, UserProfileData } from '../components/UserProfileModa
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { TinyGoldCheck } from '../components/CreatorStoryModal';
 import { SocialBrandIcon } from '../components/SocialBrandIcon';
+import { sFont } from '../utils/responsive';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+interface StructureStepItem {
+  step: number;
+  title: string;
+  timing: string;
+  focus: string;
+  snippet: string;
+  visualCue: string;
+  voicePacing: string;
+  editingCue: string;
+}
+
+const STRUCTURE_STEPS: StructureStepItem[] = [
+  {
+    step: 1,
+    title: 'Hook',
+    timing: '0–3s',
+    focus: '3-sec thumbstopper',
+    snippet: '“Most new creators do not fail because they lack ideas. They fail because they wait too long to post.”',
+    visualCue: 'Direct-to-camera punch-in (1.1x) in the first 0.8s to create an immediate visual interruption.',
+    voicePacing: 'High urgency, confident assertive cadence with zero pre-intro silence.',
+    editingCue: 'Kinetic text overlay on screen with subtle sound pop on the first 3 words.',
+  },
+  {
+    step: 2,
+    title: 'Mistake 1',
+    timing: '3–14s',
+    focus: 'Problem #1 reveal',
+    snippet: '“Waiting for the perfect idea. It doesn’t exist. Good ideas come from publishing through the average ones.”',
+    visualCue: 'Direct-to-camera crop shift with on-screen bold keyword callout.',
+    voicePacing: 'Assertive, conversational tempo; keep transitions tight without dead air.',
+    editingCue: 'Quick jump cut on “Mistake 1”, followed by a subtle woosh transition.',
+  },
+  {
+    step: 3,
+    title: 'Mistake 2',
+    timing: '14–25s',
+    focus: 'Friction point',
+    snippet: '“Over-editing for 6 hours. If you’re spending six hours editing every post, you’re making consistency much harder than it needs to be.”',
+    visualCue: 'Angle switch or quick b-roll cut to editing timeline / screen capture.',
+    voicePacing: 'Relatable tone, slight cadence drop to deliver the reality check with impact.',
+    editingCue: 'Speed ramp or split-screen highlight at the 18-second retention check.',
+  },
+  {
+    step: 4,
+    title: 'Mistake 3',
+    timing: '25–36s',
+    focus: 'Systems bottleneck',
+    snippet: '“Zero system. Re-inventing the wheel every morning leads directly to creator burnout.”',
+    visualCue: 'Medium close-up framing with side-panel graphic showing workflow steps.',
+    voicePacing: 'Grounded, authoritative cadence; emphasize the word “System” for weight.',
+    editingCue: 'Highlight pill animation on screen to visually lock in the main takeaway.',
+  },
+  {
+    step: 5,
+    title: 'CTA',
+    timing: '36–42s',
+    focus: 'Engagement question',
+    snippet: '“Which of these three is slowing you down the most? Let me know in the comments.”',
+    visualCue: 'Direct eye contact, natural hand gesture pointing toward the comment section below.',
+    voicePacing: 'Warm, inviting, open-ended question designed to encourage comments.',
+    editingCue: 'Animated comment prompt sticker + clean sound chime.',
+  },
+];
+
+interface ScriptSectionBlock {
+  id: string;
+  tag: string;
+  timing: string;
+  content: string;
+  placeholder?: string;
+}
+
+const INITIAL_SCRIPT_SECTIONS: ScriptSectionBlock[] = [
+  {
+    id: 'hook',
+    tag: 'HOOK',
+    timing: '0–3s',
+    content: 'Most new creators do not fail because they lack ideas. They fail because they wait too long to post.',
+    placeholder: 'Hook script...',
+  },
+  {
+    id: 'mistake1',
+    tag: 'MISTAKE 1',
+    timing: '3–14s',
+    content: 'Waiting for the "Perfect Idea". It doesn\'t exist. Good ideas come from publishing through the average ones.',
+    placeholder: 'Mistake 1 breakdown...',
+  },
+  {
+    id: 'mistake2',
+    tag: 'MISTAKE 2',
+    timing: '14–25s',
+    content: 'Over-editing for 6 hours. If you’re spending six hours editing every post, you’re making consistency much harder than it needs to be.',
+    placeholder: 'Mistake 2 breakdown...',
+  },
+  {
+    id: 'mistake3',
+    tag: 'MISTAKE 3',
+    timing: '25–36s',
+    content: 'Zero system. Starting from scratch every single time leads directly to creator burnout.',
+    placeholder: 'Mistake 3 breakdown...',
+  },
+  {
+    id: 'cta',
+    tag: 'CTA',
+    timing: '36–42s',
+    content: 'Which of these three is slowing you down the most? Let me know in the comments.',
+    placeholder: 'Call to action...',
+  },
+];
 
 interface ProScriptScreenProps {
   ideaTitle?: string;
   onBack: () => void;
   onLogout?: () => void;
   onOpenSchedule?: () => void;
-  onOpenMessages?: () => void;
   onOpenJarvisPro?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onOpenVoiceStudio?: (scriptText?: string, scriptTitle?: string) => void;
@@ -47,7 +158,6 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
   onBack,
   onLogout,
   onOpenSchedule,
-  onOpenMessages,
   onOpenJarvisPro,
   onNavigateTab,
   onOpenVoiceStudio,
@@ -57,6 +167,10 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
   userProfile,
   onSaveProfile,
 }) => {
+  const { width: windowWidth } = useWindowDimensions();
+  // Dynamically compute font size so 38 characters fit on a single line on any device screen without truncation
+  const titleFontSize = Math.min(19, Math.max(14, (windowWidth - 44) / 21));
+
   const [activeTab, setActiveTab] = useState<TabType>('create');
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
@@ -73,7 +187,7 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
     {
       badge: 'BEST PERFORMING',
       text: 'Most new creators do not fail because they lack ideas. They fail because they wait too long to post.',
-      type: 'Direct • High Retention',
+      type: 'Direct • High Hook Potential',
     },
     {
       badge: 'CURIOSITY GAP',
@@ -87,14 +201,24 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
     },
   ]);
 
-  const [scriptBody, setScriptBody] = useState(
-    `[Hook] Most new creators do not fail because they lack ideas. They fail because they wait too long to post.\n\nLook, I get it. You want it to be perfect. But perfectionism is just procrastination in a fancy suit.\n\nMistake one: Waiting for the "Perfect Idea". It doesn't exist. Good ideas come from the data of bad ones.\n\nMistake two: Editing for 6 hours. If it takes you that long, your audience's attention span is over in 3 seconds anyway.\n\nMistake three: Not having a repeatable workflow. You're starting from scratch every single time.\n\n[CTA] Which of these three is slowing you down the most? Let me know in the comments.`
-  );
+  const [scriptSections, setScriptSections] = useState<ScriptSectionBlock[]>(INITIAL_SCRIPT_SECTIONS);
+
+  // Computes unified script text for Voice Studio and Draft exports
+  const getFullScriptText = () => {
+    return scriptSections.map(s => `[${s.tag}] ${s.content}`).join('\n\n');
+  };
+
+  const handleUpdateSectionContent = (id: string, newContent: string) => {
+    setScriptSections(prev =>
+      prev.map(section => (section.id === id ? { ...section, content: newContent } : section))
+    );
+  };
 
   const [isPlayingPreview, setIsPlayingPreview] = useState(false);
   const [isAccelerated, setIsAccelerated] = useState(false);
-  const [selectedFormat, setSelectedFormat] = useState('9:16 Video (42s)');
+  const [selectedFormat, setSelectedFormat] = useState('30-60s');
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['tiktok', 'instagram', 'youtube']);
+  const [expandedStructureIndex, setExpandedStructureIndex] = useState<number | null>(null);
   const [completionData, setCompletionData] = useState({
     title: 'Script Saved to Drafts!',
     subtitle: `"${currentIdeaTitle}" is ready for Voice Studio or immediate posting.`,
@@ -102,6 +226,13 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
     xpEarned: 50,
     speechBubble: 'Script polished to perfection, Pablo! Ready to record! 🎙️',
   });
+
+  const handleToggleStructureRow = (index: number) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setExpandedStructureIndex(prev => (prev === index ? null : index));
+  };
 
   const flameFloatY = useRef(new Animated.Value(0)).current;
   const modalPopScale = useRef(new Animated.Value(0.88)).current;
@@ -152,9 +283,9 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
     }
     setSelectedHookIndex(index);
     const chosenHook = hookOptions[index].text;
-    const bodyLines = scriptBody.split('\n\n');
-    bodyLines[0] = `[Hook] ${chosenHook}`;
-    setScriptBody(bodyLines.join('\n\n'));
+    setScriptSections(prev =>
+      prev.map(section => (section.id === 'hook' ? { ...section, content: chosenHook } : section))
+    );
     showToast(`✓ Applied Hook #${index + 1}`);
   };
 
@@ -166,7 +297,7 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
       {
         badge: 'VIRAL HOOK',
         text: 'The #1 reason creator accounts stay stuck under 1,000 views is this single mistake.',
-        type: 'High Urgency • Retention Spikes',
+        type: 'High Urgency • Hook Potential',
       },
       {
         badge: 'STORY HOOK',
@@ -182,13 +313,73 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
     showToast('✨ Jarvis generated 3 new viral hooks!');
   };
 
+  const handleMakeShorter = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setScriptSections(prev =>
+      prev.map(s => {
+        if (s.id === 'hook') return { ...s, content: 'Most new creators fail because they wait too long to post.' };
+        if (s.id === 'mistake1') return { ...s, content: 'Waiting for the "Perfect Idea". Good ideas come from shipping through average ones.' };
+        if (s.id === 'mistake2') return { ...s, content: 'Over-editing for 6 hours. High volume beats overthinking every time.' };
+        if (s.id === 'mistake3') return { ...s, content: 'Zero system. Starting from scratch every morning creates burnout.' };
+        if (s.id === 'cta') return { ...s, content: 'Which one is slowing you down? Drop 1, 2, or 3 below.' };
+        return s;
+      })
+    );
+    showToast('✂️ Trimmed script duration to 30s');
+  };
+
+  const handleMakePunchier = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setScriptSections(prev =>
+      prev.map(s => {
+        if (s.id === 'hook') return { ...s, content: 'You are not failing because you lack ideas. You are failing because you hesitate to post.' };
+        if (s.id === 'mistake1') return { ...s, content: 'Waiting for perfection. The only way to find great ideas is publishing through average ones.' };
+        if (s.id === 'mistake2') return { ...s, content: 'Spending 6 hours on an edit. Stop over-tweaking and start shipping.' };
+        if (s.id === 'mistake3') return { ...s, content: 'No repeatable workflow. If you rebuild the wheel daily, you burn out.' };
+        if (s.id === 'cta') return { ...s, content: 'Which mistake is holding you back? Comment 1, 2, or 3.' };
+        return s;
+      })
+    );
+    showToast('💥 Boosted hook and delivery cadence');
+  };
+
+  const handleAddHumor = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setScriptSections(prev =>
+      prev.map(s => {
+        if (s.id === 'mistake1') return { ...s, content: 'Waiting for the "perfect idea"—while your drafts folder has 47 unfinished reels and your ego protects them like state secrets.' };
+        if (s.id === 'cta') return { ...s, content: 'Be honest—are you guilty of 1, 2, or all 3? Drop your confession below.' };
+        return s;
+      })
+    );
+    showToast('😄 Injected relatable creator punchline');
+  };
+
+  const handleImproveFlow = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setScriptSections(prev =>
+      prev.map(s => {
+        if (s.id === 'mistake1') return { ...s, content: 'Waiting for the "Perfect Idea". Here’s the truth: good ideas come from publishing through average ones.' };
+        if (s.id === 'mistake2') return { ...s, content: 'Over-editing for 6 hours. Spending six hours editing every post makes consistency impossible.' };
+        return s;
+      })
+    );
+    showToast('🌊 Smoothed transitions between scenes');
+  };
+
   const handlePolishWithJarvis = () => {
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
-    setScriptBody(
-      `[Hook] Most new creators don't fail from lack of talent. They fail because they wait too long to post.\n\nPerfectionism is just fear in disguise.\n\nMistake 1: Waiting for the "Perfect Idea". It doesn't exist. Great content comes from publishing through the average ones.\n\nMistake 2: Over-editing. A 6-hour edit won't save a boring first 3 seconds.\n\nMistake 3: Zero system. Re-inventing the wheel every morning leads directly to burnout.\n\n[CTA] Which one are you guilty of right now? Drop 1, 2, or 3 below.`
-    );
+    setScriptSections(INITIAL_SCRIPT_SECTIONS);
     showToast('🪄 Script polished with Jarvis AI!');
   };
 
@@ -211,7 +402,7 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
     if (onOpenVoiceStudio) {
-      onOpenVoiceStudio(scriptBody, currentIdeaTitle);
+      onOpenVoiceStudio(getFullScriptText(), currentIdeaTitle);
     } else {
       showToast('🎙️ Loaded script into Pro Voice Studio');
     }
@@ -260,18 +451,7 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
             </Pressable>
 
             {/* Mascot */}
-            <Animated.View
-              style={[
-                styles.headerLogoWrapper,
-                { transform: [{ translateY: flameFloatY }] },
-              ]}
-            >
-              <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerGhostLogo}
-                resizeMode="contain"
-              />
-            </Animated.View>
+            <BrandLogo size="sm" />
 
             {/* Pro Badge Pill */}
             <Pressable
@@ -288,37 +468,18 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
               hitSlop={8}
             >
               <LinearGradient
-                colors={['#FDE68A', '#F59E0B', '#D97706']}
+                colors={['#F59E0B', '#F59E0B', '#F59E0B']}
                 start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
+                end={{ x: 1, y: 0 }}
                 style={styles.proHeaderBadge}
               >
-                <Text style={styles.proHeaderBadgeText}>🔥 PRO</Text>
+                <Text style={styles.proHeaderBadgeText}>👑 PRO</Text>
               </LinearGradient>
             </Pressable>
           </View>
 
           {/* Right Header */}
           <View style={styles.headerRightGroup}>
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                if (onOpenMessages) onOpenMessages();
-                else if (onNavigateTab) onNavigateTab('match');
-              }}
-            >
-              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-            </Pressable>
-
             <Pressable
               style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
               hitSlop={8}
@@ -355,11 +516,36 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
               style={styles.profileAvatarWrapper}
               hitSlop={8}
             >
-              <Image
-                source={userProfile?.avatarSource || require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerUserAvatar}
-                resizeMode="cover"
-              />
+              {userProfile?.customAvatarUri ? (
+                <Image
+                  source={{ uri: userProfile.customAvatarUri }}
+                  style={styles.headerUserAvatar}
+                  resizeMode="cover"
+                />
+              ) : (userProfile?.avatarSource && userProfile.avatarId && userProfile.avatarId !== 'ghost') ? (
+                <Image
+                  source={userProfile.avatarSource}
+                  style={styles.headerUserAvatar}
+                  resizeMode="cover"
+                />
+              ) : (
+                <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
+                  <Path
+                    d="M20 21V19C20 17.9 19.5 16.9 18.7 16.2C17.9 15.5 16.9 15 15.8 15H8.2C7.1 15 6.1 15.5 5.3 16.2C4.5 16.9 4 17.9 4 19V21"
+                    stroke="#F59E0B"
+                    strokeWidth="2.3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <Circle
+                    cx="12"
+                    cy="7"
+                    r="4"
+                    stroke="#F59E0B"
+                    strokeWidth="2.3"
+                  />
+                </Svg>
+              )}
               <View style={styles.avatarTinyGoldCheckPos}>
                 <TinyGoldCheck size={14} />
               </View>
@@ -379,9 +565,14 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
               <Text style={styles.goldScriptBadgeText}>PRO SCRIPT ENGINE</Text>
             </View>
 
-            <Text style={styles.mainTitleText}>Build a script that holds attention.</Text>
+            <Text
+              style={styles.mainTitleText}
+              numberOfLines={2}
+            >
+              Build a script that holds attention.
+            </Text>
             <Text style={styles.mainSubText}>
-              Shape your Hook, Body and CTA with AI support, visual pacing and regarding cadence.
+              Build stronger Hooks, Bodies and CTAs with pacing and retention strategy.
             </Text>
 
             <View style={{ flexDirection: 'row', gap: 8, marginTop: 10 }}>
@@ -405,7 +596,7 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
             </Text>
 
             <View style={styles.tagsPillsRow}>
-              {['Creator Advice', 'Viral Reel', 'Short-form Video', 'Category: 7-Step'].map((tag) => (
+              {['Creator Advice', 'High-Reach Potential', 'Short-form Video', 'Mistake Breakdown'].map((tag) => (
                 <View key={tag} style={styles.ideaTagPill}>
                   <Text style={styles.ideaTagPillText}>{tag}</Text>
                 </View>
@@ -483,7 +674,7 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
               <View style={{ flex: 1, gap: 10 }}>
                 <View>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 3 }}>
-                    <Text style={styles.meterLabel}>HOOK RETENTION</Text>
+                    <Text style={styles.meterLabel}>HOOK STRENGTH</Text>
                     <Text style={styles.meterVal}>92%</Text>
                   </View>
                   <View style={styles.meterTrack}>
@@ -524,9 +715,10 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
               return (
                 <Pressable
                   key={index}
-                  style={[
+                  style={({ pressed }) => [
                     styles.hookOptionCard,
                     isSelected && styles.hookOptionCardSelected,
+                    pressed && styles.btnPressed,
                   ]}
                   onPress={() => handleApplyHook(index)}
                 >
@@ -538,7 +730,16 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
                   <Text style={[styles.hookOptionText, isSelected && styles.hookOptionTextSelected]}>
                     &ldquo;{hook.text}&rdquo;
                   </Text>
-                  <Text style={styles.hookOptionType}>{hook.type}</Text>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
+                    <Text style={styles.hookOptionType}>{hook.type}</Text>
+                    {isSelected ? (
+                      <View style={styles.activeHookPill}>
+                        <Text style={styles.activeHookPillText}>Active Hook ✓</Text>
+                      </View>
+                    ) : (
+                      <Text style={styles.tapToUseText}>Tap to use →</Text>
+                    )}
+                  </View>
                 </Pressable>
               );
             })}
@@ -557,68 +758,174 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
           <View style={[styles.sectionHeaderRowBetween, { marginTop: 22 }]}>
             <Text style={styles.sectionHeaderTitle}>SCRIPT STRUCTURE</Text>
             <View style={styles.durationOptimalPill}>
-              <Text style={styles.durationOptimalPillText}>⏱ 42 SECONDS (OPTIMAL)</Text>
+              <Text style={styles.durationOptimalPillText}>⏱ 42 SECONDS • OPTIMIZED</Text>
             </View>
           </View>
 
           <View style={styles.structureTimelineCard}>
-            {[
-              { step: 1, title: 'Hook', timing: '0-3s | 3-sec thumbstopper', icon: '✔', active: true },
-              { step: 2, title: 'Mistake 1', timing: '4-14s | Problem #1 reveal', icon: '➔', active: false },
-              { step: 3, title: 'Mistake 2', timing: '15-25s | Friction point', icon: '◆', active: false },
-              { step: 4, title: 'Mistake 3', timing: '26-36s | Systems bottleneck', icon: '☰', active: false },
-              { step: 5, title: 'CTA', timing: '37-42s | Engagement question', icon: '💬', active: false },
-            ].map((item, idx) => (
-              <View key={idx} style={styles.timelineRowItem}>
-                <View style={[styles.timelineNumCircle, item.active && styles.timelineNumCircleActive]}>
-                  <Text style={[styles.timelineNumText, item.active && styles.timelineNumTextActive]}>
-                    {item.step}
-                  </Text>
+            {STRUCTURE_STEPS.map((item, idx) => {
+              const isExpanded = expandedStructureIndex === idx;
+              const isLast = idx === STRUCTURE_STEPS.length - 1;
+
+              return (
+                <View
+                  key={item.step}
+                  style={[
+                    styles.timelineItemWrapper,
+                    isExpanded && styles.timelineItemWrapperExpanded,
+                    !isLast && !isExpanded && styles.timelineItemBorderBottom,
+                  ]}
+                >
+                  <Pressable
+                    style={({ pressed }) => [
+                      styles.timelineRowItem,
+                      pressed && styles.timelineRowItemPressed,
+                    ]}
+                    onPress={() => handleToggleStructureRow(idx)}
+                    accessibilityRole="button"
+                    accessibilityState={{ expanded: isExpanded }}
+                    accessibilityLabel={`${item.title}, ${item.timing}, ${item.focus}. ${
+                      isExpanded ? 'Tap to collapse' : 'Tap to expand production cues'
+                    }`}
+                  >
+                    <View
+                      style={[
+                        styles.timelineNumCircle,
+                        (isExpanded || item.step === 1) && styles.timelineNumCircleActive,
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.timelineNumText,
+                          (isExpanded || item.step === 1) && styles.timelineNumTextActive,
+                        ]}
+                      >
+                        {item.step}
+                      </Text>
+                    </View>
+
+                    <View style={{ flex: 1 }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                        <Text style={styles.timelineItemTitle}>{item.title}</Text>
+                        <View style={styles.timelineTimingBadge}>
+                          <Text style={styles.timelineTimingBadgeText}>{item.timing}</Text>
+                        </View>
+                      </View>
+                      <Text style={styles.timelineItemTiming}>{item.focus}</Text>
+                    </View>
+
+                    <View style={styles.timelineChevronContainer}>
+                      <Text style={styles.timelineChevronText}>{isExpanded ? '⌄' : '›'}</Text>
+                    </View>
+                  </Pressable>
+
+                  {isExpanded && (
+                    <View style={styles.timelineExpandedContent}>
+                      {/* Spoken Snippet Box */}
+                      <View style={styles.timelineSnippetBox}>
+                        <Text style={styles.timelineSnippetLabel}>SPOKEN FOCUS</Text>
+                        <Text style={styles.timelineSnippetText}>{item.snippet}</Text>
+                      </View>
+
+                      {/* Production Cues Card */}
+                      <View style={styles.timelineCuesBox}>
+                        <View style={styles.timelineCueRow}>
+                          <View style={styles.timelineCueIconBadge}>
+                            <Text style={styles.timelineCueIcon}>🎥</Text>
+                          </View>
+                          <View style={{ flex: 1 }}>
+                            <Text style={styles.timelineCueTitle}>Visual Direction</Text>
+                            <Text style={styles.timelineCueBody}>{item.visualCue}</Text>
+                          </View>
+                        </View>
+
+                        <View style={styles.timelineCueDivider} />
+
+                        <View style={styles.timelineCueRow}>
+                          <View style={styles.timelineCueIconBadge}>
+                            <Text style={styles.timelineCueIcon}>🎙️</Text>
+                          </View>
+                          <View style={{ flex: 1 }}>
+                            <Text style={styles.timelineCueTitle}>Voice Pacing</Text>
+                            <Text style={styles.timelineCueBody}>{item.voicePacing}</Text>
+                          </View>
+                        </View>
+
+                        <View style={styles.timelineCueDivider} />
+
+                        <View style={styles.timelineCueRow}>
+                          <View style={styles.timelineCueIconBadge}>
+                            <Text style={styles.timelineCueIcon}>✂️</Text>
+                          </View>
+                          <View style={{ flex: 1 }}>
+                            <Text style={styles.timelineCueTitle}>Editing Cue</Text>
+                            <Text style={styles.timelineCueBody}>{item.editingCue}</Text>
+                          </View>
+                        </View>
+                      </View>
+                    </View>
+                  )}
                 </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.timelineItemTitle}>{item.title}</Text>
-                  <Text style={styles.timelineItemTiming}>{item.timing}</Text>
-                </View>
-                <Text style={{ fontSize: 13, color: item.active ? '#15803D' : '#64748B' }}>
-                  {item.icon}
-                </Text>
-              </View>
-            ))}
+              );
+            })}
           </View>
 
           {/* ============================================================ */}
-          {/* CARD 5: SCRIPT BODY (Interactive Text Editor)                */}
+          {/* CARD 5: SCRIPT BODY (Interactive Section Editor)             */}
           {/* ============================================================ */}
           <View style={[styles.sectionHeaderRowBetween, { marginTop: 22 }]}>
             <Text style={styles.sectionHeaderTitle}>SCRIPT BODY</Text>
-            <Text style={{ fontSize: 13 }}>✏️</Text>
+            <View style={styles.editorCountBadge}>
+              <Text style={styles.editorCountBadgeText}>6 SECTIONS</Text>
+            </View>
           </View>
 
           <View style={styles.scriptBodyCard}>
-            <TextInput
-              style={styles.scriptBodyTextInput}
-              multiline
-              value={scriptBody}
-              onChangeText={setScriptBody}
-              placeholder="Your script body..."
-              placeholderTextColor="#94A3B8"
-            />
+            {scriptSections.map((section, index) => {
+              const isLast = index === scriptSections.length - 1;
+              return (
+                <View
+                  key={section.id}
+                  style={[
+                    styles.editorSectionBlock,
+                    !isLast && styles.editorSectionDivider,
+                  ]}
+                >
+                  <View style={styles.editorSectionHeaderRow}>
+                    <View style={styles.editorSectionTagBadge}>
+                      <Text style={styles.editorSectionTagText}>[{section.tag}]</Text>
+                    </View>
+                    <Text style={styles.editorSectionTimingText}>{section.timing}</Text>
+                  </View>
+
+                  <TextInput
+                    style={styles.editorSectionTextInput}
+                    multiline
+                    scrollEnabled={false}
+                    value={section.content}
+                    onChangeText={(text) => handleUpdateSectionContent(section.id, text)}
+                    placeholder={section.placeholder || `Enter ${section.tag.toLowerCase()}...`}
+                    placeholderTextColor="#94A3B8"
+                  />
+                </View>
+              );
+            })}
 
             {/* AI Rewriters */}
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ gap: 6, marginTop: 12, paddingTop: 10, borderTopWidth: 1, borderTopColor: '#F1EFE9' }}
+              contentContainerStyle={styles.editorRewritersScroll}
             >
               {[
-                { label: 'Make Shorter', action: () => showToast('✂️ Trimmed script duration to 30s') },
-                { label: 'Make Punchier', action: () => showToast('💥 Boosted hook and delivery cadence') },
-                { label: 'Add Humor', action: () => showToast('😄 Injected relatable creator punchline') },
-                { label: 'Improve Flow', action: () => showToast('🌊 Smoothed transitions between scenes') },
+                { label: 'Make Shorter', action: handleMakeShorter },
+                { label: 'Make Punchier', action: handleMakePunchier },
+                { label: 'Add Humor', action: handleAddHumor },
+                { label: 'Improve Flow', action: handleImproveFlow },
               ].map((pill, idx) => (
                 <Pressable
                   key={idx}
-                  style={styles.quickRewritePill}
+                  style={({ pressed }) => [styles.quickRewritePill, pressed && styles.btnPressed]}
                   onPress={pill.action}
                 >
                   <Text style={styles.quickRewritePillText}>{pill.label}</Text>
@@ -626,7 +933,7 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
               ))}
 
               <Pressable
-                style={styles.aiPolishPillBtn}
+                style={({ pressed }) => [styles.aiPolishPillBtn, pressed && styles.btnPressed]}
                 onPress={handlePolishWithJarvis}
               >
                 <Text style={styles.aiPolishPillBtnText}>🪄 AI Polish with Jarvis</Text>
@@ -643,7 +950,13 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
               <Text style={styles.estimateBigNum}>42s</Text>
               <Text style={styles.estimateUnitText}> Est. Duration</Text>
             </View>
-            <Text style={styles.estimateSubText}>124 WORDS • 2.9 W/S</Text>
+            <Text style={styles.estimateSubText}>
+              {scriptSections.reduce(
+                (acc, s) => acc + (s.content.trim() ? s.content.trim().split(/\s+/).length : 0),
+                0
+              )}{' '}
+              WORDS • 2.9 W/S
+            </Text>
 
             <View style={styles.estimateMetricsRow}>
               <Text style={styles.estimateMetricLabel}>Pacing: <Text style={styles.estimateMetricVal}>91%</Text></Text>
@@ -653,30 +966,31 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
           </View>
 
           {/* ============================================================ */}
-          {/* CARD 7: FORMAT & MULTI-PLATFORM ADAPT STUDIO                 */}
+          {/* CARD 7: MULTI-PLATFORM READY                                 */}
           {/* ============================================================ */}
           <View style={styles.formatAdaptCard}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-              <Text style={styles.formatAdaptHeaderLabel}>FORMAT &amp; MULTI-PLATFORM SYNC</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <Text style={styles.formatAdaptHeaderLabel}>MULTI-PLATFORM READY</Text>
               <View style={styles.formatActiveBadge}>
-                <Text style={styles.formatActiveBadgeText}>👑 9:16 VERTICAL HD</Text>
+                <Text style={styles.formatActiveBadgeText}>👑 9:16 HD</Text>
               </View>
             </View>
 
             {/* Platform Selection Row */}
-            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+            <View style={{ flexDirection: 'row', gap: 7, marginBottom: 12 }}>
               {[
-                { id: 'tiktok', name: 'TikTok', format: '9:16 Reel', icon: 'tiktok' as const },
-                { id: 'instagram', name: 'Instagram', format: 'Reels / IGTV', icon: 'instagram' as const },
-                { id: 'youtube', name: 'YouTube', format: 'Shorts 60s', icon: 'youtube' as const },
+                { id: 'tiktok', name: 'TikTok', icon: 'tiktok' as const },
+                { id: 'instagram', name: 'Instagram', icon: 'instagram' as const },
+                { id: 'youtube', name: 'YouTube', icon: 'youtube' as const },
               ].map((plat) => {
                 const isSelected = selectedPlatforms.includes(plat.id);
                 return (
                   <Pressable
                     key={plat.id}
-                    style={[
+                    style={({ pressed }) => [
                       styles.platformFormatPillCard,
-                      isSelected && styles.platformFormatPillCardSelected,
+                      isSelected ? styles.platformFormatPillCardSelected : styles.platformFormatPillCardUnselected,
+                      pressed && styles.btnPressed,
                     ]}
                     onPress={() => {
                       if (Platform.OS !== 'web') {
@@ -685,26 +999,54 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
                       if (isSelected) {
                         if (selectedPlatforms.length > 1) {
                           setSelectedPlatforms(selectedPlatforms.filter((p) => p !== plat.id));
+                          showToast(`Removed ${plat.name} from publishing destinations`);
                         } else {
-                          showToast('At least 1 platform must remain active');
+                          showToast('At least 1 publishing destination must remain selected');
                         }
                       } else {
                         setSelectedPlatforms([...selectedPlatforms, plat.id]);
-                        showToast(`✓ Added ${plat.name} to sync`);
+                        showToast(`✓ Selected ${plat.name} as destination`);
                       }
                     }}
+                    accessibilityRole="checkbox"
+                    accessibilityState={{ checked: isSelected }}
+                    accessibilityLabel={`${plat.name}, connected account. ${
+                      isSelected ? 'Selected destination for this script' : 'Tap to select as destination'
+                    }`}
                   >
-                    <SocialBrandIcon platform={plat.icon} size={20} />
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.platFormatName}>{plat.name}</Text>
-                      <Text style={styles.platFormatSub}>{plat.format}</Text>
+                    <View style={styles.platCardTopRow}>
+                      <View style={styles.platIconWrapper}>
+                        <SocialBrandIcon platform={plat.icon} size={17} />
+                        <View style={styles.platConnectedDot} />
+                      </View>
+                      <View style={[styles.platCheckCircle, isSelected && styles.platCheckCircleActive]}>
+                        {isSelected && (
+                          <Svg width={8} height={8} viewBox="0 0 12 12" fill="none">
+                            <Path d="M2.5 6.2L4.8 8.5L9.5 3.5" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                          </Svg>
+                        )}
+                      </View>
                     </View>
-                    <View style={[styles.platCheckCircle, isSelected && styles.platCheckCircleActive]}>
-                      {isSelected && (
-                        <Svg width={9} height={9} viewBox="0 0 12 12" fill="none">
-                          <Path d="M2.5 6.2L4.8 8.5L9.5 3.5" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" />
-                        </Svg>
-                      )}
+
+                    <Text style={styles.platFormatName} numberOfLines={1}>
+                      {plat.name}
+                    </Text>
+
+                    <View
+                      style={[
+                        styles.platStatusBadge,
+                        isSelected ? styles.platStatusBadgeSelected : styles.platStatusBadgeUnselected,
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.platStatusBadgeText,
+                          isSelected ? styles.platStatusBadgeTextSelected : styles.platStatusBadgeTextUnselected,
+                        ]}
+                        numberOfLines={1}
+                      >
+                        {isSelected ? 'Selected' : 'Connected'}
+                      </Text>
                     </View>
                   </Pressable>
                 );
@@ -713,32 +1055,51 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
 
             {/* Format Style Selector Chips */}
             <Text style={styles.formatPresetsLabel}>SCRIPT PACING PRESET</Text>
-            <View style={{ flexDirection: 'row', gap: 6, marginTop: 6, marginBottom: 12 }}>
-              {['9:16 Video (42s)', 'Carousel Slides (6p)', 'Viral X Thread'].map((fmt) => (
-                <Pressable
-                  key={fmt}
-                  style={[
-                    styles.formatPresetChip,
-                    selectedFormat === fmt && styles.formatPresetChipActive,
-                  ]}
-                  onPress={() => {
-                    if (Platform.OS !== 'web') {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    }
-                    setSelectedFormat(fmt);
-                    showToast(`✓ Switched preset: ${fmt}`);
-                  }}
-                >
-                  <Text
+            <View style={styles.formatPresetsRow}>
+              {[
+                { id: '0-30s', duration: '0–30s', label: 'Punchy' },
+                { id: '30-60s', duration: '30–60s', label: 'Standard' },
+                { id: 'over-60s', duration: 'Over 60s', label: 'Deep Dive' },
+              ].map((fmt) => {
+                const isActive = selectedFormat === fmt.id;
+                return (
+                  <Pressable
+                    key={fmt.id}
                     style={[
-                      styles.formatPresetChipText,
-                      selectedFormat === fmt && styles.formatPresetChipTextActive,
+                      styles.formatPresetChip,
+                      isActive && styles.formatPresetChipActive,
                     ]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }
+                      setSelectedFormat(fmt.id);
+                      showToast(`✓ Switched pacing: ${fmt.duration} • ${fmt.label}`);
+                    }}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${fmt.duration} ${fmt.label} pacing preset`}
                   >
-                    {fmt}
-                  </Text>
-                </Pressable>
-              ))}
+                    <Text
+                      style={[
+                        styles.formatPresetDurationText,
+                        isActive && styles.formatPresetDurationTextActive,
+                      ]}
+                      numberOfLines={1}
+                    >
+                      {fmt.duration}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.formatPresetLabelText,
+                        isActive && styles.formatPresetLabelTextActive,
+                      ]}
+                      numberOfLines={1}
+                    >
+                      {fmt.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
             </View>
 
             {/* Dynamic Adapt Action Button */}
@@ -751,7 +1112,7 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
                 showToast(`✨ Script adapted for ${selectedPlatforms.map(p => p.toUpperCase()).join(' + ')}!`);
               }}
             >
-              <Text style={styles.adaptBtnText}>✨ Adapt &amp; Optimize Format ➔</Text>
+              <Text style={styles.adaptBtnText} numberOfLines={1}>✨ Adapt &amp; Optimize Format ➔</Text>
             </Pressable>
           </View>
 
@@ -761,10 +1122,21 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
           <View style={styles.retentionNotesCard}>
             <Text style={styles.retentionNotesHeaderLabel}>RETENTION NOTES</Text>
             <View style={{ gap: 8, marginTop: 10 }}>
-              <Text style={styles.retentionNoteLine}>✓ First 3 sec strongest for TikTok &amp; Reels</Text>
-              <Text style={styles.retentionNoteLine}>⚡ Pattern interrupt at 12s and 24s</Text>
-              <Text style={styles.retentionNoteLine}>💡 Total duration optimal for Reel loop</Text>
-              <Text style={styles.retentionNoteLine}>💬 Question-based CTA for comments upside</Text>
+              {[
+                { icon: '✓', text: 'First 3s hook designed to strengthen early retention' },
+                { icon: '⚡', text: 'Pattern interrupts placed at 14s & 25s transitions' },
+                { icon: '💡', text: 'Duration optimized for a smoother loop' },
+                { icon: '💬', text: 'Question CTA designed to encourage comments' },
+              ].map((note, nIdx) => (
+                <View key={nIdx} style={styles.retentionRow}>
+                  <View style={styles.retentionIconBox}>
+                    <Text style={styles.retentionIconText}>{note.icon}</Text>
+                  </View>
+                  <Text style={styles.retentionNoteText}>
+                    {note.text}
+                  </Text>
+                </View>
+              ))}
             </View>
           </View>
 
@@ -805,10 +1177,10 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
             </View>
 
             <Pressable
-              style={styles.applyVoiceStudioBtn}
+              style={({ pressed }) => [styles.applyVoiceStudioBtn, pressed && styles.btnPressed]}
               onPress={handleSendToVoiceStudio}
             >
-              <Text style={styles.applyVoiceStudioBtnText}>APPLY TO VOICE STUDIO</Text>
+              <Text style={styles.applyVoiceStudioBtnText}>🎙️ SEND TO VOICE STUDIO</Text>
             </Pressable>
           </View>
 
@@ -818,13 +1190,13 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
           <View style={styles.streakCard}>
             <Text style={styles.streakCardHeaderLabel}>STREAK &amp; XP IMPACT</Text>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
-              <Text style={styles.streakValText}>🔥 47 Days Streak</Text>
-              <Text style={styles.xpValText}>⚡ +50 XP Creator Level</Text>
+              <Text style={styles.streakValText}>🔥 {userProfile?.streakCount || 1} Day{userProfile?.streakCount === 1 ? '' : 's'} Streak</Text>
+              <Text style={styles.xpValText}>⚡ +50 XP on Publish</Text>
             </View>
 
             <View style={{ marginTop: 10 }}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
-                <Text style={styles.postProgressLabel}>POST PROGRESS</Text>
+                <Text style={styles.postProgressLabel}>TODAY’S POST PROGRESS</Text>
                 <Text style={styles.postProgressVal}>75%</Text>
               </View>
               <View style={styles.meterTrack}>
@@ -845,7 +1217,7 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
               <View style={styles.jarvisCoachIconBox}>
                 <Image
-                  source={require('../../assets/images/jarvis-ghost-clean.png')}
+                  source={require('../../assets/images/jarvis-core-flame.png')}
                   style={{ width: 28, height: 28 }}
                   resizeMode="contain"
                 />
@@ -985,6 +1357,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+    width: '100%',
     backgroundColor: '#FAF8F5',
   },
   headerBar: {
@@ -1029,15 +1402,18 @@ const styles = StyleSheet.create({
     height: 26,
   },
   proHeaderBadge: {
-    paddingHorizontal: 9,
-    paddingVertical: 3.5,
-    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+    backgroundColor: '#F59E0B',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   proHeaderBadgeText: {
-    fontSize: 9.5,
+    fontSize: sFont(10),
     fontWeight: '900',
-    color: '#0C0A12',
-    letterSpacing: 0.3,
+    color: '#78350F',
+    letterSpacing: 0.4,
   },
   headerRightGroup: {
     flexDirection: 'row',
@@ -1047,7 +1423,7 @@ const styles = StyleSheet.create({
   headerIconBtn: {
     width: 38,
     height: 38,
-    borderRadius: 19,
+    borderRadius: 20,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#EFECE6',
@@ -1073,15 +1449,18 @@ const styles = StyleSheet.create({
   profileAvatarWrapper: {
     width: 38,
     height: 38,
-    borderRadius: 19,
-    borderWidth: 1.5,
+    borderRadius: 20,
+    borderWidth: 2,
     borderColor: '#F59E0B',
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
     position: 'relative',
   },
   headerUserAvatar: {
     width: '100%',
     height: '100%',
-    borderRadius: 19,
+    borderRadius: 18,
   },
   avatarTinyGoldCheckPos: {
     position: 'absolute',
@@ -1105,16 +1484,18 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   goldScriptBadgeText: {
-    fontSize: 9.5,
-    fontWeight: '900',
+    fontSize: 10,
+    fontWeight: '700',
     color: '#D97706',
     letterSpacing: 0.3,
   },
   mainTitleText: {
-    fontSize: 23,
-    fontWeight: '900',
+    fontSize: Platform.OS === 'web' ? ('clamp(15px, 3.8vw, 17px)' as any) : sFont(16),
+    fontWeight: '700',
     color: '#171420',
-    letterSpacing: -0.5,
+    letterSpacing: -0.35,
+    lineHeight: 22,
+    marginBottom: 4,
   },
   mainSubText: {
     fontSize: 12.5,
@@ -1129,8 +1510,8 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   purplePillText: {
-    fontSize: 10.5,
-    fontWeight: '900',
+    fontSize: 11,
+    fontWeight: '700',
     color: '#582CDB',
   },
   goldPill: {
@@ -1140,8 +1521,8 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   goldPillText: {
-    fontSize: 10.5,
-    fontWeight: '900',
+    fontSize: 11,
+    fontWeight: '700',
     color: '#D97706',
   },
 
@@ -1161,20 +1542,20 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   selectedIdeaTag: {
-    fontSize: 9.5,
-    fontWeight: '900',
+    fontSize: 10,
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.5,
   },
   selectedIdeaTitle: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     marginVertical: 4,
     lineHeight: 22,
   },
   selectedIdeaSub: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
     lineHeight: 16,
   },
@@ -1193,7 +1574,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   ideaTagPillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#475569',
   },
@@ -1207,8 +1588,8 @@ const styles = StyleSheet.create({
     borderTopColor: '#F1EFE9',
   },
   reSelectIdeaText: {
-    fontSize: 10.5,
-    fontWeight: '900',
+    fontSize: 11,
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.4,
   },
@@ -1222,13 +1603,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#582CDB',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.12,
     shadowRadius: 4,
     elevation: 2,
   },
   proAccelerateBtnText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   proAccelerateBtnTextActive: {
@@ -1249,8 +1630,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   scoreCardLabel: {
-    fontSize: 10.5,
-    fontWeight: '900',
+    fontSize: 11,
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.4,
   },
@@ -1261,8 +1642,8 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   aiEvaluatedBadgeText: {
-    fontSize: 8.5,
-    fontWeight: '900',
+    fontSize: 9,
+    fontWeight: '700',
     color: '#582CDB',
   },
   scoreGaugeCircle: {
@@ -1276,7 +1657,7 @@ const styles = StyleSheet.create({
   },
   scoreGaugeNum: {
     fontSize: 22,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     lineHeight: 24,
   },
@@ -1286,13 +1667,13 @@ const styles = StyleSheet.create({
     color: '#94A3B8',
   },
   meterLabel: {
-    fontSize: 9.5,
-    fontWeight: '900',
+    fontSize: 10,
+    fontWeight: '700',
     color: '#64748B',
   },
   meterVal: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   meterTrack: {
@@ -1331,8 +1712,8 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   sectionHeaderTitle: {
-    fontSize: 11.5,
-    fontWeight: '900',
+    fontSize: 12,
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.5,
   },
@@ -1356,8 +1737,8 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   bestPerformingBadgeText: {
-    fontSize: 8.5,
-    fontWeight: '900',
+    fontSize: 9,
+    fontWeight: '700',
     color: '#D97706',
   },
   hookOptionText: {
@@ -1367,12 +1748,27 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   hookOptionTextSelected: {
-    fontWeight: '900',
+    fontWeight: '700',
   },
   hookOptionType: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#64748B',
-    marginTop: 6,
+  },
+  activeHookPill: {
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 7,
+    paddingVertical: 2.5,
+    borderRadius: 5,
+  },
+  activeHookPillText: {
+    fontSize: 9.5,
+    fontWeight: '700',
+    color: '#D97706',
+  },
+  tapToUseText: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: '#582CDB',
   },
   generateMoreHooksBtn: {
     backgroundColor: '#FFFFFF',
@@ -1385,7 +1781,7 @@ const styles = StyleSheet.create({
   },
   generateMoreHooksBtnText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
 
@@ -1398,58 +1794,13 @@ const styles = StyleSheet.create({
   },
   durationOptimalPillText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#15803D',
   },
   structureTimelineCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 18,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: '#EFECE6',
-  },
-  timelineRowItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#FAF8F5',
-  },
-  timelineNumCircle: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: '#E2E8F0',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  timelineNumCircleActive: {
-    backgroundColor: '#582CDB',
-  },
-  timelineNumText: {
-    fontSize: 11,
-    fontWeight: '900',
-    color: '#475569',
-  },
-  timelineNumTextActive: {
-    color: '#FFFFFF',
-  },
-  timelineItemTitle: {
-    fontSize: 12.5,
-    fontWeight: '900',
-    color: '#171420',
-  },
-  timelineItemTiming: {
-    fontSize: 10.5,
-    color: '#64748B',
-  },
-
-  // CARD 5: SCRIPT BODY
-  scriptBodyCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 18,
-    padding: 16,
+    padding: 8,
     borderWidth: 1,
     borderColor: '#EFECE6',
     shadowColor: '#000',
@@ -1457,35 +1808,249 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.03,
     shadowRadius: 6,
   },
-  scriptBodyTextInput: {
-    fontSize: 12.5,
+  timelineItemWrapper: {
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  timelineItemWrapperExpanded: {
+    backgroundColor: '#FAF9F6',
+    borderWidth: 1,
+    borderColor: '#E8E4DC',
+    marginVertical: 4,
+  },
+  timelineItemBorderBottom: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#F4F2EC',
+  },
+  timelineRowItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+  },
+  timelineRowItemPressed: {
+    opacity: 0.75,
+  },
+  timelineNumCircle: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: '#F1EFE9',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  timelineNumCircleActive: {
+    backgroundColor: '#582CDB',
+  },
+  timelineNumText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#64748B',
+  },
+  timelineNumTextActive: {
+    color: '#FFFFFF',
+  },
+  timelineItemTitle: {
+    fontSize: 13.5,
+    fontWeight: '700',
+    color: '#171420',
+  },
+  timelineTimingBadge: {
+    backgroundColor: '#F1EFE9',
+    paddingHorizontal: 6,
+    paddingVertical: 1.5,
+    borderRadius: 6,
+  },
+  timelineTimingBadgeText: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: '#475569',
+    letterSpacing: 0.2,
+  },
+  timelineItemTiming: {
+    fontSize: 11.5,
+    color: '#64748B',
+    marginTop: 1.5,
+  },
+  timelineChevronContainer: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#F8F6F0',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  timelineChevronText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#64748B',
+  },
+  timelineExpandedContent: {
+    paddingHorizontal: 10,
+    paddingBottom: 12,
+    paddingTop: 2,
+  },
+  timelineSnippetBox: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    padding: 10,
+    borderLeftWidth: 3,
+    borderLeftColor: '#582CDB',
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    marginBottom: 8,
+  },
+  timelineSnippetLabel: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#582CDB',
+    letterSpacing: 0.6,
+    marginBottom: 3,
+  },
+  timelineSnippetText: {
+    fontSize: 12,
+    fontStyle: 'italic',
+    color: '#334155',
+    lineHeight: 17,
+  },
+  timelineCuesBox: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
+  timelineCueRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+  },
+  timelineCueIconBadge: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    backgroundColor: '#F8F6F0',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 1,
+  },
+  timelineCueIcon: {
+    fontSize: 12,
+  },
+  timelineCueTitle: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#1E293B',
+    marginBottom: 2,
+  },
+  timelineCueBody: {
+    fontSize: 11,
+    color: '#475569',
+    lineHeight: 15,
+  },
+  timelineCueDivider: {
+    height: 1,
+    backgroundColor: '#F4F2EC',
+    marginVertical: 8,
+  },
+
+  // CARD 5: SCRIPT BODY (Structured Editor)
+  editorCountBadge: {
+    backgroundColor: '#F1EFE9',
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 5,
+  },
+  editorCountBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '700',
+    color: '#64748B',
+    letterSpacing: 0.3,
+  },
+  scriptBodyCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
+  },
+  editorSectionBlock: {
+    paddingVertical: 8,
+  },
+  editorSectionDivider: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F0E9',
+    paddingBottom: 10,
+    marginBottom: 4,
+  },
+  editorSectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  editorSectionTagBadge: {
+    backgroundColor: '#FAF8F5',
+    paddingHorizontal: 7,
+    paddingVertical: 2.5,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+  },
+  editorSectionTagText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#582CDB',
+    letterSpacing: 0.5,
+  },
+  editorSectionTimingText: {
+    fontSize: 10.5,
+    fontWeight: '600',
+    color: '#94A3B8',
+  },
+  editorSectionTextInput: {
+    fontSize: 13,
+    fontWeight: '500',
     lineHeight: 20,
     color: '#171420',
-    minHeight: 180,
-    textAlignVertical: 'top',
+    padding: 0,
+    margin: 0,
+  },
+  editorRewritersScroll: {
+    gap: 6,
+    marginTop: 8,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#F1EFE9',
   },
   quickRewritePill: {
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
     borderColor: '#EFECE6',
-    paddingHorizontal: 9,
-    paddingVertical: 5,
-    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 7,
   },
   quickRewritePillText: {
-    fontSize: 10.5,
-    fontWeight: '800',
+    fontSize: 11,
+    fontWeight: '700',
     color: '#475569',
   },
   aiPolishPillBtn: {
     backgroundColor: '#EDE9FE',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 6,
+    paddingHorizontal: 11,
+    paddingVertical: 6,
+    borderRadius: 7,
   },
   aiPolishPillBtnText: {
-    fontSize: 10.5,
-    fontWeight: '900',
+    fontSize: 11,
+    fontWeight: '700',
     color: '#582CDB',
   },
 
@@ -1499,14 +2064,14 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   estimateCardHeaderLabel: {
-    fontSize: 9.5,
-    fontWeight: '900',
+    fontSize: 10,
+    fontWeight: '700',
     color: '#94A3B8',
     letterSpacing: 0.4,
   },
   estimateBigNum: {
     fontSize: 26,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   estimateUnitText: {
@@ -1515,7 +2080,7 @@ const styles = StyleSheet.create({
     color: '#64748B',
   },
   estimateSubText: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#64748B',
     marginTop: 1,
   },
@@ -1532,7 +2097,7 @@ const styles = StyleSheet.create({
     color: '#64748B',
   },
   estimateMetricVal: {
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
 
@@ -1550,10 +2115,10 @@ const styles = StyleSheet.create({
     marginTop: 14,
   },
   formatAdaptHeaderLabel: {
-    fontSize: 10,
-    fontWeight: '900',
+    fontSize: 10.5,
+    fontWeight: '700',
     color: '#64748B',
-    letterSpacing: 0.4,
+    letterSpacing: 0.5,
   },
   formatActiveBadge: {
     backgroundColor: '#DCFCE7',
@@ -1562,72 +2127,137 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   formatActiveBadgeText: {
-    fontSize: 8.5,
-    fontWeight: '900',
+    fontSize: 9.5,
+    fontWeight: '700',
     color: '#15803D',
   },
   platformFormatPillCard: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FAF8F5',
+    minWidth: 0,
     borderRadius: 12,
     padding: 8,
     borderWidth: 1.5,
-    borderColor: '#EFECE6',
-    gap: 6,
+    justifyContent: 'space-between',
+    minHeight: 84,
   },
   platformFormatPillCardSelected: {
     backgroundColor: '#F5F3FF',
     borderColor: '#582CDB',
   },
-  platFormatName: {
-    fontSize: 10.5,
-    fontWeight: '900',
-    color: '#171420',
+  platformFormatPillCardUnselected: {
+    backgroundColor: '#FFFFFF',
+    borderColor: '#EFECE6',
   },
-  platFormatSub: {
-    fontSize: 8,
-    color: '#64748B',
-    marginTop: 1,
+  platCardTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    marginBottom: 4,
+  },
+  platIconWrapper: {
+    position: 'relative',
+  },
+  platConnectedDot: {
+    position: 'absolute',
+    bottom: -1,
+    right: -2,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#15803D',
+    borderWidth: 1,
+    borderColor: '#FFFFFF',
   },
   platCheckCircle: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    backgroundColor: '#E2E8F0',
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    borderWidth: 1.5,
+    borderColor: '#CBD5E1',
+    backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
   },
   platCheckCircleActive: {
     backgroundColor: '#582CDB',
+    borderColor: '#582CDB',
+  },
+  platFormatName: {
+    fontSize: sFont(11.5),
+    fontWeight: '700',
+    color: '#171420',
+    marginBottom: 4,
+  },
+  platStatusBadge: {
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+    borderRadius: 4,
+    alignSelf: 'flex-start',
+  },
+  platStatusBadgeSelected: {
+    backgroundColor: '#EDE9FE',
+  },
+  platStatusBadgeUnselected: {
+    backgroundColor: '#F1F5F9',
+  },
+  platStatusBadgeText: {
+    fontSize: sFont(8.5),
+    fontWeight: '700',
+  },
+  platStatusBadgeTextSelected: {
+    color: '#582CDB',
+  },
+  platStatusBadgeTextUnselected: {
+    color: '#64748B',
+  },
+  formatPresetsRow: {
+    flexDirection: 'row',
+    gap: 6,
+    marginTop: 6,
+    marginBottom: 12,
   },
   formatPresetsLabel: {
-    fontSize: 9,
-    fontWeight: '900',
+    fontSize: sFont(9),
+    fontWeight: '800',
     color: '#94A3B8',
     letterSpacing: 0.4,
   },
   formatPresetChip: {
+    flex: 1,
+    minWidth: 0,
     backgroundColor: '#FAF8F5',
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: '#EFECE6',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 6,
+    paddingHorizontal: 4,
+    paddingVertical: 7,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   formatPresetChipActive: {
-    backgroundColor: '#EDE9FE',
-    borderColor: '#DDD6FE',
+    backgroundColor: '#F5F3FF',
+    borderColor: '#582CDB',
   },
-  formatPresetChipText: {
-    fontSize: 10,
+  formatPresetDurationText: {
+    fontSize: sFont(12),
     fontWeight: '800',
-    color: '#475569',
+    color: '#171420',
+    textAlign: 'center',
+    marginBottom: 1,
   },
-  formatPresetChipTextActive: {
+  formatPresetDurationTextActive: {
     color: '#582CDB',
-    fontWeight: '900',
+  },
+  formatPresetLabelText: {
+    fontSize: sFont(9.5),
+    fontWeight: '700',
+    color: '#64748B',
+    textAlign: 'center',
+  },
+  formatPresetLabelTextActive: {
+    color: '#582CDB',
+    fontWeight: '800',
   },
   adaptBtn: {
     backgroundColor: '#EDE9FE',
@@ -1639,8 +2269,8 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   adaptBtnText: {
-    fontSize: 11.5,
-    fontWeight: '900',
+    fontSize: sFont(12),
+    fontWeight: '700',
     color: '#582CDB',
   },
 
@@ -1654,15 +2284,40 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   retentionNotesHeaderLabel: {
-    fontSize: 9.5,
-    fontWeight: '900',
+    fontSize: sFont(9.5),
+    fontWeight: '800',
     color: '#94A3B8',
     letterSpacing: 0.4,
   },
-  retentionNoteLine: {
-    fontSize: 11.5,
-    fontWeight: '700',
+  retentionRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+    paddingVertical: 2,
+  },
+  retentionIconBox: {
+    width: 24,
+    height: 24,
+    borderRadius: 7,
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexShrink: 0,
+    marginTop: 1,
+  },
+  retentionIconText: {
+    fontSize: sFont(11.5),
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  retentionNoteText: {
+    fontSize: sFont(12),
+    fontWeight: '600',
+    lineHeight: 18,
     color: '#171420',
+    flex: 1,
   },
 
   // CARD 9: VOICE PREVIEW
@@ -1675,19 +2330,19 @@ const styles = StyleSheet.create({
     marginTop: 14,
   },
   voicePreviewHeaderLabel: {
-    fontSize: 9.5,
-    fontWeight: '900',
+    fontSize: 10,
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: 0.4,
   },
   voicePreviewSubLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#64748B',
   },
   voicePreviewSubDetail: {
-    fontSize: 8.5,
-    fontWeight: '900',
+    fontSize: 9,
+    fontWeight: '700',
     color: '#15803D',
     marginTop: 1,
   },
@@ -1720,15 +2375,16 @@ const styles = StyleSheet.create({
   },
   applyVoiceStudioBtn: {
     backgroundColor: '#582CDB',
-    paddingVertical: 10,
-    borderRadius: 10,
+    paddingVertical: 11,
+    borderRadius: 12,
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: 12,
   },
   applyVoiceStudioBtnText: {
     color: '#FFFFFF',
-    fontSize: 11,
-    fontWeight: '900',
+    fontSize: sFont(11.5),
+    fontWeight: '700',
+    letterSpacing: 0.3,
   },
 
   // CARD 10: STREAK & XP IMPACT
@@ -1741,29 +2397,29 @@ const styles = StyleSheet.create({
     marginTop: 14,
   },
   streakCardHeaderLabel: {
-    fontSize: 9.5,
-    fontWeight: '900',
+    fontSize: 10,
+    fontWeight: '700',
     color: '#94A3B8',
     letterSpacing: 0.4,
   },
   streakValText: {
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   xpValText: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   postProgressLabel: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
   },
   postProgressVal: {
-    fontSize: 9.5,
-    fontWeight: '900',
+    fontSize: 10,
+    fontWeight: '700',
     color: '#171420',
   },
 
@@ -1783,7 +2439,7 @@ const styles = StyleSheet.create({
   },
   jarvisCoachTitle: {
     fontSize: 14.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   jarvisCoachQuote: {
@@ -1799,8 +2455,8 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   coachChipText: {
-    fontSize: 9.5,
-    fontWeight: '900',
+    fontSize: 10,
+    fontWeight: '700',
     color: '#582CDB',
   },
   improveScriptBtn: {
@@ -1812,7 +2468,7 @@ const styles = StyleSheet.create({
   improveScriptBtnText: {
     color: '#FFFFFF',
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
   },
 
   // BOTTOM ACTION BUTTONS
@@ -1823,20 +2479,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 3,
   },
   sendToVoiceBtnText: {
     color: '#FFFFFF',
-    fontSize: 13.5,
-    fontWeight: '900',
+    fontSize: 14,
+    fontWeight: '700',
   },
   secondaryDeckBtn: {
     flex: 1,
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     paddingVertical: 12,
     borderRadius: 14,
     alignItems: 'center',
@@ -1844,7 +2500,7 @@ const styles = StyleSheet.create({
   secondaryDeckBtnText: {
     color: '#171420',
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
   },
 
   // MODALS
@@ -1871,13 +2527,13 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   modalCloseText: {
     fontSize: 18,
     color: '#94A3B8',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   modalAlertItem: {
     backgroundColor: '#FAF8F5',
@@ -1913,11 +2569,11 @@ const styles = StyleSheet.create({
   toastText: {
     color: '#FFFFFF',
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.2,
   },
   btnPressed: {
-    transform: [{ scale: 0.96 }],
-    opacity: 0.85,
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
   },
 });

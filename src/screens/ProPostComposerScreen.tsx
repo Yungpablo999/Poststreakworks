@@ -2,18 +2,18 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   StyleSheet,
   View,
-  Text,
   ScrollView,
   Pressable,
   Platform,
   Animated,
   Modal,
-  TextInput,
   Image,
   Dimensions,
   SafeAreaView,
   StatusBar,
 } from 'react-native';
+import { Text, TextInput } from '../components/ui/AppText';
+import { BrandLogo } from '../components/BrandLogo';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
@@ -23,16 +23,26 @@ import { UserProfileModal, UserProfileData } from '../components/UserProfileModa
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { TinyGoldCheck } from '../components/CreatorStoryModal';
 import { SocialBrandIcon } from '../components/SocialBrandIcon';
+import { sFont } from '../utils/responsive';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
+export interface AttachedAudioData {
+  title: string;
+  voiceName: string;
+  duration: string;
+  speed: string;
+}
+
 interface ProPostComposerScreenProps {
   ideaTitle?: string;
+  questDraft?: { title: string; hook: string; story: string; lesson: string; cta: string } | null;
+  attachedAudio?: AttachedAudioData | null;
+  onClearAttachedAudio?: () => void;
   initialPlatform?: string;
   onBack: () => void;
   onLogout?: () => void;
   onOpenSchedule?: () => void;
-  onOpenMessages?: () => void;
   onOpenJarvisPro?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onSwitchToFree?: () => void;
@@ -45,7 +55,7 @@ interface PlatformOption {
   name: string;
   shortName: string;
   format: string;
-  platformType: 'tiktok' | 'instagram' | 'youtube' | 'linkedin' | 'x' | 'threads';
+  platformType: 'tiktok' | 'instagram' | 'youtube' | 'threads';
 }
 
 const PRO_PLATFORMS: PlatformOption[] = [
@@ -71,20 +81,6 @@ const PRO_PLATFORMS: PlatformOption[] = [
     platformType: 'youtube',
   },
   {
-    id: 'x',
-    name: 'X (Twitter)',
-    shortName: 'X',
-    format: 'Viral Thread',
-    platformType: 'x',
-  },
-  {
-    id: 'linkedin',
-    name: 'LinkedIn',
-    shortName: 'LinkedIn',
-    format: 'Thought Leadership',
-    platformType: 'linkedin',
-  },
-  {
     id: 'threads',
     name: 'Threads',
     shortName: 'Threads',
@@ -103,11 +99,13 @@ const SAMPLE_IDEAS = [
 
 export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
   ideaTitle,
+  questDraft,
+  attachedAudio,
+  onClearAttachedAudio,
   initialPlatform,
   onBack,
   onLogout,
   onOpenSchedule,
-  onOpenMessages,
   onOpenJarvisPro,
   onNavigateTab,
   onSwitchToFree,
@@ -139,7 +137,9 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
   const [captionText, setCaptionText] = useState(
     'Stop waiting for the "perfect" idea. Consistency and honest lessons outperform polished perfection every single time.\n\nSave this for when you feel stuck. 🚀\n\n#CreatorTips #ContentStrategy #GrowthHacks'
   );
-  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['tiktok', 'instagram', 'youtube']);
+  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(
+    initialPlatform ? [initialPlatform] : []
+  );
   const [selectedCategoryChip, setSelectedCategoryChip] = useState('Personal Lesson');
   const [selectedTimeSlot, setSelectedTimeSlot] = useState('7:30 PM (Peak Reach)');
   const [showAllPlatformsModal, setShowAllPlatformsModal] = useState(false);
@@ -150,10 +150,37 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
     size: string;
     type: 'video' | 'image';
   } | null>(null);
+  const [localAttachedAudio, setLocalAttachedAudio] = useState<AttachedAudioData | null>(
+    attachedAudio || null
+  );
+  const [isPlayingVoiceover, setIsPlayingVoiceover] = useState(false);
+  const [voiceoverPlaybackSec, setVoiceoverPlaybackSec] = useState(0);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const flameFloatY = useRef(new Animated.Value(0)).current;
   const modalPopScale = useRef(new Animated.Value(0.88)).current;
+
+  useEffect(() => {
+    if (attachedAudio) {
+      setLocalAttachedAudio(attachedAudio);
+    }
+  }, [attachedAudio]);
+
+  useEffect(() => {
+    let timer: any;
+    if (isPlayingVoiceover) {
+      timer = setInterval(() => {
+        setVoiceoverPlaybackSec((prev) => {
+          if (prev >= 30) {
+            setIsPlayingVoiceover(false);
+            return 0;
+          }
+          return prev + 1;
+        });
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [isPlayingVoiceover]);
 
   useEffect(() => {
     Animated.loop(
@@ -171,6 +198,41 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
       ])
     ).start();
   }, [flameFloatY]);
+
+  useEffect(() => {
+    if (ideaTitle) {
+      setCurrentIdea(ideaTitle);
+      const lower = ideaTitle.toLowerCase();
+      if (
+        lower.includes('story') ||
+        lower.includes('lesson') ||
+        lower.includes('wish i knew') ||
+        lower.includes('mistake') ||
+        lower.includes('storyteller') ||
+        lower.includes('started creating')
+      ) {
+        setCaptionText(
+          'When I first started creating content, I delayed posting for months waiting for everything to be perfect.\n\nWhen I finally hit record on my phone and shared one honest lesson, my 3rd video hit 50k views.\n\nKey lesson: Storytelling and consistency beat high production every time.\n\nWhat is one lesson you learned the hard way? Drop it below 👇\n\n#Storytelling #CreatorJourney #LessonsLearned #PostStreak'
+        );
+        setSelectedCategoryChip('Personal Lesson');
+      } else if (lower.includes('habits')) {
+        setCaptionText(
+          '3 simple creator habits that helped me post 5x faster:\n1. Batch recording talking points\n2. Reusing high-retention hooks\n3. Focusing on 1 key takeaway per post.\n\nWhich of these are you trying next? 🚀\n\n#CreatorTips #Habits #Consistency'
+        );
+        setSelectedCategoryChip('Creator Habit');
+      }
+    }
+  }, [ideaTitle]);
+
+  useEffect(() => {
+    if (questDraft) {
+      if (questDraft.title) setCurrentIdea(questDraft.title);
+      setCaptionText(
+        `${questDraft.hook}\n\n${questDraft.story}\n\nKey lesson: ${questDraft.lesson}\n\n${questDraft.cta}\n\n#Storytelling #CreatorJourney #LessonsLearned #PostStreak`
+      );
+      setSelectedCategoryChip('Personal Lesson');
+    }
+  }, [questDraft]);
 
   const showToast = (msg: string) => {
     if (Platform.OS !== 'web') {
@@ -200,11 +262,7 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     if (selectedPlatforms.includes(id)) {
-      if (selectedPlatforms.length > 1) {
-        setSelectedPlatforms(selectedPlatforms.filter((p) => p !== id));
-      } else {
-        showToast('At least 1 platform must remain selected');
-      }
+      setSelectedPlatforms(selectedPlatforms.filter((p) => p !== id));
     } else {
       setSelectedPlatforms([...selectedPlatforms, id]);
     }
@@ -305,18 +363,7 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
             </Pressable>
 
             {/* Mascot */}
-            <Animated.View
-              style={[
-                styles.headerLogoWrapper,
-                { transform: [{ translateY: flameFloatY }] },
-              ]}
-            >
-              <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerGhostLogo}
-                resizeMode="contain"
-              />
-            </Animated.View>
+            <BrandLogo size="sm" />
 
             {/* Mode Switcher Pill */}
             <Pressable
@@ -333,37 +380,18 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
               hitSlop={8}
             >
               <LinearGradient
-                colors={['#FDE68A', '#F59E0B', '#D97706']}
+                colors={['#F59E0B', '#F59E0B', '#F59E0B']}
                 start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
+                end={{ x: 1, y: 0 }}
                 style={styles.proHeaderBadge}
               >
-                <Text style={styles.proHeaderBadgeText}>🔥 PRO</Text>
+                <Text style={styles.proHeaderBadgeText}>👑 PRO</Text>
               </LinearGradient>
             </Pressable>
           </View>
 
           {/* Right Header */}
           <View style={styles.headerRightGroup}>
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                if (onOpenMessages) onOpenMessages();
-                else if (onNavigateTab) onNavigateTab('match');
-              }}
-            >
-              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-            </Pressable>
-
             <Pressable
               style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
               hitSlop={8}
@@ -400,11 +428,36 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
               style={styles.profileAvatarWrapper}
               hitSlop={8}
             >
-              <Image
-                source={userProfile?.avatarSource || require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerUserAvatar}
-                resizeMode="cover"
-              />
+              {userProfile?.customAvatarUri ? (
+                <Image
+                  source={{ uri: userProfile.customAvatarUri }}
+                  style={styles.headerUserAvatar}
+                  resizeMode="cover"
+                />
+              ) : (userProfile?.avatarSource && userProfile.avatarId && userProfile.avatarId !== 'ghost') ? (
+                <Image
+                  source={userProfile.avatarSource}
+                  style={styles.headerUserAvatar}
+                  resizeMode="cover"
+                />
+              ) : (
+                <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
+                  <Path
+                    d="M20 21V19C20 17.9 19.5 16.9 18.7 16.2C17.9 15.5 16.9 15 15.8 15H8.2C7.1 15 6.1 15.5 5.3 16.2C4.5 16.9 4 17.9 4 19V21"
+                    stroke="#F59E0B"
+                    strokeWidth="2.3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <Circle
+                    cx="12"
+                    cy="7"
+                    r="4"
+                    stroke="#F59E0B"
+                    strokeWidth="2.3"
+                  />
+                </Svg>
+              )}
               <View style={styles.avatarTinyGoldCheckPos}>
                 <TinyGoldCheck size={14} />
               </View>
@@ -422,16 +475,24 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
           <View style={styles.topTitlesSection}>
             <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center', marginBottom: 8 }}>
               <View style={styles.createPostTagBox}>
-                <Text style={styles.createPostTagText}>✨ CREATE POST — PRO</Text>
+                <Text style={styles.createPostTagText}>✨ CREATE POST • PRO</Text>
               </View>
-              <View style={styles.draftPill}>
-                <Text style={styles.draftPillText}>AUTOPILOT READY</Text>
-              </View>
+              {questDraft ? (
+                <View style={styles.questDraftBadge}>
+                  <Text style={styles.questDraftBadgeText}>🔥 STORYTELLER QUEST DRAFT</Text>
+                </View>
+              ) : (
+                <View style={styles.draftPill}>
+                  <Text style={styles.draftPillText}>AUTOPILOT READY</Text>
+                </View>
+              )}
             </View>
 
-            <Text style={styles.mainTitleText}>Shape your next post.</Text>
-            <Text style={styles.mainSubText}>
-              Write your caption, choose platforms, add media and schedule your content.
+            <Text
+              style={styles.mainTitleText}
+              numberOfLines={2}
+            >
+              Shape your next post.
             </Text>
           </View>
 
@@ -454,12 +515,17 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
 
             <Text style={styles.postIdeaMainTitle}>&ldquo;{currentIdea}&rdquo;</Text>
             <Text style={styles.postIdeaSub}>
-              Turn this idea into a short-form post for your selected platforms.
+              Shape this idea into a post your audience will want to see.
             </Text>
 
             {/* Chips */}
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 12 }}>
-              {['Personal Lesson', 'Creator Advice', 'Streak Saver', 'Viral Reel'].map((chip) => (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ flexDirection: 'row', gap: 8, paddingHorizontal: 2 }}
+              style={{ flexGrow: 0, marginTop: 12 }}
+            >
+              {['Personal Lesson', 'Creator Advice', 'Consistency', 'Viral Reel'].map((chip) => (
                 <Pressable
                   key={chip}
                   style={[
@@ -483,7 +549,7 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
                   </Text>
                 </Pressable>
               ))}
-            </View>
+            </ScrollView>
           </View>
 
           {/* ============================================================ */}
@@ -503,7 +569,7 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
           </View>
 
           <View style={styles.platformsGridRow}>
-            {PRO_PLATFORMS.slice(0, 3).map((platform) => {
+            {PRO_PLATFORMS.slice(0, 2).map((platform) => {
               const isSelected = selectedPlatforms.includes(platform.id);
               return (
                 <Pressable
@@ -533,6 +599,85 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
           <Text style={styles.platformDisclaimerText}>
             👑 Pro Multi-Sync active. Your content is automatically tailored to each platform&apos;s optimal algorithm format.
           </Text>
+
+          {/* ============================================================ */}
+          {/* ATTACHED STUDIO VOICEOVER CARD (SEAMLESS PRO WORKFLOW)       */}
+          {/* ============================================================ */}
+          {localAttachedAudio && (
+            <View style={{ marginTop: 18 }}>
+              <View style={styles.sectionHeaderRowWithBtn}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <Text style={{ fontSize: 16 }}>🎙️</Text>
+                  <Text style={styles.sectionHeaderTitle}>ATTACHED STUDIO VOICEOVER</Text>
+                </View>
+                <Pressable
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    setLocalAttachedAudio(null);
+                    if (onClearAttachedAudio) onClearAttachedAudio();
+                    showToast('🗑️ Voiceover detached from post');
+                  }}
+                  hitSlop={8}
+                >
+                  <Text style={{ fontSize: 11, color: '#EF4444', fontWeight: '800' }}>✕ Detach</Text>
+                </Pressable>
+              </View>
+
+              <View style={styles.attachedAudioCard}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                  {/* Play/Pause Button */}
+                  <Pressable
+                    style={({ pressed }) => [styles.audioPlayBtnCircle, pressed && styles.btnPressed]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                      }
+                      setIsPlayingVoiceover(!isPlayingVoiceover);
+                      if (!isPlayingVoiceover) {
+                        showToast(`▶ Playing ${localAttachedAudio.title}`);
+                      }
+                    }}
+                  >
+                    <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                      {isPlayingVoiceover ? (
+                        <Path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" fill="#FFFFFF" />
+                      ) : (
+                        <Path d="M8 5v14l11-7L8 5z" fill="#FFFFFF" />
+                      )}
+                    </Svg>
+                  </Pressable>
+
+                  {/* Audio Info */}
+                  <View style={{ flex: 1 }}>
+                    <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center', marginBottom: 3 }}>
+                      <View style={styles.audioProBadge}>
+                        <Text style={styles.audioProBadgeText}>🎙️ STUDIO MASTER</Text>
+                      </View>
+                      <View style={styles.audioSpeedBadge}>
+                        <Text style={styles.audioSpeedBadgeText}>{localAttachedAudio.speed}</Text>
+                      </View>
+                    </View>
+                    <Text style={styles.attachedAudioTitle} numberOfLines={1}>
+                      {localAttachedAudio.title}
+                    </Text>
+                    <Text style={styles.attachedAudioMeta}>
+                      {localAttachedAudio.voiceName} • {localAttachedAudio.duration} • 48kHz HD
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Status Bar / Synchronization hint */}
+                <View style={styles.audioSyncBanner}>
+                  <View style={styles.audioSyncDot} />
+                  <Text style={styles.audioSyncText}>
+                    {isPlayingVoiceover ? `Playing preview (${voiceoverPlaybackSec}s)...` : 'Synced with 9:16 video timeline • Ready to publish'}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          )}
 
           {/* ============================================================ */}
           {/* CARD 3: MEDIA UPLOAD & ASSET STUDIO                          */}
@@ -598,23 +743,33 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
               </View>
             )}
 
-            {/* Action Buttons: Upload Media & Add Thumbnail */}
+            {/* Action Buttons: Add Media & Add Thumbnail */}
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 14 }}>
               <Pressable
                 style={({ pressed }) => [styles.mediaActionBtn, pressed && styles.btnPressed]}
                 onPress={() => openFilePicker('media')}
               >
-                <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-                  <Path d="M12 19V5M5 12l7-7 7 7" stroke="#171420" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                <Svg width={15} height={15} viewBox="0 0 24 24" fill="none">
+                  <Path
+                    d="M4 16L8.586 11.414C9.367 10.633 10.633 10.633 11.414 11.414L16 16M14 14L15.586 12.414C16.367 11.633 17.633 11.633 18.414 12.414L20 14M14 8H14.01M6 20H18C19.105 20 20 19.105 20 18V6C20 4.895 19.105 4 18 4H6C4.895 4 4 4.895 4 6V18C4 19.105 4.895 20 6 20Z"
+                    stroke="#171420"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </Svg>
-                <Text style={styles.mediaActionBtnText}>Upload Media</Text>
+                <Text style={styles.mediaActionBtnText}>Add Media</Text>
               </Pressable>
 
               <Pressable
                 style={({ pressed }) => [styles.mediaActionBtn, pressed && styles.btnPressed]}
                 onPress={() => openFilePicker('thumbnail')}
               >
-                <Text style={{ fontSize: 14 }}>🖼️</Text>
+                <Svg width={15} height={15} viewBox="0 0 24 24" fill="none">
+                  <Rect x="3" y="3" width="18" height="18" rx="4" stroke="#171420" strokeWidth="2" />
+                  <Circle cx="8.5" cy="8.5" r="1.5" fill="#171420" />
+                  <Path d="M21 15L16 10L5 21" stroke="#171420" strokeWidth="2" strokeLinecap="round" />
+                </Svg>
                 <Text style={styles.mediaActionBtnText}>Add Thumbnail</Text>
               </Pressable>
             </View>
@@ -700,7 +855,10 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderBetween}>
-                <Text style={styles.modalTitle}>Choose Post Idea</Text>
+                <View style={{ flex: 1, paddingRight: 8 }}>
+                  <Text style={styles.modalTitle}>Choose Post Idea</Text>
+                  <Text style={styles.modalSubtitle}>Choose an idea from your vault or start with a quick prompt.</Text>
+                </View>
                 <Pressable onPress={() => setShowChangeIdeaModal(false)} hitSlop={8}>
                   <Text style={styles.modalCloseText}>✕</Text>
                 </Pressable>
@@ -710,21 +868,22 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
                 {SAMPLE_IDEAS.map((idea, idx) => (
                   <Pressable
                     key={idx}
-                    style={styles.ideaOptionCard}
+                    style={[styles.ideaOptionCard, currentIdea === idea && { borderColor: '#7C3AED', backgroundColor: '#F5F3FF' }]}
                     onPress={() => {
                       setCurrentIdea(idea);
                       setShowChangeIdeaModal(false);
                       showToast(`✓ Selected: "${idea}"`);
                     }}
                   >
-                    <Text style={styles.ideaOptionText}>&ldquo;{idea}&rdquo;</Text>
+                    <Text style={[styles.ideaOptionText, currentIdea === idea && { color: '#7C3AED', fontWeight: '800' }]}>&ldquo;{idea}&rdquo;</Text>
+                    {currentIdea === idea && (
+                      <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: '#7C3AED', justifyContent: 'center', alignItems: 'center' }}>
+                        <Text style={{ color: '#FFFFFF', fontSize: 12, fontWeight: '800' }}>✓</Text>
+                      </View>
+                    )}
                   </Pressable>
                 ))}
               </View>
-
-              <Pressable style={styles.modalCancelBtn} onPress={() => setShowChangeIdeaModal(false)}>
-                <Text style={styles.modalCancelBtnText}>Close</Text>
-              </Pressable>
             </Animated.View>
           </View>
         </Modal>
@@ -845,6 +1004,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+    width: '100%',
     backgroundColor: '#FAF8F5',
   },
   headerBar: {
@@ -889,15 +1049,18 @@ const styles = StyleSheet.create({
     height: 26,
   },
   proHeaderBadge: {
-    paddingHorizontal: 9,
-    paddingVertical: 3.5,
-    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+    backgroundColor: '#F59E0B',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   proHeaderBadgeText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '900',
-    color: '#0C0A12',
-    letterSpacing: 0.3,
+    color: '#78350F',
+    letterSpacing: 0.4,
   },
   headerRightGroup: {
     flexDirection: 'row',
@@ -907,7 +1070,7 @@ const styles = StyleSheet.create({
   headerIconBtn: {
     width: 38,
     height: 38,
-    borderRadius: 19,
+    borderRadius: 20,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#EFECE6',
@@ -933,15 +1096,18 @@ const styles = StyleSheet.create({
   profileAvatarWrapper: {
     width: 38,
     height: 38,
-    borderRadius: 19,
-    borderWidth: 1.5,
+    borderRadius: 20,
+    borderWidth: 2,
     borderColor: '#F59E0B',
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
     position: 'relative',
   },
   headerUserAvatar: {
     width: '100%',
     height: '100%',
-    borderRadius: 19,
+    borderRadius: 18,
   },
   avatarTinyGoldCheckPos: {
     position: 'absolute',
@@ -963,8 +1129,8 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   createPostTagText: {
-    fontSize: 9.5,
-    fontWeight: '900',
+    fontSize: 10,
+    fontWeight: '700',
     color: '#D97706',
     letterSpacing: 0.3,
   },
@@ -975,16 +1141,33 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   draftPillText: {
-    fontSize: 9.5,
-    fontWeight: '900',
+    fontSize: 10,
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.3,
   },
+  questDraftBadge: {
+    backgroundColor: '#FAF5FF',
+    borderWidth: 1,
+    borderColor: '#D8B4FE',
+    paddingHorizontal: 9,
+    paddingVertical: 3.5,
+    borderRadius: 6,
+  },
+  questDraftBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#6B21A8',
+    letterSpacing: 0.3,
+  },
   mainTitleText: {
-    fontSize: 23,
-    fontWeight: '900',
+    fontSize: Platform.OS === 'web' ? ('clamp(15px, 3.8vw, 17px)' as any) : sFont(16),
+    fontWeight: '700',
     color: '#171420',
-    letterSpacing: -0.5,
+    letterSpacing: -0.35,
+    lineHeight: 22,
+    marginBottom: 4,
+    marginTop: 4,
   },
   mainSubText: {
     fontSize: 12.5,
@@ -1009,19 +1192,19 @@ const styles = StyleSheet.create({
   },
   postIdeaTag: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#94A3B8',
     letterSpacing: 0.5,
   },
   changeIdeaLink: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.3,
   },
   postIdeaMainTitle: {
     fontSize: 17,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     marginVertical: 4,
     lineHeight: 23,
@@ -1035,22 +1218,22 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
     borderColor: '#EFECE6',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 100,
   },
   ideaChipPillActive: {
     backgroundColor: '#EDE9FE',
     borderColor: '#DDD6FE',
   },
   ideaChipPillText: {
-    fontSize: 11,
-    fontWeight: '800',
+    fontSize: 11.5,
+    fontWeight: '700',
     color: '#475569',
   },
   ideaChipPillTextActive: {
     color: '#582CDB',
-    fontWeight: '900',
+    fontWeight: '800',
   },
 
   // SECTION 2: CHOOSE PLATFORMS
@@ -1062,7 +1245,7 @@ const styles = StyleSheet.create({
   },
   sectionHeaderTitle: {
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.5,
   },
@@ -1074,15 +1257,18 @@ const styles = StyleSheet.create({
   },
   morePlatformsBtnText: {
     color: '#FFFFFF',
-    fontSize: 10.5,
-    fontWeight: '900',
+    fontSize: 11,
+    fontWeight: '700',
   },
   platformsGridRow: {
     flexDirection: 'row',
-    gap: 10,
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
   },
   platformCard: {
-    flex: 1,
+    width: '48%',
+    minHeight: 110,
+    marginBottom: 10,
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 14,
@@ -1108,7 +1294,7 @@ const styles = StyleSheet.create({
   },
   platformCardName: {
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   platformCheckCircle: {
@@ -1163,8 +1349,8 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   mediaMainHeading: {
-    fontSize: 13.5,
-    fontWeight: '900',
+    fontSize: 14,
+    fontWeight: '700',
     color: '#171420',
   },
   mediaSubHeading: {
@@ -1199,8 +1385,8 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   mediaProBadgeText: {
-    fontSize: 8.5,
-    fontWeight: '900',
+    fontSize: 9,
+    fontWeight: '700',
     color: '#15803D',
   },
   mediaSizeText: {
@@ -1210,11 +1396,11 @@ const styles = StyleSheet.create({
   },
   mediaAttachedName: {
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   mediaAttachedFormat: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#64748B',
     marginTop: 1,
   },
@@ -1226,13 +1412,13 @@ const styles = StyleSheet.create({
     gap: 6,
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     paddingVertical: 10,
     borderRadius: 12,
   },
   mediaActionBtnText: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
 
@@ -1244,8 +1430,8 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   polishJarvisBtnText: {
-    fontSize: 10.5,
-    fontWeight: '900',
+    fontSize: 11,
+    fontWeight: '700',
     color: '#582CDB',
   },
   captionBoxCard: {
@@ -1279,14 +1465,14 @@ const styles = StyleSheet.create({
   autopilotBtnText: {
     color: '#582CDB',
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   publishGoldBtn: {
     borderRadius: 14,
     overflow: 'hidden',
     shadowColor: '#F59E0B',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.12,
     shadowRadius: 8,
     elevation: 4,
   },
@@ -1298,8 +1484,8 @@ const styles = StyleSheet.create({
   },
   publishGoldBtnText: {
     color: '#0C0A12',
-    fontSize: 13.5,
-    fontWeight: '900',
+    fontSize: 14,
+    fontWeight: '700',
     letterSpacing: 0.3,
   },
 
@@ -1328,25 +1514,38 @@ const styles = StyleSheet.create({
   modalCloseText: {
     fontSize: 18,
     color: '#94A3B8',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.3,
   },
+  modalSubtitle: {
+    fontSize: 12,
+    color: '#64748B',
+    marginTop: 2,
+    lineHeight: 16,
+  },
   ideaOptionCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
     backgroundColor: '#FAF8F5',
-    borderRadius: 12,
-    padding: 12,
-    borderWidth: 1,
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderWidth: 1.5,
     borderColor: '#EFECE6',
   },
   ideaOptionText: {
+    flex: 1,
     fontSize: 13,
     fontWeight: '800',
     color: '#171420',
+    lineHeight: 18,
   },
   platformModalRow: {
     flexDirection: 'row',
@@ -1364,7 +1563,7 @@ const styles = StyleSheet.create({
   },
   platformModalName: {
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   platformModalFormat: {
@@ -1398,11 +1597,95 @@ const styles = StyleSheet.create({
   toastText: {
     color: '#FFFFFF',
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.2,
   },
   btnPressed: {
-    transform: [{ scale: 0.96 }],
-    opacity: 0.85,
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
+  },
+  // Attached Audio Card Styles
+  attachedAudioCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1.5,
+    borderColor: '#DDD6FE',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    elevation: 3,
+  },
+  audioPlayBtnCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#582CDB',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  audioProBadge: {
+    backgroundColor: '#FAF5FF',
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+  },
+  audioProBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: '#6D28D9',
+    letterSpacing: 0.5,
+  },
+  audioSpeedBadge: {
+    backgroundColor: '#F3F4F6',
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  audioSpeedBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#4B5563',
+  },
+  attachedAudioTitle: {
+    fontSize: 14.5,
+    fontWeight: '800',
+    color: '#171420',
+    marginTop: 2,
+  },
+  attachedAudioMeta: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#6B7280',
+    marginTop: 2,
+  },
+  audioSyncBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#F5F3FF',
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    borderRadius: 8,
+    marginTop: 11,
+  },
+  audioSyncDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#10B981',
+  },
+  audioSyncText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#6D28D9',
   },
 });

@@ -2,8 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   StyleSheet,
   View,
-  Text,
-  TextInput,
   Pressable,
   ScrollView,
   KeyboardAvoidingView,
@@ -14,6 +12,7 @@ import {
   Animated,
   Modal,
 } from 'react-native';
+import { Text, TextInput } from '../components/ui/AppText';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 
@@ -520,7 +519,7 @@ export const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({
 
                     <TextInput
                       style={styles.textInput}
-                      placeholder="At least 6 characters"
+                      placeholder="Min. 6 characters"
                       placeholderTextColor="#A39BB5"
                       value={newPassword}
                       onChangeText={setNewPassword}
@@ -591,7 +590,7 @@ export const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({
 
                     <TextInput
                       style={styles.textInput}
-                      placeholder="Repeat your password"
+                      placeholder="Confirm password"
                       placeholderTextColor="#A39BB5"
                       value={confirmPassword}
                       onChangeText={setConfirmPassword}
@@ -716,7 +715,7 @@ export const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({
 
               <View style={styles.jarvisCoreBadge}>
                 <Text style={styles.jarvisBadgeSparkle}>🔥</Text>
-                <Text style={styles.jarvisBadgeText}>JARVIS CORE AI</Text>
+                <Text style={styles.jarvisBadgeText}>JARVIS CORE</Text>
               </View>
 
               <Text style={styles.modalTitle}>{jarvisModalTitle}</Text>
@@ -838,10 +837,11 @@ const styles = StyleSheet.create({
   },
   formCard: {
     backgroundColor: 'rgba(255, 255, 255, 0.84)',
-    borderRadius: 26,
+    borderRadius: 24,
     borderWidth: 1,
     borderColor: 'rgba(235, 230, 248, 0.9)',
-    padding: 20,
+    paddingVertical: 18,
+    paddingHorizontal: 14,
     marginBottom: 18,
     shadowColor: '#171420',
     shadowOffset: { width: 0, height: 8 },
@@ -855,7 +855,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   inputLabel: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '700',
     color: '#524C62',
     letterSpacing: 0.6,
@@ -868,49 +868,63 @@ const styles = StyleSheet.create({
     borderWidth: 1.2,
     borderColor: 'rgba(221, 214, 254, 0.9)',
     borderRadius: 14,
-    paddingHorizontal: 14,
+    paddingHorizontal: 12,
     height: 50,
     width: '100%',
+    overflow: 'hidden',
   },
   inputFieldFocused: {
     borderColor: '#582CDB',
     backgroundColor: 'rgba(250, 248, 255, 0.95)',
   },
   inputIconContainer: {
-    marginRight: 10,
+    marginRight: 8,
+    flexShrink: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   eyeIconButton: {
     padding: 4,
-    marginLeft: 6,
+    marginLeft: 4,
+    flexShrink: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   textInput: {
     flex: 1,
-    fontSize: 15,
+    minWidth: 0,
+    fontSize: 14.5,
     fontWeight: '500',
     color: '#171420',
     paddingVertical: 0,
+    paddingHorizontal: 0,
+    paddingRight: 6,
+    ...(Platform.OS === 'web' ? { outlineStyle: 'none' as any } : {}),
   },
   otpRow: {
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    gap: 6,
+    gap: 5,
     marginBottom: 20,
     width: '100%',
   },
   otpBox: {
-    width: 42,
-    height: 50,
+    flex: 1,
+    minWidth: 0,
+    maxWidth: 42,
+    height: 48,
     borderRadius: 12,
     borderWidth: 1.5,
     borderColor: 'rgba(221, 214, 254, 0.9)',
     backgroundColor: 'rgba(250, 248, 255, 0.8)',
     textAlign: 'center',
-    fontSize: 20,
+    fontSize: 19,
     fontWeight: '700',
     color: '#171420',
     paddingVertical: 0,
     paddingHorizontal: 0,
+    ...(Platform.OS === 'web' ? { outlineStyle: 'none' as any } : {}),
   },
   otpBoxFilled: {
     borderColor: '#582CDB',
@@ -925,7 +939,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   resendActiveText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '700',
     color: '#582CDB',
   },
@@ -947,7 +961,7 @@ const styles = StyleSheet.create({
     width: '100%',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 12,
     elevation: 4,
   },
@@ -986,7 +1000,7 @@ const styles = StyleSheet.create({
   },
   successCheckEmoji: {
     fontSize: 32,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   successTitle: {
@@ -1074,7 +1088,7 @@ const styles = StyleSheet.create({
     letterSpacing: -0.4,
   },
   modalText: {
-    fontSize: 13.5,
+    fontSize: 14,
     color: '#524C62',
     textAlign: 'center',
     lineHeight: 20,
@@ -1093,7 +1107,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 10,
     elevation: 4,
   },

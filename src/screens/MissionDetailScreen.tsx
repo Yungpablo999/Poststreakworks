@@ -1,1498 +1,409 @@
-import React, { useState, useRef, useEffect } from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  Pressable,
-  ScrollView,
-  Platform,
-  Image,
-  SafeAreaView,
-  StatusBar,
-  Animated,
-  Modal,
-  TextInput,
-} from 'react-native';
-import Svg, { Path, Circle, Rect } from 'react-native-svg';
+import React, { useEffect, useMemo, useState } from 'react';
+import { usePageWidth } from '../hooks/useBreakpoint';
+import { View, ScrollView, Pressable, StyleSheet, Platform } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated, {
+  Easing,
+  FadeIn,
+  FadeInUp,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from 'react-native-reanimated';
+import Svg, { Circle, Path } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
-import { LinearGradient } from 'expo-linear-gradient';
+import { Text } from '../components/ui/AppText';
+import { AppButton } from '../components/ui/AppButton';
+import { FitLines } from '../components/ui/FitLines';
+import { GlassBackdrop } from '../components/glass/GlassBackdrop';
+import { GlassCard } from '../components/glass/GlassCard';
+import { JarvisOrb } from '../components/JarvisOrb';
+import { FreeAppHeader } from '../components/FreeAppHeader';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
-import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
+import type { UserPersona } from '../components/HeaderDualModePills';
+import { JarvisPickCard, ProgressRing, PulsingTarget, type PickIdea } from '../components/quests/QuestBlocks';
+import { getStarterIdeas } from '../data';
+import { ds } from '../theme/colors';
+
+// Today's quest, opened from the Quests tab. Three tappable steps, Jarvis's
+// idea pick (shuffle through a few), and what finishing earns. No deadline,
+// no streak warnings: post whenever suits you.
+
+const XP = 80;
+const pointer = Platform.OS === 'web' ? ({ cursor: 'pointer' } as object) : null;
+const tick = () => {
+  if (Platform.OS !== 'web') Haptics.selectionAsync();
+};
 
 interface MissionDetailScreenProps {
-  onBackToDashboard?: () => void;
+  onBack?: () => void;
   onLogout?: () => void;
   onNavigateTab?: (tab: TabType) => void;
-  onOpenMessages?: () => void;
+  onOpenJarvisPro?: () => void;
+  onOpenCreateIdea?: () => void;
+  onOpenIdeaAngle?: () => void;
+  onOpenPostComposer?: (prefillTitle?: string, prefillPlatform?: string) => void;
+  /** New creators: shape the idea in Script. */
+  onOpenScript?: (title: string) => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
+  userPersona?: UserPersona;
+  onTogglePersona?: () => void;
+  onSwitchToPro?: () => void;
+  onSwitchToFree?: () => void;
+}
+
+type StepIcon = 'idea' | 'make' | 'post';
+
+interface Step {
+  id: StepIcon;
+  title: string;
+  body: string;
+  /** Button label; none = tracked automatically */
+  action?: string;
+  onPress?: () => void;
+  /** Done from Jarvis's pick below, so no button of its own */
+  hint?: boolean;
+}
+
+function StepGlyph({ id, color }: { id: StepIcon; color: string }) {
+  const paths: Record<StepIcon, React.ReactNode> = {
+    idea: (
+      <Path
+        d="M9 18h6M10 21h4M12 3a6 6 0 00-3.5 10.9c.6.4 1 1.1 1 1.8V16h5v-.3c0-.7.4-1.4 1-1.8A6 6 0 0012 3z"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    ),
+    make: <Path d="M15 10l5-3v10l-5-3M4 6h11v12H4z" stroke={color} strokeWidth={2} strokeLinejoin="round" />,
+    post: <Path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />,
+  };
+  return (
+    <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+      {paths[id]}
+    </Svg>
+  );
+}
+
+// ─── Stepper ────────────────────────────────────────────────────────────────
+function StepRow({
+  step,
+  index,
+  last,
+  open,
+  next,
+  onToggle,
+}: {
+  step: Step;
+  index: number;
+  last: boolean;
+  open: boolean;
+  next: boolean;
+  onToggle: () => void;
+}) {
+  const [hover, setHover] = useState(false);
+  return (
+    <Animated.View style={styles.stepRow}>
+      {/* Rail */}
+      <View style={styles.rail}>
+        <View style={[styles.stepCircle, next && styles.stepCircleNext]}>
+          <StepGlyph id={step.id} color={next ? '#FFFFFF' : ds.purple} />
+        </View>
+        {!last && <View style={styles.railLine} />}
+      </View>
+
+      <Pressable
+        onPress={onToggle}
+        onHoverIn={() => setHover(true)}
+        onHoverOut={() => setHover(false)}
+        accessibilityRole="button"
+        accessibilityState={{ expanded: open }}
+        accessibilityLabel={`Step ${index + 1}: ${step.title}`}
+        style={[styles.stepBody, open && styles.stepBodyOpen, hover && !open && styles.stepBodyHover, pointer]}
+      >
+        <View style={styles.stepTop}>
+          <Text style={styles.stepNum}>STEP {index + 1}</Text>
+          {next && (
+            <View style={styles.nextChip}>
+              <Text style={styles.nextChipText}>Next up</Text>
+            </View>
+          )}
+          {!step.action && !step.hint && (
+            <View style={styles.autoChip}>
+              <Text style={styles.autoChipText}>Automatic</Text>
+            </View>
+          )}
+        </View>
+        <Text style={styles.stepTitle}>{step.title}</Text>
+        {open && (
+          <Animated.View entering={FadeIn.duration(220)}>
+            <Text style={styles.stepText}>{step.body}</Text>
+            {step.action && step.onPress && (
+              <View style={styles.stepAction}>
+                <AppButton title={step.action} onPress={step.onPress} variant={next ? 'primary' : 'glass'} />
+              </View>
+            )}
+          </Animated.View>
+        )}
+      </Pressable>
+    </Animated.View>
+  );
+}
+
+// Soft glow behind the finish badge
+function BadgeGlow() {
+  const reduce = useReducedMotion();
+  const t = useSharedValue(0);
+  useEffect(() => {
+    if (!reduce) t.value = withRepeat(withTiming(1, { duration: 1800, easing: Easing.inOut(Easing.sin) }), -1, true);
+  }, [reduce, t]);
+  const style = useAnimatedStyle(() => ({ opacity: 0.35 + 0.35 * t.value, transform: [{ scale: 0.92 + 0.12 * t.value }] }));
+  return <Animated.View pointerEvents="none" style={[styles.badgeGlow, style]} />;
 }
 
 export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
-  onBackToDashboard,
+  onBack,
   onLogout,
   onNavigateTab,
-  onOpenMessages,
-
+  onOpenJarvisPro,
+  onOpenCreateIdea,
+  onOpenIdeaAngle,
+  onOpenPostComposer,
+  onOpenScript,
   userProfile,
-  onSaveProfile,}) => {
-  const isDark = false;
-  const [activeTab, setActiveTab] = useState<TabType>('quests');
-  const [isCompleted, setIsCompleted] = useState(false);
-  const [step1Done, setStep1Done] = useState(true);
-  const [step2Done, setStep2Done] = useState(false);
-  const [step3Done, setStep3Done] = useState(false);
+  onSaveProfile,
+  userPersona,
+  onTogglePersona,
+  onSwitchToPro,
+  onSwitchToFree,
+}) => {
+  const pageWidth = usePageWidth();
+  const isNew = (userPersona || userProfile?.userPersona || 'new') === 'new';
+  const [showProfile, setShowProfile] = useState(false);
+  const [open, setOpen] = useState(0);
 
-  // Modal States
-  const [showCelebrationModal, setShowCelebrationModal] = useState(false);
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showIdeaModal, setShowIdeaModal] = useState(false);
-  const [showNotificationModal, setShowNotificationModal] = useState(false);
-  const [showProfileModal, setShowProfileModal] = useState(false);
-  const [showChatModal, setShowChatModal] = useState(false);
+  const ideas = useMemo(
+    () => getStarterIdeas(userProfile?.niches ?? [], (userProfile as { platforms?: string[] } | undefined)?.platforms ?? []).slice(0, 5),
+    [userProfile],
+  );
 
-  // Form State
-  const [postTitle, setPostTitle] = useState('One thing I wish I knew before I started creating.');
-  const [postPlatform, setPostPlatform] = useState<'tiktok' | 'instagram' | 'youtube'>('tiktok');
-
-  // Animations
-  const flameFloatY = useRef(new Animated.Value(0)).current;
-  const modalPopScale = useRef(new Animated.Value(0.88)).current;
-
-  useEffect(() => {
-    const flameLoop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(flameFloatY, {
-          toValue: -3,
-          duration: 1300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(flameFloatY, {
-          toValue: 3,
-          duration: 1300,
-          useNativeDriver: true,
-        }),
-      ])
-    );
-    flameLoop.start();
-    return () => flameLoop.stop();
-  }, [flameFloatY]);
-
-  const triggerModalPop = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    }
-    modalPopScale.setValue(0.88);
-    Animated.spring(modalPopScale, {
-      toValue: 1,
-      useNativeDriver: true,
-      speed: 26,
-      bounciness: 12,
-    }).start();
-  };
-
-  const handleTabPress = (tab: TabType) => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    setActiveTab(tab);
-    if (onNavigateTab) {
-      onNavigateTab(tab);
+  const findIdeas = () => (onOpenIdeaAngle ? onOpenIdeaAngle() : onOpenCreateIdea ? onOpenCreateIdea() : onNavigateTab?.('create'));
+  const useIdea = (idea: PickIdea) => {
+    if (isNew) {
+      if (onOpenScript) onOpenScript(idea.title);
+      else if (onOpenCreateIdea) onOpenCreateIdea();
+      else onNavigateTab?.('create');
+    } else {
+      onOpenPostComposer?.(idea.title);
     }
   };
 
-  const handleCompleteMission = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
-    setIsCompleted(true);
-    setStep2Done(true);
-    setStep3Done(true);
-    setShowCelebrationModal(true);
-  };
+  const steps: Step[] = isNew
+    ? [
+        { id: 'idea', title: 'Pick an idea', body: 'Use Jarvis’s pick below, or look through more ideas.', action: 'Find ideas', onPress: findIdeas },
+        { id: 'make', title: 'Write the script', body: 'Tap “Use this idea” below and Jarvis helps you turn it into a short script.', hint: true },
+        { id: 'post', title: 'Save it', body: 'We tick this off when you save a draft or schedule it.' },
+      ]
+    : [
+        { id: 'idea', title: 'Pick an idea', body: 'Use Jarvis’s pick below, or find one that fits today.', action: 'Find ideas', onPress: findIdeas },
+        { id: 'make', title: 'Make your post', body: 'Tap “Use this idea” below to film, write or design it.', hint: true },
+        { id: 'post', title: 'Post it', body: 'We tick this off when your post goes live. Whenever suits you.' },
+      ];
+
+  const title = isNew ? ['Your first', 'Studio session'] : ['Share one', 'post today'];
 
   return (
-    <SafeAreaView style={[styles.safeArea, isDark && { backgroundColor: '#0C0A12' }]}>
-      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={isDark ? "#0C0A12" : "#FAF8F5"} />
-      <View style={[styles.container, isDark && { backgroundColor: '#0C0A12' }]}>
-        {/* 1. TOP AIRY HEADER BAR */}
-        <View style={styles.headerBar}>
-          {/* Top-Left: Ghost Logo Mascot */}
-          <Animated.View
-            style={[
-              styles.headerLogoWrapper,
-              { transform: [{ translateY: flameFloatY }] },
-            ]}
-          >
-            <Image
-              source={require('../../assets/images/jarvis-ghost-clean.png')}
-              style={styles.headerGhostLogo}
-              resizeMode="contain"
-            />
+    <View style={styles.root}>
+      <GlassBackdrop />
+      <SafeAreaView style={styles.flex} edges={['top']}>
+        <FreeAppHeader
+          backgroundColor="transparent"
+          onBack={onBack}
+          onOpenJarvisPro={onOpenJarvisPro}
+          onSwitchToPro={onSwitchToPro}
+          onSwitchToFree={onSwitchToFree}
+          onTogglePersona={onTogglePersona}
+          onOpenProfile={() => setShowProfile(true)}
+          userPersona={userPersona}
+          userProfile={userProfile}
+        />
+        <ScrollView contentContainerStyle={[styles.scroll, pageWidth]} showsVerticalScrollIndicator={false}>
+          {/* Hero */}
+          <Animated.View entering={FadeInUp.duration(500).easing(Easing.out(Easing.cubic))}>
+            <GlassCard strong radius={28} padding={20}>
+              <View style={styles.heroTop}>
+                <View style={styles.flex}>
+                  <View style={styles.eyebrow}>
+                    <PulsingTarget />
+                    <Text style={styles.eyebrowText}>TODAY'S QUEST</Text>
+                  </View>
+                  <FitLines
+                    key={title.join()}
+                    lines={[title[0], <Text key="a" style={styles.accent}>{title[1]}</Text>]}
+                    textStyle={styles.heroTitle}
+                    maxFontSize={30}
+                    align="left"
+                    accessibilityLabel={title.join(' ')}
+                  />
+                </View>
+                <View style={styles.ring} accessibilityLabel={`${XP} XP when you finish`}>
+                  <ProgressRing progress={0.04} size={70} />
+                  <View style={styles.ringCenter}>
+                    <Text style={styles.ringXp}>+{XP}</Text>
+                    <Text style={styles.ringLabel}>XP</Text>
+                  </View>
+                </View>
+              </View>
+              <Text style={styles.heroBody}>
+                {isNew ? 'Get one idea ready. No need to post yet.' : 'Whenever suits you. There’s no deadline.'}
+              </Text>
+              <View style={styles.segments} accessibilityLabel="0 of 3 steps done">
+                {steps.map((s) => (
+                  <View key={s.id} style={styles.segment} />
+                ))}
+              </View>
+              <Text style={styles.segmentsLabel}>0 of 3 steps done</Text>
+            </GlassCard>
           </Animated.View>
 
-          {/* Right Icons: Messages, Notification Bell, Profile */}
-          <View style={styles.headerRightGroup}>
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                if (onOpenMessages) {
-                  onOpenMessages();
-                } else {
-                  triggerModalPop();
-                  setShowChatModal(true);
-                }
-              }}
-            >
-              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                triggerModalPop();
-                setShowNotificationModal(true);
-              }}
-            >
-              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <Path
-                  d="M13.73 21a2 2 0 0 1-3.46 0"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-              <View style={styles.notificationDot} />
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                triggerModalPop();
-                setShowProfileModal(true);
-              }}
-            >
-              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <Circle cx="12" cy="7" r="4" stroke="#171420" strokeWidth="2.2" />
-              </Svg>
-            </Pressable>
-          </View>
-        </View>
-
-        {/* 2. MAIN SCROLLABLE CONTENT */}
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-          bounces={true}
-        >
-          {/* TOP PILL BADGES */}
-          <View style={styles.topBadgesRow}>
-            <View style={styles.todayMissionPill}>
-              <Text style={styles.todayMissionPillText}>TODAY&apos;S MISSION</Text>
-            </View>
-
-            <View style={styles.freeMissionPill}>
-              <Text style={styles.freeMissionPillText}>FREE MISSION</Text>
-            </View>
-          </View>
-
-          {/* MAIN HEADLINE & SUBTITLE */}
-          <Text style={styles.mainHeading}>Post once before 9 PM.</Text>
-          <Text style={styles.mainSubtitle}>
-            Protect your <Text style={{ fontWeight: '800', color: '#171420' }}>47-day streak</Text> and keep your creator momentum alive.
-          </Text>
-
-          {/* 1. MISSION PROGRESS CARD */}
-          <View style={styles.missionProgressCard}>
-            <View style={styles.progressHeaderRow}>
-              <Text style={styles.progressCardTitle}>Mission Progress</Text>
-              <Text style={styles.progressFractionText}>{isCompleted ? '1 / 1' : '0 / 1'}</Text>
-            </View>
-
-            {/* Progress Bar */}
-            <View style={styles.progressBarTrack}>
-              <View style={[styles.progressBarFill, { width: isCompleted ? '100%' : '18%' }]} />
-            </View>
-
-            {/* 3 Metric Pills Row: +80 XP, Streak, 9:00 PM Deadline */}
-            <View style={styles.metricsRow}>
-              <View style={styles.metricBox}>
-                <Text style={styles.metricValueGold}>+80</Text>
-                <Text style={styles.metricLabel}>XP</Text>
-              </View>
-
-              <View style={styles.metricBox}>
-                <Text style={styles.metricEmoji}>🔥</Text>
-                <Text style={styles.metricLabel}>STREAK</Text>
-              </View>
-
-              <View style={styles.metricBox}>
-                <Text style={styles.metricValueGold}>9:00 PM</Text>
-                <Text style={styles.metricLabel}>DEADLINE</Text>
-              </View>
-            </View>
-
-            {/* Warning / Reminder Banner */}
-            <View style={styles.warningBanner}>
-              <Text style={styles.warningBannerText}>
-                ! One post today keeps your streak alive.
-              </Text>
-            </View>
-          </View>
-
-          {/* 2. STEP-BY-STEP GUIDE */}
-          <View style={styles.guideCard}>
-            <Text style={styles.guideSectionTitle}>STEP-BY-STEP GUIDE</Text>
-
-            {/* Step 1 */}
-            <View style={styles.stepRow}>
-              <View style={[styles.stepCircle, step1Done && styles.stepCircleActive]}>
-                <Text style={[styles.stepCircleNumber, step1Done && styles.stepCircleNumberActive]}>1</Text>
-              </View>
-              <View style={styles.stepContent}>
-                <Text style={styles.stepTitle}>Choose your idea</Text>
-                <Text style={styles.stepDescription}>Pick a trending topic or use a suggestion.</Text>
-              </View>
-            </View>
-
-            {/* Step 2 */}
-            <View style={styles.stepRow}>
-              <View style={[styles.stepCircle, step2Done && styles.stepCircleActive]}>
-                <Text style={[styles.stepCircleNumber, step2Done && styles.stepCircleNumberActive]}>2</Text>
-              </View>
-              <View style={styles.stepContent}>
-                <Text style={styles.stepTitle}>Write your script</Text>
-                <Text style={styles.stepDescription}>Keep it concise. Focus on the hook.</Text>
-              </View>
-            </View>
-
-            {/* Step 3 */}
-            <View style={[styles.stepRow, { marginBottom: 0 }]}>
-              <View style={[styles.stepCircle, step3Done && styles.stepCircleActive]}>
-                <Text style={[styles.stepCircleNumber, step3Done && styles.stepCircleNumberActive]}>3</Text>
-              </View>
-              <View style={styles.stepContent}>
-                <Text style={styles.stepTitle}>Publish before 9 PM</Text>
-                <Text style={styles.stepDescription}>Make sure your post goes live before the deadline.</Text>
-              </View>
-            </View>
-          </View>
-
-          {/* 3. SUGGESTED IDEA CARD (ROYAL PURPLE) */}
-          <View style={styles.suggestedIdeaCard}>
-            <View style={styles.suggestedHeaderRow}>
-              <Text style={styles.suggestedIdeaTag}>SUGGESTED IDEA</Text>
-              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                <Rect x="2" y="3" width="20" height="14" rx="2" stroke="#E0E7FF" strokeWidth="2" />
-                <Path d="M8 21h8M12 17v4" stroke="#E0E7FF" strokeWidth="2" strokeLinecap="round" />
-              </Svg>
-            </View>
-
-            <Text style={styles.suggestedQuote}>
-              &ldquo;One thing I wish I knew before I started creating.&rdquo;
-            </Text>
-
-            <View style={styles.suggestedFooterRow}>
-              <View style={styles.bestTimeRow}>
-                <Text style={styles.bestTimeText}>🕒 Best time: 7:30 PM</Text>
-              </View>
-
-              <Pressable
-                style={({ pressed }) => [styles.useThisIdeaBtn, pressed && styles.btnPressed]}
-                onPress={() => {
-                  setPostTitle('One thing I wish I knew before I started creating');
-                  triggerModalPop();
-                  setShowCreateModal(true);
-                }}
-              >
-                <Text style={styles.useThisIdeaBtnText}>Use This Idea</Text>
-              </Pressable>
-            </View>
-          </View>
-
-          {/* 4. WHAT THIS MISSION IMPROVES */}
-          <View style={styles.improvesCard}>
-            <Text style={styles.improvesSectionTitle}>WHAT THIS MISSION IMPROVES</Text>
-            <View style={styles.improvesPillsRow}>
-              <View style={styles.improvesPillGray}>
-                <Text style={styles.improvesPillGrayText}>Consistency</Text>
-              </View>
-              <View style={styles.improvesPillPurple}>
-                <Text style={styles.improvesPillPurpleText}>XP Boost</Text>
-              </View>
-              <View style={styles.improvesPillGold}>
-                <Text style={styles.improvesPillGoldText}>Growth</Text>
-              </View>
-              <View style={styles.improvesPillGray}>
-                <Text style={styles.improvesPillGrayText}>Passport</Text>
-              </View>
-            </View>
-          </View>
-
-          {/* 5. XP & REWARD CARD */}
-          <View style={styles.rewardCard}>
-            <View style={styles.rewardTopRow}>
-              <View style={styles.rewardMedalBox}>
-                <Text style={{ fontSize: 20 }}>🎖️</Text>
-              </View>
-              <View>
-                <Text style={styles.rewardTitle}>+80 XP Pending</Text>
-                <Text style={styles.rewardSubtitle}>Streak Protection</Text>
-              </View>
-            </View>
-
-            <View style={styles.momentumBadgePill}>
-              <Text style={styles.momentumBadgeText}>MOMENTUM BUILDER BADGE</Text>
-            </View>
-          </View>
-
-          {/* 6. JARVIS INSIGHT CARD */}
-          <View style={styles.jarvisCard}>
-            <View style={styles.jarvisHeaderRow}>
-              <Animated.View
-                style={[
-                  styles.jarvisFlameCircle,
-                  { transform: [{ translateY: flameFloatY }] },
-                ]}
-              >
-                <Image
-                  source={require('../../assets/images/jarvis-ghost-clean.png')}
-                  style={styles.jarvisFlameIcon}
-                  resizeMode="contain"
-                />
-              </Animated.View>
-              <View style={styles.jarvisTitleCol}>
-                <Text style={styles.jarvisTitle}>Jarvis insight</Text>
-                <Text style={styles.jarvisTime}>2m ago</Text>
-              </View>
-            </View>
-
-            <Text style={styles.jarvisBody}>
-              Your audience responds well to honest creator lessons. Share a quick mistake or lesson from your journey.
-            </Text>
-
-            <Pressable
-              style={styles.generateIdeaLink}
-              onPress={() => {
-                triggerModalPop();
-                setShowIdeaModal(true);
-              }}
-              hitSlop={6}
-            >
-              <Text style={styles.generateIdeaLinkText}>✨ GENERATE IDEA</Text>
-            </Pressable>
-          </View>
-
-          {/* 7. DUAL ACTION BUTTONS */}
-          <View style={styles.actionButtonsContainer}>
-            {/* Primary Button: Create Post */}
-            <Pressable
-              style={({ pressed }) => [styles.createPostBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                triggerModalPop();
-                setShowCreateModal(true);
-              }}
-            >
-              <LinearGradient
-                colors={['#6366F1', '#582CDB']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.createPostGradient}
-              >
-                <Text style={styles.createPostBtnText}>⊕  Create Post</Text>
-              </LinearGradient>
-            </Pressable>
-
-            {/* Secondary Button: I Published This */}
-            <Pressable
-              style={({ pressed }) => [styles.publishedBtn, pressed && styles.btnPressed]}
-              onPress={handleCompleteMission}
-            >
-              <Text style={styles.publishedBtnText}>✓  I Published This</Text>
-            </Pressable>
-          </View>
-
-          {/* Bottom Space for Floating Tab Bar */}
-          <View style={{ height: 120 }} />
-        </ScrollView>
-
-        {/* FLOATING LIQUID GLASS TAB BAR */}
-        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
-
-        {/* SIGNATURE ANIMATED GHOST CELEBRATION MODAL */}
-        <AnimatedCompletionModal
-          visible={showCelebrationModal}
-          title="Mission Accomplished!"
-          subtitle="Your daily post is live & your 47-day streak momentum is 100% protected."
-          speechBubble="Ghost says: Consistency is your superpower Amara! +80 XP added to your Passport!"
-          badgeText="MISSION COMPLETE"
-          xpEarned={80}
-          streakCount={47}
-          actionText="Continue ➔"
-          onDismiss={() => {
-            setShowCelebrationModal(false);
-            if (onBackToDashboard) onBackToDashboard();
-          }}
-        />
-
-        {/* CREATE POST MODAL */}
-        <Modal
-          visible={showCreateModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowCreateModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Create Mission Post</Text>
-                  <Text style={styles.modalSubtitle}>Post before 9 PM to protect your streak.</Text>
-                </View>
-                <Pressable
-                  onPress={() => setShowCreateModal(false)}
-                  style={styles.modalCloseCircle}
-                  hitSlop={8}
-                >
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
-              </View>
-
-              <Text style={styles.modalInputLabel}>CHOOSE PLATFORM</Text>
-              <View style={styles.platformSelectRow}>
-                {/* TikTok */}
-                <Pressable
-                  onPress={() => setPostPlatform('tiktok')}
-                  style={[
-                    styles.platformSelectBtn,
-                    postPlatform === 'tiktok' && styles.platformSelectBtnActive,
-                  ]}
-                >
-                  <Svg width={14} height={14} viewBox="0 0 24 24">
-                    <Path
-                      d="M17.5 4.5a4.5 4.5 0 0 1-3.5-4h-2.5v13.5a2.5 2.5 0 1 1-2.5-2.5c.3 0 .5.05.7.15V8.5a5.5 5.5 0 1 0 4.8 5.4V7.2a7.5 7.5 0 0 0 4.5 1.3V5.5c-.5 0-1-.3-1.5-1z"
-                      fill={postPlatform === 'tiktok' ? '#FFFFFF' : '#000000'}
-                    />
-                  </Svg>
-                  <Text
-                    style={[
-                      styles.platformSelectBtnText,
-                      postPlatform === 'tiktok' && styles.platformSelectBtnTextActive,
-                    ]}
-                  >
-                    TikTok
-                  </Text>
-                </Pressable>
-
-                {/* Instagram */}
-                <Pressable
-                  onPress={() => setPostPlatform('instagram')}
-                  style={[
-                    styles.platformSelectBtn,
-                    postPlatform === 'instagram' && styles.platformSelectBtnActive,
-                  ]}
-                >
-                  <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
-                    <Rect x="2" y="2" width="20" height="20" rx="5" stroke={postPlatform === 'instagram' ? '#FFFFFF' : '#E1306C'} strokeWidth="2.2" />
-                    <Circle cx="12" cy="12" r="4" stroke={postPlatform === 'instagram' ? '#FFFFFF' : '#E1306C'} strokeWidth="2.2" />
-                  </Svg>
-                  <Text
-                    style={[
-                      styles.platformSelectBtnText,
-                      postPlatform === 'instagram' && styles.platformSelectBtnTextActive,
-                    ]}
-                  >
-                    Instagram
-                  </Text>
-                </Pressable>
-
-                {/* YouTube */}
-                <Pressable
-                  onPress={() => setPostPlatform('youtube')}
-                  style={[
-                    styles.platformSelectBtn,
-                    postPlatform === 'youtube' && styles.platformSelectBtnActive,
-                  ]}
-                >
-                  <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
-                    <Path
-                      d="M21.58 7.19a2.5 2.5 0 0 0-1.76-1.77C18.26 5 12 5 12 5s-6.26 0-7.82.42A2.5 2.5 0 0 0 2.42 7.19C2 8.76 2 12 2 12s0 3.24.42 4.81a2.5 2.5 0 0 0 1.76 1.77C5.74 19 12 19 12 19s6.26 0 7.82-.42a2.5 2.5 0 0 0 1.76-1.77C22 15.24 22 12 22 12s0-3.24-.42-4.81z"
-                      fill={postPlatform === 'youtube' ? '#FFFFFF' : '#FF0000'}
-                    />
-                    <Path d="M10 15.5l5.5-3.5L10 8.5v7z" fill={postPlatform === 'youtube' ? '#582CDB' : '#FFFFFF'} />
-                  </Svg>
-                  <Text
-                    style={[
-                      styles.platformSelectBtnText,
-                      postPlatform === 'youtube' && styles.platformSelectBtnTextActive,
-                    ]}
-                  >
-                    YouTube
-                  </Text>
-                </Pressable>
-              </View>
-
-              <Text style={styles.modalInputLabel}>POST TITLE / HOOK</Text>
-              <TextInput
-                style={styles.modalTextInput}
-                value={postTitle}
-                onChangeText={setPostTitle}
-                placeholder="e.g. One thing I wish I knew before creating..."
-                placeholderTextColor="#94A3B8"
-              />
-
-              <View style={styles.modalBtnRow}>
-                <Pressable
-                  style={styles.modalSecondaryBtn}
-                  onPress={() => setShowCreateModal(false)}
-                >
-                  <Text style={styles.modalSecondaryBtnText}>Cancel</Text>
-                </Pressable>
-
-                <Pressable
-                  style={styles.modalPrimaryBtn}
-                  onPress={() => {
-                    setShowCreateModal(false);
-                    handleCompleteMission();
+          {/* Steps */}
+          <Animated.View entering={FadeInUp.delay(100).duration(500).easing(Easing.out(Easing.cubic))}>
+            <Text style={styles.section}>How to finish</Text>
+            <GlassCard radius={24} padding={14}>
+              {steps.map((s, i) => (
+                <StepRow
+                  key={s.id}
+                  step={s}
+                  index={i}
+                  last={i === steps.length - 1}
+                  open={open === i}
+                  next={i === 0}
+                  onToggle={() => {
+                    tick();
+                    setOpen(open === i ? -1 : i);
                   }}
-                >
-                  <LinearGradient
-                    colors={['#6366F1', '#582CDB']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.modalPrimaryGradient}
-                  >
-                    <Text style={styles.modalPrimaryBtnText}>Publish &amp; Save</Text>
-                  </LinearGradient>
-                </Pressable>
-              </View>
-            </Animated.View>
-          </View>
-        </Modal>
-
-        {/* AI IDEA SPARKS MODAL */}
-        <Modal
-          visible={showIdeaModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowIdeaModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>AI Hook Sparks</Text>
-                  <Text style={styles.modalSubtitle}>Angles tailored for your 47-day streak:</Text>
-                </View>
-                <Pressable
-                  onPress={() => setShowIdeaModal(false)}
-                  style={styles.modalCloseCircle}
-                  hitSlop={8}
-                >
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
-              </View>
-
-              {[
-                'One thing I wish I knew before I started creating.',
-                '3 creator tools that saved me 10 hours this week.',
-                'Why consistency beats motivation every single time.',
-              ].map((spark, idx) => (
-                <Pressable
-                  key={idx}
-                  style={styles.sparkCard}
-                  onPress={() => {
-                    setPostTitle(spark);
-                    setShowIdeaModal(false);
-                    setShowCreateModal(true);
-                  }}
-                >
-                  <Text style={styles.sparkText}>&ldquo;{spark}&rdquo;</Text>
-                  <Text style={styles.sparkTag}>⚡ 94 Viral Score • High Retention</Text>
-                </Pressable>
+                />
               ))}
+            </GlassCard>
+          </Animated.View>
 
-              <Pressable
-                style={styles.modalFullBtn}
-                onPress={() => setShowIdeaModal(false)}
-              >
-                <Text style={styles.modalFullBtnText}>Done</Text>
-              </Pressable>
+          {/* Jarvis's pick */}
+          {ideas.length > 0 && (
+            <Animated.View entering={FadeInUp.delay(200).duration(500).easing(Easing.out(Easing.cubic))}>
+              <Text style={styles.section}>Jarvis’s pick for today</Text>
+              <JarvisPickCard orb={<JarvisOrb size={30} />} ideas={ideas} onUse={useIdea} />
             </Animated.View>
-          </View>
-        </Modal>
+          )}
 
-        {/* NOTIFICATION MODAL */}
-        <Modal
-          visible={showNotificationModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowNotificationModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Mission Notifications</Text>
-                  <Text style={styles.modalSubtitle}>Today&apos;s streak updates</Text>
+          {/* Reward */}
+          <Animated.View entering={FadeInUp.delay(300).duration(500).easing(Easing.out(Easing.cubic))}>
+            <Text style={styles.section}>When you finish</Text>
+            <View style={styles.rewards}>
+              <GlassCard radius={22} padding={14} style={styles.rewardTile}>
+                <View style={styles.rewardIcon}>
+                  <Svg width={18} height={18} viewBox="0 0 24 24">
+                    <Path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z" fill={ds.purple} />
+                  </Svg>
                 </View>
-                <Pressable
-                  onPress={() => setShowNotificationModal(false)}
-                  style={styles.modalCloseCircle}
-                  hitSlop={8}
-                >
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
-              </View>
-
-              <View style={styles.notifCard}>
-                <Text style={{ fontSize: 18 }}>🔥</Text>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.notifTitle}>Post before 9 PM</Text>
-                  <Text style={styles.notifBody}>Your 47-day streak requires 1 post today.</Text>
+                <Text style={styles.rewardValue}>+{XP} XP</Text>
+                <Text style={styles.rewardSub}>Towards your next level</Text>
+              </GlassCard>
+              <GlassCard radius={22} padding={14} style={styles.rewardTile}>
+                <View style={styles.rewardIcon}>
+                  <BadgeGlow />
+                  <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                    <Circle cx="12" cy="9" r="6" stroke={ds.purple} strokeWidth={2.2} />
+                    <Path d="M8.5 14L7 22l5-3 5 3-1.5-8" stroke={ds.purple} strokeWidth={2.2} strokeLinejoin="round" />
+                  </Svg>
                 </View>
-              </View>
+                <Text style={styles.rewardValue}>Momentum</Text>
+                <Text style={styles.rewardSub}>A badge for your profile</Text>
+              </GlassCard>
+            </View>
+          </Animated.View>
 
-              <Pressable
-                style={styles.modalFullBtn}
-                onPress={() => setShowNotificationModal(false)}
-              >
-                <Text style={styles.modalFullBtnText}>Close</Text>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
+        </ScrollView>
+      </SafeAreaView>
 
-        {/* PROFILE MODAL */}
-        {/* UNIVERSAL CREATOR PASSPORT & PROFILE MODAL */}
-        <UserProfileModal
-          visible={showProfileModal}
-          onClose={() => setShowProfileModal(false)}
-          onLogout={onLogout}
-          initialProfile={userProfile}
-          onSaveProfile={onSaveProfile}
-        />
+      <FloatingTabBar activeTab="quests" onTabPress={(t) => onNavigateTab?.(t)} />
 
-        {/* CHAT MODAL */}
-        <Modal
-          visible={showChatModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowChatModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Squad Chat</Text>
-                  <Text style={styles.modalSubtitle}>Collaborate with your creator squad</Text>
-                </View>
-                <Pressable
-                  onPress={() => setShowChatModal(false)}
-                  style={styles.modalCloseCircle}
-                  hitSlop={8}
-                >
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
-              </View>
-
-              <View style={styles.chatCard}>
-                <Text style={{ fontSize: 12, fontWeight: '800', color: '#582CDB', marginBottom: 2 }}>🤖 Jarvis Assistant</Text>
-                <Text style={{ fontSize: 13, color: '#334155' }}>Your peak audience reach starts at 7:30 PM today!</Text>
-              </View>
-
-              <Pressable
-                style={styles.modalFullBtn}
-                onPress={() => setShowChatModal(false)}
-              >
-                <Text style={styles.modalFullBtnText}>Close</Text>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
-      </View>
-    </SafeAreaView>
+      <UserProfileModal
+        visible={showProfile}
+        onClose={() => setShowProfile(false)}
+        onLogout={onLogout}
+        initialProfile={userProfile}
+        onSaveProfile={onSaveProfile}
+      />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#FAF8F5',
-  },
-  container: {
-    flex: 1,
-    backgroundColor: '#FAF8F5',
-  },
-  btnPressed: {
-    opacity: 0.78,
-    transform: [{ scale: 0.97 }],
-  },
+  root: { flex: 1, backgroundColor: ds.bg },
+  flex: { flex: 1 },
+  scroll: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 130, width: '100%', maxWidth: 560, alignSelf: 'center' },
 
-  // 1. TOP HEADER BAR
-  headerBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 22,
-    paddingTop: 10,
-    paddingBottom: 14,
-    backgroundColor: '#FAF8F5',
-  },
-  headerLogoWrapper: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.95)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#171420',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.04,
-    shadowRadius: 10,
-    elevation: 2,
-  },
-  headerGhostLogo: {
-    width: 36,
-    height: 36,
-  },
-  headerRightGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  headerIconBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderWidth: 1,
-    borderColor: 'rgba(235, 230, 248, 0.8)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
-    shadowColor: '#171420',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 6,
-    elevation: 1,
-  },
-  notificationDot: {
-    position: 'absolute',
-    top: 9,
-    right: 9,
-    width: 7,
-    height: 7,
-    borderRadius: 3.5,
-    backgroundColor: '#EF4444',
-    borderWidth: 1.2,
-    borderColor: '#FFFFFF',
-  },
-
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 8,
-  },
-
-  // TOP PILL BADGES
-  topBadgesRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 12,
-  },
-  todayMissionPill: {
-    backgroundColor: '#784DF0',
-    paddingVertical: 4,
-    paddingHorizontal: 12,
-    borderRadius: 100,
-  },
-  todayMissionPillText: {
-    fontSize: 10.5,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    letterSpacing: 0.4,
-  },
-  freeMissionPill: {
-    backgroundColor: '#E2E8F0',
-    paddingVertical: 4,
-    paddingHorizontal: 12,
-    borderRadius: 100,
-  },
-  freeMissionPillText: {
-    fontSize: 10.5,
-    fontWeight: '800',
-    color: '#475569',
-    letterSpacing: 0.4,
-  },
-
-  // HEADLINE
-  mainHeading: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#171420',
-    letterSpacing: -0.6,
-    marginBottom: 4,
-  },
-  mainSubtitle: {
-    fontSize: 14,
-    color: '#524C62',
-    lineHeight: 20,
-    marginBottom: 20,
-    fontWeight: '500',
-  },
-
-  // 1. MISSION PROGRESS CARD
-  missionProgressCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: '#EFEBF8',
-    padding: 20,
-    marginBottom: 18,
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.05,
-    shadowRadius: 16,
-    elevation: 3,
-  },
-  progressHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  progressCardTitle: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#171420',
-  },
-  progressFractionText: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#582CDB',
-  },
-  progressBarTrack: {
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#E2E8F0',
-    overflow: 'hidden',
-    marginBottom: 16,
-  },
-  progressBarFill: {
-    height: '100%',
-    backgroundColor: '#582CDB',
-    borderRadius: 4,
-  },
-  metricsRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 14,
-  },
-  metricBox: {
-    flex: 1,
-    backgroundColor: '#FAF8F5',
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#EFEBF8',
-    paddingVertical: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  metricValueGold: {
-    fontSize: 15,
-    fontWeight: '800',
-    color: '#D97706',
-    marginBottom: 2,
-  },
-  metricEmoji: {
-    fontSize: 15,
-    marginBottom: 2,
-  },
-  metricLabel: {
-    fontSize: 9.5,
-    fontWeight: '800',
-    color: '#6B7280',
-    letterSpacing: 0.5,
-  },
-  warningBanner: {
-    backgroundColor: '#FEF2F2',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#FEE2E2',
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    alignItems: 'center',
-  },
-  warningBannerText: {
-    fontSize: 12.5,
-    fontWeight: '700',
-    color: '#DC2626',
-  },
-
-  // 2. STEP-BY-STEP GUIDE
-  guideCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: '#EFEBF8',
-    padding: 20,
-    marginBottom: 18,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 8,
-  },
-  guideSectionTitle: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#6B7280',
-    letterSpacing: 0.6,
-    marginBottom: 16,
-  },
-  stepRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 14,
-    marginBottom: 18,
-  },
-  stepCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    borderWidth: 1.5,
-    borderColor: '#CBD5E1',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    marginTop: 2,
-  },
-  stepCircleActive: {
-    borderColor: '#582CDB',
-    backgroundColor: '#F5F3FF',
-  },
-  stepCircleNumber: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: '#64748B',
-  },
-  stepCircleNumberActive: {
-    color: '#582CDB',
-  },
-  stepContent: {
-    flex: 1,
-  },
-  stepTitle: {
-    fontSize: 15,
-    fontWeight: '800',
-    color: '#171420',
-    marginBottom: 2,
-  },
-  stepDescription: {
-    fontSize: 13,
-    color: '#64748B',
-    lineHeight: 18,
-  },
-
-  // 3. SUGGESTED IDEA CARD (ROYAL PURPLE)
-  suggestedIdeaCard: {
-    backgroundColor: '#582CDB',
-    borderRadius: 24,
-    padding: 20,
-    marginBottom: 18,
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 14,
-    elevation: 4,
-  },
-  suggestedHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  suggestedIdeaTag: {
-    fontSize: 10.5,
-    fontWeight: '800',
-    color: '#E0E7FF',
-    letterSpacing: 0.6,
-  },
-  suggestedQuote: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    lineHeight: 25,
-    marginBottom: 18,
-  },
-  suggestedFooterRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  bestTimeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  bestTimeText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#E0E7FF',
-  },
-  useThisIdeaBtn: {
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 100,
-  },
-  useThisIdeaBtnText: {
-    fontSize: 12.5,
-    fontWeight: '800',
-    color: '#582CDB',
-  },
-
-  // 4. WHAT THIS MISSION IMPROVES
-  improvesCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: '#EFEBF8',
-    padding: 20,
-    marginBottom: 18,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 8,
-  },
-  improvesSectionTitle: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#6B7280',
-    letterSpacing: 0.6,
-    marginBottom: 14,
-  },
-  improvesPillsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  improvesPillGray: {
-    backgroundColor: '#F1F5F9',
-    paddingVertical: 6,
-    paddingHorizontal: 14,
-    borderRadius: 100,
-  },
-  improvesPillGrayText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#475569',
-  },
-  improvesPillPurple: {
-    backgroundColor: '#EDE9FE',
-    paddingVertical: 6,
-    paddingHorizontal: 14,
-    borderRadius: 100,
-  },
-  improvesPillPurpleText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#6D28D9',
-  },
-  improvesPillGold: {
-    backgroundColor: '#FEF3C7',
-    paddingVertical: 6,
-    paddingHorizontal: 14,
-    borderRadius: 100,
-  },
-  improvesPillGoldText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#D97706',
-  },
-
-  // 5. XP & REWARD CARD
-  rewardCard: {
-    backgroundColor: '#F5F0E6',
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: '#E8E1D3',
-    padding: 18,
-    marginBottom: 18,
-  },
-  rewardTopRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 12,
-  },
-  rewardMedalBox: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: '#FEF3C7',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  rewardTitle: {
-    fontSize: 15,
-    fontWeight: '800',
-    color: '#171420',
-  },
-  rewardSubtitle: {
-    fontSize: 12,
-    color: '#64748B',
-  },
-  momentumBadgePill: {
-    backgroundColor: '#EBE4D5',
-    borderRadius: 10,
-    paddingVertical: 8,
-    alignItems: 'center',
-  },
-  momentumBadgeText: {
-    fontSize: 10.5,
-    fontWeight: '800',
-    color: '#785928',
-    letterSpacing: 0.6,
-  },
-
-  // 6. JARVIS INSIGHT CARD
-  jarvisCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: '#EFEBF8',
-    padding: 20,
-    marginBottom: 20,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 8,
-  },
-  jarvisHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginBottom: 10,
-  },
-  jarvisFlameCircle: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: '#FAF8F5',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  jarvisFlameIcon: {
-    width: 22,
-    height: 22,
-  },
-  jarvisTitleCol: {
-    flex: 1,
-  },
-  jarvisTitle: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#171420',
-  },
-  jarvisTime: {
-    fontSize: 11,
-    color: '#94A3B8',
-  },
-  jarvisBody: {
-    fontSize: 13,
-    color: '#475569',
-    lineHeight: 19,
-    fontStyle: 'italic',
-    marginBottom: 12,
-  },
-  generateIdeaLink: {
+  heroTop: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
+  eyebrow: {
     alignSelf: 'flex-start',
-  },
-  generateIdeaLinkText: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: '#582CDB',
-    letterSpacing: 0.5,
-  },
-
-  // 7. DUAL ACTION BUTTONS
-  actionButtonsContainer: {
-    gap: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 10,
+    height: 24,
+    borderRadius: 999,
+    backgroundColor: ds.lavender,
     marginBottom: 10,
   },
-  createPostBtn: {
-    height: 52,
-    borderRadius: 16,
-    overflow: 'hidden',
-    shadowColor: '#582CDB',
+  eyebrowText: { fontSize: 11, fontWeight: '800', letterSpacing: 0.8, color: ds.purple },
+  heroTitle: { fontWeight: '800', letterSpacing: -0.7, color: ds.ink },
+  accent: { color: ds.purple },
+  ring: { width: 70, height: 70, alignItems: 'center', justifyContent: 'center' },
+  ringCenter: { position: 'absolute', alignItems: 'center' },
+  ringXp: { fontSize: 16, fontWeight: '800', color: ds.purple },
+  ringLabel: { fontSize: 10, fontWeight: '800', color: ds.text3, marginTop: -2 },
+  heroBody: { fontSize: 14.5, lineHeight: 21, color: ds.text2, marginTop: 10 },
+  segments: { flexDirection: 'row', gap: 6, marginTop: 14 },
+  segment: { flex: 1, height: 6, borderRadius: 3, backgroundColor: ds.lavender },
+  segmentsLabel: { fontSize: 12, fontWeight: '700', color: ds.text3, marginTop: 6 },
+
+  section: { fontSize: 17, fontWeight: '800', color: ds.ink, letterSpacing: -0.2, marginTop: 24, marginBottom: 12 },
+
+  stepRow: { flexDirection: 'row', gap: 12 },
+  rail: { alignItems: 'center', width: 38 },
+  stepCircle: { width: 38, height: 38, borderRadius: 19, backgroundColor: ds.lavender, alignItems: 'center', justifyContent: 'center' },
+  stepCircleNext: {
+    backgroundColor: ds.purple,
+    shadowColor: ds.purple,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.35,
     shadowRadius: 10,
-    elevation: 3,
   },
-  createPostGradient: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  createPostBtnText: {
-    fontSize: 15,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    letterSpacing: -0.2,
-  },
-  publishedBtn: {
-    height: 52,
-    borderRadius: 16,
-    borderWidth: 1.5,
-    borderColor: '#582CDB',
-    backgroundColor: '#FFFFFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  publishedBtnText: {
-    fontSize: 15,
-    fontWeight: '800',
-    color: '#582CDB',
-  },
+  railLine: { flex: 1, width: 2, minHeight: 12, marginVertical: 4, borderRadius: 1, backgroundColor: ds.lavender },
+  stepBody: { flex: 1, padding: 12, borderRadius: 18, marginBottom: 8, borderWidth: 1, borderColor: 'transparent' },
+  stepBodyHover: { backgroundColor: 'rgba(245, 243, 255, 0.6)' },
+  stepBodyOpen: { backgroundColor: 'rgba(245, 243, 255, 0.9)', borderColor: ds.lavender },
+  stepTop: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  stepNum: { fontSize: 11, fontWeight: '800', letterSpacing: 0.8, color: ds.text3 },
+  nextChip: { paddingHorizontal: 8, height: 20, borderRadius: 999, backgroundColor: ds.purple, justifyContent: 'center' },
+  nextChipText: { fontSize: 10.5, fontWeight: '800', color: '#FFFFFF' },
+  autoChip: { paddingHorizontal: 8, height: 20, borderRadius: 999, backgroundColor: ds.greenBg, justifyContent: 'center' },
+  autoChipText: { fontSize: 10.5, fontWeight: '800', color: ds.greenFill },
+  stepTitle: { fontSize: 16, lineHeight: 21, fontWeight: '800', color: ds.ink, marginTop: 4 },
+  stepText: { fontSize: 13.5, lineHeight: 19, color: ds.text2, marginTop: 4 },
+  stepAction: { marginTop: 12 },
 
-  // MODALS
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(15, 12, 24, 0.65)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  modalCard: {
-    width: '100%',
-    maxWidth: 380,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 26,
-    borderWidth: 1,
-    borderColor: '#EFEBF8',
-    padding: 22,
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.18,
-    shadowRadius: 28,
-    elevation: 10,
-  },
-  modalHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 16,
-  },
-  modalCloseCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#F1F5F9',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalCloseCross: {
-    fontSize: 14,
-    color: '#64748B',
-    fontWeight: '800',
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#171420',
-    letterSpacing: -0.4,
-    marginBottom: 3,
-  },
-  modalSubtitle: {
-    fontSize: 13,
-    color: '#6B637B',
-    lineHeight: 18,
-  },
-  modalInputLabel: {
-    fontSize: 10.5,
-    fontWeight: '800',
-    color: '#582CDB',
-    letterSpacing: 0.6,
-    marginBottom: 6,
-  },
-  platformSelectRow: {
-    flexDirection: 'row',
-    gap: 6,
-    marginBottom: 14,
-  },
-  platformSelectBtn: {
-    flex: 1,
-    paddingVertical: 8,
-    borderRadius: 10,
-    backgroundColor: '#FAF8F5',
-    borderWidth: 1,
-    borderColor: '#EFEBF8',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-  },
-  platformSelectBtnActive: {
-    backgroundColor: '#582CDB',
-    borderColor: '#582CDB',
-  },
-  platformSelectBtnText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#524C62',
-  },
-  platformSelectBtnTextActive: {
-    color: '#FFFFFF',
-  },
-  modalTextInput: {
-    backgroundColor: '#FAF8F5',
-    borderWidth: 1,
-    borderColor: '#EFEBF8',
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    fontSize: 13.5,
-    color: '#171420',
-    marginBottom: 14,
-  },
-  modalBtnRow: {
-    flexDirection: 'row',
-    gap: 10,
-    marginTop: 6,
-  },
-  modalSecondaryBtn: {
-    flex: 1,
-    height: 48,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#EFEBF8',
-    backgroundColor: '#FAF8F5',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalSecondaryBtnText: {
-    fontSize: 13.5,
-    fontWeight: '700',
-    color: '#524C62',
-  },
-  modalPrimaryBtn: {
-    flex: 2,
-    height: 48,
-    borderRadius: 14,
-    overflow: 'hidden',
-  },
-  modalPrimaryGradient: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalPrimaryBtnText: {
-    fontSize: 13.5,
-    fontWeight: '800',
-    color: '#FFFFFF',
-  },
-  modalFullBtn: {
-    backgroundColor: '#582CDB',
-    height: 48,
-    borderRadius: 14,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 14,
-  },
-  modalFullBtnText: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#FFFFFF',
-  },
-  sparkCard: {
-    backgroundColor: '#FAF8F5',
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#EFEBF8',
-    padding: 14,
-    marginBottom: 10,
-  },
-  sparkText: {
-    fontSize: 13.5,
-    fontWeight: '700',
-    color: '#171420',
-    marginBottom: 4,
-  },
-  sparkTag: {
-    fontSize: 11,
-    color: '#582CDB',
-    fontWeight: '600',
-  },
-  notifCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    backgroundColor: '#FAF8F5',
-    borderRadius: 14,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#EFEBF8',
-  },
-  notifTitle: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: '#171420',
-    marginBottom: 2,
-  },
-  notifBody: {
-    fontSize: 11.5,
-    color: '#64748B',
-  },
-  profileRing: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#EDE9FE',
-    borderWidth: 2,
-    borderColor: '#582CDB',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  chatCard: {
-    backgroundColor: '#FAF8F5',
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#EFEBF8',
-    padding: 12,
-    marginBottom: 10,
-  },
+
+  rewards: { flexDirection: 'row', gap: 10 },
+  rewardTile: { flex: 1 },
+  rewardIcon: { width: 36, height: 36, borderRadius: 12, backgroundColor: ds.lavender, alignItems: 'center', justifyContent: 'center', marginBottom: 10 },
+  badgeGlow: { position: 'absolute', width: 36, height: 36, borderRadius: 12, backgroundColor: '#C4B5FD' },
+  rewardValue: { fontSize: 16, fontWeight: '800', color: ds.ink },
+  rewardSub: { fontSize: 12.5, lineHeight: 17, color: ds.text2, marginTop: 2 },
+
 });

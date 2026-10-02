@@ -1,256 +1,187 @@
-import React from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  SafeAreaView,
-  StatusBar,
-  useWindowDimensions,
-  Platform,
-} from 'react-native';
-import { colors } from '../theme/colors';
-import { GlassBadge } from '../components/GlassBadge';
+import React, { useRef, useState } from 'react';
+import { StyleSheet, View, StatusBar, useWindowDimensions, Platform } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
+import Svg, { Path } from 'react-native-svg';
+import { Text } from '../components/ui/AppText';
+import { AppButton } from '../components/ui/AppButton';
+import { BrandLogo } from '../components/BrandLogo';
 import { HeroMascot } from '../components/HeroMascot';
-import { PrimaryButton } from '../components/PrimaryButton';
-import { SecondaryButton } from '../components/SecondaryButton';
-
-// Exact Figma SVG Vector Icons with Micro-Animations
-import { AnimatedFireIcon } from '../components/icons/AnimatedFireIcon';
-import { AnimatedAudioWaveIcon } from '../components/icons/AnimatedAudioWaveIcon';
-import { AnimatedGrowthIcon } from '../components/icons/AnimatedGrowthIcon';
-import { AnimatedSparklesIcon } from '../components/icons/AnimatedSparklesIcon';
+import { GlassBackdrop } from '../components/glass/GlassBackdrop';
+import { ds } from '../theme/colors';
+import { typography } from '../theme/typography';
 
 interface WelcomeScreenProps {
   onGetStarted?: () => void;
   onSignIn?: () => void;
 }
 
-export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
-  onGetStarted = () => {},
-  onSignIn = () => {},
-}) => {
-  const { height } = useWindowDimensions();
+// One smooth curve for every entrance, as on the website
+const ENTER_MS = 650;
+const MASCOT_DELAY = 120;
+const MASCOT_ENTER_MS = 800;
+
+// Headline words rise in one after another; "Earn." uses the Playfair accent
+const HEADLINE = [
+  { word: 'Create.', accent: false },
+  { word: 'Grow.', accent: false },
+  { word: 'Earn.', accent: true },
+];
+
+export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onGetStarted = () => {}, onSignIn = () => {} }) => {
+  const { width, height } = useWindowDimensions();
   const isSmallScreen = height < 740;
-  const isMediumScreen = height >= 740 && height < 860;
+  // Headline starts at its ideal size, then shrinks to fit once we've measured it.
+  // Measuring (instead of guessing) matters because fonts render at slightly
+  // different widths on iPhone, Android and the web.
+  const contentWidth = Math.min(width, 480) - 40;
+  const maxHeadlineSize = isSmallScreen ? 38 : 42;
+  const WORD_GAP = 10;
+  const [fitScale, setFitScale] = useState(1);
+  const headlineSize = Math.floor(maxHeadlineSize * fitScale);
+  const wordWidths = useRef<number[]>([]);
+  const handleWordLayout = (index: number, w: number) => {
+    wordWidths.current[index] = w;
+    const measured = wordWidths.current.filter((x) => x > 0);
+    if (measured.length < HEADLINE.length) return;
+    const total = measured.reduce((a, b) => a + b, 0) + WORD_GAP * (HEADLINE.length - 1);
+    const naturalWidth = total / fitScale; // width at the ideal size
+    const next = Math.min(1, (contentWidth * 0.96) / naturalWidth);
+    if (Math.abs(next - fitScale) > 0.01) setFitScale(next);
+  };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
+    <View style={styles.root}>
+      <GlassBackdrop />
+      <SafeAreaView style={styles.safeArea}>
+        <StatusBar barStyle="dark-content" />
 
-      {/* Main Screen Flex Container */}
-      <View style={styles.mainContainer}>
-        {/* TOP ROW: Floating Animated Badges (Fire & Audio Wave) */}
-        <View style={styles.topBadgesRow}>
-          <GlassBadge floatDelay={0} floatDistance={6} size={isSmallScreen ? 54 : 62}>
-            <AnimatedFireIcon size={isSmallScreen ? 24 : 28} color="#FABD32" opacity={0.9} />
-          </GlassBadge>
+        <View style={styles.container}>
+          {/* Brand: ghost + wordmark together */}
+          <Animated.View entering={FadeIn.duration(500)} style={styles.topBar}>
+            <BrandLogo size="sm" wordmarkOnly />
+          </Animated.View>
 
-          <GlassBadge floatDelay={400} floatDistance={7} size={isSmallScreen ? 54 : 62}>
-            <AnimatedAudioWaveIcon size={isSmallScreen ? 23 : 26} color={colors.primary} />
-          </GlassBadge>
-        </View>
+          {/* Mascot floats up, then keeps its gentle idle bob (tap it to make it bounce) */}
+          <Animated.View entering={FadeInUp.delay(MASCOT_DELAY).duration(MASCOT_ENTER_MS)} style={styles.hero}>
+            {/* The ghost rises into place and stays there (no idle float); tapping it still makes it bounce */}
+            <HeroMascot idleFloat={false} />
+          </Animated.View>
 
-        {/* HERO SECTION: Mascot Character with Soft Halo */}
-        <View style={styles.heroSection}>
-          <HeroMascot />
-        </View>
-
-        {/* CONTENT SECTION: Brand, Main Headline & Subtitle */}
-        <View style={styles.contentSection}>
-          <Text style={styles.brandTag}>Poststreak</Text>
-
-          <Text
-            style={[
-              styles.mainHeadline,
-              isSmallScreen && styles.mainHeadlineSmall,
-              isMediumScreen && styles.mainHeadlineMedium,
-            ]}
+          {/* Headline: word-by-word rise */}
+          <View
+            // Fixed height: shrinking the words to fit must never shift the ghost or buttons
+            style={[styles.headlineRow, { height: Math.round(maxHeadlineSize * 1.25) }]}
+            accessible
+            accessibilityRole="header"
+            accessibilityLabel="Create. Grow. Earn."
           >
-            Build your{'\n'}
-            creator <Text style={styles.streakAccent}>streak.</Text>
-          </Text>
-
-          <Text
-            style={[
-              styles.subtitle,
-              isSmallScreen && styles.subtitleSmall,
-            ]}
-          >
-            Create, schedule, collaborate, grow and earn—all in one creator engine.
-          </Text>
-        </View>
-
-        {/* ACTION BUTTONS CLUSTER */}
-        <View style={styles.actionCluster}>
-          <PrimaryButton
-            title="Get Started"
-            onPress={onGetStarted}
-            style={styles.actionBtn}
-          />
-          <SecondaryButton
-            title="Sign In"
-            onPress={onSignIn}
-            style={styles.actionBtn}
-          />
-        </View>
-
-        {/* FOOTER & FLANKING AMBIENT BADGES */}
-        <View style={styles.footerContainer}>
-          {/* Bottom Left Floating Badge: Growth Trend */}
-          <View style={styles.bottomLeftBadge}>
-            <GlassBadge floatDelay={600} floatDistance={5} size={isSmallScreen ? 50 : 56}>
-              <AnimatedGrowthIcon size={isSmallScreen ? 22 : 25} color={colors.primary} />
-            </GlassBadge>
+            {HEADLINE.map(({ word, accent }, i) => (
+              <Animated.View
+                key={word}
+                entering={FadeInUp.delay(380 + i * 130).duration(ENTER_MS)}
+                onLayout={(e) => handleWordLayout(i, e.nativeEvent.layout.width)}
+                style={styles.word}
+              >
+                <Text
+                  style={[
+                    styles.headline,
+                    { fontSize: headlineSize, lineHeight: Math.round(headlineSize * 1.2) },
+                    accent && styles.earn,
+                  ]}
+                >
+                  {word}
+                </Text>
+              </Animated.View>
+            ))}
           </View>
 
-          {/* Center Footer Attribution */}
-          <View style={styles.footerTextContainer}>
-            <Text style={styles.poweredBy}>POWERED BY</Text>
-            <Text style={styles.jarvisCore}>Jarvis Core</Text>
-          </View>
+          {/* Actions */}
+          <Animated.View entering={FadeInUp.delay(820).duration(ENTER_MS)} style={styles.actions}>
+            <AppButton
+              title="Get started, it's free"
+              size="lg"
+              onPress={onGetStarted}
+              iconRight={
+                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                  <Path d="M5 12h14M13 6l6 6-6 6" stroke="#FFFFFF" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
+                </Svg>
+              }
+            />
+            <AppButton title="I already have an account" variant="glass" onPress={onSignIn} />
+          </Animated.View>
 
-          {/* Bottom Right Floating Badge: Twinkling Sparkles */}
-          <View style={styles.bottomRightBadge}>
-            <GlassBadge floatDelay={900} floatDistance={6} size={isSmallScreen ? 50 : 56}>
-              <AnimatedSparklesIcon size={isSmallScreen ? 24 : 27} color="#FABD32" opacity={0.9} />
-            </GlassBadge>
-          </View>
+          <Animated.View entering={FadeIn.delay(1100).duration(600)}>
+            <Text style={styles.footer}>
+              Powered by <Text style={styles.footerStrong}>Jarvis</Text>, your AI creative partner
+            </Text>
+          </Animated.View>
         </View>
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: ds.bg,
+  },
   safeArea: {
     flex: 1,
-    backgroundColor: colors.background,
   },
-  mainContainer: {
+  container: {
     flex: 1,
+    width: '100%',
+    maxWidth: 480,
+    alignSelf: 'center',
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'ios' ? 4 : 12,
-    paddingBottom: Platform.OS === 'ios' ? 8 : 16,
-    justifyContent: 'space-between',
+    paddingTop: Platform.OS === 'ios' ? 4 : 16,
+    paddingBottom: 16,
     alignItems: 'center',
+    justifyContent: 'space-between',
   },
-
-  /* Top Badges Row */
-  topBadgesRow: {
+  topBar: {
     width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 6,
-    marginTop: 2,
-    zIndex: 10,
+    paddingVertical: 4,
   },
-
-  /* Center Hero */
-  heroSection: {
+  hero: {
+    width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: 2,
   },
-
-  /* Content & Typography */
-  contentSection: {
-    alignItems: 'center',
-    paddingHorizontal: 8,
+  headlineRow: {
+    flexDirection: 'row',
+    alignSelf: 'center',
+    alignItems: 'baseline',
+    gap: 10,
   },
-  brandTag: {
-    fontSize: 15,
+  word: {
+    flexShrink: 0, // keep each word's natural width so it can be measured
+  },
+  headline: {
     fontWeight: '800',
-    color: colors.amberDark,
-    letterSpacing: 0.2,
-    marginBottom: 6,
-    textAlign: 'center',
+    letterSpacing: -1,
+    color: ds.ink,
   },
-  mainHeadline: {
-    fontSize: 38,
-    fontWeight: '900',
-    color: colors.textPrimary,
-    textAlign: 'center',
-    letterSpacing: -1.6,
-    lineHeight: 44,
-    marginBottom: 10,
+  earn: {
+    fontFamily: typography.earnAccent,
+    color: ds.purple,
+    letterSpacing: -0.5,
   },
-  mainHeadlineMedium: {
-    fontSize: 35,
-    lineHeight: 40,
-    letterSpacing: -1.4,
-  },
-  mainHeadlineSmall: {
-    fontSize: 30,
-    lineHeight: 35,
-    letterSpacing: -1.1,
-    marginBottom: 6,
-  },
-  streakAccent: {
-    color: colors.primary,
-  },
-  subtitle: {
-    fontSize: 15.5,
-    fontWeight: '400',
-    color: colors.textSecondary,
-    textAlign: 'center',
-    lineHeight: 23,
-    maxWidth: 310,
-  },
-  subtitleSmall: {
-    fontSize: 13.5,
-    lineHeight: 20,
-    maxWidth: 275,
-  },
-
-  /* Action Buttons */
-  actionCluster: {
+  actions: {
     width: '100%',
-    alignItems: 'center',
+    maxWidth: 400,
     gap: 12,
-    marginVertical: 6,
-    zIndex: 10,
   },
-  actionBtn: {
-    width: '100%',
-    maxWidth: 270,
-    height: 56,
+  footer: {
+    fontSize: 12,
+    color: ds.text2,
+    textAlign: 'center',
   },
-
-  /* Footer & Flanking Badges */
-  footerContainer: {
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 6,
-    marginTop: 4,
-    marginBottom: 4,
-    minHeight: 56,
-  },
-  bottomLeftBadge: {
-    width: 56,
-    alignItems: 'flex-start',
-  },
-  footerTextContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  bottomRightBadge: {
-    width: 56,
-    alignItems: 'flex-end',
-  },
-  poweredBy: {
-    fontSize: 10.5,
+  footerStrong: {
     fontWeight: '700',
-    color: colors.textMuted,
-    letterSpacing: 1.5,
-    marginBottom: 3,
-  },
-  jarvisCore: {
-    fontSize: 19,
-    fontWeight: '900',
-    color: colors.primary,
-    letterSpacing: -0.4,
+    color: ds.purple,
   },
 });

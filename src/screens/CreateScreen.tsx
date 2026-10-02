@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { TourTarget, useTourScroll } from '../components/tour/GhostTour';
+import { ResponsiveColumns } from '../components/ui/ResponsiveColumns';
 import {
   StyleSheet,
   View,
-  Text,
   Pressable,
   ScrollView,
   Platform,
@@ -11,14 +12,98 @@ import {
   StatusBar,
   Animated,
   Modal,
-  TextInput,
 } from 'react-native';
+import { Text, TextInput } from '../components/ui/AppText';
+import { getVoiceCloneSummary, getRepurposeAllowance, getScheduleSummary, getDrafts, subscribeToDrafts, draftAgo } from '../data';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
-import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
+import { FreeAppHeader } from '../components/FreeAppHeader';
+import { UserPersona } from '../components/HeaderDualModePills';
+import { sFont, sPadding, moderateScale, isNarrowScreen } from '../utils/responsive';
+import Reanimated, { FadeInUp } from 'react-native-reanimated';
+import { GlassBackdrop } from '../components/glass/GlassBackdrop';
+import { FitLines } from '../components/ui/FitLines';
+import { IdeaHeroCard } from '../components/create/IdeaHeroCard';
+import { ToolTile, GlassRow, AllowanceMeter, DraftRow, DraftsEmpty, VoiceStudioProCard, VoiceStudioCard, UnlimitedChip, ProTag } from '../components/create/CreateBlocks';
+import { ds } from '../theme/colors';
+
+const SCHEDULE_DATE_OPTIONS = (() => {
+  const arr: string[] = [];
+  const today = new Date();
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  for (let i = 0; i < 45; i++) {
+    const d = new Date();
+    d.setDate(today.getDate() + i);
+    const dayName = dayNames[d.getDay()];
+    const month = monthNames[d.getMonth()];
+    const dayNum = d.getDate();
+    if (i === 0) {
+      arr.push(`Today · ${month} ${dayNum}`);
+    } else if (i === 1) {
+      arr.push(`Tomorrow · ${month} ${dayNum}`);
+    } else {
+      arr.push(`${dayName} · ${month} ${dayNum}`);
+    }
+  }
+  return arr;
+})();
+
+const SCHEDULE_TIME_OPTIONS = [
+  '7:00 AM',
+  '7:30 AM',
+  '8:00 AM',
+  '8:30 AM',
+  '9:00 AM',
+  '9:30 AM',
+  '10:00 AM',
+  '10:30 AM',
+  '11:00 AM',
+  '11:30 AM (Lunch Rush 🥪)',
+  '12:00 PM',
+  '12:30 PM',
+  '1:00 PM',
+  '1:30 PM',
+  '2:00 PM',
+  '2:30 PM',
+  '3:00 PM',
+  '3:30 PM',
+  '4:00 PM',
+  '4:30 PM (Afternoon Peak ☕)',
+  '5:00 PM',
+  '5:30 PM',
+  '6:00 PM',
+  '6:30 PM',
+  '7:00 PM',
+  '7:30 PM (Peak Reach 🔥)',
+  '8:00 PM (Prime Time ✨)',
+  '8:30 PM (Prime Evening)',
+  '9:00 PM',
+  '9:30 PM (Late Night Scroll 🌙)',
+  '10:00 PM',
+  '10:30 PM',
+  '11:00 PM',
+  '11:30 PM',
+];
+
+const CalendarLineIcon = ({ size = 14, color = '#6B637B' }: { size?: number; color?: string }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <Rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+    <Path d="M16 2v4" />
+    <Path d="M8 2v4" />
+    <Path d="M3 10h18" />
+  </Svg>
+);
+
+const ClockLineIcon = ({ size = 14, color = '#6B637B' }: { size?: number; color?: string }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <Circle cx="12" cy="12" r="10" />
+    <Path d="M12 6v6l4 2" />
+  </Svg>
+);
 
 interface CreateScreenProps {
   onLogout?: () => void;
@@ -32,6 +117,14 @@ interface CreateScreenProps {
   onOpenCaption?: (ideaTitle?: string) => void;
   onOpenRepurpose?: (ideaTitle?: string) => void;
   onOpenMessages?: () => void;
+  userPersona?: UserPersona;
+  onTogglePersona?: () => void;
+  onSwitchToPro?: () => void;
+  onSwitchToFree?: () => void;
+  /** Pro members: Voice Studio unlocked, Hook Studio, unlimited Repurpose. */
+  tier?: 'free' | 'pro';
+  onOpenVoiceStudio?: () => void;
+  onOpenHookStudio?: () => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
 }
@@ -39,9 +132,11 @@ interface CreateScreenProps {
 interface DraftItem {
   id: string;
   title: string;
-  platform: 'TikTok' | 'Instagram' | 'YouTube';
+  platform: string;
   editedTime: string;
   imageSource: any;
+  /** Saved from the Script page: reopens there instead of the composer */
+  isScript?: boolean;
 }
 
 interface NotificationItem {
@@ -55,7 +150,7 @@ interface NotificationItem {
   badgeBorder: string;
 }
 
-const INITIAL_DRAFTS: DraftItem[] = [
+const RETURNING_DRAFTS: DraftItem[] = [
   {
     id: 'draft_1',
     title: '3 mistakes new creators make',
@@ -72,6 +167,8 @@ const INITIAL_DRAFTS: DraftItem[] = [
   },
 ];
 
+const INITIAL_DRAFTS: DraftItem[] = [];
+
 const TRENDING_IDEAS = [
   'One thing I wish I knew before I started creating.',
   '3 creator tools that saved me 10 hours this week.',
@@ -82,8 +179,8 @@ const TRENDING_IDEAS = [
 const NOTIFICATIONS: NotificationItem[] = [
   {
     id: 'notif_1',
-    title: '🔥 Streak Protected!',
-    body: 'Your 47-day creator streak is safe for today.',
+    title: '🔥 Daily Habit Active',
+    body: 'Kick off your daily creator streak today.',
     time: '10m ago',
     unread: true,
     iconEmoji: '🔥',
@@ -102,146 +199,15 @@ const NOTIFICATIONS: NotificationItem[] = [
   },
   {
     id: 'notif_3',
-    title: '🤝 Elena liked your draft',
-    body: 'Elena left feedback on "3 creator mistakes I stopped making".',
+    title: '✨ Studio Draft Autosaved',
+    body: 'Your draft "3 creator mistakes I stopped making" is saved and ready.',
     time: '5h ago',
     unread: false,
-    iconEmoji: '💬',
+    iconEmoji: '📝',
     badgeBg: 'rgba(241, 245, 249, 0.9)',
     badgeBorder: '#E2E8F0',
   },
 ];
-
-// Live Animated Studio Audio Waveform Visualizer
-const LiveVoiceWaveform: React.FC = () => {
-  const bar0 = useRef(new Animated.Value(0.35)).current;
-  const bar1 = useRef(new Animated.Value(0.55)).current;
-  const bar2 = useRef(new Animated.Value(0.75)).current;
-  const bar3 = useRef(new Animated.Value(0.95)).current;
-  const bar4 = useRef(new Animated.Value(1.0)).current;
-  const bar5 = useRef(new Animated.Value(0.85)).current;
-  const bar6 = useRef(new Animated.Value(0.65)).current;
-  const bar7 = useRef(new Animated.Value(0.45)).current;
-  const bar8 = useRef(new Animated.Value(0.3)).current;
-
-  const auraOpacity = useRef(new Animated.Value(0.35)).current;
-
-  useEffect(() => {
-    const createWaveLoop = (
-      anim: Animated.Value,
-      minVal: number,
-      maxVal: number,
-      midVal: number,
-      duration: number,
-      delay: number
-    ) => {
-      return Animated.loop(
-        Animated.sequence([
-          Animated.timing(anim, {
-            toValue: maxVal,
-            duration: duration * 0.4,
-            delay: delay,
-            useNativeDriver: true,
-          }),
-          Animated.timing(anim, {
-            toValue: minVal,
-            duration: duration * 0.35,
-            useNativeDriver: true,
-          }),
-          Animated.timing(anim, {
-            toValue: midVal,
-            duration: duration * 0.25,
-            useNativeDriver: true,
-          }),
-        ])
-      );
-    };
-
-    const l0 = createWaveLoop(bar0, 0.2, 0.65, 0.35, 620, 0);
-    const l1 = createWaveLoop(bar1, 0.28, 0.85, 0.5, 540, 60);
-    const l2 = createWaveLoop(bar2, 0.38, 0.95, 0.65, 480, 120);
-    const l3 = createWaveLoop(bar3, 0.42, 1.0, 0.72, 430, 80);
-    const l4 = createWaveLoop(bar4, 0.52, 1.0, 0.82, 390, 40); // Center gold peak
-    const l5 = createWaveLoop(bar5, 0.4, 0.95, 0.7, 460, 100);
-    const l6 = createWaveLoop(bar6, 0.32, 0.88, 0.58, 520, 140);
-    const l7 = createWaveLoop(bar7, 0.25, 0.75, 0.42, 580, 80);
-    const l8 = createWaveLoop(bar8, 0.18, 0.58, 0.3, 640, 20);
-
-    const auraLoop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(auraOpacity, {
-          toValue: 0.8,
-          duration: 900,
-          useNativeDriver: true,
-        }),
-        Animated.timing(auraOpacity, {
-          toValue: 0.35,
-          duration: 900,
-          useNativeDriver: true,
-        }),
-      ])
-    );
-
-    l0.start();
-    l1.start();
-    l2.start();
-    l3.start();
-    l4.start();
-    l5.start();
-    l6.start();
-    l7.start();
-    l8.start();
-    auraLoop.start();
-
-    return () => {
-      l0.stop();
-      l1.stop();
-      l2.stop();
-      l3.stop();
-      l4.stop();
-      l5.stop();
-      l6.stop();
-      l7.stop();
-      l8.stop();
-      auraLoop.stop();
-    };
-  }, [bar0, bar1, bar2, bar3, bar4, bar5, bar6, bar7, bar8, auraOpacity]);
-
-  const barsData = [
-    { anim: bar0, color: '#6366F1', baseHeight: 36 }, // Purple
-    { anim: bar1, color: '#8B5CF6', baseHeight: 42 }, // Violet Purple
-    { anim: bar2, color: '#FBBF24', baseHeight: 48 }, // Rich Gold
-    { anim: bar3, color: '#F59E0B', baseHeight: 46 }, // Amber Gold
-    { anim: bar4, color: '#8B5CF6', baseHeight: 50 }, // Center Purple Peak
-    { anim: bar5, color: '#FBBF24', baseHeight: 48 }, // Rich Gold
-    { anim: bar6, color: '#F59E0B', baseHeight: 46 }, // Amber Gold
-    { anim: bar7, color: '#8B5CF6', baseHeight: 42 }, // Violet Purple
-    { anim: bar8, color: '#6366F1', baseHeight: 36 }, // Purple
-  ];
-
-  return (
-    <View style={styles.waveformWrapper}>
-      {/* Glowing Backdrop Aura */}
-      <Animated.View style={[styles.waveformAura, { opacity: auraOpacity }]} />
-
-      <View style={styles.waveformContainer}>
-        {barsData.map((b, i) => (
-          <Animated.View
-            key={i}
-            style={[
-              styles.waveBar,
-              {
-                backgroundColor: b.color,
-                height: b.baseHeight,
-                transform: [{ scaleY: b.anim }],
-              },
-            ]}
-          />
-        ))}
-      </View>
-    </View>
-  );
-};
 
 export const CreateScreen: React.FC<CreateScreenProps> = ({
   onLogout,
@@ -253,13 +219,43 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
   onOpenIdeaAngle,
   onOpenScript,
   onOpenCaption,
+  onOpenRepurpose,
   onOpenMessages,
-
+  userPersona,
+  onTogglePersona,
+  onSwitchToPro,
+  onSwitchToFree,
+  tier = 'free',
+  onOpenVoiceStudio,
+  onOpenHookStudio,
   userProfile,
-  onSaveProfile,}) => {
+  onSaveProfile,
+}) => {
+  // Lets Ghost's tour scroll this page
+  const tourScroll = useTourScroll();
   const isDark = false;
+  const isNewUser = (userPersona || userProfile?.userPersona || 'new') === 'new';
+  const schedule = getScheduleSummary(isNewUser ? 'new' : 'returning');
+  const isPro = tier === 'pro';
+  const repurpose = getRepurposeAllowance(isNewUser ? 'new' : 'returning', 'free');
+  const voice = getVoiceCloneSummary(isNewUser ? 'new' : 'returning');
+  const repurposesLeft = Math.max(0, (repurpose.weeklyLimit ?? 0) - repurpose.usedThisWeek);
   const [activeTab, setActiveTab] = useState<TabType>('create');
   const [drafts, setDrafts] = useState<DraftItem[]>(INITIAL_DRAFTS);
+  // Drafts saved from Script / the composer (shared store) come first
+  const storeDrafts = React.useSyncExternalStore(subscribeToDrafts, getDrafts, getDrafts);
+  const localDrafts = isNewUser ? drafts : drafts.length > 0 ? drafts : RETURNING_DRAFTS;
+  const displayedDrafts = [
+    ...storeDrafts.map((d) => ({
+      id: d.id,
+      title: d.title,
+      platform: d.platform ? d.platform.charAt(0).toUpperCase() + d.platform.slice(1) : d.format,
+      editedTime: draftAgo(d.savedAt),
+      imageSource: undefined,
+      isScript: d.kind === 'script',
+    })),
+    ...localDrafts,
+  ];
   const [notificationsList, setNotificationsList] = useState<NotificationItem[]>(NOTIFICATIONS);
 
   // Modal Visibility States
@@ -284,7 +280,10 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
   // New Post Form State
   const [postTitle, setPostTitle] = useState('');
   const [postPlatform, setPostPlatform] = useState<'tiktok' | 'instagram' | 'youtube'>('tiktok');
-  const [postTime, setPostTime] = useState('7:30 PM');
+  const [selectedCreateDate, setSelectedCreateDate] = useState('Today · Aug 29');
+  const [selectedCreateTime, setSelectedCreateTime] = useState('7:30 PM (Peak Reach 🔥)');
+  const [showCreateDateDropdown, setShowCreateDateDropdown] = useState(false);
+  const [showCreateTimeDropdown, setShowCreateTimeDropdown] = useState(false);
 
   // Script Generator Form State
   const [scriptHook, setScriptHook] = useState('Stop scrolling if you are a creator in 2026.');
@@ -299,27 +298,8 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
   );
 
   // Animations
-  const flameFloatY = useRef(new Animated.Value(0)).current;
   const modalPopScale = useRef(new Animated.Value(0.88)).current;
 
-  useEffect(() => {
-    const flameLoop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(flameFloatY, {
-          toValue: -3,
-          duration: 1300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(flameFloatY, {
-          toValue: 3,
-          duration: 1300,
-          useNativeDriver: true,
-        }),
-      ])
-    );
-    flameLoop.start();
-    return () => flameLoop.stop();
-  }, [flameFloatY]);
 
   const triggerModalPop = () => {
     if (Platform.OS !== 'web') {
@@ -372,9 +352,22 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
     }
   };
 
+  const openRepurpose = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    if (onOpenRepurpose) {
+      onOpenRepurpose('3 mistakes new creators make');
+    }
+  };
+
   const openDraft = (draft: DraftItem) => {
     setSelectedDraft(draft);
-    if (onOpenIdeaDetail) {
+    if (draft.isScript && onOpenScript) {
+      onOpenScript(draft.title);
+    } else if (onOpenPostComposer) {
+      onOpenPostComposer(draft.title, draft.platform.toLowerCase());
+    } else if (onOpenIdeaDetail) {
       onOpenIdeaDetail(draft.title);
     } else {
       triggerModalPop();
@@ -439,7 +432,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
     // Trigger Animated Ghost Celebration Modal
     setCelebrationTitle('Post Draft Scheduled!');
     setCelebrationSubtitle('Your draft is stored and scheduled for tomorrow at 11:30 AM.');
-    setCelebrationSpeech('Ghost says: You are on fire today Amara! 47 days and counting!');
+    setCelebrationSpeech(`Ghost says: You are on fire today Amara! ${userProfile?.streakCount || 1} day and counting!`);
     setCelebrationBadge('STREAK PROTECTED');
     setCelebrationXp(50);
     setShowCelebrationModal(true);
@@ -473,359 +466,198 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
     <SafeAreaView style={[styles.safeArea, isDark && { backgroundColor: '#0C0A12' }]}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={isDark ? "#0C0A12" : "#FAF8F5"} />
       <View style={[styles.container, isDark && { backgroundColor: '#0C0A12' }]}>
+        <GlassBackdrop />
         {/* 1. TOP AIRY HEADER BAR */}
-        <View style={styles.headerBar}>
-          {/* Top-Left: Ghost Logo Mascot */}
-          <Animated.View
-            style={[
-              styles.headerLogoWrapper,
-              { transform: [{ translateY: flameFloatY }] },
-            ]}
-          >
-            <Image
-              source={require('../../assets/images/jarvis-ghost-clean.png')}
-              style={styles.headerGhostLogo}
-              resizeMode="contain"
-            />
-          </Animated.View>
-
-          {/* Right Icons: Messages, Notification Bell, Profile */}
-          <View style={styles.headerRightGroup}>
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={openChat}
-            >
-              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={openNotifications}
-            >
-              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <Path
-                  d="M13.73 21a2 2 0 0 1-3.46 0"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-              {unreadNotifCount > 0 && <View style={styles.notificationDot} />}
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={openProfile}
-            >
-              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <Circle
-                  cx="12"
-                  cy="7"
-                  r="4"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                />
-              </Svg>
-            </Pressable>
-          </View>
-        </View>
+        <FreeAppHeader
+          backgroundColor="transparent"
+          onSwitchToPro={onSwitchToPro}
+          onSwitchToFree={onSwitchToFree}
+          onTogglePersona={onTogglePersona}
+          userPersona={userPersona || userProfile?.userPersona}
+          onOpenJarvisPro={onOpenJarvisPro}
+          onOpenNotifications={openNotifications}
+          onOpenProfile={openProfile}
+          userProfile={userProfile}
+          unreadCount={unreadNotifCount}
+          isDark={isDark}
+        />
 
         {/* 2. MAIN SCROLLABLE CONTENT */}
         <ScrollView
+          {...tourScroll}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           bounces={true}
         >
-          {/* TOP PILL BADGES (ROYAL PURPLE & METALLIC GOLD) */}
-          <View style={styles.topBadgesRow}>
-            <LinearGradient
-              colors={['#7C3AED', '#582CDB']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={styles.createPill}
-            >
-              <Text style={styles.createPillText}>Create</Text>
-            </LinearGradient>
+          {/* HEADLINE — same two-line structure on every screen size */}
+          <Reanimated.View entering={FadeInUp.duration(500)} style={styles.headline}>
+            <FitLines
+              lines={['Create your', <Text key="n" style={styles.headlineAccent}>next post</Text>]}
+              textStyle={styles.headlineText}
+              maxFontSize={34}
+              align="left"
+              accessibilityLabel="Create your next post"
+            />
+          </Reanimated.View>
 
-            <View style={styles.freeToolsPill}>
-              <Text style={styles.freeToolsPillText}>✨ FREE CREATE TOOLS</Text>
-            </View>
-          </View>
-
-          {/* HEADLINE & SUBTITLE */}
-          <Text style={styles.mainHeading}>Create your next post.</Text>
-          <Text style={styles.mainSubtitle}>
-            Turn one idea into a post your audience wants to watch.
-          </Text>
-
-          {/* 1. HERO STREAK SAVER CARD */}
-          <View style={styles.streakSaverCard}>
-            <View style={styles.streakHeaderRow}>
-              <View style={styles.streakLeftGroup}>
-                <View style={styles.flameIconCircle}>
-                  <Text style={styles.flameEmoji}>🔥</Text>
-                </View>
-                <View>
-                  <Text style={styles.streakSaverTag}>STREAK SAVER</Text>
-                  <Text style={styles.streakDaysTitle}>47-day streak</Text>
-                </View>
-              </View>
-
-              <View style={styles.activePill}>
-                <View style={styles.activeDot} />
-                <Text style={styles.activePillText}>Active</Text>
-              </View>
-            </View>
-
-            {/* Prompt Inner Box */}
-            <View style={styles.promptInnerBox}>
-              <Text style={styles.promptText}>
-                Create a 30-second Reel: &ldquo;One thing I wish I knew before I started creating.&rdquo;
-              </Text>
-            </View>
-
-            {/* Platform & Suggested Time Row (Purple & Gold Accents) */}
-            <View style={styles.tagsRow}>
-              <View style={styles.tagPillPurple}>
-                <Text style={styles.tagPillPurpleText}>TikTok</Text>
-              </View>
-              <View style={styles.tagPillPurple}>
-                <Text style={styles.tagPillPurpleText}>Instagram Reel</Text>
-              </View>
-              <View style={styles.suggestedTimePillGold}>
-                <Text style={styles.suggestedTimePillGoldText}>⚡ Suggested: 7:30 PM</Text>
-              </View>
-            </View>
-
-            {/* Primary Action Button: Use This Idea */}
-            <Pressable
-              style={({ pressed }) => [styles.useIdeaBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                }
-                if (onOpenIdeaDetail) {
-                  onOpenIdeaDetail('One thing I wish I knew before I started creating');
-                } else {
-                  openNewPost('One thing I wish I knew before I started creating', 'instagram');
-                }
+          {/* Desktop: idea and tools on the left, the rest beside them */}
+          <ResponsiveColumns split={2} gap={16}>
+          {/* 1. TODAY'S IDEA (with Jarvis shuffle) */}
+          <Reanimated.View entering={FadeInUp.delay(100).duration(550)}>
+            <TourTarget id="create-idea">
+            <IdeaHeroCard
+              isNewUser={isNewUser}
+              niches={userProfile?.niches?.length ? userProfile.niches : ['lifestyle']}
+              platforms={userProfile?.connectedPlatforms?.length ? userProfile.connectedPlatforms : ['tiktok', 'instagram']}
+              onUseIdea={(idea) => {
+                if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                if (onOpenPostComposer) onOpenPostComposer(idea.title);
+                else if (onOpenIdeaDetail) onOpenIdeaDetail(idea.title);
+                else openNewPost(idea.title);
               }}
-            >
-              <LinearGradient
-                colors={['#6366F1', '#582CDB']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.useIdeaGradient}
-              >
-                <Text style={styles.useIdeaBtnText}>Use This Idea ➔</Text>
-              </LinearGradient>
-            </Pressable>
-          </View>
+            />
+            </TourTarget>
+          </Reanimated.View>
 
-          {/* 2. JARVIS SUGGESTION CARD */}
-          <View style={styles.jarvisSuggestionCard}>
-            <Animated.View
-              style={[
-                styles.jarvisFlameCircle,
-                { transform: [{ translateY: flameFloatY }] },
-              ]}
-            >
-              <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.jarvisFlameIcon}
-                resizeMode="contain"
+          {/* 2. TOOLS */}
+          <Reanimated.View entering={FadeInUp.delay(200).duration(550)}>
+            <Text style={styles.sectionLabel}>Tools</Text>
+            <View style={styles.toolRow}>
+              <ToolTile
+                featured
+                title="New post"
+                subtitle="Start from scratch"
+                onPress={() => openNewPost()}
+                icon={
+                  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                    <Path d="M12 5v14M5 12h14" stroke="#FFFFFF" strokeWidth={2.6} strokeLinecap="round" />
+                  </Svg>
+                }
               />
-            </Animated.View>
-            <View style={styles.jarvisSuggestionContent}>
-              <Text style={styles.jarvisSuggestionTitle}>Jarvis Suggestion</Text>
-              <Text style={styles.jarvisSuggestionText}>
-                Your streak is active. One finished post today keeps your momentum strong.
-              </Text>
+              <ToolTile
+                title="Ideas"
+                subtitle="Find your next angle"
+                onPress={openIdeas}
+                icon={
+                  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                    <Path d="M12 2l2.4 5.6L20 10l-5.6 2.4L12 18l-2.4-5.6L4 10l5.6-2.4L12 2z" fill={ds.purple} />
+                    <Path d="M19 16l1 2.3 2.3 1-2.3 1-1 2.3-1-2.3-2.3-1 2.3-1 1-2.3z" fill={ds.purple} />
+                  </Svg>
+                }
+              />
             </View>
-          </View>
-
-          {/* 3. 2x2 CREATION TOOLS GRID */}
-          <View style={styles.toolsGrid}>
-            {/* Tool 1: New Post */}
-            <Pressable
-              style={({ pressed }) => [styles.toolGridCard, pressed && styles.btnPressed]}
-              onPress={() => openNewPost()}
-            >
-              <View style={[styles.toolIconBox, { backgroundColor: '#582CDB' }]}>
-                <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                  <Path d="M12 5V19M5 12H19" stroke="#FFFFFF" strokeWidth="2.6" strokeLinecap="round" />
-                </Svg>
-              </View>
-              <Text style={styles.toolTitle}>New Post</Text>
-              <Text style={styles.toolSubtitle}>Start from scratch</Text>
-            </Pressable>
-
-            {/* Tool 2: Ideas */}
-            <Pressable
-              style={({ pressed }) => [styles.toolGridCard, pressed && styles.btnPressed]}
-              onPress={openIdeas}
-            >
-              <View style={[styles.toolIconBox, { backgroundColor: '#FEF3C7' }]}>
-                <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                  <Path
-                    d="M12 2L14.4 7.6L20 10L14.4 12.4L12 18L9.6 12.4L4 10L9.6 7.6L12 2Z"
-                    fill="#D97706"
-                  />
-                  <Path
-                    d="M19 16L20.2 18.8L23 20L20.2 21.2L19 24L17.8 21.2L15 20L17.8 18.8L19 16Z"
-                    fill="#D97706"
-                  />
-                </Svg>
-              </View>
-              <Text style={styles.toolTitle}>Ideas</Text>
-              <Text style={styles.toolSubtitle}>Find your next angle</Text>
-            </Pressable>
-
-            {/* Tool 3: Script */}
-            <Pressable
-              style={({ pressed }) => [styles.toolGridCard, pressed && styles.btnPressed]}
-              onPress={openScript}
-            >
-              <View style={[styles.toolIconBox, { backgroundColor: '#EDE9FE' }]}>
-                <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                  <Path
-                    d="M19.82 2H4.18C2.97 2 2 2.97 2 4.18v15.64C2 21.03 2.97 22 4.18 22h15.64c1.21 0 2.18-.97 2.18-2.18V4.18C22 2.97 21.03 2 19.82 2z"
-                    stroke="#582CDB"
-                    strokeWidth="2.2"
-                  />
-                  <Path d="M7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 7h5M17 17h5" stroke="#582CDB" strokeWidth="2.2" />
-                </Svg>
-              </View>
-              <Text style={styles.toolTitle}>Script</Text>
-              <Text style={styles.toolSubtitle}>Build a story</Text>
-            </Pressable>
-
-            {/* Tool 4: Caption */}
-            <Pressable
-              style={({ pressed }) => [styles.toolGridCard, pressed && styles.btnPressed]}
-              onPress={openCaption}
-            >
-              <View style={[styles.toolIconBox, { backgroundColor: '#EDE9FE' }]}>
-                <Text style={[styles.quoteIconText, { color: '#582CDB' }]}>99</Text>
-              </View>
-              <Text style={styles.toolTitle}>Caption</Text>
-              <Text style={styles.toolSubtitle}>Write in your voice</Text>
-            </Pressable>
-          </View>
-
-          {/* 4. SCHEDULED POSTS CARD (3 posts scheduled) */}
-          <Pressable
-            style={({ pressed }) => [styles.scheduledBannerCard, pressed && styles.btnPressed]}
-            onPress={handleOpenScheduleView}
-          >
-            <View style={styles.scheduledLeft}>
-              <View style={[styles.calendarIconBox, { backgroundColor: '#EDE9FE' }]}>
-                <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
-                  <Rect x="3" y="4" width="18" height="18" rx="3" stroke="#582CDB" strokeWidth="2.2" />
-                  <Path d="M16 2v4M8 2v4M3 10h18" stroke="#582CDB" strokeWidth="2.2" strokeLinecap="round" />
-                </Svg>
-              </View>
-              <View>
-                <Text style={styles.scheduledTitle}>3 posts scheduled</Text>
-                <Text style={styles.scheduledSub}>Next: Tomorrow at 11:30 AM</Text>
-              </View>
+            <View style={styles.toolRow}>
+              <ToolTile
+                title="Script"
+                subtitle="Build a story"
+                onPress={openScript}
+                icon={
+                  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                    <Rect x="3" y="3" width="18" height="18" rx="3" stroke={ds.purple} strokeWidth={2.1} />
+                    <Path d="M8 3v18M16 3v18M3 8h5M3 16h5M16 8h5M16 16h5" stroke={ds.purple} strokeWidth={2.1} />
+                  </Svg>
+                }
+              />
+              <ToolTile
+                title="Caption"
+                subtitle="Write in your voice"
+                onPress={openCaption}
+                icon={
+                  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                    <Path d="M17 3a2.83 2.83 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z" stroke={ds.purple} strokeWidth={2.1} strokeLinecap="round" strokeLinejoin="round" />
+                  </Svg>
+                }
+              />
             </View>
+          </Reanimated.View>
 
-            <Pressable onPress={handleOpenScheduleView} hitSlop={10}>
-              <Text style={styles.scheduledOpenLink}>Open</Text>
-            </Pressable>
-          </Pressable>
+          {/* 3. REPURPOSE + SCHEDULE */}
+          <Reanimated.View entering={FadeInUp.delay(300).duration(550)} style={styles.stack}>
+            <GlassRow
+              title="Repurpose"
+              subtitle="Turn an idea, a video or a link into more posts"
+              onPress={openRepurpose}
+              extra={isPro ? <UnlimitedChip /> : <AllowanceMeter left={repurposesLeft} limit={repurpose.weeklyLimit ?? 0} />}
+              icon={
+                <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                  <Path d="M21 2v6h-6M3 12a9 9 0 0115-6.7L21 8M3 22v-6h6M21 12a9 9 0 01-15 6.7L3 16" stroke={ds.purple} strokeWidth={2.1} strokeLinecap="round" strokeLinejoin="round" />
+                </Svg>
+              }
+            />
+            {isPro && (
+              <GlassRow
+                title="Hook Studio"
+                subtitle="Strong first lines for your next video"
+                onPress={() => onOpenHookStudio?.()}
+                extra={<View style={{ marginTop: 8 }}><ProTag /></View>}
+                icon={
+                  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                    <Path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z" stroke={ds.purple} strokeWidth={2.1} strokeLinejoin="round" />
+                  </Svg>
+                }
+              />
+            )}
+            <GlassRow
+              title={
+                schedule.scheduledCount === 0
+                  ? 'Nothing scheduled yet'
+                  : `${schedule.scheduledCount} post${schedule.scheduledCount === 1 ? '' : 's'} scheduled`
+              }
+              subtitle={schedule.nextPostLabel ? `Next up: ${schedule.nextPostLabel}` : 'Pick an idea above, then choose a time'}
+              onPress={handleOpenScheduleView}
+              icon={
+                <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                  <Rect x="3" y="4" width="18" height="17" rx="3" stroke={ds.purple} strokeWidth={2.1} />
+                  <Path d="M16 2v4M8 2v4M3 10h18" stroke={ds.purple} strokeWidth={2.1} strokeLinecap="round" />
+                </Svg>
+              }
+            />
+          </Reanimated.View>
 
-          {/* 5. YOUR DRAFTS SECTION */}
-          <View style={styles.draftsHeaderRow}>
-            <Text style={styles.draftsSectionTitle}>Your Drafts</Text>
-            <Pressable onPress={openAllDrafts} hitSlop={6}>
-              <Text style={styles.viewAllDraftsLink}>View all drafts</Text>
-            </Pressable>
-          </View>
-
-          <View style={styles.draftsList}>
-            {drafts.map((draft) => (
-              <Pressable
-                key={draft.id}
-                style={({ pressed }) => [styles.draftCard, pressed && styles.btnPressed]}
-                onPress={() => openDraft(draft)}
-              >
-                <Image source={draft.imageSource} style={styles.draftThumbnail} resizeMode="cover" />
-                <View style={styles.draftContentCol}>
-                  <Text style={styles.draftTitle} numberOfLines={1}>
-                    {draft.title}
-                  </Text>
-                  <Text style={styles.draftMeta}>
-                    {draft.platform === 'TikTok' ? '💬' : '📷'} {draft.platform} • {draft.editedTime}
-                  </Text>
-                </View>
-                <Pressable
-                  hitSlop={8}
-                  onPress={() => openDraft(draft)}
-                >
-                  <Text style={styles.draftMoreDots}>⋮</Text>
+          {/* 4. DRAFTS */}
+          <Reanimated.View entering={FadeInUp.delay(400).duration(550)}>
+            <View style={styles.sectionHeader}>
+              <Text style={[styles.sectionLabel, styles.sectionLabelInline]}>Your drafts</Text>
+              {displayedDrafts.length > 0 && (
+                <Pressable onPress={openAllDrafts} hitSlop={8} accessibilityRole="button">
+                  <Text style={styles.sectionLink}>See all</Text>
                 </Pressable>
-              </Pressable>
-            ))}
-          </View>
-
-          {/* 6. VOICE STUDIO PRO CARD */}
-          <View style={styles.voiceStudioCard}>
-            <View style={styles.voiceStudioProPill}>
-              <Text style={styles.voiceStudioProPillText}>🔒 PRO FEATURE</Text>
+              )}
             </View>
+            <View style={styles.stack}>
+              {displayedDrafts.length === 0 ? (
+                <DraftsEmpty onStart={() => openNewPost()} />
+              ) : (
+                displayedDrafts.slice(0, 3).map((draft) => (
+                  <DraftRow
+                    key={draft.id}
+                    title={draft.title}
+                    platform={draft.platform}
+                    edited={draft.editedTime}
+                    image={draft.imageSource}
+                    onPress={() => openDraft(draft)}
+                  />
+                ))
+              )}
+            </View>
+          </Reanimated.View>
 
-            <Text style={styles.voiceStudioTitle}>Voice Studio</Text>
-            <Text style={styles.voiceStudioSubtitle}>
-              Turn scripts into voiceovers with Pro.
-            </Text>
+          {/* 5. VOICE STUDIO (Pro only) */}
+          <Reanimated.View entering={FadeInUp.delay(500).duration(550)} style={styles.voiceStudio}>
+            {isPro ? (
+              <VoiceStudioCard
+                isNew={isNewUser}
+                voiceName={voice.voiceName}
+                minutesUsed={voice.minutesUsed}
+                minutesIncluded={voice.minutesIncluded}
+                onOpen={() => onOpenVoiceStudio?.()}
+              />
+            ) : (
+              <VoiceStudioProCard onUnlock={handleOpenVoiceStudioPro} />
+            )}
+          </Reanimated.View>
 
-            {/* Live Animated Audio Waveform Graphic */}
-            <LiveVoiceWaveform />
-
-            {/* Unlock Voice Studio Metallic Gold Button */}
-            <Pressable
-              style={({ pressed }) => [styles.unlockVoiceBtn, pressed && styles.btnPressed]}
-              onPress={handleOpenVoiceStudioPro}
-            >
-              <LinearGradient
-                colors={['#FDE047', '#EAB308', '#CA8A04', '#A16207']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.unlockVoiceGradient}
-              >
-                <Text style={styles.unlockVoiceBtnText}>Unlock Voice Studio</Text>
-              </LinearGradient>
-            </Pressable>
-          </View>
-
+          </ResponsiveColumns>
           {/* Bottom Space for Floating Tab Bar */}
           <View style={{ height: 110 }} />
         </ScrollView>
@@ -847,7 +679,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
+                <View style={{ flex: 1, minWidth: 0, marginRight: 10 }}>
                   <Text style={styles.modalTitle}>New Post</Text>
                   <Text style={styles.modalSubtitle}>Create from scratch and protect your streak.</Text>
                 </View>
@@ -940,18 +772,122 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
                 style={styles.modalTextInput}
                 value={postTitle}
                 onChangeText={setPostTitle}
-                placeholder="e.g. 3 creator habits that changed my reach..."
+                placeholder="Enter your post hook…"
                 placeholderTextColor="#94A3B8"
               />
 
-              <Text style={styles.modalInputLabel}>SCHEDULE TIME</Text>
-              <TextInput
-                style={styles.modalTextInput}
-                value={postTime}
-                onChangeText={setPostTime}
-                placeholder="e.g. 7:30 PM"
-                placeholderTextColor="#94A3B8"
-              />
+              <Text style={styles.modalInputLabel}>WHEN TO POST</Text>
+              <View style={styles.dropdownSelectorsRow}>
+                {/* DATE SELECTOR BUTTON */}
+                <Pressable
+                  style={[styles.dropdownBtnHalf, showCreateDateDropdown && styles.dropdownBtnActive]}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    setShowCreateDateDropdown(!showCreateDateDropdown);
+                    setShowCreateTimeDropdown(false);
+                  }}
+                >
+                  <View style={styles.dropdownBtnIconWrap}>
+                    <CalendarLineIcon size={14} color={showCreateDateDropdown ? '#582CDB' : '#6B637B'} />
+                  </View>
+                  <Text style={styles.dropdownBtnText} numberOfLines={1}>
+                    {selectedCreateDate}
+                  </Text>
+                  <Text style={styles.dropdownChevron}>{showCreateDateDropdown ? '▴' : '▾'}</Text>
+                </Pressable>
+
+                {/* TIME SELECTOR BUTTON */}
+                <Pressable
+                  style={[styles.dropdownBtnHalf, showCreateTimeDropdown && styles.dropdownBtnActive]}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    setShowCreateTimeDropdown(!showCreateTimeDropdown);
+                    setShowCreateDateDropdown(false);
+                  }}
+                >
+                  <View style={styles.dropdownBtnIconWrap}>
+                    <ClockLineIcon size={14} color={showCreateTimeDropdown ? '#582CDB' : '#6B637B'} />
+                  </View>
+                  <Text style={styles.dropdownBtnText} numberOfLines={1}>
+                    {selectedCreateTime.split(' (')[0]}
+                  </Text>
+                  <Text style={styles.dropdownChevron}>{showCreateTimeDropdown ? '▴' : '▾'}</Text>
+                </Pressable>
+              </View>
+
+              {/* Subtle Jarvis Recommendation */}
+              {selectedCreateTime.includes('7:30') && !showCreateDateDropdown && !showCreateTimeDropdown && (
+                <View style={styles.jarvisSubtleRow}>
+                  <Text style={styles.jarvisSubtleSparkle}>✨</Text>
+                  <Text style={styles.jarvisSubtleText}>
+                    Jarvis recommends <Text style={styles.jarvisSubtleBold}>7:30 PM</Text> · Best audience window
+                  </Text>
+                </View>
+              )}
+
+              {/* SCROLLABLE DATE DROPDOWN MENU */}
+              {showCreateDateDropdown && (
+                <View style={styles.dropdownMenuBox}>
+                  <Text style={styles.dropdownMenuHeader}>SCROLL TO SELECT DATE (45 DAYS)</Text>
+                  <ScrollView style={styles.dropdownMenuScroll} nestedScrollEnabled showsVerticalScrollIndicator={true}>
+                    {SCHEDULE_DATE_OPTIONS.map((item) => {
+                      const isSelected = selectedCreateDate === item;
+                      return (
+                        <Pressable
+                          key={item}
+                          style={[styles.dropdownMenuItem, isSelected && styles.dropdownMenuItemActive]}
+                          onPress={() => {
+                            if (Platform.OS !== 'web') {
+                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            }
+                            setSelectedCreateDate(item);
+                            setShowCreateDateDropdown(false);
+                          }}
+                        >
+                          <Text style={[styles.dropdownMenuItemText, isSelected && styles.dropdownMenuItemTextActive]}>
+                            {item}
+                          </Text>
+                          {isSelected && <Text style={styles.dropdownCheckmark}>✓</Text>}
+                        </Pressable>
+                      );
+                    })}
+                  </ScrollView>
+                </View>
+              )}
+
+              {/* SCROLLABLE TIME DROPDOWN MENU */}
+              {showCreateTimeDropdown && (
+                <View style={styles.dropdownMenuBox}>
+                  <Text style={styles.dropdownMenuHeader}>SCROLL TO SELECT TIME</Text>
+                  <ScrollView style={styles.dropdownMenuScroll} nestedScrollEnabled showsVerticalScrollIndicator={true}>
+                    {SCHEDULE_TIME_OPTIONS.map((item) => {
+                      const isSelected = selectedCreateTime === item;
+                      return (
+                        <Pressable
+                          key={item}
+                          style={[styles.dropdownMenuItem, isSelected && styles.dropdownMenuItemActive]}
+                          onPress={() => {
+                            if (Platform.OS !== 'web') {
+                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            }
+                            setSelectedCreateTime(item);
+                            setShowCreateTimeDropdown(false);
+                          }}
+                        >
+                          <Text style={[styles.dropdownMenuItemText, isSelected && styles.dropdownMenuItemTextActive]}>
+                            {item}
+                          </Text>
+                          {isSelected && <Text style={styles.dropdownCheckmark}>✓</Text>}
+                        </Pressable>
+                      );
+                    })}
+                  </ScrollView>
+                </View>
+              )}
 
               <View style={styles.modalBtnRow}>
                 <Pressable
@@ -962,14 +898,9 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
                 </Pressable>
 
                 <Pressable style={styles.modalPrimaryBtn} onPress={handleCreatePostSubmit}>
-                  <LinearGradient
-                    colors={['#6366F1', '#582CDB']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.modalPrimaryGradient}
-                  >
+                  <View style={[styles.modalPrimaryGradient, { backgroundColor: '#5B3EE8' }]}>
                     <Text style={styles.modalPrimaryBtnText}>Save &amp; Schedule</Text>
-                  </LinearGradient>
+                  </View>
                 </Pressable>
               </View>
             </Animated.View>
@@ -986,7 +917,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
+                <View style={{ flex: 1, minWidth: 0, marginRight: 10 }}>
                   <Text style={styles.modalTitle}>AI Hook Sparks</Text>
                   <Text style={styles.modalSubtitle}>Trending angles customized for your niche:</Text>
                 </View>
@@ -1035,7 +966,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
+                <View style={{ flex: 1, minWidth: 0, marginRight: 10 }}>
                   <Text style={styles.modalTitle}>Script Builder</Text>
                   <Text style={styles.modalSubtitle}>Hook ➔ Story ➔ Lesson ➔ CTA formula:</Text>
                 </View>
@@ -1105,7 +1036,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
+                <View style={{ flex: 1, minWidth: 0, marginRight: 10 }}>
                   <Text style={styles.modalTitle}>Caption Generator</Text>
                   <Text style={styles.modalSubtitle}>Craft high-engagement captions in your voice:</Text>
                 </View>
@@ -1175,7 +1106,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
+                <View style={{ flex: 1, minWidth: 0, marginRight: 10 }}>
                   <Text style={styles.modalTitle}>{selectedDraft?.platform} Draft</Text>
                   <Text style={styles.modalSubtitle}>{selectedDraft?.editedTime}</Text>
                 </View>
@@ -1207,14 +1138,9 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
                     handleOpenScheduleView();
                   }}
                 >
-                  <LinearGradient
-                    colors={['#6366F1', '#582CDB']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.modalPrimaryGradient}
-                  >
+                  <View style={[styles.modalPrimaryGradient, { backgroundColor: '#5B3EE8' }]}>
                     <Text style={styles.modalPrimaryBtnText}>Open in Schedule</Text>
-                  </LinearGradient>
+                  </View>
                 </Pressable>
               </View>
             </Animated.View>
@@ -1231,9 +1157,9 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
+                <View style={{ flex: 1, minWidth: 0, marginRight: 10 }}>
                   <Text style={styles.modalTitle}>All Creator Drafts</Text>
-                  <Text style={styles.modalSubtitle}>Manage your active video concepts</Text>
+                  <Text style={styles.modalSubtitle}>Pick up where you left off</Text>
                 </View>
                 <Pressable
                   onPress={() => setShowAllDraftsModal(false)}
@@ -1245,22 +1171,29 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
               </View>
 
               <ScrollView style={{ maxHeight: 280 }} showsVerticalScrollIndicator={false}>
-                {drafts.map((draft) => (
-                  <Pressable
-                    key={draft.id}
-                    style={styles.draftCard}
-                    onPress={() => {
-                      setShowAllDraftsModal(false);
-                      openDraft(draft);
-                    }}
-                  >
-                    <Image source={draft.imageSource} style={styles.draftThumbnail} resizeMode="cover" />
-                    <View style={styles.draftContentCol}>
-                      <Text style={styles.draftTitle} numberOfLines={1}>{draft.title}</Text>
-                      <Text style={styles.draftMeta}>{draft.platform} • {draft.editedTime}</Text>
-                    </View>
-                  </Pressable>
-                ))}
+                <View style={{ gap: 8 }}>
+                  {drafts.map((draft) => (
+                    <Pressable
+                      key={draft.id}
+                      style={({ pressed }) => [styles.draftCard, pressed && styles.btnPressed]}
+                      onPress={() => {
+                        setShowAllDraftsModal(false);
+                        openDraft(draft);
+                      }}
+                    >
+                      <Image source={draft.imageSource} style={styles.draftThumbnail} resizeMode="cover" />
+                      <View style={styles.draftContentCol}>
+                        <Text style={styles.draftTitle} numberOfLines={2}>{draft.title}</Text>
+                        <Text style={styles.draftMeta}>{draft.platform} • {draft.editedTime}</Text>
+                      </View>
+                      <View style={styles.draftChevronBox}>
+                        <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+                          <Path d="M9 18l6-6-6-6" stroke="#94A3B8" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+                        </Svg>
+                      </View>
+                    </Pressable>
+                  ))}
+                </View>
               </ScrollView>
 
               <Pressable
@@ -1283,7 +1216,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
+                <View style={{ flex: 1, minWidth: 0, marginRight: 10 }}>
                   <Text style={styles.modalTitle}>Notifications</Text>
                   <Text style={styles.modalSubtitle}>Streak updates &amp; squad activity</Text>
                 </View>
@@ -1343,7 +1276,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
+                <View style={{ flex: 1, minWidth: 0, marginRight: 10 }}>
                   <Text style={styles.modalTitle}>Creator Squad Chat</Text>
                   <Text style={styles.modalSubtitle}>Connect &amp; collaborate with matched creators</Text>
                 </View>
@@ -1384,7 +1317,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           speechBubble={celebrationSpeech}
           badgeText={celebrationBadge}
           xpEarned={celebrationXp}
-          streakCount={47}
+          streakCount={userProfile?.streakCount || 1}
           actionText="Continue ➔"
           onDismiss={() => setShowCelebrationModal(false)}
         />
@@ -1396,15 +1329,25 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FAF8F5',
+    backgroundColor: ds.bg,
   },
   container: {
     flex: 1,
-    backgroundColor: '#FAF8F5',
+    width: '100%',
   },
+  headline: { marginTop: 4, marginBottom: 16 },
+  headlineText: { fontWeight: '800', letterSpacing: -0.8, color: ds.ink },
+  headlineAccent: { color: ds.purple },
+  sectionHeader: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', marginTop: 24, marginBottom: 10 },
+  sectionLabel: { fontSize: 17, fontWeight: '800', color: ds.ink, letterSpacing: -0.2, marginTop: 24, marginBottom: 10 },
+  sectionLabelInline: { marginTop: 0, marginBottom: 0 },
+  sectionLink: { fontSize: 13.5, fontWeight: '800', color: ds.purple },
+  toolRow: { flexDirection: 'row', gap: 12, marginBottom: 12 },
+  stack: { gap: 12 },
+  voiceStudio: { marginTop: 24 },
   btnPressed: {
-    opacity: 0.78,
-    transform: [{ scale: 0.97 }],
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
   },
 
   // 1. TOP HEADER BAR
@@ -1420,7 +1363,7 @@ const styles = StyleSheet.create({
   headerLogoWrapper: {
     width: 42,
     height: 42,
-    borderRadius: 21,
+    borderRadius: 20,
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.95)',
@@ -1470,51 +1413,52 @@ const styles = StyleSheet.create({
   },
 
   scrollContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: sPadding(20),
     paddingTop: 8,
   },
 
-  // TOP PILL BADGES (ROYAL PURPLE & GOLD)
+  // TOP PILL BADGES
   topBadgesRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 12,
+    gap: 7,
+    marginBottom: 10,
   },
   createPill: {
-    paddingVertical: 5,
-    paddingHorizontal: 13,
+    paddingVertical: 4,
+    paddingHorizontal: 11,
     borderRadius: 100,
     overflow: 'hidden',
   },
   createPillText: {
-    fontSize: 11,
+    fontSize: 10.5,
     fontWeight: '800',
     color: '#FFFFFF',
     letterSpacing: 0.2,
   },
   freeToolsPill: {
-    backgroundColor: '#FEF3C7',
+    backgroundColor: '#EDE9FE',
     borderWidth: 1,
-    borderColor: '#FDE68A',
-    paddingVertical: 4,
-    paddingHorizontal: 12,
+    borderColor: '#DDD6FE',
+    paddingVertical: 3,
+    paddingHorizontal: 9,
     borderRadius: 100,
   },
   freeToolsPillText: {
-    fontSize: 10.5,
-    fontWeight: '800',
-    color: '#B45309',
-    letterSpacing: 0.5,
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#5B3EE8',
+    letterSpacing: 0.2,
   },
 
   // HEADLINE
   mainHeading: {
-    fontSize: 28,
-    fontWeight: '800',
+    fontSize: Platform.OS === 'web' ? ('clamp(15px, 3.8vw, 17px)' as any) : sFont(16),
+    fontWeight: '700',
     color: '#171420',
-    letterSpacing: -0.6,
-    marginBottom: 4,
+    letterSpacing: -0.35,
+    lineHeight: 22,
+    marginBottom: 16,
   },
   mainSubtitle: {
     fontSize: 14,
@@ -1524,134 +1468,129 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 
-  // 1. HERO STREAK SAVER CARD (PURPLE & GOLD ACCENTS)
+  // 1. HERO STREAK SAVER CARD
   streakSaverCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 24,
+    borderRadius: 18,
     borderWidth: 1,
-    borderColor: '#E9D5FF',
-    padding: 20,
-    marginBottom: 18,
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.08,
-    shadowRadius: 16,
-    elevation: 4,
+    borderColor: 'rgba(23, 20, 32, 0.07)',
+    padding: sPadding(14),
+    marginBottom: 16,
+    shadowColor: '#171420',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.03,
+    shadowRadius: 12,
+    elevation: 2,
+    overflow: 'hidden',
   },
   streakHeaderRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 14,
+    marginBottom: 10,
+    width: '100%',
   },
   streakLeftGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 8,
+    flex: 1,
+    minWidth: 0,
   },
   flameIconCircle: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: '#FEF3C7',
-    borderWidth: 1,
-    borderColor: '#FDE68A',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  flameEmoji: {
-    fontSize: 18,
-  },
-  streakSaverTag: {
-    fontSize: 10.5,
-    fontWeight: '800',
-    color: '#B45309',
-    letterSpacing: 0.6,
-  },
-  streakDaysTitle: {
-    fontSize: 19,
-    fontWeight: '800',
-    color: '#171420',
-    letterSpacing: -0.3,
-  },
-  activePill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: '#F5F3FF',
     borderWidth: 1,
-    borderColor: '#DDD6FE',
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 100,
+    borderColor: '#EDE9FE',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexShrink: 0,
   },
-  activeDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#582CDB',
+  flameEmoji: {
+    fontSize: 15,
   },
-  activePillText: {
-    fontSize: 11,
+  streakTitlesContainer: {
+    flex: 1,
+    minWidth: 0,
+  },
+  streakSaverTag: {
+    fontSize: 9.5,
     fontWeight: '800',
-    color: '#582CDB',
+    color: '#5B3EE8',
+    letterSpacing: 0.4,
+  },
+  streakDaysTitle: {
+    fontSize: sFont(14.5),
+    fontWeight: '700',
+    color: '#171420',
+    letterSpacing: -0.2,
+    marginTop: 1,
   },
   promptInnerBox: {
-    backgroundColor: '#FAF8F5',
-    borderRadius: 14,
+    backgroundColor: '#FAF9FD',
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#E9D5FF',
-    padding: 14,
-    marginBottom: 14,
+    borderColor: 'rgba(23, 20, 32, 0.05)',
+    padding: 12,
+    marginBottom: 10,
+  },
+  promptLabel: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#171420',
+    marginBottom: 3,
   },
   promptText: {
     fontSize: 13.5,
-    color: '#1E1B4B',
-    lineHeight: 20,
-    fontStyle: 'italic',
+    color: '#474154',
+    lineHeight: 19,
     fontWeight: '500',
   },
-  tagsRow: {
+  streakMetaRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 18,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+    width: '100%',
   },
-  tagPillPurple: {
-    backgroundColor: '#F5F3FF',
-    borderWidth: 1,
-    borderColor: '#DDD6FE',
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 8,
+  streakPlatformsBadge: {
+    backgroundColor: '#F4F0FF',
+    paddingVertical: 3.5,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+    flexShrink: 1,
   },
-  tagPillPurpleText: {
-    fontSize: 11,
+  streakPlatformsText: {
+    fontSize: 10.5,
     fontWeight: '700',
     color: '#582CDB',
+    letterSpacing: -0.2,
   },
-  suggestedTimePillGold: {
-    backgroundColor: '#FEF3C7',
+  bestTimeBadge: {
+    backgroundColor: '#F5F3FF',
     borderWidth: 1,
-    borderColor: '#FDE68A',
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 8,
+    borderColor: '#EDE9FE',
+    paddingVertical: 3.5,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+    flexShrink: 0,
   },
-  suggestedTimePillGoldText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#B45309',
+  bestTimeBadgeText: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: '#5B3EE8',
+    letterSpacing: -0.2,
   },
   useIdeaBtn: {
-    height: 48,
-    borderRadius: 14,
+    height: 44,
+    borderRadius: 12,
     overflow: 'hidden',
     shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 3,
   },
   useIdeaGradient: {
     flex: 1,
@@ -1660,9 +1599,9 @@ const styles = StyleSheet.create({
   },
   useIdeaBtnText: {
     fontSize: 14.5,
-    fontWeight: '800',
+    fontWeight: '700',
     color: '#FFFFFF',
-    letterSpacing: -0.2,
+    letterSpacing: -0.1,
   },
 
   // 2. JARVIS SUGGESTION CARD (ROYAL PURPLE & GOLD)
@@ -1670,22 +1609,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    backgroundColor: '#F5F3FF',
+    backgroundColor: '#FAF9FF',
     borderRadius: 18,
     padding: 14,
     marginBottom: 18,
-    borderWidth: 1.2,
-    borderColor: '#DDD6FE',
+    borderWidth: 1,
+    borderColor: 'rgba(88, 44, 219, 0.12)',
   },
   jarvisFlameCircle: {
     width: 38,
     height: 38,
-    borderRadius: 19,
+    borderRadius: 20,
     backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#FDE68A',
+    borderColor: '#EDE9FE',
   },
   jarvisFlameIcon: {
     width: 24,
@@ -1695,14 +1634,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   jarvisSuggestionTitle: {
-    fontSize: 13.5,
-    fontWeight: '800',
+    fontSize: 14,
+    fontWeight: '700',
     color: '#582CDB',
     marginBottom: 2,
   },
   jarvisSuggestionText: {
     fontSize: 12,
-    color: '#6D28D9',
+    color: '#5E576E',
     lineHeight: 17,
     fontWeight: '500',
   },
@@ -1711,45 +1650,132 @@ const styles = StyleSheet.create({
   toolsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
-    marginBottom: 18,
+    justifyContent: 'space-between',
+    rowGap: 10,
+    marginBottom: 14,
+    width: '100%',
   },
   toolGridCard: {
-    width: '48%',
+    width: '48.2%',
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#E9D5FF',
-    padding: 16,
-    shadowColor: '#582CDB',
+    borderColor: 'rgba(23, 20, 32, 0.07)',
+    padding: sPadding(12),
+    shadowColor: '#171420',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.04,
+    shadowOpacity: 0.03,
     shadowRadius: 8,
     elevation: 2,
   },
   toolIconBox: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
+    width: 34,
+    height: 34,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 8,
   },
   quoteIconText: {
-    fontSize: 16,
-    fontWeight: '900',
+    fontSize: 15,
+    fontWeight: '700',
     color: '#582CDB',
   },
   toolTitle: {
-    fontSize: 15,
-    fontWeight: '800',
+    fontSize: sFont(13.5),
+    fontWeight: '700',
     color: '#171420',
     marginBottom: 2,
   },
   toolSubtitle: {
-    fontSize: 11.5,
-    color: '#6B7280',
-    fontWeight: '500',
+    fontSize: sFont(11),
+    color: '#5E576E',
+    fontWeight: '400',
+  },
+
+  // 3.5 REPURPOSE SPOTLIGHT BANNER
+  repurposeBannerCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: 'rgba(88, 44, 219, 0.12)',
+    padding: sPadding(14),
+    marginBottom: 18,
+    shadowColor: '#171420',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    elevation: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  repurposeBannerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    flex: 1,
+    minWidth: 0,
+  },
+  repurposeIconBox: {
+    width: 38,
+    height: 38,
+    borderRadius: 11,
+    backgroundColor: '#EDE9FE',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(88, 44, 219, 0.08)',
+  },
+  repurposeBannerContent: {
+    flex: 1,
+    minWidth: 0,
+  },
+  repurposeTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 2,
+  },
+  repurposeBannerTitle: {
+    fontSize: sFont(14),
+    fontWeight: '700',
+    color: '#171420',
+  },
+  repurposeLimitBadge: {
+    paddingHorizontal: 7,
+    paddingVertical: 2.5,
+    borderRadius: 100,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 0.5,
+    borderColor: '#34D399',
+  },
+  repurposeLimitBadgeText: {
+    fontWeight: '800',
+    fontSize: sFont(9),
+    color: '#FFFFFF',
+    letterSpacing: 0.2,
+  },
+  repurposeBannerSubtitle: {
+    fontSize: sFont(11.5),
+    color: '#5E576E',
+    lineHeight: 16,
+    fontWeight: '400',
+  },
+  repurposeActionBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    backgroundColor: '#FAF9FF',
+    borderWidth: 1,
+    borderColor: 'rgba(88, 44, 219, 0.15)',
+  },
+  repurposeActionText: {
+    fontSize: sFont(11.5),
+    fontWeight: '700',
+    color: '#582CDB',
   },
 
   // 4. SCHEDULED POSTS BANNER
@@ -1758,43 +1784,56 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 18,
     borderWidth: 1,
-    borderColor: '#E9D5FF',
-    padding: 16,
+    borderColor: 'rgba(23, 20, 32, 0.07)',
+    padding: sPadding(14),
     marginBottom: 24,
-    shadowColor: '#582CDB',
+    shadowColor: '#171420',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.04,
+    shadowOpacity: 0.03,
     shadowRadius: 8,
+    overflow: 'hidden',
   },
   scheduledLeft: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 10,
+    marginRight: 12,
+    minWidth: 0,
   },
   calendarIconBox: {
-    width: 42,
-    height: 42,
-    borderRadius: 12,
-    backgroundColor: '#EDE9FE',
+    width: 38,
+    height: 38,
+    borderRadius: 11,
+    backgroundColor: '#F4F0FF',
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 0,
+  },
+  scheduledTextGroup: {
+    flex: 1,
+    minWidth: 0,
   },
   scheduledTitle: {
-    fontSize: 15,
-    fontWeight: '800',
+    fontSize: sFont(13.5),
+    fontWeight: '700',
     color: '#171420',
   },
   scheduledSub: {
-    fontSize: 12,
-    color: '#6D28D9',
-    marginTop: 2,
-    fontWeight: '500',
+    fontSize: sFont(11),
+    color: '#5E576E',
+    marginTop: 1,
+    fontWeight: '400',
+  },
+  scheduledOpenBtn: {
+    paddingLeft: 8,
+    flexShrink: 0,
   },
   scheduledOpenLink: {
-    fontSize: 13.5,
-    fontWeight: '800',
+    fontSize: sFont(13),
+    fontWeight: '700',
     color: '#582CDB',
   },
 
@@ -1807,141 +1846,173 @@ const styles = StyleSheet.create({
   },
   draftsSectionTitle: {
     fontSize: 18,
-    fontWeight: '800',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.3,
   },
   viewAllDraftsLink: {
     fontSize: 12.5,
-    fontWeight: '700',
+    fontWeight: '600',
     color: '#582CDB',
   },
   draftsList: {
     gap: 10,
     marginBottom: 24,
   },
+  draftsEmptyCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: 'rgba(23, 20, 32, 0.07)',
+    paddingVertical: 18,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#171420',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.02,
+    shadowRadius: 6,
+    elevation: 1,
+  },
+  draftsEmptyText: {
+    fontSize: sFont(12.5),
+    color: '#6B637B',
+    fontWeight: '500',
+    textAlign: 'center',
+    lineHeight: 18,
+  },
   draftCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: 18,
+    borderRadius: 15,
     borderWidth: 1,
-    borderColor: '#E9D5FF',
-    padding: 12,
-    gap: 12,
-    shadowColor: '#582CDB',
+    borderColor: 'rgba(23, 20, 32, 0.07)',
+    paddingVertical: 9.5,
+    paddingHorizontal: 11,
+    gap: 11,
+    shadowColor: '#171420',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.03,
     shadowRadius: 6,
   },
   draftThumbnail: {
-    width: 44,
-    height: 44,
-    borderRadius: 10,
-    backgroundColor: '#E2E8F0',
+    width: 40,
+    height: 40,
+    borderRadius: 9,
+    backgroundColor: '#F1F5F9',
   },
   draftContentCol: {
     flex: 1,
+    minWidth: 0,
   },
   draftTitle: {
     fontSize: 13.5,
-    fontWeight: '700',
+    fontWeight: '600',
     color: '#171420',
-    marginBottom: 3,
+    marginBottom: 2,
+    lineHeight: 18,
   },
   draftMeta: {
     fontSize: 11.5,
-    color: '#6D28D9',
-    fontWeight: '500',
+    color: '#5E576E',
+    fontWeight: '400',
   },
   draftMoreDots: {
     fontSize: 18,
     color: '#582CDB',
     paddingHorizontal: 6,
   },
+  draftChevronBox: {
+    paddingLeft: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 
   // 6. VOICE STUDIO PRO CARD (METALLIC GOLD & PURPLE DASHED)
   voiceStudioCard: {
-    backgroundColor: '#FAF8F5',
-    borderRadius: 24,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
     borderWidth: 1.5,
-    borderColor: '#EAB308',
+    borderColor: '#F59E0B',
     borderStyle: 'dashed',
-    padding: 22,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
     alignItems: 'center',
-    marginBottom: 10,
-    shadowColor: '#CA8A04',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
+    marginBottom: 8,
+    shadowColor: '#F59E0B',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
   },
   voiceStudioProPill: {
     backgroundColor: '#FEF3C7',
     borderWidth: 1,
     borderColor: '#FDE68A',
-    paddingVertical: 3.5,
-    paddingHorizontal: 12,
+    paddingVertical: 2.5,
+    paddingHorizontal: 9,
     borderRadius: 100,
-    marginBottom: 10,
+    marginBottom: 6,
   },
   voiceStudioProPillText: {
-    fontSize: 10,
+    fontSize: 9.5,
     fontWeight: '800',
     color: '#B45309',
-    letterSpacing: 0.6,
+    letterSpacing: 0.5,
   },
   voiceStudioTitle: {
-    fontSize: 19,
-    fontWeight: '800',
+    fontSize: 16.5,
+    fontWeight: '700',
     color: '#171420',
-    marginBottom: 4,
+    marginBottom: 2,
+    letterSpacing: -0.3,
   },
   voiceStudioSubtitle: {
-    fontSize: 13,
+    fontSize: 12,
     color: '#64748B',
-    marginBottom: 14,
+    marginBottom: 10,
     fontWeight: '500',
   },
   waveformWrapper: {
-    height: 56,
+    height: 38,
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
-    marginBottom: 16,
+    marginBottom: 12,
     width: '100%',
   },
   waveformAura: {
     position: 'absolute',
-    width: 150,
-    height: 42,
-    borderRadius: 22,
-    backgroundColor: 'rgba(234, 179, 8, 0.18)',
-    shadowColor: '#EAB308',
+    width: 120,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: 'rgba(234, 179, 8, 0.16)',
+    shadowColor: '#F59E0B',
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.7,
-    shadowRadius: 22,
+    shadowOpacity: 0.1,
+    shadowRadius: 16,
   },
   waveformContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    height: 48,
+    gap: 5,
+    height: 34,
   },
   waveBar: {
-    width: 6.5,
+    width: 5,
     borderRadius: 10,
   },
   unlockVoiceBtn: {
     width: '100%',
-    maxWidth: 240,
-    height: 44,
+    maxWidth: 220,
+    height: 38,
     borderRadius: 100,
     overflow: 'hidden',
     shadowColor: '#F59E0B',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
     elevation: 3,
   },
   unlockVoiceGradient: {
@@ -1950,8 +2021,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   unlockVoiceBtnText: {
-    fontSize: 13.5,
-    fontWeight: '900',
+    fontSize: 13,
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.2,
   },
@@ -2019,6 +2090,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginBottom: 16,
+    width: '100%',
   },
   modalCloseCircle: {
     width: 32,
@@ -2027,6 +2099,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F1F5F9',
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 0,
   },
   modalCloseCross: {
     fontSize: 14,
@@ -2046,7 +2119,7 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   modalInputLabel: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#582CDB',
     letterSpacing: 0.6,
@@ -2088,9 +2161,116 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 10,
-    fontSize: 13.5,
+    fontSize: 14,
     color: '#171420',
     marginBottom: 14,
+  },
+  dropdownSelectorsRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 12,
+  },
+  dropdownBtnHalf: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#EFEBF8',
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    height: 42,
+  },
+  dropdownBtnActive: {
+    borderColor: '#582CDB',
+    backgroundColor: '#FAF5FF',
+  },
+  dropdownBtnIconWrap: {
+    marginRight: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dropdownBtnText: {
+    flex: 1,
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#171420',
+  },
+  dropdownChevron: {
+    fontSize: 11,
+    color: '#64748B',
+    fontWeight: '800',
+    marginLeft: 2,
+  },
+  jarvisSubtleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: -4,
+    marginBottom: 14,
+    paddingHorizontal: 2,
+    gap: 5,
+  },
+  jarvisSubtleSparkle: {
+    fontSize: 11,
+  },
+  jarvisSubtleText: {
+    fontSize: 11.5,
+    color: '#6B637B',
+    fontWeight: '500',
+  },
+  jarvisSubtleBold: {
+    fontWeight: '700',
+    color: '#582CDB',
+  },
+  dropdownMenuBox: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#EFEBF8',
+    padding: 8,
+    marginBottom: 14,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    elevation: 5,
+  },
+  dropdownMenuHeader: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#582CDB',
+    letterSpacing: 0.5,
+    marginBottom: 6,
+    paddingHorizontal: 6,
+  },
+  dropdownMenuScroll: {
+    maxHeight: 180,
+  },
+  dropdownMenuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 9,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+  },
+  dropdownMenuItemActive: {
+    backgroundColor: '#EDE9FE',
+  },
+  dropdownMenuItemText: {
+    fontSize: 12.5,
+    fontWeight: '600',
+    color: '#475569',
+  },
+  dropdownMenuItemTextActive: {
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  dropdownCheckmark: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#582CDB',
   },
   modalBtnRow: {
     flexDirection: 'row',
@@ -2108,7 +2288,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalSecondaryBtnText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '700',
     color: '#524C62',
   },
@@ -2124,7 +2304,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalPrimaryBtnText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#FFFFFF',
   },
@@ -2151,7 +2331,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   ideaItemText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '700',
     color: '#171420',
     marginBottom: 4,
@@ -2193,12 +2373,12 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   notifBody: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
     lineHeight: 16,
   },
   notifTime: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#94A3B8',
     marginTop: 2,
   },
@@ -2237,7 +2417,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   profileModalLevelText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '700',
     color: '#6D28D9',
   },

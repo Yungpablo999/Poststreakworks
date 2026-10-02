@@ -2,31 +2,31 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   StyleSheet,
   View,
-  Text,
   ScrollView,
   Pressable,
   Platform,
   Animated,
   Modal,
-  TextInput,
   Image,
   Dimensions,
   SafeAreaView,
   StatusBar,
 } from 'react-native';
+import { Text, TextInput } from '../components/ui/AppText';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import Svg, { Path, Circle } from 'react-native-svg';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
+import { FreeAppHeader } from '../components/FreeAppHeader';
+import { sFont, sPadding, isNarrowScreen } from '../utils/responsive';
 
 interface IdeaDetailScreenProps {
   ideaTitle?: string;
   onBack: () => void;
   onLogout?: () => void;
   onOpenSchedule?: () => void;
-  onOpenMessages?: () => void;
   onOpenJarvisPro?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onOpenPostComposer?: (ideaTitle?: string) => void;
@@ -59,7 +59,7 @@ const NOTIFICATIONS: NotificationItem[] = [
   {
     id: 'n2',
     title: 'Streak Saver Ready',
-    body: "Convert today's idea into a post to keep your 47-day streak.",
+    body: "Convert today's idea into a post to kick off your creator streak.",
     time: '2h ago',
     unread: true,
     iconEmoji: '🔥',
@@ -78,8 +78,7 @@ const PLATFORM_OPTIONS = [
   { id: 'tiktok', name: 'TikTok', multiplier: '0.8x', icon: '♪' },
   { id: 'instagram', name: 'Insta Reel', multiplier: '1.2x', icon: '📷' },
   { id: 'shorts', name: 'Shorts', multiplier: '1.0x', icon: '▶' },
-  { id: 'linkedin', name: 'LinkedIn', multiplier: '1.5x', icon: 'in' },
-  { id: 'x', name: 'X', multiplier: '0.9x', icon: '𝕏' },
+  { id: 'threads', name: 'Threads', multiplier: '1.3x', icon: '🧵' },
 ];
 
 export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
@@ -87,7 +86,6 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
   onBack,
   onLogout,
   onOpenSchedule,
-  onOpenMessages,
   onOpenJarvisPro,
   onNavigateTab,
   onOpenPostComposer,
@@ -110,7 +108,6 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const [showChatModal, setShowChatModal] = useState(false);
   const [showCelebrationModal, setShowCelebrationModal] = useState(false);
   const [celebrationTitle, setCelebrationTitle] = useState('Idea Ready!');
   const [celebrationSubtitle, setCelebrationSubtitle] = useState('Your post draft has been saved & added to your queue.');
@@ -232,7 +229,7 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
     } else {
       setCelebrationTitle('Draft Created!');
       setCelebrationSubtitle(`"${ideaTitle}" is now ready in your drafts queue with full hook & caption.`);
-      setCelebrationSpeech('47-day streak protected! Keep this momentum going.');
+      setCelebrationSpeech('Day 1 draft ready! Keep this momentum going.');
       setShowCelebrationModal(true);
     }
   };
@@ -263,115 +260,22 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
     <SafeAreaView style={[styles.safeArea, isDark && { backgroundColor: '#0C0A12' }]}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={isDark ? "#0C0A12" : "#FAF8F5"} />
       <View style={[styles.container, isDark && { backgroundColor: '#0C0A12' }]}>
-        {/* 1. TOP AIRY HEADER BAR (UNIFIED APP-WIDE) */}
-        <View style={styles.headerBar}>
-          <View style={styles.headerLeftGroup}>
-            <Pressable
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                onBack();
-              }}
-              style={({ pressed }) => [styles.backCircleBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-            >
-              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                <Path d="M15 18L9 12L15 6" stroke="#171420" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-              </Svg>
-            </Pressable>
-
-            {/* Mascot Logo with Floating Animation */}
-            <Animated.View
-              style={[
-                styles.headerLogoWrapper,
-                { transform: [{ translateY: flameFloatY }] },
-              ]}
-            >
-              <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerGhostLogo}
-                resizeMode="contain"
-              />
-            </Animated.View>
-          </View>
-
-          {/* Right Icons: Messages, Notification Bell, Profile */}
-          <View style={styles.headerRightGroup}>
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                if (Platform.OS !== "web") {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                if (onOpenMessages) {
-                  onOpenMessages();
-                } else {
-                  triggerModalAnim();
-                  setShowChatModal(true);
-                }
-              }}
-            >
-              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                triggerModalAnim();
-                setShowNotificationModal(true);
-              }}
-            >
-              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <Path
-                  d="M13.73 21a2 2 0 0 1-3.46 0"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-              {unreadNotifCount > 0 && <View style={styles.notificationDot} />}
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                triggerModalAnim();
-                setShowProfileModal(true);
-              }}
-            >
-              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <Circle cx="12" cy="7" r="4" stroke="#171420" strokeWidth="2.2" />
-              </Svg>
-            </Pressable>
-          </View>
-        </View>
+        {/* 1. TOP AIRY HEADER BAR */}
+        <FreeAppHeader
+          onBack={onBack}
+          onOpenJarvisPro={onOpenJarvisPro}
+          onOpenNotifications={() => {
+            triggerModalAnim();
+            setShowNotificationModal(true);
+          }}
+          onOpenProfile={() => {
+            triggerModalAnim();
+            setShowProfileModal(true);
+          }}
+          userProfile={userProfile}
+          unreadCount={unreadNotifCount}
+          isDark={isDark}
+        />
 
         {/* 2. MAIN SCROLLABLE CONTENT */}
         <ScrollView
@@ -396,7 +300,12 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
           </View>
 
           {/* Main Title & Subtitle */}
-          <Text style={styles.mainTitle}>Turn this idea into your next post.</Text>
+          <Text
+            style={styles.mainTitle}
+            numberOfLines={2}
+          >
+            Turn this idea into your next post.
+          </Text>
           <Text style={styles.mainSubtitle}>
             Use this streak-saving idea to create content your audience can connect with.
           </Text>
@@ -432,7 +341,7 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
                 <Text style={styles.ideaTagPillText}>Creator Advice</Text>
               </View>
               <View style={styles.ideaTagPill}>
-                <Text style={styles.ideaTagPillText}>High Save Potential</Text>
+                <Text style={styles.ideaTagPillText}>Save-Focused</Text>
               </View>
             </View>
 
@@ -440,7 +349,7 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
             <View style={styles.streakRibbonBanner}>
               <Text style={styles.streakRibbonIcon}>🎖</Text>
               <Text style={styles.streakRibbonText}>
-                Completing this today helps protect your <Text style={{ fontWeight: '800' }}>47-day streak</Text>.
+                Completing this today helps protect your <Text style={{ fontWeight: '800' }}>{userProfile?.streakCount || 1}-day streak</Text>.
               </Text>
             </View>
           </View>
@@ -649,7 +558,7 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
                   ]}
                 >
                   <Image
-                    source={require('../../assets/images/jarvis-ghost-clean.png')}
+                    source={require('../../assets/images/jarvis-core-flame.png')}
                     style={styles.jarvisFlameImage}
                     resizeMode="contain"
                   />
@@ -669,7 +578,12 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
             </Text>
 
             {/* Quick Filter Chips */}
-            <View style={styles.jarvisChipsRow}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.jarvisChipsRow}
+              style={{ flexGrow: 0, marginBottom: 14 }}
+            >
               {(
                 [
                   { id: 'shorter', label: '⚡ Shorter' },
@@ -703,7 +617,7 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
                   </Pressable>
                 );
               })}
-            </View>
+            </ScrollView>
 
             <Pressable
               style={({ pressed }) => [styles.improveIdeaBtn, pressed && styles.btnPressed]}
@@ -732,7 +646,7 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
               <View style={styles.impactCheckCircle}>
                 <Text style={{ fontSize: 12, color: '#582CDB' }}>✓</Text>
               </View>
-              <Text style={styles.streakImpactText}>47-day streak protected</Text>
+              <Text style={styles.streakImpactText}>{userProfile?.streakCount || 1}-day streak protected</Text>
             </View>
 
             <View style={styles.streakImpactItemRow}>
@@ -972,46 +886,6 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
           onSaveProfile={onSaveProfile}
         />
 
-        {/* MODAL 5: CREATOR CHAT */}
-        <Modal
-          visible={showChatModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowChatModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Jarvis AI Chat</Text>
-                  <Text style={styles.modalSubtitle}>Real-time creative assistant</Text>
-                </View>
-                <Pressable
-                  onPress={() => setShowChatModal(false)}
-                  style={styles.modalCloseCircle}
-                  hitSlop={8}
-                >
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
-              </View>
-
-              <View style={styles.chatCard}>
-                <Text style={styles.chatSpeaker}>Jarvis AI</Text>
-                <Text style={styles.chatMsg}>
-                  I analyzed your niche reach. This idea &ldquo;{ideaTitle}&rdquo; has strong viral retention potential on TikTok &amp; Reels!
-                </Text>
-              </View>
-
-              <Pressable
-                style={styles.modalFullBtn}
-                onPress={() => setShowChatModal(false)}
-              >
-                <Text style={styles.modalFullBtnText}>Close Chat</Text>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
-
         {/* SIGNATURE ANIMATED GHOST CELEBRATION MODAL */}
         <AnimatedCompletionModal
           visible={showCelebrationModal}
@@ -1020,7 +894,7 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
           speechBubble={celebrationSpeech}
           badgeText="IDEA CRAFTED"
           xpEarned={40}
-          streakCount={47}
+          streakCount={userProfile?.streakCount || 1}
           actionText="Keep Editing ➔"
           onDismiss={() => {
             setShowCelebrationModal(false);
@@ -1038,16 +912,17 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+    width: '100%',
     backgroundColor: '#FAF8F5',
   },
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 8,
-    paddingBottom: 24,
+    paddingBottom: 135,
   },
   btnPressed: {
-    opacity: 0.78,
-    transform: [{ scale: 0.97 }],
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
   },
 
   // 1. TOP AIRY HEADER BAR (UNIFIED)
@@ -1137,13 +1012,13 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.08,
     shadowRadius: 6,
     elevation: 2,
   },
   selectedIdeaPillText: {
-    fontSize: 10.5,
-    fontWeight: '900',
+    fontSize: 11,
+    fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: 0.6,
   },
@@ -1162,12 +1037,12 @@ const styles = StyleSheet.create({
     letterSpacing: 0.4,
   },
 
-  // Main Heading
   mainTitle: {
-    fontSize: 23,
-    fontWeight: '800',
+    fontSize: Platform.OS === 'web' ? ('clamp(15px, 3.8vw, 17px)' as any) : sFont(16),
+    fontWeight: '700',
     color: '#171420',
-    letterSpacing: -0.4,
+    letterSpacing: -0.35,
+    lineHeight: 22,
     marginBottom: 4,
     marginTop: 4,
   },
@@ -1199,7 +1074,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   ideaCardTag: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#6D28D9',
     letterSpacing: 0.6,
@@ -1246,25 +1121,28 @@ const styles = StyleSheet.create({
   },
   ideaTagsRow: {
     flexDirection: 'row',
+    alignItems: 'center',
     flexWrap: 'wrap',
     gap: 6,
+    rowGap: 6,
     marginBottom: 14,
   },
   ideaTagPill: {
     backgroundColor: '#EDE9FE',
     paddingVertical: 4,
     paddingHorizontal: 9,
-    borderRadius: 8,
+    borderRadius: 100,
+    flexShrink: 0,
   },
   ideaTagPillText: {
-    fontSize: 10.5,
+    fontSize: sFont(11),
     fontWeight: '700',
     color: '#6D28D9',
   },
   streakRibbonBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFBEB',
+    backgroundColor: '#FEF3C7',
     borderRadius: 10,
     borderWidth: 1,
     borderColor: '#FDE68A',
@@ -1277,13 +1155,13 @@ const styles = StyleSheet.create({
   },
   streakRibbonText: {
     fontSize: 11,
-    color: '#92400E',
+    color: '#B45309',
     flex: 1,
   },
 
   // Section Labels
   sectionLabel: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#7F7894',
     letterSpacing: 0.6,
@@ -1348,12 +1226,12 @@ const styles = StyleSheet.create({
     borderColor: '#FDE68A',
   },
   recBadgeText: {
-    fontSize: 8.5,
-    fontWeight: '900',
+    fontSize: 9,
+    fontWeight: '700',
     color: '#B45309',
   },
   formatSubtitle: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
   },
   formatChevron: {
@@ -1374,7 +1252,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 100,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     paddingVertical: 6,
     paddingHorizontal: 12,
     gap: 6,
@@ -1402,7 +1280,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#6D28D9',
   },
   platformMultiplierText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#64748B',
   },
@@ -1418,7 +1296,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   hookCounterBadgeText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '700',
     color: '#64748B',
   },
@@ -1440,7 +1318,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     padding: 12,
     marginBottom: 10,
   },
@@ -1518,7 +1396,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   captionAngleBold: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#171420',
     marginBottom: 4,
@@ -1533,12 +1411,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8FAFC',
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     padding: 12,
     marginBottom: 12,
   },
   starterTextLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#64748B',
     letterSpacing: 0.5,
@@ -1588,7 +1466,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 3,
   },
@@ -1623,7 +1501,7 @@ const styles = StyleSheet.create({
   },
   structureNumber: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     marginBottom: 4,
   },
@@ -1655,38 +1533,45 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    gap: 8,
+    rowGap: 8,
     marginBottom: 12,
   },
   jarvisHeaderLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 7,
+    flexShrink: 1,
+    flexWrap: 'wrap',
   },
   jarvisFlameIconBox: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     backgroundColor: '#EDE9FE',
     borderWidth: 1,
     borderColor: '#DDD6FE',
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 0,
   },
   jarvisFlameImage: {
-    width: 18,
-    height: 18,
+    width: 16,
+    height: 16,
   },
   jarvisInsightBadge: {
     backgroundColor: '#EDE9FE',
-    paddingVertical: 4,
-    paddingHorizontal: 10,
+    paddingVertical: 3.5,
+    paddingHorizontal: 8,
     borderRadius: 100,
+    flexShrink: 0,
   },
   jarvisInsightTag: {
-    fontSize: 10.5,
-    fontWeight: '900',
+    fontSize: sFont(10.5),
+    fontWeight: '700',
     color: '#6D28D9',
-    letterSpacing: 0.5,
+    letterSpacing: 0.4,
   },
   jarvisScorePill: {
     backgroundColor: '#FEF3C7',
@@ -1695,9 +1580,10 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#FDE68A',
+    flexShrink: 0,
   },
   jarvisScoreText: {
-    fontSize: 10.5,
+    fontSize: sFont(10.5),
     fontWeight: '800',
     color: '#B45309',
   },
@@ -1710,15 +1596,16 @@ const styles = StyleSheet.create({
   jarvisChipsRow: {
     flexDirection: 'row',
     gap: 8,
-    marginBottom: 14,
+    paddingHorizontal: 2,
+    paddingVertical: 2,
   },
   jarvisChip: {
     backgroundColor: '#F8FAFC',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+    paddingVertical: 5,
+    paddingHorizontal: 11,
     borderRadius: 100,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
   },
   jarvisChipActive: {
     backgroundColor: '#EDE9FE',
@@ -1739,7 +1626,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.22,
+    shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 3,
   },
@@ -1811,13 +1698,13 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   missionProgressTitle: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#64748B',
     letterSpacing: 0.5,
   },
   missionProgressCount: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#582CDB',
   },
@@ -1853,7 +1740,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 10,
     elevation: 4,
   },
@@ -1911,7 +1798,7 @@ const styles = StyleSheet.create({
     padding: 20,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.08,
     shadowRadius: 24,
     elevation: 8,
   },
@@ -1927,7 +1814,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   modalSubtitle: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
     marginTop: 2,
   },
@@ -1949,7 +1836,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8FAFC',
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     padding: 12,
     fontSize: 12.5,
     color: '#1E293B',
@@ -1998,7 +1885,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   schedulePeakLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#6D28D9',
     letterSpacing: 0.5,
@@ -2011,7 +1898,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   schedulePeakReason: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#582CDB',
     fontWeight: '600',
   },
@@ -2023,7 +1910,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: '#F1F5F9',
+    borderColor: '#F5F2EC',
   },
   notifCardUnread: {
     backgroundColor: '#F5F3FF',
@@ -2049,7 +1936,7 @@ const styles = StyleSheet.create({
     lineHeight: 15,
   },
   notifTime: {
-    fontSize: 9.5,
+    fontSize: 10,
     color: '#94A3B8',
     marginTop: 4,
   },
@@ -2062,7 +1949,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   modalFullBtnText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#FFFFFF',
   },
@@ -2101,7 +1988,7 @@ const styles = StyleSheet.create({
     borderColor: '#FDE68A',
   },
   profileModalLevelText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#B45309',
   },
@@ -2115,7 +2002,7 @@ const styles = StyleSheet.create({
   },
   chatSpeaker: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.5,
     marginBottom: 4,

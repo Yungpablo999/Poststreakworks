@@ -1,20 +1,20 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   StyleSheet,
   View,
-  Text,
   ScrollView,
   SafeAreaView,
   StatusBar,
   Pressable,
   Animated,
   Modal,
-  TextInput,
   Image,
   Platform,
   Dimensions,
   Switch,
 } from 'react-native';
+import { Text, TextInput } from '../components/ui/AppText';
+import { BrandLogo } from '../components/BrandLogo';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -23,19 +23,20 @@ import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { TinyGoldCheck } from '../components/CreatorStoryModal';
+import { ProNotificationsModal, ProNotificationItem, DEFAULT_PRO_NOTIFICATIONS } from '../components/ProNotificationsModal';
 import { SocialBrandIcon } from '../components/SocialBrandIcon';
 import { PurpleGoldSwitch } from '../components/PurpleGoldSwitch';
+import { sFont, sPadding, isNarrowScreen } from '../utils/responsive';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 interface ProScheduleScreenProps {
   onBack?: () => void;
   onStartMission?: () => void;
-  onOpenPostComposer?: (title?: string) => void;
+  onOpenPostComposer?: (title?: string, platform?: string) => void;
   onLogout?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onOpenJarvisPro?: () => void;
-  onOpenMessages?: (threadId?: string) => void;
   onOpenCreateIdea?: () => void;
   onSwitchToFree?: () => void;
   userProfile?: UserProfileData;
@@ -45,25 +46,74 @@ interface ProScheduleScreenProps {
 interface CalendarDay {
   dayName: string;
   dayNum: number;
+  monthName: string;
+  fullDateStr: string;
   dotsCount: number;
   isToday?: boolean;
 }
 
-const CALENDAR_DAYS: CalendarDay[] = [
-  { dayName: 'SUN', dayNum: 23, dotsCount: 1 },
-  { dayName: 'TUE', dayNum: 24, dotsCount: 2 },
-  { dayName: 'WED', dayNum: 25, dotsCount: 2, isToday: true },
-  { dayName: 'THU', dayNum: 26, dotsCount: 1 },
-  { dayName: 'FRI', dayNum: 27, dotsCount: 2 },
-  { dayName: 'SAT', dayNum: 28, dotsCount: 1 },
-  { dayName: 'SUN', dayNum: 29, dotsCount: 2 },
+const MONTH_NAMES_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const MONTH_NAMES_FULL = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
 ];
+const DAY_NAMES_SHORT = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+
+const getDynamicWeekData = () => {
+  const now = new Date();
+  const baseDate = new Date(now.getFullYear() === 2026 ? now : new Date(2026, 8, 5));
+  const currentDayOfWeek = baseDate.getDay(); // 0 = Sun ... 6 = Sat
+
+  // 7-day week starting on Sunday
+  const sunday = new Date(baseDate);
+  sunday.setDate(baseDate.getDate() - currentDayOfWeek);
+
+  const days: CalendarDay[] = [];
+  let todayIndex = currentDayOfWeek;
+
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(sunday);
+    d.setDate(sunday.getDate() + i);
+    const isToday =
+      d.getDate() === baseDate.getDate() &&
+      d.getMonth() === baseDate.getMonth() &&
+      d.getFullYear() === baseDate.getFullYear();
+
+    if (isToday) {
+      todayIndex = i;
+    }
+
+    days.push({
+      dayName: DAY_NAMES_SHORT[d.getDay()],
+      dayNum: d.getDate(),
+      monthName: MONTH_NAMES_SHORT[d.getMonth()],
+      fullDateStr: `${MONTH_NAMES_SHORT[d.getMonth()]} ${d.getDate()}`,
+      dotsCount: isToday ? 2 : (i % 2 === 0 ? 1 : 2),
+      isToday,
+    });
+  }
+
+  const startDay = days[0];
+  const endDay = days[6];
+  let rangeLabel = '';
+  if (startDay.monthName === endDay.monthName) {
+    const monthFull = MONTH_NAMES_FULL[MONTH_NAMES_SHORT.indexOf(startDay.monthName)];
+    rangeLabel = `${monthFull} ${startDay.dayNum} – ${endDay.dayNum}`;
+  } else {
+    const startFull = MONTH_NAMES_FULL[MONTH_NAMES_SHORT.indexOf(startDay.monthName)];
+    const endFull = MONTH_NAMES_FULL[MONTH_NAMES_SHORT.indexOf(endDay.monthName)];
+    rangeLabel = `${startFull} ${startDay.dayNum} – ${endFull} ${endDay.dayNum}`;
+  }
+
+  return { days, rangeLabel, todayIndex, baseDate };
+};
 
 interface StrategyItem {
   id: string;
   icon: string;
   title: string;
   tag: string;
+  summary: string;
   body: string;
 }
 
@@ -73,27 +123,31 @@ const JARVIS_STRATEGIES: StrategyItem[] = [
     icon: '⚡',
     title: 'Peak Velocity Window (7:15 – 7:45 PM)',
     tag: 'ALGORITHM TIMING • +2.4X REACH',
+    summary: 'Schedule 45s Reels at 7:30 PM to trigger discovery velocity wave.',
     body: 'Wednesday and Friday evening algorithms favor early watch-time velocity. Schedule your 45-second Reels at 7:30 PM to trigger the discovery explore page.',
   },
   {
     id: 'strat_2',
     icon: '🎬',
     title: 'Contrarian Hook Architecture',
-    tag: 'RETENTION RETENTION • 96% MATCH',
-    body: 'Start with "Why 90% of creators fail by Month 2" rather than an intro. Cuts initial 3-second dropoff by 42% on TikTok and Instagram Reels.',
+    tag: 'RETENTION • 96% AUDIENCE FIT',
+    summary: 'Open with bold contrarian statement to strengthen 3-second retention.',
+    body: 'Start with "Why 90% of creators fail by Month 2" rather than a casual intro to capture early attention on TikTok · Video and Instagram · Reel.',
   },
   {
     id: 'strat_3',
     icon: '🚀',
     title: 'Multi-Sync Cascade Pacing',
     tag: 'DISTRIBUTION MULTIPLIER',
-    body: 'Publish your 9:16 video to Instagram and TikTok simultaneously, then release the long-form text breakdown on LinkedIn 2 hours later to maximize B2B authority.',
+    summary: 'Publish Instagram · Reel + TikTok · Video together → YouTube · Short 2h later.',
+    body: 'Publish your 9:16 video to Instagram and TikTok simultaneously, then release the YouTube · Short breakdown 2 hours later to maximize multi-channel reach.',
   },
   {
     id: 'strat_4',
     icon: '🤝',
     title: 'Pre-Release Squad Engagement',
     tag: 'DUEL BOOST • +750 XP',
+    summary: 'Notify your squad 15m before launch for early viral comment momentum.',
     body: 'Notify your squad (Elena & Amara) 15 minutes before your post goes live to secure initial high-retention comments and fuel viral reach.',
   },
 ];
@@ -107,153 +161,209 @@ interface FullQueueItem {
   dayLabel: string;
   status: 'AUTOPILOT' | 'READY' | 'QUEUED';
   score: string;
-  iconType: 'tiktok' | 'instagram' | 'youtube' | 'linkedin' | 'x';
+  iconType: 'tiktok' | 'instagram' | 'youtube' | 'threads';
 }
 
-const INITIAL_FULL_QUEUE: FullQueueItem[] = [
-  {
-    id: 'q1',
-    title: 'LinkedIn Insight: Why 90% of creators fail by Month 2',
-    platformLabel: 'in LinkedIn',
-    time: '10:00',
-    period: 'AM',
-    dayLabel: 'Tomorrow (Thu)',
-    status: 'AUTOPILOT',
-    score: '96% Match',
-    iconType: 'linkedin',
-  },
-  {
-    id: 'q2',
-    title: 'Instagram Carousel: The 1 iPhone 4K Recording Setup',
-    platformLabel: '📸 IG Reel',
-    time: '06:00',
-    period: 'PM',
-    dayLabel: 'Friday (Oct 27)',
-    status: 'READY',
-    score: '94% Match',
-    iconType: 'instagram',
-  },
-  {
-    id: 'q3',
-    title: 'TikTok Duet: Unpopular truth about the 2026 algorithm',
-    platformLabel: '≈ TikTok',
-    time: '05:30',
-    period: 'PM',
-    dayLabel: 'Saturday (Oct 28)',
-    status: 'AUTOPILOT',
-    score: '98% Match',
-    iconType: 'tiktok',
-  },
-  {
-    id: 'q4',
-    title: 'YouTube Short: How I batch-film 10 videos in 2 hours',
-    platformLabel: '▶ Shorts',
-    time: '02:00',
-    period: 'PM',
-    dayLabel: 'Sunday (Oct 29)',
-    status: 'QUEUED',
-    score: '91% Match',
-    iconType: 'youtube',
-  },
-  {
-    id: 'q5',
-    title: 'X Viral Thread: 5 tools that automate my content pipeline',
-    platformLabel: 'in LinkedIn',
-    time: '09:30',
-    period: 'AM',
-    dayLabel: 'Monday (Oct 30)',
-    status: 'AUTOPILOT',
-    score: '95% Match',
-    iconType: 'linkedin',
-  },
-  {
-    id: 'q6',
-    title: 'Instagram Reel: Behind the scenes of my video workflow',
-    platformLabel: '📸 IG Reel',
-    time: '07:30',
-    period: 'PM',
-    dayLabel: 'Tuesday (Oct 31)',
-    status: 'READY',
-    score: '96% Match',
-    iconType: 'instagram',
-  },
-];
+const generateInitialFullQueue = (baseDate: Date): FullQueueItem[] => {
+  const getRelativeDayLabel = (offsetDays: number) => {
+    const d = new Date(baseDate);
+    d.setDate(baseDate.getDate() + offsetDays);
+    const dayOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][d.getDay()];
+    const shortMonth = MONTH_NAMES_SHORT[d.getMonth()];
+    if (offsetDays === 1) {
+      return `Tomorrow (${dayOfWeek.slice(0, 3)}, ${shortMonth} ${d.getDate()})`;
+    }
+    return `${dayOfWeek} (${shortMonth} ${d.getDate()})`;
+  };
+
+  return [
+    {
+      id: 'q1',
+      title: 'Shorts Insight: Why 90% of creators fail by Month 2',
+      platformLabel: '▶ Shorts',
+      time: '10:00',
+      period: 'AM',
+      dayLabel: getRelativeDayLabel(1),
+      status: 'AUTOPILOT',
+      score: '96% Audience Fit',
+      iconType: 'youtube',
+    },
+    {
+      id: 'q2',
+      title: 'Instagram Carousel: The 1 iPhone 4K Recording Setup',
+      platformLabel: '📸 IG Reel',
+      time: '06:00',
+      period: 'PM',
+      dayLabel: getRelativeDayLabel(2),
+      status: 'READY',
+      score: '94% Audience Fit',
+      iconType: 'instagram',
+    },
+    {
+      id: 'q3',
+      title: 'TikTok Duet: Unpopular truth about the 2026 algorithm',
+      platformLabel: '≈ TikTok',
+      time: '05:30',
+      period: 'PM',
+      dayLabel: getRelativeDayLabel(3),
+      status: 'AUTOPILOT',
+      score: '98% Audience Fit',
+      iconType: 'tiktok',
+    },
+    {
+      id: 'q4',
+      title: 'YouTube Short: How I batch-film 10 videos in 2 hours',
+      platformLabel: '▶ Shorts',
+      time: '02:00',
+      period: 'PM',
+      dayLabel: getRelativeDayLabel(4),
+      status: 'QUEUED',
+      score: '91% Audience Fit',
+      iconType: 'youtube',
+    },
+    {
+      id: 'q5',
+      title: 'Threads Take: 5 tools that automate my content pipeline',
+      platformLabel: '🧵 Threads',
+      time: '09:30',
+      period: 'AM',
+      dayLabel: getRelativeDayLabel(5),
+      status: 'AUTOPILOT',
+      score: '95% Audience Fit',
+      iconType: 'threads',
+    },
+    {
+      id: 'q6',
+      title: 'Instagram Reel: Behind the scenes of my video workflow',
+      platformLabel: '📸 IG Reel',
+      time: '07:30',
+      period: 'PM',
+      dayLabel: getRelativeDayLabel(6),
+      status: 'READY',
+      score: '96% Audience Fit',
+      iconType: 'instagram',
+    },
+  ];
+};
 
 interface ScheduleItem {
   id: string;
   time: string;
   period: string;
   title: string;
-  platform: 'tiktok' | 'instagram' | 'youtube' | 'linkedin';
+  platform: 'tiktok' | 'instagram' | 'youtube' | 'threads';
   platformLabel: string;
   badgeType: 'scheduled' | 'recommended' | 'draft';
   dayIndex: number;
 }
 
-const INITIAL_SCHEDULE_ITEMS: ScheduleItem[] = [
-  {
-    id: 'sch_1',
-    time: '11:30',
-    period: 'AM',
-    title: '3 creator mistakes I stopped making this year',
-    platform: 'tiktok',
-    platformLabel: '≈ TikTok',
-    badgeType: 'scheduled',
-    dayIndex: 2, // WED 25
-  },
-  {
-    id: 'sch_2',
-    time: '07:30',
-    period: 'PM',
-    title: 'Personal lesson Reel • Behind the scenes studio',
-    platform: 'instagram',
-    platformLabel: '📸 IG Reel',
-    badgeType: 'recommended',
-    dayIndex: 2, // WED 25
-  },
-  {
-    id: 'sch_3',
-    time: '10:00',
-    period: 'AM',
-    title: '5 retention rules that 10x watch time',
-    platform: 'linkedin',
-    platformLabel: 'in LinkedIn',
-    badgeType: 'scheduled',
-    dayIndex: 3, // THU 26
-  },
-  {
-    id: 'sch_4',
-    time: '06:00',
-    period: 'PM',
-    title: 'Step-by-step editing workflow in CapCut',
-    platform: 'instagram',
-    platformLabel: '📸 IG Reel',
-    badgeType: 'scheduled',
-    dayIndex: 4, // FRI 27
-  },
-];
+const parseTimeToMinutes = (timeStr: string, period: string): number => {
+  const parts = timeStr.split(':');
+  let hours = parseInt(parts[0] || '0', 10);
+  const minutes = parseInt(parts[1] || '0', 10);
+  const p = (period || '').toUpperCase().trim();
+
+  if (p === 'PM' && hours < 12) {
+    hours += 12;
+  } else if (p === 'AM' && hours === 12) {
+    hours = 0;
+  }
+
+  return hours * 60 + minutes;
+};
+
+const sortScheduleItemsChronologically = (items: ScheduleItem[]): ScheduleItem[] => {
+  return [...items].sort((a, b) => {
+    if (a.dayIndex !== b.dayIndex) {
+      return a.dayIndex - b.dayIndex;
+    }
+    const minA = parseTimeToMinutes(a.time, a.period);
+    const minB = parseTimeToMinutes(b.time, b.period);
+    return minA - minB;
+  });
+};
+
+const generateInitialScheduleItems = (todayIndex: number): ScheduleItem[] => {
+  return [
+    {
+      id: 'sch_1',
+      time: '10:00',
+      period: 'AM',
+      title: '5 retention rules that 10x watch time',
+      platform: 'youtube',
+      platformLabel: '▶ Shorts',
+      badgeType: 'scheduled',
+      dayIndex: todayIndex,
+    },
+    {
+      id: 'sch_2',
+      time: '11:30',
+      period: 'AM',
+      title: '3 creator mistakes I stopped making this year',
+      platform: 'tiktok',
+      platformLabel: '≈ TikTok',
+      badgeType: 'scheduled',
+      dayIndex: todayIndex,
+    },
+    {
+      id: 'sch_3',
+      time: '6:00',
+      period: 'PM',
+      title: 'Step-by-step editing workflow in CapCut',
+      platform: 'instagram',
+      platformLabel: '📸 IG Reel',
+      badgeType: 'scheduled',
+      dayIndex: todayIndex,
+    },
+    {
+      id: 'sch_4',
+      time: '7:30',
+      period: 'PM',
+      title: 'Personal lesson Reel • Behind the scenes studio',
+      platform: 'instagram',
+      platformLabel: '📸 IG Reel',
+      badgeType: 'recommended',
+      dayIndex: todayIndex,
+    },
+  ];
+};
 
 const GAP_SUGGESTIONS = [
   {
     id: 'gap_1',
-    title: 'Why 90% of creators quit by month 2',
-    format: '📸 Storytelling Reel • 42s Retention',
-    score: '96% Match',
+    angle: 'Contrarian Take',
+    angleIcon: '🔥',
+    score: '98% Fit',
+    reasoning: 'Based on your recent saves, Reel retention & audience response to contrarian topics.',
+    title: 'Most creators fail at X because they optimize for reach before retention',
+    format: 'Reel • High Comments',
+    platform: 'instagram',
+    platformLabel: 'Instagram',
     hashtags: '#creatortips #mindset #consistency',
   },
   {
     id: 'gap_2',
-    title: 'The exact equipment I use to record 4K content on iPhone',
-    format: '📊 Breakdown Carousel • High Saves',
-    score: '92% Match',
-    hashtags: '#creatorsetup #iphonetips #cinematography',
+    angle: 'Behind-the-Scenes',
+    angleIcon: '🎬',
+    score: '95% Fit',
+    reasoning: 'Based on your past breakdown carousels driving 3.2x higher bookmark & share velocity.',
+    title: 'How I built my production workflow in 48 hours without burning out',
+    format: 'Carousel • High Saves',
+    platform: 'instagram',
+    platformLabel: 'Instagram',
+    hashtags: '#creatorsetup #workflow #efficiency',
   },
   {
     id: 'gap_3',
-    title: 'Unpopular truth about algorithmic reach in 2026',
-    format: '≈ Contrarian Short • High Comments',
-    score: '89% Match',
-    hashtags: '#viralgrowth #socialmediatips #algorithm',
+    angle: 'Actionable Framework',
+    angleIcon: '🛠️',
+    score: '92% Fit',
+    reasoning: 'Based on your growth analytics: step-by-step metric frameworks deliver your strongest conversion.',
+    title: '3 metrics you must track daily if you want consistent inbound growth',
+    format: 'Thread • High Bookmarks',
+    platform: 'x',
+    platformLabel: 'X Thread',
+    hashtags: '#growthstrategy #analytics #scaling',
   },
 ];
 
@@ -264,22 +374,30 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
   onLogout,
   onNavigateTab,
   onOpenJarvisPro,
-  onOpenMessages,
   onOpenCreateIdea,
   onSwitchToFree,
   userProfile,
   onSaveProfile,
 }) => {
+  const weekData = useMemo(() => getDynamicWeekData(), []);
   const [activeTab, setActiveTab] = useState<TabType>('home');
-  const [selectedDayIndex, setSelectedDayIndex] = useState<number>(2); // WED 25
-  const [scheduleList, setScheduleList] = useState<ScheduleItem[]>(INITIAL_SCHEDULE_ITEMS);
+  const [selectedDayIndex, setSelectedDayIndex] = useState<number>(weekData.todayIndex);
+  const [scheduleList, setScheduleList] = useState<ScheduleItem[]>(() =>
+    generateInitialScheduleItems(weekData.todayIndex)
+  );
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [notifications, setNotifications] = useState<ProNotificationItem[]>(DEFAULT_PRO_NOTIFICATIONS);
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const unreadCount = notifications.filter((n) => n.unread).length;
   const [showSchedulePostModal, setShowSchedulePostModal] = useState(false);
   const [showExpandViewModal, setShowExpandViewModal] = useState(false);
   const [showFullQueueModal, setShowFullQueueModal] = useState(false);
   const [showStrategyModal, setShowStrategyModal] = useState(false);
+  const [showAudienceFitModal, setShowAudienceFitModal] = useState(false);
   const [selectedStrategyIds, setSelectedStrategyIds] = useState<string[]>(['strat_1', 'strat_2']);
-  const [fullQueueList, setFullQueueList] = useState<FullQueueItem[]>(INITIAL_FULL_QUEUE);
+  const [fullQueueList, setFullQueueList] = useState<FullQueueItem[]>(() =>
+    generateInitialFullQueue(weekData.baseDate)
+  );
   const [selectedQueueFilter, setSelectedQueueFilter] = useState('ALL');
   const [showFillGapModal, setShowFillGapModal] = useState(false);
   const [selectedPostDetail, setSelectedPostDetail] = useState<ScheduleItem | null>(null);
@@ -290,6 +408,23 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
   const [editingPostPeriod, setEditingPostPeriod] = useState('PM');
   const [editingPostHashtags, setEditingPostHashtags] = useState('#CreatorGrowth #ViralReels #PostStreak');
   const [autopilotEnabled, setAutopilotEnabled] = useState<boolean>(true);
+  const [showAutopilotModal, setShowAutopilotModal] = useState<boolean>(false);
+  const [savedAutopilotMode, setSavedAutopilotMode] = useState<'recommend' | 'schedule' | 'autopost'>('schedule');
+  const [autopilotMode, setAutopilotMode] = useState<'recommend' | 'schedule' | 'autopost'>('schedule');
+  const [expandedWindow, setExpandedWindow] = useState<'today' | 'tomorrow' | null>(null);
+  const [expandedReasonId, setExpandedReasonId] = useState<string | null>(null);
+  const [expandedStrategyId, setExpandedStrategyId] = useState<string | null>(null);
+
+  // Dynamic Operating Dashboard Calculations
+  const TARGET_WEEKLY_SLOTS = 7;
+  const scheduledCount = scheduleList.length;
+  const draftsCount = 2;
+  const postedCount = 1;
+  const openSlotsCount = Math.max(0, TARGET_WEEKLY_SLOTS - (scheduledCount + postedCount));
+  const planCompletionPct = Math.min(
+    100,
+    Math.round(((postedCount + scheduledCount) / TARGET_WEEKLY_SLOTS) * 100)
+  );
 
   // Completion Animation State
   const [showCompletionModal, setShowCompletionModal] = useState(false);
@@ -304,7 +439,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
   // Form states: Schedule Post
   const [postTitleInput, setPostTitleInput] = useState('');
   const [postTimeInput, setPostTimeInput] = useState('7:30 PM (Peak)');
-  const [selectedPlatform, setSelectedPlatform] = useState<'tiktok' | 'instagram' | 'youtube' | 'linkedin'>('instagram');
+  const [selectedPlatform, setSelectedPlatform] = useState<'tiktok' | 'instagram' | 'youtube' | 'threads'>('instagram');
   const [hashtagsInput, setHashtagsInput] = useState('#creatortips #growth #buildinpublic');
 
   // Form states: Fill Gap
@@ -375,7 +510,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
           ? '≈ TikTok'
           : selectedPlatform === 'youtube'
           ? '▶ Shorts'
-          : 'in LinkedIn',
+          : '🧵 Threads',
       badgeType: 'scheduled',
       dayIndex: selectedDayIndex,
     };
@@ -419,7 +554,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
     // Trigger 3D Ghost Celebration Animation
     setCompletionData({
       title: 'Content Gap Resolved!',
-      subtitle: 'Your Friday 7:30 PM slot is filled with high-retention storytelling.',
+      subtitle: 'Your Wednesday 7:30 PM slot is filled with high-retention storytelling.',
       badgeText: 'GAP FILLED',
       xpEarned: 75,
       speechBubble: 'Your streak momentum is unstoppable!',
@@ -429,10 +564,13 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
     }, 300);
   };
 
-  // Filter items for selected day
-  const displayedItems = scheduleList.filter(
-    (item) => item.dayIndex === selectedDayIndex
-  );
+  // Filter items for selected day, strictly sorted chronologically
+  const displayedItems = useMemo(() => {
+    const filtered = scheduleList.filter(
+      (item) => item.dayIndex === selectedDayIndex
+    );
+    return sortScheduleItemsChronologically(filtered);
+  }, [scheduleList, selectedDayIndex]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -442,37 +580,9 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
         {/* 1. TOP HEADER BAR                                            */}
         {/* ============================================================ */}
         <View style={styles.headerBar}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-            {onBack && (
-              <Pressable
-                onPress={() => {
-                  if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  }
-                  onBack();
-                }}
-                style={({ pressed }) => [styles.backBtnCircle, pressed && styles.btnPressed]}
-                hitSlop={8}
-              >
-                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                  <Path d="M15 18L9 12L15 6" stroke="#171420" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-                </Svg>
-              </Pressable>
-            )}
-
-            {/* PostStreak 3D Ghost Mascot */}
-            <Animated.View
-              style={[
-                styles.headerLogoWrapper,
-                { transform: [{ translateY: flameFloatY }] },
-              ]}
-            >
-              <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerGhostLogo}
-                resizeMode="contain"
-              />
-            </Animated.View>
+          {/* Top-Left: Mascot + Mode Switcher */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <BrandLogo size="sm" />
 
             {/* Mode Switcher */}
             <Pressable
@@ -489,9 +599,9 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
               hitSlop={8}
             >
               <LinearGradient
-                colors={['#FDE68A', '#F59E0B', '#D97706']}
+                colors={['#F59E0B', '#F59E0B', '#F59E0B']}
                 start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
+                end={{ x: 1, y: 0 }}
                 style={styles.proHeaderBadge}
               >
                 <Text style={styles.proHeaderBadgeText}>👑 PRO</Text>
@@ -499,42 +609,81 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
             </Pressable>
           </View>
 
-          {/* Right Action: Plus Button (+) & Profile Icon with Tiny Gold Check */}
+          {/* Right Action Icons: Notification Bell & Profile Avatar */}
           <View style={styles.headerRightGroup}>
+            {/* Notification Bell */}
             <Pressable
-              style={({ pressed }) => [styles.newChatBtn, pressed && styles.btnPressed]}
+              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.headerIconBtnPressed]}
               hitSlop={8}
               onPress={() => {
                 if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 }
-                triggerModalPop();
-                setShowSchedulePostModal(true);
+                setShowNotificationModal(true);
               }}
             >
-              <LinearGradient
-                colors={['#7C3AED', '#582CDB']}
-                style={styles.plusIconGradient}
-              >
-                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                  <Path d="M12 5V19M5 12H19" stroke="#FFFFFF" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
-                </Svg>
-              </LinearGradient>
+              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                <Path
+                  d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
+                  stroke="#1A1626"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <Path
+                  d="M13.73 21a2 2 0 0 1-3.46 0"
+                  stroke="#1A1626"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
+              {unreadCount > 0 && <View style={styles.notifBadgeDot} />}
             </Pressable>
 
             {/* User Profile Avatar with Tiny Gold Check Badge */}
             <Pressable
               onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
                 setShowProfileModal(true);
               }}
               style={styles.profileAvatarWrapper}
               hitSlop={8}
             >
-              <Image
-                source={userProfile?.avatarSource || require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerUserAvatar}
-                resizeMode="cover"
-              />
+              {userProfile?.customAvatarUri ? (
+                <Image
+                  source={{ uri: userProfile.customAvatarUri }}
+                  style={styles.headerUserAvatar}
+                  resizeMode="cover"
+                />
+              ) : (userProfile?.avatarSource && userProfile.avatarId && userProfile.avatarId !== 'ghost') ? (
+                <Image
+                  source={userProfile.avatarSource}
+                  style={styles.headerUserAvatar}
+                  resizeMode="cover"
+                />
+              ) : (
+                <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
+                  <Path
+                    d="M20 21V19C20 17.9 19.5 16.9 18.7 16.2C17.9 15.5 16.9 15 15.8 15H8.2C7.1 15 6.1 15.5 5.3 16.2C4.5 16.9 4 17.9 4 19V21"
+                    stroke="#F59E0B"
+                    strokeWidth="2.3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <Circle
+                    cx="12"
+                    cy="7"
+                    r="4"
+                    stroke="#F59E0B"
+                    strokeWidth="2.3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </Svg>
+              )}
               <View style={styles.avatarTinyGoldCheckPos}>
                 <TinyGoldCheck size={14} />
               </View>
@@ -551,11 +700,13 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
           {/* HEADER TAG & TITLES */}
           <View style={styles.topTitlesSection}>
             <View style={styles.contentScheduleTagBox}>
-              <Text style={styles.contentScheduleTagText}>CONTENT SCHEDULE — PRO</Text>
+              <Text style={styles.contentScheduleTagText}>CONTENT SCHEDULE • PRO</Text>
             </View>
-            <Text style={styles.mainTitleText}>Plan your content with precision.</Text>
-            <Text style={styles.mainSubText}>
-              Manage your schedule, find content gaps and post during your strongest windows.
+            <Text
+              style={styles.mainTitleText}
+              numberOfLines={2}
+            >
+              Plan your content with precision.
             </Text>
           </View>
 
@@ -564,7 +715,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
           {/* ============================================================ */}
           <View style={styles.weeklyOutlookCard}>
             <Text style={styles.weeklyOutlookTitle}>Weekly Outlook</Text>
-            <Text style={styles.weeklyOutlookRange}>October 23 – October 29</Text>
+            <Text style={styles.weeklyOutlookRange}>{weekData.rangeLabel}</Text>
 
             {/* Top Action Buttons: Schedule Post & Fill Gaps */}
             <View style={styles.outlookButtonsRow}>
@@ -574,8 +725,12 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                   if (Platform.OS !== 'web') {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                   }
-                  triggerModalPop();
-                  setShowSchedulePostModal(true);
+                  if (onOpenPostComposer) {
+                    onOpenPostComposer();
+                  } else {
+                    triggerModalPop();
+                    setShowSchedulePostModal(true);
+                  }
                 }}
               >
                 <Text style={styles.schedulePostPrimaryBtnText}>Schedule Post</Text>
@@ -601,18 +756,33 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
               <View style={styles.metricsGridRow}>
                 <Pressable
                   style={styles.metricGridTile}
-                  onPress={() => showToast(`${scheduleList.length} posts scheduled in queue`)}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    triggerModalPop();
+                    setShowExpandViewModal(true);
+                  }}
                 >
                   <Text style={styles.metricGridLabel}>SCHEDULED</Text>
-                  <Text style={styles.metricGridVal}>{scheduleList.length}</Text>
+                  <Text style={styles.metricGridVal}>{scheduledCount}</Text>
                 </Pressable>
 
                 <Pressable
                   style={styles.metricGridTile}
-                  onPress={() => showToast('2 drafts ready for publishing')}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    if (onOpenPostComposer) {
+                      onOpenPostComposer('Personal lesson Reel • Behind the scenes studio', 'instagram');
+                    } else {
+                      showToast(`${draftsCount} drafts ready for publishing`);
+                    }
+                  }}
                 >
                   <Text style={styles.metricGridLabel}>DRAFTS</Text>
-                  <Text style={styles.metricGridVal}>2</Text>
+                  <Text style={styles.metricGridVal}>{draftsCount}</Text>
                 </Pressable>
               </View>
 
@@ -620,21 +790,24 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
               <View style={styles.metricsGridRow}>
                 <Pressable
                   style={styles.metricGridTile}
-                  onPress={() => showToast('1 post successfully published today')}
+                  onPress={() => showToast(`${postedCount} post successfully published this week`)}
                 >
                   <Text style={styles.metricGridLabel}>POSTED</Text>
-                  <Text style={styles.metricGridVal}>1</Text>
+                  <Text style={styles.metricGridVal}>{postedCount}</Text>
                 </Pressable>
 
                 <Pressable
-                  style={styles.metricGridTile}
+                  style={[styles.metricGridTile, styles.metricGridTileOpenSlots]}
                   onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
                     triggerModalPop();
                     setShowFillGapModal(true);
                   }}
                 >
-                  <Text style={styles.metricGridLabel}>OPEN SLOTS</Text>
-                  <Text style={styles.metricGridVal}>2</Text>
+                  <Text style={[styles.metricGridLabel, styles.metricGridLabelOpenSlots]}>OPEN SLOTS</Text>
+                  <Text style={[styles.metricGridVal, styles.metricGridValOpenSlots]}>{openSlotsCount}</Text>
                 </Pressable>
               </View>
             </View>
@@ -642,14 +815,14 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
             {/* PLAN COMPLETION PROGRESS */}
             <View style={styles.planCompletionHeaderRow}>
               <Text style={styles.planCompletionLabel}>PLAN COMPLETION</Text>
-              <Text style={styles.planCompletionReadyText}>65% READY</Text>
+              <Text style={styles.planCompletionReadyText}>{planCompletionPct}% READY</Text>
             </View>
             <View style={styles.planCompletionProgressBarTrack}>
               <LinearGradient
                 colors={['#582CDB', '#8B5CF6', '#C59B27']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
-                style={[styles.planCompletionProgressBarFill, { width: '65%' }]}
+                style={[styles.planCompletionProgressBarFill, { width: `${planCompletionPct}%` }]}
               />
             </View>
           </View>
@@ -659,7 +832,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
           {/* ============================================================ */}
           <Text style={styles.sectionSmallHeading}>CALENDAR VIEW</Text>
           <View style={styles.calendarViewStrip}>
-            {CALENDAR_DAYS.map((day, idx) => {
+            {weekData.days.map((day, idx) => {
               const isSelected = selectedDayIndex === idx;
               return (
                 <Pressable
@@ -667,6 +840,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                   style={[
                     styles.dayPillCard,
                     isSelected && styles.dayPillCardSelected,
+                    day.isToday && !isSelected && styles.dayPillCardToday,
                   ]}
                   onPress={() => {
                     if (Platform.OS !== 'web') {
@@ -698,10 +872,14 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
           </View>
 
           {/* ============================================================ */}
-          {/* SECTION 3: TODAY'S SCHEDULE                                  */}
+          {/* SECTION 3: TODAY'S / SELECTED DAY'S SCHEDULE                 */}
           {/* ============================================================ */}
           <View style={styles.sectionHeaderRowWithLink}>
-            <Text style={styles.sectionHeaderTitleBold}>Today&apos;s Schedule</Text>
+            <Text style={styles.sectionHeaderTitleBold}>
+              {weekData.days[selectedDayIndex]?.isToday
+                ? "Today's Schedule"
+                : `${weekData.days[selectedDayIndex]?.dayName}'s Schedule (${weekData.days[selectedDayIndex]?.monthName} ${weekData.days[selectedDayIndex]?.dayNum})`}
+            </Text>
             <Pressable
               onPress={() => {
                 if (Platform.OS !== 'web') {
@@ -725,7 +903,16 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                     styles.scheduleItemCard,
                     item.badgeType === 'recommended' && styles.scheduleItemCardGoldBorder,
                   ]}
-                  onPress={() => setSelectedPostDetail(item)}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    if (onOpenPostComposer) {
+                      onOpenPostComposer(item.title, item.platform);
+                    } else {
+                      setSelectedPostDetail(item);
+                    }
+                  }}
                 >
                   <View style={item.badgeType === 'recommended' ? styles.timeBoxGold : styles.timeBoxPurple}>
                     <Text style={item.badgeType === 'recommended' ? styles.timeBoxGoldText : styles.timeBoxPurpleText}>
@@ -736,11 +923,11 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                     </Text>
                   </View>
 
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.scheduleItemTitle} numberOfLines={1}>
+                  <View style={{ flex: 1, minWidth: 0, marginRight: 6 }}>
+                    <Text style={styles.scheduleItemTitle} numberOfLines={2} ellipsizeMode="tail">
                       {item.title}
                     </Text>
-                    <Text style={styles.scheduleItemPlatform}>{item.platformLabel}</Text>
+                    <Text style={styles.scheduleItemPlatform} numberOfLines={1}>{item.platformLabel}</Text>
                   </View>
 
                   <View style={item.badgeType === 'recommended' ? styles.recommendedPillBadge : styles.scheduledPillBadge}>
@@ -757,8 +944,15 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                 <Pressable
                   style={styles.emptyAddPostBtn}
                   onPress={() => {
-                    triggerModalPop();
-                    setShowSchedulePostModal(true);
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    }
+                    if (onOpenPostComposer) {
+                      onOpenPostComposer();
+                    } else {
+                      triggerModalPop();
+                      setShowSchedulePostModal(true);
+                    }
                   }}
                 >
                   <Text style={styles.emptyAddPostBtnText}>+ Schedule Post</Text>
@@ -788,48 +982,53 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
           </View>
 
           <View style={styles.queueContainerCard}>
-            {/* Item 1: LinkedIn */}
-            <Pressable
-              style={styles.queueItemRow}
-              onPress={() => showToast('LinkedIn Insight scheduled for Tomorrow 10:00 AM')}
-            >
-              <SocialBrandIcon platform="linkedin" size={28} />
-              <View style={{ flex: 1, marginLeft: 10 }}>
-                <Text style={styles.queueItemTitle}>LinkedIn Insight: Why 90% Fail by Month 2</Text>
-                <Text style={styles.queueItemTime}>Tomorrow, 10:00 AM • ⚡ 96% Match</Text>
-              </View>
-              <Text style={styles.threeDotsMenu}>⋮</Text>
-            </Pressable>
-
-            <View style={styles.queueItemDivider} />
-
-            {/* Item 2: Instagram */}
-            <Pressable
-              style={styles.queueItemRow}
-              onPress={() => showToast('Instagram Carousel scheduled for Friday 06:00 PM')}
-            >
-              <SocialBrandIcon platform="instagram" size={28} />
-              <View style={{ flex: 1, marginLeft: 10 }}>
-                <Text style={styles.queueItemTitle}>Instagram Carousel: 4K Recording Setup</Text>
-                <Text style={styles.queueItemTime}>Friday, 06:00 PM • ⚡ 94% Match</Text>
-              </View>
-              <Text style={styles.threeDotsMenu}>⋮</Text>
-            </Pressable>
-
-            <View style={styles.queueItemDivider} />
-
-            {/* Item 3: TikTok */}
-            <Pressable
-              style={styles.queueItemRow}
-              onPress={() => showToast('TikTok Duet scheduled for Saturday 05:30 PM')}
-            >
-              <SocialBrandIcon platform="tiktok" size={28} />
-              <View style={{ flex: 1, marginLeft: 10 }}>
-                <Text style={styles.queueItemTitle}>TikTok Reel: 2026 Algorithm Truth</Text>
-                <Text style={styles.queueItemTime}>Saturday, 05:30 PM • ⚡ 98% Match</Text>
-              </View>
-              <Text style={styles.threeDotsMenu}>⋮</Text>
-            </Pressable>
+            {fullQueueList.slice(0, 3).map((item, idx) => (
+              <React.Fragment key={item.id}>
+                {idx > 0 && <View style={styles.queueItemDivider} />}
+                <Pressable
+                  style={styles.queueItemRow}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    if (onOpenPostComposer) {
+                      onOpenPostComposer(item.title, item.iconType);
+                    } else {
+                      showToast(`${item.title} • ${item.time} ${item.period}`);
+                    }
+                  }}
+                >
+                  <SocialBrandIcon platform={item.iconType} size={28} />
+                  <View style={{ flex: 1, marginLeft: 10, minWidth: 0 }}>
+                    <Text style={styles.queueItemTitle} numberOfLines={2} ellipsizeMode="tail">
+                      {item.title}
+                    </Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', marginTop: 3, gap: 4 }}>
+                      <Text style={styles.queueItemTime}>
+                        {item.dayLabel.split(' (')[0]}, {item.time} {item.period} •
+                      </Text>
+                      <Pressable
+                        style={styles.audienceFitInlinePill}
+                        onPress={(e) => {
+                          e.stopPropagation();
+                          if (Platform.OS !== 'web') {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          }
+                          triggerModalPop();
+                          setShowAudienceFitModal(true);
+                        }}
+                        hitSlop={6}
+                      >
+                        <Text style={styles.audienceFitInlinePillText}>
+                          ⚡ {item.score} <Text style={{ fontSize: 9.5, color: '#92400E' }}>ⓘ</Text>
+                        </Text>
+                      </Pressable>
+                    </View>
+                  </View>
+                  <Text style={styles.threeDotsMenu}>⋮</Text>
+                </Pressable>
+              </React.Fragment>
+            ))}
           </View>
 
           {/* ============================================================ */}
@@ -871,62 +1070,314 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                 <Text style={styles.autopilotSubTileVal}>2 Drafts</Text>
               </View>
             </View>
+
+            {/* Subtle Action Link: What Autopilot manages → */}
+            <Pressable
+              style={({ pressed }) => [styles.autopilotManageLinkBtn, pressed && styles.btnPressed]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                setAutopilotMode(savedAutopilotMode);
+                triggerModalPop();
+                setShowAutopilotModal(true);
+              }}
+              hitSlop={8}
+            >
+              <Text style={styles.autopilotManageLinkText}>What Autopilot manages →</Text>
+            </Pressable>
           </View>
 
           {/* ============================================================ */}
-          {/* SECTION 6: OPTIMAL WINDOWS & PLATFORM MIX                    */}
+          {/* SECTION 6: OPTIMAL WINDOWS & PLATFORM DISTRIBUTION           */}
           {/* ============================================================ */}
           <View style={styles.analyticsSectionCard}>
             <Text style={styles.analyticsSectionTitle}>Optimal Windows</Text>
 
             {/* TODAY */}
-            <View style={{ marginTop: 10, marginBottom: 12 }}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
-                <Text style={styles.windowDayLabel}>TODAY</Text>
+            <Pressable
+              style={({ pressed }) => [
+                styles.windowRowPressable,
+                expandedWindow === 'today' && styles.windowRowPressableActive,
+                pressed && styles.btnPressed,
+              ]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                setExpandedWindow((prev) => (prev === 'today' ? null : 'today'));
+              }}
+            >
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6, alignItems: 'center' }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <Text style={styles.windowDayLabel}>TODAY</Text>
+                  <Text style={styles.expandChevron}>{expandedWindow === 'today' ? '▲' : '▼'}</Text>
+                </View>
                 <Text style={styles.windowPeakLabel}>7:30 PM • Peak</Text>
               </View>
               <View style={styles.timelineBarTrack}>
                 <View style={[styles.timelinePeakBlock, { left: '70%' }]} />
               </View>
-            </View>
+            </Pressable>
+
+            {/* Dynamic Expanded Platform Breakdown: TODAY */}
+            {expandedWindow === 'today' && (
+              <View style={styles.platformWindowExpandedContainer}>
+                <View style={styles.platformTimingHeaderRow}>
+                  <Text style={styles.platformTimingHeader}>ALGORITHM PEAKS BY PLATFORM</Text>
+                  <Text style={styles.platformTimingHeaderSub}>TODAY</Text>
+                </View>
+                <View style={styles.platformTimingGrid}>
+                  {/* TikTok */}
+                  <Pressable
+                    style={({ pressed }) => [styles.platformTimingCard, pressed && styles.btnPressed]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                      if (onOpenPostComposer) {
+                        onOpenPostComposer('', 'tiktok');
+                      } else {
+                        showToast('TikTok peak: 7:30 PM');
+                      }
+                    }}
+                  >
+                    <View style={styles.platformTimingTop}>
+                      <View style={styles.platformBadgeWrap}>
+                        <View style={[styles.platformDot, { backgroundColor: '#000000' }]} />
+                        <Text style={styles.platformTimingName}>TikTok</Text>
+                      </View>
+                      <Text style={styles.platformTimingTime}>7:30 PM</Text>
+                    </View>
+                    <Text style={styles.platformTimingDesc}>⚡ Peak viral short-form retention</Text>
+                  </Pressable>
+
+                  {/* Instagram */}
+                  <Pressable
+                    style={({ pressed }) => [styles.platformTimingCard, pressed && styles.btnPressed]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                      if (onOpenPostComposer) {
+                        onOpenPostComposer('', 'instagram');
+                      } else {
+                        showToast('Instagram peak: 8:00 PM');
+                      }
+                    }}
+                  >
+                    <View style={styles.platformTimingTop}>
+                      <View style={styles.platformBadgeWrap}>
+                        <View style={[styles.platformDot, { backgroundColor: '#E1306C' }]} />
+                        <Text style={styles.platformTimingName}>Instagram</Text>
+                      </View>
+                      <Text style={styles.platformTimingTime}>8:00 PM</Text>
+                    </View>
+                    <Text style={styles.platformTimingDesc}>🔥 Peak save & share velocity</Text>
+                  </Pressable>
+
+                  {/* YouTube */}
+                  <Pressable
+                    style={({ pressed }) => [styles.platformTimingCard, pressed && styles.btnPressed]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                      if (onOpenPostComposer) {
+                        onOpenPostComposer('', 'youtube');
+                      } else {
+                        showToast('YouTube Shorts peak: 6:30 PM');
+                      }
+                    }}
+                  >
+                    <View style={styles.platformTimingTop}>
+                      <View style={styles.platformBadgeWrap}>
+                        <View style={[styles.platformDot, { backgroundColor: '#EF4444' }]} />
+                        <Text style={styles.platformTimingName}>YouTube</Text>
+                      </View>
+                      <Text style={styles.platformTimingTime}>6:30 PM</Text>
+                    </View>
+                    <Text style={styles.platformTimingDesc}>▶ High Shorts completion rate</Text>
+                  </Pressable>
+
+                  {/* Threads */}
+                  <Pressable
+                    style={({ pressed }) => [styles.platformTimingCard, pressed && styles.btnPressed]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                      if (onOpenPostComposer) {
+                        onOpenPostComposer('', 'threads');
+                      } else {
+                        showToast('Threads peak: 11:00 AM');
+                      }
+                    }}
+                  >
+                    <View style={styles.platformTimingTop}>
+                      <View style={styles.platformBadgeWrap}>
+                        <View style={[styles.platformDot, { backgroundColor: '#3B82F6' }]} />
+                        <Text style={styles.platformTimingName}>Threads</Text>
+                      </View>
+                      <Text style={styles.platformTimingTime}>11:00 AM</Text>
+                    </View>
+                    <Text style={styles.platformTimingDesc}>💬 Morning discussion spike</Text>
+                  </Pressable>
+                </View>
+              </View>
+            )}
 
             {/* TOMORROW */}
-            <View style={{ marginBottom: 16 }}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
-                <Text style={styles.windowDayLabel}>TOMORROW</Text>
+            <Pressable
+              style={({ pressed }) => [
+                styles.windowRowPressable,
+                expandedWindow === 'tomorrow' && styles.windowRowPressableActive,
+                pressed && styles.btnPressed,
+              ]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                setExpandedWindow((prev) => (prev === 'tomorrow' ? null : 'tomorrow'));
+              }}
+            >
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6, alignItems: 'center' }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <Text style={styles.windowDayLabel}>TOMORROW</Text>
+                  <Text style={styles.expandChevron}>{expandedWindow === 'tomorrow' ? '▲' : '▼'}</Text>
+                </View>
                 <Text style={styles.windowPeakLabel}>12:00 PM • Mid</Text>
               </View>
               <View style={styles.timelineBarTrack}>
                 <View style={[styles.timelinePeakBlock, { left: '45%', backgroundColor: '#A78BFA' }]} />
               </View>
-            </View>
+            </Pressable>
 
-            {/* PLATFORM MIX */}
-            <Text style={styles.platformMixTitle}>Platform Mix</Text>
-            <View style={styles.platformMixBarContainer}>
-              <View style={[styles.mixBarSegment, { flex: 35, backgroundColor: '#000000', borderTopLeftRadius: 6, borderBottomLeftRadius: 6 }]} />
-              <View style={[styles.mixBarSegment, { flex: 30, backgroundColor: '#7C3AED' }]} />
-              <View style={[styles.mixBarSegment, { flex: 20, backgroundColor: '#EF4444' }]} />
-              <View style={[styles.mixBarSegment, { flex: 15, backgroundColor: '#0A66C2', borderTopRightRadius: 6, borderBottomRightRadius: 6 }]} />
-            </View>
+            {/* Dynamic Expanded Platform Breakdown: TOMORROW */}
+            {expandedWindow === 'tomorrow' && (
+              <View style={styles.platformWindowExpandedContainer}>
+                <View style={styles.platformTimingHeaderRow}>
+                  <Text style={styles.platformTimingHeader}>ALGORITHM PEAKS BY PLATFORM</Text>
+                  <Text style={styles.platformTimingHeaderSub}>TOMORROW</Text>
+                </View>
+                <View style={styles.platformTimingGrid}>
+                  {/* TikTok */}
+                  <Pressable
+                    style={({ pressed }) => [styles.platformTimingCard, pressed && styles.btnPressed]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                      if (onOpenPostComposer) {
+                        onOpenPostComposer('', 'tiktok');
+                      } else {
+                        showToast('TikTok peak: 12:00 PM');
+                      }
+                    }}
+                  >
+                    <View style={styles.platformTimingTop}>
+                      <View style={styles.platformBadgeWrap}>
+                        <View style={[styles.platformDot, { backgroundColor: '#000000' }]} />
+                        <Text style={styles.platformTimingName}>TikTok</Text>
+                      </View>
+                      <Text style={styles.platformTimingTime}>12:00 PM</Text>
+                    </View>
+                    <Text style={styles.platformTimingDesc}>⚡ Lunch break algorithm surge</Text>
+                  </Pressable>
 
-            {/* LEGEND */}
-            <View style={styles.legendRow}>
-              <View style={styles.legendItem}>
-                <View style={[styles.legendDot, { backgroundColor: '#000000' }]} />
-                <Text style={styles.legendText}>TIKTOK</Text>
+                  {/* Instagram */}
+                  <Pressable
+                    style={({ pressed }) => [styles.platformTimingCard, pressed && styles.btnPressed]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                      if (onOpenPostComposer) {
+                        onOpenPostComposer('', 'instagram');
+                      } else {
+                        showToast('Instagram peak: 1:15 PM');
+                      }
+                    }}
+                  >
+                    <View style={styles.platformTimingTop}>
+                      <View style={styles.platformBadgeWrap}>
+                        <View style={[styles.platformDot, { backgroundColor: '#E1306C' }]} />
+                        <Text style={styles.platformTimingName}>Instagram</Text>
+                      </View>
+                      <Text style={styles.platformTimingTime}>1:15 PM</Text>
+                    </View>
+                    <Text style={styles.platformTimingDesc}>🔥 Midday feed scroll peak</Text>
+                  </Pressable>
+
+                  {/* YouTube */}
+                  <Pressable
+                    style={({ pressed }) => [styles.platformTimingCard, pressed && styles.btnPressed]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                      if (onOpenPostComposer) {
+                        onOpenPostComposer('', 'youtube');
+                      } else {
+                        showToast('YouTube Shorts peak: 3:30 PM');
+                      }
+                    }}
+                  >
+                    <View style={styles.platformTimingTop}>
+                      <View style={styles.platformBadgeWrap}>
+                        <View style={[styles.platformDot, { backgroundColor: '#EF4444' }]} />
+                        <Text style={styles.platformTimingName}>YouTube</Text>
+                      </View>
+                      <Text style={styles.platformTimingTime}>3:30 PM</Text>
+                    </View>
+                    <Text style={styles.platformTimingDesc}>▶ Afternoon watch acceleration</Text>
+                  </Pressable>
+
+                  {/* Threads */}
+                  <Pressable
+                    style={({ pressed }) => [styles.platformTimingCard, pressed && styles.btnPressed]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                      if (onOpenPostComposer) {
+                        onOpenPostComposer('', 'threads');
+                      } else {
+                        showToast('Threads peak: 9:00 AM');
+                      }
+                    }}
+                  >
+                    <View style={styles.platformTimingTop}>
+                      <View style={styles.platformBadgeWrap}>
+                        <View style={[styles.platformDot, { backgroundColor: '#3B82F6' }]} />
+                        <Text style={styles.platformTimingName}>Threads</Text>
+                      </View>
+                      <Text style={styles.platformTimingTime}>9:00 AM</Text>
+                    </View>
+                    <Text style={styles.platformTimingDesc}>💬 Morning feed catch-up</Text>
+                  </Pressable>
+                </View>
               </View>
-              <View style={styles.legendItem}>
-                <View style={[styles.legendDot, { backgroundColor: '#7C3AED' }]} />
-                <Text style={styles.legendText}>INSTA</Text>
+            )}
+
+            {/* PLATFORM DISTRIBUTION */}
+            <View style={{ marginTop: 12 }}>
+              <Text style={styles.platformMixTitle}>Platform distribution</Text>
+              <View style={styles.platformMixBarContainer}>
+                <View style={[styles.mixBarSegment, { flex: 32, backgroundColor: '#000000', borderTopLeftRadius: 6, borderBottomLeftRadius: 6 }]} />
+                <View style={[styles.mixBarSegment, { flex: 28, backgroundColor: '#E1306C' }]} />
+                <View style={[styles.mixBarSegment, { flex: 22, backgroundColor: '#EF4444' }]} />
+                <View style={[styles.mixBarSegment, { flex: 18, backgroundColor: '#3B82F6', borderTopRightRadius: 6, borderBottomRightRadius: 6 }]} />
               </View>
-              <View style={styles.legendItem}>
-                <View style={[styles.legendDot, { backgroundColor: '#EF4444' }]} />
-                <Text style={styles.legendText}>YOUTUBE</Text>
-              </View>
-              <View style={styles.legendItem}>
-                <View style={[styles.legendDot, { backgroundColor: '#0A66C2' }]} />
-                <Text style={styles.legendText}>LINKEDIN</Text>
+
+              {/* LEGEND WITH PERCENTAGES (CONSISTENT 2x2 GRID ACROSS MOBILE & LAPTOP) */}
+              <View style={styles.legendGrid}>
+                {/* Row 1 */}
+                <View style={styles.legendGridRow}>
+                  <View style={styles.legendItem}>
+                    <View style={[styles.legendDot, { backgroundColor: '#000000' }]} />
+                    <Text style={styles.legendText}>TIKTOK 32%</Text>
+                  </View>
+                  <View style={styles.legendItem}>
+                    <View style={[styles.legendDot, { backgroundColor: '#E1306C' }]} />
+                    <Text style={styles.legendText}>INSTA 28%</Text>
+                  </View>
+                </View>
+                {/* Row 2 */}
+                <View style={styles.legendGridRow}>
+                  <View style={styles.legendItem}>
+                    <View style={[styles.legendDot, { backgroundColor: '#EF4444' }]} />
+                    <Text style={styles.legendText}>YOUTUBE 22%</Text>
+                  </View>
+                  <View style={styles.legendItem}>
+                    <View style={[styles.legendDot, { backgroundColor: '#3B82F6' }]} />
+                    <Text style={styles.legendText}>THREADS 18%</Text>
+                  </View>
+                </View>
               </View>
             </View>
           </View>
@@ -957,12 +1408,12 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                 }}
               >
                 <LinearGradient
-                  colors={['#FDE68A', '#F59E0B', '#D97706']}
+                  colors={['#F59E0B', '#F59E0B', '#D97706']}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                   style={styles.goldBtnGradient}
                 >
-                  <Text style={styles.fillSlotGoldBtnText}>✨ Fill Slot</Text>
+                  <Text style={styles.fillSlotGoldBtnText}>Fill Slot</Text>
                 </LinearGradient>
               </Pressable>
 
@@ -972,12 +1423,10 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                   if (Platform.OS !== 'web') {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   }
-                  if (onOpenMessages) {
-                    onOpenMessages('conv_jarvis');
-                  } else if (onOpenJarvisPro) {
+                  if (onOpenJarvisPro) {
                     onOpenJarvisPro();
                   } else {
-                    showToast('Opening Jarvis AI Chatbot...');
+                    showToast('Opening Jarvis AI Pro...');
                   }
                 }}
               >
@@ -993,11 +1442,11 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
             colors={['#3B14A7', '#582CDB']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            style={[styles.jarvisInsightCard, { marginBottom: 140 }]}
+            style={styles.jarvisInsightCard}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 }}>
               <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
+                source={require('../../assets/images/jarvis-core-flame.png')}
                 style={{ width: 28, height: 28 }}
                 resizeMode="contain"
               />
@@ -1005,7 +1454,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
             </View>
 
             <Text style={styles.jarvisInsightBody}>
-              Your current rhythm is strong. Fill Friday&apos;s open slot with a short personal lesson Reel to protect momentum.
+              Your current rhythm is strong. Fill Wednesday&apos;s 7:30 PM slot with a short personal lesson Reel to protect momentum.
             </Text>
 
             <Pressable
@@ -1019,13 +1468,13 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
               }}
             >
               <LinearGradient
-                colors={['#FDE68A', '#F59E0B', '#D97706']}
+                colors={['#F59E0B', '#F59E0B', '#D97706']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.modalGoldBtnGradient}
               >
-                <Text style={styles.modalGoldActionBtnText}>
-                  ✨ More Strategy Ideas ➔
+                <Text style={styles.modalGoldActionBtnText} numberOfLines={1}>
+                  ✨ See More Opportunities ➔
                 </Text>
               </LinearGradient>
             </Pressable>
@@ -1063,7 +1512,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                     <Text style={styles.modalProTagBadgeText}>👑 PRO AUTOPILOT SCHEDULER</Text>
                   </View>
                   <Pressable onPress={() => setShowSchedulePostModal(false)} hitSlop={8}>
-                    <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '900' }}>✕</Text>
+                    <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '700' }}>✕</Text>
                   </Pressable>
                 </View>
 
@@ -1108,7 +1557,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                     { id: 'instagram', label: '📸 IG Reel' },
                     { id: 'tiktok', label: '≈ TikTok' },
                     { id: 'youtube', label: '▶ Shorts' },
-                    { id: 'linkedin', label: 'in LinkedIn' },
+                    { id: 'threads', label: '🧵 Threads' },
                   ].map((p) => {
                     const isSelected = selectedPlatform === p.id;
                     return (
@@ -1117,7 +1566,10 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                         style={[styles.platformPillBtn, isSelected && styles.platformPillBtnActive]}
                         onPress={() => setSelectedPlatform(p.id as any)}
                       >
-                        <Text style={[styles.platformPillText, isSelected && styles.platformPillTextActive]}>
+                        <Text
+                          style={[styles.platformPillText, isSelected && styles.platformPillTextActive]}
+                          numberOfLines={1}
+                        >
                           {p.label}
                         </Text>
                       </Pressable>
@@ -1163,10 +1615,17 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                 {/* Primary Action Button */}
                 <Pressable
                   style={styles.modalPrimaryActionBtn}
-                  onPress={handleConfirmSchedulePost}
+                  onPress={() => {
+                    setShowSchedulePostModal(false);
+                    if (onOpenPostComposer) {
+                      onOpenPostComposer(postTitleInput || 'Plan your next viral hook', selectedPlatform);
+                    } else {
+                      handleConfirmSchedulePost();
+                    }
+                  }}
                 >
-                  <Text style={styles.modalPrimaryActionBtnText}>
-                    🚀 Schedule to Autopilot Queue (+50 XP) ➔
+                  <Text style={styles.modalPrimaryActionBtnText} numberOfLines={1}>
+                    🚀 Open in Post Composer (+50 XP) ➔
                   </Text>
                 </Pressable>
 
@@ -1182,7 +1641,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
         </Modal>
 
         {/* ============================================================ */}
-        {/* MODAL 2: IN-DEPTH PRO FILL GAP RESOLVER MODAL                */}
+        {/* MODAL 2: JARVIS 3-HOOK STRATEGY PICKER SHEET (PRO GAP)       */}
         {/* ============================================================ */}
         <Modal
           visible={showFillGapModal}
@@ -1191,103 +1650,123 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
           onRequestClose={() => setShowFillGapModal(false)}
         >
           <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }], maxHeight: '90%' }]}>
               <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
                 {/* Header */}
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                   <View style={styles.modalGoldTagBadge}>
-                    <Text style={styles.modalGoldTagBadgeText}>🪄 JARVIS GAP RESOLVER — PRO</Text>
+                    <Text style={styles.modalGoldTagBadgeText}>🪄 JARVIS GAP STRATEGIST — PRO</Text>
                   </View>
                   <Pressable onPress={() => setShowFillGapModal(false)} hitSlop={8}>
-                    <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '900' }}>✕</Text>
+                    <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '700' }}>✕</Text>
                   </Pressable>
                 </View>
 
-                <Text style={styles.modalTitleText}>Auto-Fill Detected Schedule Gaps</Text>
+                <Text style={styles.modalTitleText}>Auto-Fill Content Gap</Text>
                 <Text style={styles.modalSubText}>
-                  Jarvis detected open slots in your weekly schedule. Select an AI-tailored hook or edit your own to protect your streak.
+                  Jarvis analyzed your performance history and generated 3 high-impact pitches for this open slot. Tap any pitch to start composing immediately:
                 </Text>
 
-                {/* Detected Slot Banner */}
+                {/* Detected Slot Alert Banner */}
                 <View style={styles.gapSlotDetectedBanner}>
-                  <Text style={styles.gapSlotDetectedTitle}>⚠️ FRIDAY OCT 27 • 7:30 PM</Text>
-                  <Text style={styles.gapSlotDetectedSub}>High traffic window without scheduled content</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
+                    <Text style={styles.gapSlotDetectedTitle}>
+                      ⚠️ Wednesday • 7:30 PM
+                    </Text>
+                    <View style={styles.gapSlotAudienceBadge}>
+                      <Text style={styles.gapSlotAudienceBadgeText}>🔥 Peak Window</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.gapSlotDetectedSub}>
+                    High traffic slot with 0 scheduled posts. Plugging this gap protects your streak & boosts reach.
+                  </Text>
                 </View>
 
-                {/* 3 Selectable Gap Hooks */}
-                <Text style={styles.inputLabel}>CHOOSE AI-RECOMMENDED HOOK</Text>
-                {GAP_SUGGESTIONS.map((sug, sIdx) => {
-                  const isSelected = selectedGapIndex === sIdx;
+                {/* 3 Interactive AI Strategy Cards */}
+                <Text style={styles.inputLabel}>CHOOSE AI STRATEGY (1-TAP TO COMPOSE)</Text>
+                {GAP_SUGGESTIONS.map((sug) => {
+                  const isReasonExpanded = expandedReasonId === sug.id;
                   return (
                     <Pressable
                       key={sug.id}
-                      style={[
+                      style={({ pressed }) => [
                         styles.gapSuggestionCard,
-                        isSelected && styles.gapSuggestionCardSelected,
+                        pressed && styles.gapSuggestionCardPressed,
                       ]}
                       onPress={() => {
                         if (Platform.OS !== 'web') {
-                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                         }
-                        setSelectedGapIndex(sIdx);
-                        setEditableGapTitle(sug.title);
+                        setShowFillGapModal(false);
+                        if (onOpenPostComposer) {
+                          onOpenPostComposer(sug.title, sug.platform);
+                        }
                       }}
                     >
-                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                        <Text style={styles.gapSugFormatText}>{sug.format}</Text>
-                        <View style={styles.gapSugScoreBadge}>
-                          <Text style={styles.gapSugScoreText}>{sug.score}</Text>
+                      {/* Top Row: Angle & Tappable Audience Fit Score */}
+                      <View style={styles.gapSugTopRow}>
+                        <View style={styles.gapSugAngleBadge}>
+                          <Text style={styles.gapSugAngleText}>
+                            {sug.angleIcon} {sug.angle}
+                          </Text>
                         </View>
+                        <Pressable
+                          style={styles.gapSugScoreBadge}
+                          onPress={(e) => {
+                            e.stopPropagation();
+                            if (Platform.OS !== 'web') {
+                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            }
+                            setExpandedReasonId((prev) => (prev === sug.id ? null : sug.id));
+                          }}
+                          hitSlop={8}
+                        >
+                          <Text style={styles.gapSugScoreText}>⚡ {sug.score} ⓘ</Text>
+                        </Pressable>
                       </View>
-                      <Text style={[styles.gapSugTitleText, isSelected && { color: '#582CDB' }]}>
+
+                      {/* Expanded AI Reasoning Breakdown */}
+                      {isReasonExpanded && (
+                        <View style={styles.gapSugReasoningBox}>
+                          <Text style={styles.gapSugReasoningTitle}>WHY {sug.score.toUpperCase()}?</Text>
+                          <Text style={styles.gapSugReasoningText}>{sug.reasoning}</Text>
+                        </View>
+                      )}
+
+                      {/* Hook Headline (Complete text without awkward word breaks) */}
+                      <Text style={styles.gapSugTitleText}>
                         &ldquo;{sug.title}&rdquo;
                       </Text>
+
+                      {/* Bottom Row: Format & Action CTA (Protected from clipping) */}
+                      <View style={styles.gapSugBottomRow}>
+                        <View style={styles.gapSugFormatContainer}>
+                          <Text style={styles.gapSugFormatText} numberOfLines={1} ellipsizeMode="tail">
+                            {sug.platformLabel} • {sug.format}
+                          </Text>
+                        </View>
+                        <View style={styles.gapSugDraftPill}>
+                          <Text style={styles.gapSugActionTag}>Draft ➔</Text>
+                        </View>
+                      </View>
                     </Pressable>
                   );
                 })}
 
-                {/* Editable Hook Input */}
-                <Text style={[styles.inputLabel, { marginTop: 10 }]}>EDIT SELECTED HOOK / NOTES</Text>
-                <TextInput
-                  style={styles.modalInput}
-                  value={editableGapTitle}
-                  onChangeText={setEditableGapTitle}
-                  placeholder="Edit content hook..."
-                  placeholderTextColor="#94A3B8"
-                />
-
-                {/* Peak Time */}
-                <Text style={[styles.inputLabel, { marginTop: 10 }]}>LOCK IN TIME</Text>
-                <View style={{ flexDirection: 'row', gap: 6, marginBottom: 12 }}>
-                  {['7:30 PM (Peak)', '12:00 PM (Mid)'].map((t, tIdx) => {
-                    const isSelected = editableGapTime === t;
-                    return (
-                      <Pressable
-                        key={tIdx}
-                        style={[styles.timeChipBtn, isSelected && styles.timeChipBtnActive]}
-                        onPress={() => setEditableGapTime(t)}
-                      >
-                        <Text style={[styles.timeChipText, isSelected && styles.timeChipTextActive]}>{t}</Text>
-                      </Pressable>
-                    );
-                  })}
-                </View>
-
-                {/* Action Buttons */}
+                {/* Secondary Option: Blank Post Composer */}
                 <Pressable
-                  style={styles.modalGoldActionBtnWrapper}
-                  onPress={handleConfirmFillGap}
+                  style={({ pressed }) => [styles.gapBlankComposerBtn, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    setShowFillGapModal(false);
+                    if (onOpenPostComposer) {
+                      onOpenPostComposer('', 'instagram');
+                    }
+                  }}
                 >
-                  <LinearGradient
-                    colors={['#FDE68A', '#F59E0B', '#D97706']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.modalGoldBtnGradient}
-                  >
-                    <Text style={styles.modalGoldActionBtnText}>
-                      ✨ Accept &amp; Fill Schedule Slot (+75 XP) ➔
-                    </Text>
-                  </LinearGradient>
+                  <Text style={styles.gapBlankComposerBtnText}>✍️ Start with Blank Composer</Text>
                 </Pressable>
 
                 <Pressable
@@ -1320,7 +1799,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                       <Text style={styles.modalProTagBadgeText}>👑 ADVANCED PRO POST EDITOR</Text>
                     </View>
                     <Pressable onPress={() => setSelectedPostDetail(null)} hitSlop={8}>
-                      <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '900' }}>✕</Text>
+                      <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '700' }}>✕</Text>
                     </Pressable>
                   </View>
 
@@ -1361,8 +1840,8 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
 
                   {/* 2. TARGET PLATFORM */}
                   <Text style={styles.inputLabel}>TARGET PLATFORM</Text>
-                  <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
-                    {['📸 IG Reel', '≈ TikTok', '▶ Shorts', 'in LinkedIn'].map((plat) => (
+                  <View style={{ flexDirection: 'row', gap: 6, marginBottom: 12 }}>
+                    {['📸 IG Reel', '≈ TikTok', '▶ Shorts', '🧵 Threads'].map((plat) => (
                       <Pressable
                         key={plat}
                         style={[
@@ -1376,6 +1855,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                             styles.platformPillText,
                             editingPostPlatform === plat && styles.platformPillTextActive,
                           ]}
+                          numberOfLines={1}
                         >
                           {plat}
                         </Text>
@@ -1466,13 +1946,13 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                       }}
                     >
                       <LinearGradient
-                        colors={['#FDE68A', '#F59E0B', '#D97706']}
+                        colors={['#F59E0B', '#F59E0B', '#D97706']}
                         start={{ x: 0, y: 0 }}
                         end={{ x: 1, y: 1 }}
                         style={styles.modalGoldBtnGradient}
                       >
-                        <Text style={styles.modalGoldActionBtnText}>
-                          ✨ Save Changes (+25 XP) ➔
+                        <Text style={styles.modalGoldActionBtnText} numberOfLines={1}>
+                          Save Changes (+25 XP) ➔
                         </Text>
                       </LinearGradient>
                     </Pressable>
@@ -1490,7 +1970,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                         }
                       }}
                     >
-                      <Text style={styles.modalSecondaryOutlineBtnText}>
+                      <Text style={styles.modalSecondaryOutlineBtnText} numberOfLines={1}>
                         🚀 Open in Full Post Composer ➔
                       </Text>
                     </Pressable>
@@ -1529,16 +2009,20 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                   <View style={styles.modalProTagBadge}>
                     <Text style={styles.modalProTagBadgeText}>
-                      📅 {CALENDAR_DAYS[selectedDayIndex].dayName} {CALENDAR_DAYS[selectedDayIndex].dayNum}TH TIMELINE
+                      📅 {weekData.days[selectedDayIndex]?.dayName} {weekData.days[selectedDayIndex]?.monthName?.toUpperCase()} {weekData.days[selectedDayIndex]?.dayNum} TIMELINE
                     </Text>
                   </View>
                   <Pressable onPress={() => setShowExpandViewModal(false)} hitSlop={8}>
-                    <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '900' }}>✕</Text>
+                    <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '700' }}>✕</Text>
                   </Pressable>
                 </View>
 
-                <Text style={styles.modalTitleText}>
-                  {CALENDAR_DAYS[selectedDayIndex].dayName} Detailed Schedule
+                <Text
+                  style={styles.modalTitleText}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                >
+                  {weekData.days[selectedDayIndex]?.dayName} ({weekData.days[selectedDayIndex]?.monthName} {weekData.days[selectedDayIndex]?.dayNum}) Detailed Schedule
                 </Text>
                 <Text style={styles.modalSubText}>
                   Complete chronological breakdown of posts, predicted retention windows, and status for this day.
@@ -1549,26 +2033,30 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                   {displayedItems.length > 0 ? (
                     displayedItems.map((item, idx) => (
                       <View key={item.id} style={styles.expandedPostCard}>
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                          <View style={{ flexDirection: 'row', gap: 10, flex: 1 }}>
-                            <View style={item.badgeType === 'recommended' ? styles.timeBoxGold : styles.timeBoxPurple}>
-                              <Text style={item.badgeType === 'recommended' ? styles.timeBoxGoldText : styles.timeBoxPurpleText}>
-                                {item.time}
-                              </Text>
-                              <Text style={item.badgeType === 'recommended' ? styles.timeBoxGoldSub : styles.timeBoxPurpleSub}>
-                                {item.period}
-                              </Text>
-                            </View>
-
-                            <View style={{ flex: 1 }}>
-                              <Text style={styles.scheduleItemTitle}>{item.title}</Text>
-                              <Text style={styles.scheduleItemPlatform}>{item.platformLabel} • ⚡ 94% Retention</Text>
-                            </View>
+                        <View style={styles.expandedPostTopRow}>
+                          <View style={item.badgeType === 'recommended' ? styles.timeBoxGold : styles.timeBoxPurple}>
+                            <Text style={item.badgeType === 'recommended' ? styles.timeBoxGoldText : styles.timeBoxPurpleText}>
+                              {item.time}
+                            </Text>
+                            <Text style={item.badgeType === 'recommended' ? styles.timeBoxGoldSub : styles.timeBoxPurpleSub}>
+                              {item.period}
+                            </Text>
                           </View>
 
-                          <View style={item.badgeType === 'recommended' ? styles.recommendedPillBadge : styles.scheduledPillBadge}>
-                            <Text style={item.badgeType === 'recommended' ? styles.recommendedPillBadgeText : styles.scheduledPillBadgeText}>
-                              {item.badgeType.toUpperCase()}
+                          <View style={styles.expandedPostContentCol}>
+                            <View style={styles.expandedPostTitleRow}>
+                              <Text style={styles.expandedPostTitle} numberOfLines={2} ellipsizeMode="tail">
+                                {item.title}
+                              </Text>
+                              <View style={item.badgeType === 'recommended' ? styles.recommendedPillBadge : styles.scheduledPillBadge}>
+                                <Text style={item.badgeType === 'recommended' ? styles.recommendedPillBadgeText : styles.scheduledPillBadgeText}>
+                                  {item.badgeType.toUpperCase()}
+                                </Text>
+                              </View>
+                            </View>
+
+                            <Text style={styles.expandedPostPlatformText} numberOfLines={1} ellipsizeMode="tail">
+                              {item.platformLabel} • ⚡ 94% Retention
                             </Text>
                           </View>
                         </View>
@@ -1583,7 +2071,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                               }
                               setShowExpandViewModal(false);
                               if (onOpenPostComposer) {
-                                onOpenPostComposer(item.title);
+                                onOpenPostComposer(item.title, item.platform);
                               } else if (onStartMission) {
                                 onStartMission();
                               } else {
@@ -1600,13 +2088,17 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                               if (Platform.OS !== 'web') {
                                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                               }
-                              setEditingPostTitle(item.title);
-                              setEditingPostPlatform(item.platformLabel);
-                              setEditingPostTime(item.time);
-                              setEditingPostPeriod(item.period);
                               setShowExpandViewModal(false);
-                              triggerModalPop();
-                              setSelectedPostDetail(item);
+                              if (onOpenPostComposer) {
+                                onOpenPostComposer(item.title, item.platform);
+                              } else {
+                                setEditingPostTitle(item.title);
+                                setEditingPostPlatform(item.platformLabel);
+                                setEditingPostTime(item.time);
+                                setEditingPostPeriod(item.period);
+                                triggerModalPop();
+                                setSelectedPostDetail(item);
+                              }
                             }}
                           >
                             <Text style={styles.expandedPostActionBtnSecondaryText}>✏️ Edit Details</Text>
@@ -1617,7 +2109,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                   ) : (
                     <View style={styles.emptyScheduleBox}>
                       <Text style={{ fontSize: 24, marginBottom: 4 }}>☕</Text>
-                      <Text style={styles.emptyScheduleTitle}>No posts scheduled for {CALENDAR_DAYS[selectedDayIndex].dayName}</Text>
+                      <Text style={styles.emptyScheduleTitle}>No posts scheduled for {weekData.days[selectedDayIndex]?.dayName}</Text>
                       <Text style={styles.emptyScheduleSub}>Lock in a peak engagement slot to maintain your streak momentum.</Text>
                     </View>
                   )}
@@ -1628,14 +2120,18 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                   style={styles.modalPrimaryActionBtn}
                   onPress={() => {
                     setShowExpandViewModal(false);
-                    setTimeout(() => {
-                      triggerModalPop();
-                      setShowSchedulePostModal(true);
-                    }, 200);
+                    if (onOpenPostComposer) {
+                      onOpenPostComposer();
+                    } else {
+                      setTimeout(() => {
+                        triggerModalPop();
+                        setShowSchedulePostModal(true);
+                      }, 200);
+                    }
                   }}
                 >
-                  <Text style={styles.modalPrimaryActionBtnText}>
-                    + Schedule New Post for {CALENDAR_DAYS[selectedDayIndex].dayName} ➔
+                  <Text style={styles.modalPrimaryActionBtnText} numberOfLines={1}>
+                    + Schedule Post for {weekData.days[selectedDayIndex]?.dayName} ➔
                   </Text>
                 </Pressable>
 
@@ -1668,7 +2164,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                     <Text style={styles.modalProTagBadgeText}>👑 PRO AUTOPILOT QUEUE</Text>
                   </View>
                   <Pressable onPress={() => setShowFullQueueModal(false)} hitSlop={8}>
-                    <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '900' }}>✕</Text>
+                    <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '700' }}>✕</Text>
                   </Pressable>
                 </View>
 
@@ -1679,7 +2175,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
 
                 {/* Filter Chips */}
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginVertical: 10 }}>
-                  {['ALL', 'IG Reel', 'TikTok', 'Shorts', 'LinkedIn'].map((filter) => (
+                  {['ALL', 'IG Reel', 'TikTok', 'Shorts', 'Threads'].map((filter) => (
                     <Pressable
                       key={filter}
                       style={[
@@ -1712,34 +2208,60 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                           if (Platform.OS !== 'web') {
                             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                           }
-                          // Pre-fill Edit Modal with this queue item
-                          setEditingPostTitle(item.title);
-                          setEditingPostPlatform(item.platformLabel);
-                          setEditingPostTime(item.time);
-                          setEditingPostPeriod(item.period);
                           setShowFullQueueModal(false);
-                          triggerModalPop();
-                          setSelectedPostDetail({
-                            id: item.id,
-                            time: item.time,
-                            period: item.period,
-                            title: item.title,
-                            platform: (item.iconType === 'x' ? 'linkedin' : item.iconType) as any,
-                            platformLabel: item.platformLabel,
-                            badgeType: 'scheduled',
-                            dayIndex: selectedDayIndex,
-                          });
+                          if (onOpenPostComposer) {
+                            onOpenPostComposer(item.title, item.iconType);
+                          } else {
+                            // Fallback
+                            setEditingPostTitle(item.title);
+                            setEditingPostPlatform(item.platformLabel);
+                            setEditingPostTime(item.time);
+                            setEditingPostPeriod(item.period);
+                            triggerModalPop();
+                            setSelectedPostDetail({
+                              id: item.id,
+                              time: item.time,
+                              period: item.period,
+                              title: item.title,
+                              platform: item.iconType,
+                              platformLabel: item.platformLabel,
+                              badgeType: 'scheduled',
+                              dayIndex: selectedDayIndex,
+                            });
+                          }
                         }}
                       >
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                          <View style={{ flexDirection: 'row', gap: 10, flex: 1, alignItems: 'center' }}>
-                            <SocialBrandIcon platform={item.iconType} size={32} />
+                          <View style={{ flexDirection: 'row', gap: 10, flex: 1, minWidth: 0, alignItems: 'flex-start' }}>
+                            <View style={{ marginTop: 2 }}>
+                              <SocialBrandIcon platform={item.iconType} size={32} />
+                            </View>
 
-                            <View style={{ flex: 1 }}>
-                              <Text style={styles.scheduleItemTitle} numberOfLines={2}>{item.title}</Text>
-                              <Text style={styles.scheduleItemPlatform}>
-                                {item.dayLabel} • {item.time} {item.period} • ⚡ {item.score}
+                            <View style={{ flex: 1, minWidth: 0, marginRight: 8 }}>
+                              <Text style={styles.scheduleItemTitle} numberOfLines={2} ellipsizeMode="tail">
+                                {item.title}
                               </Text>
+                              <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', marginTop: 3, gap: 4 }}>
+                                <Text style={styles.scheduleItemPlatform}>
+                                  {item.dayLabel} • {item.time} {item.period} •
+                                </Text>
+                                <Pressable
+                                  style={styles.audienceFitInlinePill}
+                                  onPress={(e) => {
+                                    e.stopPropagation();
+                                    if (Platform.OS !== 'web') {
+                                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                    }
+                                    triggerModalPop();
+                                    setShowAudienceFitModal(true);
+                                  }}
+                                  hitSlop={6}
+                                >
+                                  <Text style={styles.audienceFitInlinePillText}>
+                                    ⚡ {item.score} <Text style={{ fontSize: 9.5, color: '#92400E' }}>ⓘ</Text>
+                                  </Text>
+                                </Pressable>
+                              </View>
                             </View>
                           </View>
 
@@ -1749,8 +2271,8 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                         </View>
 
                         <View style={styles.queueCardFooterRow}>
-                          <Text style={styles.queueCardActionHint}>✏️ Tap to edit details &amp; peak timing</Text>
-                          <Text style={{ fontSize: 13, color: '#582CDB', fontWeight: '900' }}>➔</Text>
+                          <Text style={styles.queueCardActionHint}>✏️ Tap to edit in Post Composer</Text>
+                          <Text style={{ fontSize: 13, color: '#582CDB', fontWeight: '700' }}>➔</Text>
                         </View>
                       </Pressable>
                     ))}
@@ -1767,7 +2289,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                     }, 200);
                   }}
                 >
-                  <Text style={styles.modalPrimaryActionBtnText}>
+                  <Text style={styles.modalPrimaryActionBtnText} numberOfLines={1}>
                     + Add New Post to Queue ➔
                   </Text>
                 </Pressable>
@@ -1777,6 +2299,287 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                   onPress={() => setShowFullQueueModal(false)}
                 >
                   <Text style={styles.modalCancelBtnText}>Close Queue</Text>
+                </Pressable>
+              </ScrollView>
+            </Animated.View>
+          </View>
+        </Modal>
+
+        {/* ============================================================ */}
+        {/* MODAL 6: AUDIENCE FIT EXPLANATION & METHODOLOGY              */}
+        {/* ============================================================ */}
+        <Modal
+          visible={showAudienceFitModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowAudienceFitModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }], maxWidth: 420 }]}>
+              <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
+                {/* Header */}
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <View style={styles.modalGoldTagBadge}>
+                    <Text style={styles.modalGoldTagBadgeText}>⚡ JARVIS PREDICTIVE INTEL</Text>
+                  </View>
+                  <Pressable onPress={() => setShowAudienceFitModal(false)} hitSlop={8}>
+                    <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '700' }}>✕</Text>
+                  </Pressable>
+                </View>
+
+                <Text style={styles.modalTitleText} numberOfLines={1} adjustsFontSizeToFit>
+                  What is Audience Fit?
+                </Text>
+
+                {/* Core Definition Banner */}
+                <View style={styles.audienceFitDefinitionBanner}>
+                  <Text style={styles.audienceFitDefinitionText}>
+                    How closely this content matches your audience’s interests, past engagement patterns, and content preferences.
+                  </Text>
+                </View>
+
+                {/* Breakdown Pillars */}
+                <Text style={styles.inputLabel}>HOW JARVIS CALCULATES THIS SCORE</Text>
+
+                <View style={styles.audienceFitPillarRow}>
+                  <View style={styles.audienceFitPillarIconBox}>
+                    <Text style={{ fontSize: 16 }}>🎯</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.audienceFitPillarTitle}>Topic &amp; Interest Alignment</Text>
+                    <Text style={styles.audienceFitPillarSub}>
+                      Measures semantic overlap with topics your audience bookmarks, saves, and shares most frequently.
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={styles.audienceFitPillarRow}>
+                  <View style={styles.audienceFitPillarIconBox}>
+                    <Text style={{ fontSize: 16 }}>🕒</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.audienceFitPillarTitle}>Peak Attention Timing</Text>
+                    <Text style={styles.audienceFitPillarSub}>
+                      Scores whether the scheduled slot matches your followers' highest historical active hours.
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={styles.audienceFitPillarRow}>
+                  <View style={styles.audienceFitPillarIconBox}>
+                    <Text style={{ fontSize: 16 }}>📈</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.audienceFitPillarTitle}>Retention &amp; Format Fit</Text>
+                    <Text style={styles.audienceFitPillarSub}>
+                      Evaluates video pacing and format against your top-performing 10% highest-retention posts.
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Action Button */}
+                <Pressable
+                  style={[styles.modalPrimaryActionBtn, { marginTop: 14 }]}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    setShowAudienceFitModal(false);
+                  }}
+                >
+                  <Text style={styles.modalPrimaryActionBtnText}>Got it ➔</Text>
+                </Pressable>
+
+                <Pressable
+                  style={styles.modalCancelBtn}
+                  onPress={() => setShowAudienceFitModal(false)}
+                >
+                  <Text style={styles.modalCancelBtnText}>Dismiss</Text>
+                </Pressable>
+              </ScrollView>
+            </Animated.View>
+          </View>
+        </Modal>
+
+        {/* ============================================================ */}
+        {/* MODAL 7: AUTOPILOT ENGINE CONTROLS & GOVERNANCE MODAL        */}
+        {/* ============================================================ */}
+        <Modal
+          visible={showAutopilotModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowAutopilotModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }], maxHeight: '90%' }]}>
+              <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
+                {/* Header */}
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <View style={styles.modalGoldTagBadge}>
+                    <Text style={styles.modalGoldTagBadgeText}>🤖 PRO AUTOPILOT GOVERNANCE</Text>
+                  </View>
+                  <Pressable
+                    onPress={() => {
+                      setAutopilotMode(savedAutopilotMode);
+                      setShowAutopilotModal(false);
+                    }}
+                    hitSlop={8}
+                  >
+                    <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '700' }}>✕</Text>
+                  </Pressable>
+                </View>
+
+                <Text style={styles.modalTitleText} numberOfLines={1} adjustsFontSizeToFit>
+                  What Autopilot Manages
+                </Text>
+                <Text style={styles.modalSubText}>
+                  Jarvis coordinates your posting consistency, queue timing, and streak protection behind the scenes.
+                </Text>
+
+                {/* 3 Clear Automation Modes (Trust Levels) */}
+                <Text style={styles.inputLabel}>AUTOMATION MODE (SELECT TRUST LEVEL)</Text>
+
+                <Pressable
+                  style={[
+                    styles.autopilotModeCard,
+                    autopilotMode === 'recommend' && styles.autopilotModeCardActive,
+                  ]}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setAutopilotMode('recommend');
+                  }}
+                >
+                  <View style={styles.autopilotModeTitleRow}>
+                    <Text style={styles.autopilotModeName}>💡 Recommend</Text>
+                    <View style={[styles.autopilotModeBadge, autopilotMode === 'recommend' && styles.autopilotModeBadgeActive]}>
+                      <Text style={[styles.autopilotModeBadgeText, autopilotMode === 'recommend' && styles.autopilotModeBadgeTextActive]}>
+                        MANUAL APPROVAL
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={styles.autopilotModeDesc}>
+                    Jarvis suggests peak windows &amp; draft hooks. Zero changes are committed to schedule without your review.
+                  </Text>
+                </Pressable>
+
+                <Pressable
+                  style={[
+                    styles.autopilotModeCard,
+                    autopilotMode === 'schedule' && styles.autopilotModeCardActive,
+                  ]}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setAutopilotMode('schedule');
+                  }}
+                >
+                  <View style={styles.autopilotModeTitleRow}>
+                    <Text style={styles.autopilotModeName}>📅 Schedule (Default)</Text>
+                    <View style={[styles.autopilotModeBadge, autopilotMode === 'schedule' && styles.autopilotModeBadgeActive]}>
+                      <Text style={[styles.autopilotModeBadgeText, autopilotMode === 'schedule' && styles.autopilotModeBadgeTextActive]}>
+                        SMART QUEUE
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={styles.autopilotModeDesc}>
+                    PostStreak locks open slots into your weekly calendar. You give quick 1-tap confirmation before publishing.
+                  </Text>
+                </Pressable>
+
+                <Pressable
+                  style={[
+                    styles.autopilotModeCard,
+                    autopilotMode === 'autopost' && styles.autopilotModeCardActive,
+                  ]}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setAutopilotMode('autopost');
+                  }}
+                >
+                  <View style={styles.autopilotModeTitleRow}>
+                    <Text style={styles.autopilotModeName}>⚡ Auto-Post</Text>
+                    <View style={[styles.autopilotModeBadge, autopilotMode === 'autopost' && styles.autopilotModeBadgeActive]}>
+                      <Text style={[styles.autopilotModeBadgeText, autopilotMode === 'autopost' && styles.autopilotModeBadgeTextActive]}>
+                        FULL AUTOPILOT
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={styles.autopilotModeDesc}>
+                    PostStreak publishes approved queue items automatically to connected social accounts at peak traffic windows.
+                  </Text>
+                  <View style={styles.autoPostTrustBadge}>
+                    <Text style={styles.autoPostTrustBadgeText}>
+                      🛡️ Only content you’ve approved can be published automatically.
+                    </Text>
+                  </View>
+                </Pressable>
+
+                {/* What Autopilot Manages Breakdown */}
+                <Text style={[styles.inputLabel, { marginTop: 12 }]}>ACTIVE CAPABILITIES &amp; CONTROLS</Text>
+                <View style={styles.autopilotCapabilitiesCard}>
+                  <View style={styles.autopilotCapabilityRow}>
+                    <Text style={styles.autopilotCapIcon}>🕒</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.autopilotCapTitle}>Best Posting Times</Text>
+                      <Text style={styles.autopilotCapSub}>Calculated daily from follower active-hour analytics.</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.autopilotCapabilityRow}>
+                    <Text style={styles.autopilotCapIcon}>📊</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.autopilotCapTitle}>Queue Prioritization</Text>
+                      <Text style={styles.autopilotCapSub}>Slots high-retention concepts into highest-traffic days.</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.autopilotCapabilityRow}>
+                    <Text style={styles.autopilotCapIcon}>🎯</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.autopilotCapTitle}>Platform Selection &amp; Gaps</Text>
+                      <Text style={styles.autopilotCapSub}>Identifies empty slots 48h early to preserve streak health.</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.autopilotCapabilityRow}>
+                    <Text style={styles.autopilotCapIcon}>💡</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.autopilotCapTitle}>Draft Recommendations</Text>
+                      <Text style={styles.autopilotCapSub}>Generates 3 curated hooks for any detected open gap.</Text>
+                    </View>
+                  </View>
+
+                  <View style={[styles.autopilotCapabilityRow, { borderBottomWidth: 0 }]}>
+                    <Text style={styles.autopilotCapIcon}>⏱️</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.autopilotCapTitle}>Timing Adjustments</Text>
+                      <Text style={styles.autopilotCapSub}>Auto-shifts slots if your audience peak shifts on weekends.</Text>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Action Button */}
+                <Pressable
+                  style={[styles.modalPrimaryActionBtn, { marginTop: 14 }]}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                    }
+                    setSavedAutopilotMode(autopilotMode);
+                    setShowAutopilotModal(false);
+                    showToast(`Autopilot set to ${autopilotMode.toUpperCase()} mode`);
+                  }}
+                >
+                  <Text style={styles.modalPrimaryActionBtnText}>Save Autopilot Settings ➔</Text>
+                </Pressable>
+
+                <Pressable
+                  style={styles.modalCancelBtn}
+                  onPress={() => {
+                    setAutopilotMode(savedAutopilotMode);
+                    setShowAutopilotModal(false);
+                  }}
+                >
+                  <Text style={styles.modalCancelBtnText}>Cancel</Text>
                 </Pressable>
               </ScrollView>
             </Animated.View>
@@ -1801,7 +2604,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                     <Text style={styles.modalProTagBadgeText}>👑 JARVIS PRO STRATEGY BLUEPRINT</Text>
                   </View>
                   <Pressable onPress={() => setShowStrategyModal(false)} hitSlop={8}>
-                    <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '900' }}>✕</Text>
+                    <Text style={{ fontSize: 18, color: '#94A3B8', fontWeight: '700' }}>✕</Text>
                   </Pressable>
                 </View>
 
@@ -1814,6 +2617,8 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                 <View style={{ gap: 10, marginVertical: 12 }}>
                   {JARVIS_STRATEGIES.map((strat) => {
                     const isSelected = selectedStrategyIds.includes(strat.id);
+                    const isExpanded = expandedStrategyId === strat.id;
+
                     return (
                       <Pressable
                         key={strat.id}
@@ -1837,9 +2642,10 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                           }
                         }}
                       >
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
-                          <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center', flex: 1 }}>
-                            <Text style={{ fontSize: 20 }}>{strat.icon}</Text>
+                        {/* Top Row: Icon, Title, Tag & Checkbox */}
+                        <View style={styles.strategyCardHeaderRow}>
+                          <View style={{ flexDirection: 'row', gap: 10, alignItems: 'flex-start', flex: 1 }}>
+                            <Text style={{ fontSize: 20, marginTop: 1 }}>{strat.icon}</Text>
                             <View style={{ flex: 1 }}>
                               <Text style={styles.strategyIdeaTitle}>{strat.title}</Text>
                               <Text style={styles.strategyIdeaTag}>{strat.tag}</Text>
@@ -1855,7 +2661,32 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                           </View>
                         </View>
 
-                        <Text style={styles.strategyIdeaBody}>{strat.body}</Text>
+                        {/* Scan-First Punchy Summary */}
+                        <Text style={styles.strategySummaryText}>{strat.summary}</Text>
+
+                        {/* Expandable Deeper Breakdown Affordance */}
+                        <Pressable
+                          style={styles.strategyExpandBtn}
+                          onPress={(e) => {
+                            e.stopPropagation();
+                            if (Platform.OS !== 'web') {
+                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            }
+                            setExpandedStrategyId((prev) => (prev === strat.id ? null : strat.id));
+                          }}
+                          hitSlop={8}
+                        >
+                          <Text style={styles.strategyExpandBtnText}>
+                            {isExpanded ? 'Hide Details ▲' : 'Deep Tactical Breakdown ▾'}
+                          </Text>
+                        </Pressable>
+
+                        {/* Expanded Deeper Explanation */}
+                        {isExpanded && (
+                          <View style={styles.strategyExpandedDetailBox}>
+                            <Text style={styles.strategyIdeaBody}>{strat.body}</Text>
+                          </View>
+                        )}
                       </Pressable>
                     );
                   })}
@@ -1883,31 +2714,29 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                   }}
                 >
                   <LinearGradient
-                    colors={['#FDE68A', '#F59E0B', '#D97706']}
+                    colors={['#F59E0B', '#F59E0B', '#D97706']}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
                     style={styles.modalGoldBtnGradient}
                   >
-                    <Text style={styles.modalGoldActionBtnText}>
-                      ✨ Apply {selectedStrategyIds.length} Strategies (+{selectedStrategyIds.length * 25} XP) ➔
+                    <Text style={styles.modalGoldActionBtnText} numberOfLines={1}>
+                      Apply {selectedStrategyIds.length} Strategies (+{selectedStrategyIds.length * 25} XP) ➔
                     </Text>
                   </LinearGradient>
                 </Pressable>
 
-                {/* Secondary Action: Chat with Jarvis */}
+                {/* Secondary Action: Ask Jarvis */}
                 <Pressable
                   style={({ pressed }) => [styles.modalSecondaryOutlineBtn, { marginTop: 8 }, pressed && styles.btnPressed]}
                   onPress={() => {
                     setShowStrategyModal(false);
-                    if (onOpenMessages) {
-                      onOpenMessages('conv_jarvis');
-                    } else if (onOpenJarvisPro) {
+                    if (onOpenJarvisPro) {
                       onOpenJarvisPro();
                     }
                   }}
                 >
-                  <Text style={styles.modalSecondaryOutlineBtnText}>
-                    💬 Chat with Jarvis for Custom Plan ➔
+                  <Text style={styles.modalSecondaryOutlineBtnText} numberOfLines={1}>
+                    ✨ Open Jarvis Pro for Plan ➔
                   </Text>
                 </Pressable>
 
@@ -1937,6 +2766,23 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
           onDismiss={() => setShowCompletionModal(false)}
         />
 
+        {/* PRO NOTIFICATIONS MODAL */}
+        <ProNotificationsModal
+          visible={showNotificationModal}
+          onClose={() => setShowNotificationModal(false)}
+          notifications={notifications}
+          onNotificationsChange={setNotifications}
+          onActionPress={(actionKey) => {
+            setShowNotificationModal(false);
+            if (actionKey === 'open_create' && onOpenCreateIdea) {
+              onOpenCreateIdea();
+            } else if (actionKey === 'open_jarvis' && onOpenJarvisPro) {
+              onOpenJarvisPro();
+            }
+          }}
+          onToast={showToast}
+        />
+
         {/* PROFILE MODAL */}
         <UserProfileModal
           visible={showProfileModal}
@@ -1962,6 +2808,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+    width: '100%',
     backgroundColor: '#FAF8F5',
   },
   headerBar: {
@@ -1972,6 +2819,37 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     paddingBottom: 12,
     backgroundColor: '#FAF8F5',
+  },
+  headerIconBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#171420',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: 'rgba(235, 230, 248, 0.6)',
+    position: 'relative',
+  },
+  headerIconBtnPressed: {
+    opacity: 0.8,
+    transform: [{ scale: 0.94 }],
+  },
+  notifBadgeDot: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: '#EF4444',
+    borderWidth: 1.5,
+    borderColor: '#FFFFFF',
   },
   backBtnCircle: {
     width: 36,
@@ -1986,7 +2864,7 @@ const styles = StyleSheet.create({
   headerLogoWrapper: {
     width: 38,
     height: 38,
-    borderRadius: 19,
+    borderRadius: 20,
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
     justifyContent: 'center',
     alignItems: 'center',
@@ -2001,17 +2879,18 @@ const styles = StyleSheet.create({
     height: 34,
   },
   proHeaderBadge: {
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: '#FBBF24',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+    backgroundColor: '#F59E0B',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   proHeaderBadgeText: {
-    fontSize: 8.5,
+    fontSize: 10,
     fontWeight: '900',
-    color: '#171420',
-    letterSpacing: 0.3,
+    color: '#78350F',
+    letterSpacing: 0.4,
   },
   headerRightGroup: {
     flexDirection: 'row',
@@ -2025,7 +2904,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.08,
     shadowRadius: 6,
     elevation: 3,
   },
@@ -2035,14 +2914,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   profileAvatarWrapper: {
+    width: 38,
+    height: 38,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: '#F59E0B',
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
     position: 'relative',
   },
   headerUserAvatar: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    borderWidth: 2,
-    borderColor: '#F59E0B',
+    width: '100%',
+    height: '100%',
+    borderRadius: 18,
   },
   avatarTinyGoldCheckPos: {
     position: 'absolute',
@@ -2052,7 +2937,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 4,
-    paddingBottom: 40,
+    paddingBottom: 95,
   },
 
   // TITLES SECTION
@@ -2070,17 +2955,18 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   contentScheduleTagText: {
-    fontSize: 9.5,
-    fontWeight: '900',
-    color: '#92400E',
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#B45309',
     letterSpacing: 0.6,
   },
   mainTitleText: {
-    fontSize: 22,
-    fontWeight: '900',
+    fontSize: Platform.OS === 'web' ? ('clamp(15px, 3.8vw, 17px)' as any) : sFont(16),
+    fontWeight: '700',
     color: '#171420',
-    letterSpacing: -0.4,
-    marginBottom: 6,
+    letterSpacing: -0.35,
+    lineHeight: 22,
+    marginBottom: 4,
   },
   mainSubText: {
     fontSize: 12.5,
@@ -2104,11 +2990,11 @@ const styles = StyleSheet.create({
   },
   weeklyOutlookTitle: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   weeklyOutlookRange: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
     marginTop: 2,
     marginBottom: 14,
@@ -2129,22 +3015,22 @@ const styles = StyleSheet.create({
   schedulePostPrimaryBtnText: {
     color: '#FFFFFF',
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   fillGapsOutlineBtn: {
     flex: 1,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     paddingVertical: 11,
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
   },
   fillGapsOutlineBtnText: {
-    color: '#92400E',
+    color: '#B45309',
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
   },
 
   // 2X2 METRICS GRID: 2 ROWS
@@ -2164,17 +3050,27 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#F1EFE9',
   },
+  metricGridTileOpenSlots: {
+    backgroundColor: '#FFFDF7',
+    borderColor: '#FDE68A',
+  },
   metricGridLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#94A3B8',
     letterSpacing: 0.5,
     marginBottom: 4,
   },
+  metricGridLabelOpenSlots: {
+    color: '#B45309',
+  },
   metricGridVal: {
     fontSize: 20,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
+  },
+  metricGridValOpenSlots: {
+    color: '#B45309',
   },
   planCompletionHeaderRow: {
     flexDirection: 'row',
@@ -2183,14 +3079,14 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   planCompletionLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#64748B',
     letterSpacing: 0.5,
   },
   planCompletionReadyText: {
-    fontSize: 10.5,
-    fontWeight: '900',
+    fontSize: 11,
+    fontWeight: '700',
     color: '#582CDB',
   },
   planCompletionProgressBarTrack: {
@@ -2207,7 +3103,7 @@ const styles = StyleSheet.create({
   // SECTION 2: CALENDAR VIEW STRIP
   sectionSmallHeading: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.6,
     marginBottom: 10,
@@ -2227,24 +3123,28 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#EFECE6',
   },
+  dayPillCardToday: {
+    borderColor: '#F59E0B',
+    borderWidth: 1.2,
+  },
   dayPillCardSelected: {
     backgroundColor: '#EDE9FE',
     borderColor: '#8B5CF6',
     borderWidth: 1.5,
   },
   dayNameText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#64748B',
     marginBottom: 2,
   },
   dayNameTextSelected: {
     color: '#582CDB',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   dayNumText: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     marginBottom: 4,
   },
@@ -2279,11 +3179,11 @@ const styles = StyleSheet.create({
   },
   sectionHeaderTitleBold: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   expandViewLink: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#582CDB',
   },
@@ -2311,7 +3211,7 @@ const styles = StyleSheet.create({
   },
   timeBoxPurpleText: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   timeBoxPurpleSub: {
@@ -2331,8 +3231,8 @@ const styles = StyleSheet.create({
   },
   timeBoxGoldText: {
     fontSize: 12,
-    fontWeight: '900',
-    color: '#92400E',
+    fontWeight: '700',
+    color: '#B45309',
   },
   timeBoxGoldSub: {
     fontSize: 9,
@@ -2341,7 +3241,7 @@ const styles = StyleSheet.create({
   },
   scheduleItemTitle: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   scheduleItemPlatform: {
@@ -2352,27 +3252,33 @@ const styles = StyleSheet.create({
   },
   scheduledPillBadge: {
     backgroundColor: '#EDE9FE',
-    paddingHorizontal: 8,
-    paddingVertical: 3.5,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
     borderRadius: 6,
+    flexShrink: 0,
+    alignSelf: 'flex-start',
   },
   scheduledPillBadgeText: {
-    fontSize: 9,
-    fontWeight: '900',
+    fontSize: sFont(8.5),
+    fontWeight: '800',
     color: '#582CDB',
+    letterSpacing: 0.2,
   },
   recommendedPillBadge: {
     backgroundColor: '#FEF3C7',
     borderWidth: 1,
     borderColor: '#FBBF24',
-    paddingHorizontal: 8,
-    paddingVertical: 3.5,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
     borderRadius: 6,
+    flexShrink: 0,
+    alignSelf: 'flex-start',
   },
   recommendedPillBadgeText: {
-    fontSize: 9,
-    fontWeight: '900',
-    color: '#92400E',
+    fontSize: sFont(8.5),
+    fontWeight: '800',
+    color: '#B45309',
+    letterSpacing: 0.2,
   },
   emptyScheduleBox: {
     backgroundColor: '#FFFFFF',
@@ -2384,7 +3290,7 @@ const styles = StyleSheet.create({
     borderStyle: 'dashed',
   },
   emptyScheduleTitle: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#64748B',
     marginBottom: 8,
@@ -2398,7 +3304,7 @@ const styles = StyleSheet.create({
   emptyAddPostBtnText: {
     color: '#582CDB',
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
   },
 
   // SECTION 4: UPCOMING QUEUE
@@ -2409,8 +3315,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   viewFullQueuePillText: {
-    fontSize: 10.5,
-    fontWeight: '900',
+    fontSize: 11,
+    fontWeight: '700',
     color: '#582CDB',
   },
   queueContainerCard: {
@@ -2456,7 +3362,7 @@ const styles = StyleSheet.create({
   },
   queueItemTitle: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   queueItemTime: {
@@ -2467,7 +3373,7 @@ const styles = StyleSheet.create({
   threeDotsMenu: {
     fontSize: 18,
     color: '#94A3B8',
-    fontWeight: '900',
+    fontWeight: '700',
   },
 
   // SECTION 5: AUTOPILOT ACTIVE BANNER
@@ -2489,11 +3395,11 @@ const styles = StyleSheet.create({
   },
   autopilotTitleText: {
     fontSize: 15,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   autopilotSubText: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#4C1D95',
     marginTop: 1,
   },
@@ -2511,8 +3417,116 @@ const styles = StyleSheet.create({
   },
   autopilotSubTileVal: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
+  },
+  autopilotManageLinkBtn: {
+    marginTop: 12,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#DDD6FE',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  autopilotManageLinkText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+
+  // AUTOPILOT MODAL STYLES
+  autopilotModeCard: {
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1.5,
+    borderColor: '#EFECE6',
+    borderRadius: 14,
+    padding: 12,
+    marginBottom: 8,
+  },
+  autopilotModeCardActive: {
+    backgroundColor: '#EDE9FE',
+    borderColor: '#8B5CF6',
+  },
+  autopilotModeTitleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  autopilotModeName: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  autopilotModeBadge: {
+    backgroundColor: '#E2E8F0',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  autopilotModeBadgeActive: {
+    backgroundColor: '#8B5CF6',
+  },
+  autopilotModeBadgeText: {
+    fontSize: 8.5,
+    fontWeight: '800',
+    color: '#475569',
+  },
+  autopilotModeBadgeTextActive: {
+    color: '#FFFFFF',
+  },
+  autopilotModeDesc: {
+    fontSize: 11,
+    color: '#64748B',
+    lineHeight: 15,
+  },
+  autoPostTrustBadge: {
+    backgroundColor: '#DCFCE7',
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    marginTop: 6,
+  },
+  autoPostTrustBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#15803D',
+    lineHeight: 14,
+  },
+  autopilotCapabilitiesCard: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    marginBottom: 8,
+  },
+  autopilotCapabilityRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+  },
+  autopilotCapIcon: {
+    fontSize: 14,
+    marginTop: 1,
+  },
+  autopilotCapTitle: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#171420',
+    marginBottom: 1,
+  },
+  autopilotCapSub: {
+    fontSize: 10.5,
+    color: '#64748B',
+    lineHeight: 14,
   },
 
   // SECTION 6: ANALYTICS OPTIMAL WINDOWS
@@ -2526,8 +3540,104 @@ const styles = StyleSheet.create({
   },
   analyticsSectionTitle: {
     fontSize: 15,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
+    marginBottom: 4,
+  },
+  windowRowPressable: {
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: 12,
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#F3EFE6',
+    marginTop: 8,
+    marginBottom: 6,
+  },
+  windowRowPressableActive: {
+    backgroundColor: '#F5F3FF',
+    borderColor: '#DDD6FE',
+  },
+  expandChevron: {
+    fontSize: 9,
+    color: '#8B5CF6',
+    fontWeight: '800',
+  },
+  platformWindowExpandedContainer: {
+    backgroundColor: '#FBF9FE',
+    borderRadius: 14,
+    padding: 12,
+    marginTop: 2,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#EDE9FE',
+  },
+  platformTimingHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+    paddingBottom: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3E8FF',
+  },
+  platformTimingHeader: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#7C3AED',
+    letterSpacing: 0.5,
+  },
+  platformTimingHeaderSub: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#9CA3AF',
+  },
+  platformTimingGrid: {
+    gap: 6,
+  },
+  platformTimingCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    paddingVertical: 7,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: '#F3F0FA',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 3,
+    elevation: 1,
+  },
+  platformTimingTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 2,
+  },
+  platformBadgeWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  platformDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+  },
+  platformTimingName: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#171420',
+  },
+  platformTimingTime: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  platformTimingDesc: {
+    fontSize: 10.5,
+    fontWeight: '500',
+    color: '#64748B',
   },
   windowDayLabel: {
     fontSize: 10,
@@ -2536,16 +3646,16 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   windowPeakLabel: {
-    fontSize: 10.5,
-    fontWeight: '900',
+    fontSize: 11,
+    fontWeight: '700',
     color: '#582CDB',
   },
   timelineBarTrack: {
     height: 12,
-    backgroundColor: '#FAF8F5',
+    backgroundColor: '#FFFFFF',
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#F1EFE9',
+    borderColor: '#EFECE6',
     position: 'relative',
     justifyContent: 'center',
   },
@@ -2557,8 +3667,8 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   platformMixTitle: {
-    fontSize: 13.5,
-    fontWeight: '900',
+    fontSize: 14,
+    fontWeight: '700',
     color: '#171420',
     marginBottom: 8,
   },
@@ -2572,14 +3682,19 @@ const styles = StyleSheet.create({
   mixBarSegment: {
     height: '100%',
   },
-  legendRow: {
+  legendGrid: {
+    gap: 8,
+  },
+  legendGridRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
   },
   legendItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 6,
+    flex: 1,
   },
   legendDot: {
     width: 6,
@@ -2587,9 +3702,10 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   legendText: {
-    fontSize: 9.5,
+    fontSize: 10.5,
     fontWeight: '800',
     color: '#64748B',
+    letterSpacing: 0.2,
   },
 
   // SECTION 7: DETECTED GAPS
@@ -2603,41 +3719,39 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   gapWarningSub: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
-    color: '#92400E',
+    color: '#B45309',
     letterSpacing: 0.5,
   },
   gapWarningTitle: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     marginTop: 2,
   },
   fillSlotGoldBtn: {
     flex: 1,
-    borderRadius: 12,
+    borderRadius: 14,
     overflow: 'hidden',
     shadowColor: '#F59E0B',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.35,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.16,
+    shadowRadius: 10,
+    elevation: 4,
   },
   goldBtnGradient: {
     flex: 1,
-    paddingVertical: 11,
+    paddingVertical: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#FCD34D',
-    borderRadius: 12,
+    borderRadius: 14,
   },
   fillSlotGoldBtnText: {
-    color: '#0C0A12',
-    fontSize: 13,
-    fontWeight: '900',
-    letterSpacing: 0.2,
+    color: '#171420',
+    fontSize: 13.5,
+    fontWeight: '800',
+    letterSpacing: -0.2,
   },
   askJarvisOutlineBtn: {
     flex: 1,
@@ -2652,17 +3766,18 @@ const styles = StyleSheet.create({
   askJarvisOutlineBtnText: {
     color: '#582CDB',
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
   },
 
   // SECTION 8: JARVIS INSIGHT
   jarvisInsightCard: {
     borderRadius: 24,
     padding: 20,
+    marginBottom: 16,
   },
   jarvisInsightHeader: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
   jarvisInsightBody: {
@@ -2680,7 +3795,7 @@ const styles = StyleSheet.create({
   moreStrategyBtnText: {
     color: '#FFFFFF',
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
   },
 
   // MODALS
@@ -2689,15 +3804,16 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(15, 10, 30, 0.75)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 24,
   },
   modalCard: {
     width: '100%',
-    maxWidth: 400,
-    maxHeight: '88%',
+    maxWidth: 420,
+    maxHeight: '90%',
     backgroundColor: '#FFFFFF',
     borderRadius: 24,
-    padding: 22,
+    padding: 18,
   },
   modalProTagBadge: {
     backgroundColor: '#EDE9FE',
@@ -2707,7 +3823,7 @@ const styles = StyleSheet.create({
   },
   modalProTagBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.5,
   },
@@ -2721,8 +3837,8 @@ const styles = StyleSheet.create({
   },
   modalGoldTagBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
-    color: '#92400E',
+    fontWeight: '700',
+    color: '#B45309',
     letterSpacing: 0.5,
   },
   modalTagBadge: {
@@ -2733,14 +3849,15 @@ const styles = StyleSheet.create({
   },
   modalTagBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   modalTitleText: {
-    fontSize: 18,
-    fontWeight: '900',
+    fontSize: sFont(16),
+    fontWeight: '800',
     color: '#171420',
     marginBottom: 4,
+    letterSpacing: -0.2,
   },
   modalSubText: {
     fontSize: 12,
@@ -2749,7 +3866,7 @@ const styles = StyleSheet.create({
     lineHeight: 17,
   },
   inputLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#64748B',
     letterSpacing: 0.5,
@@ -2758,7 +3875,7 @@ const styles = StyleSheet.create({
   modalInput: {
     backgroundColor: '#F8FAFC',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 9,
@@ -2768,7 +3885,7 @@ const styles = StyleSheet.create({
   modalTextArea: {
     backgroundColor: '#F8FAFC',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     borderRadius: 14,
     paddingHorizontal: 14,
     paddingVertical: 10,
@@ -2779,7 +3896,7 @@ const styles = StyleSheet.create({
   hookChip: {
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
@@ -2793,28 +3910,31 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F8FAFC',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
-    paddingVertical: 8,
+    borderColor: '#EFECE6',
+    paddingVertical: 7,
+    paddingHorizontal: 2,
     borderRadius: 10,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   platformPillBtnActive: {
     backgroundColor: '#582CDB',
     borderColor: '#582CDB',
   },
   platformPillText: {
-    fontSize: 10,
+    fontSize: sFont(9.5),
     fontWeight: '700',
     color: '#64748B',
+    textAlign: 'center',
   },
   platformPillTextActive: {
     color: '#FFFFFF',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   timeChipBtn: {
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     paddingHorizontal: 10,
     paddingVertical: 7,
     borderRadius: 8,
@@ -2830,7 +3950,7 @@ const styles = StyleSheet.create({
   },
   timeChipTextActive: {
     color: '#582CDB',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   jarvisPredictionBox: {
     backgroundColor: '#FAF8F5',
@@ -2841,64 +3961,70 @@ const styles = StyleSheet.create({
     marginVertical: 12,
   },
   jarvisPredictionTitle: {
-    fontSize: 11.5,
-    fontWeight: '900',
+    fontSize: 12,
+    fontWeight: '700',
     color: '#171420',
     marginBottom: 2,
   },
   jarvisPredictionSub: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#64748B',
     lineHeight: 15,
   },
   modalPrimaryActionBtn: {
     backgroundColor: '#582CDB',
     paddingVertical: 13,
+    paddingHorizontal: 12,
     borderRadius: 14,
     alignItems: 'center',
+    justifyContent: 'center',
     marginTop: 6,
   },
   modalPrimaryActionBtnText: {
     color: '#FFFFFF',
-    fontSize: 13.5,
-    fontWeight: '900',
+    fontSize: sFont(13),
+    fontWeight: '700',
+    textAlign: 'center',
   },
   modalGoldActionBtnWrapper: {
-    borderRadius: 14,
+    borderRadius: 16,
     overflow: 'hidden',
     marginTop: 8,
     shadowColor: '#F59E0B',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
+    shadowOpacity: 0.16,
     shadowRadius: 10,
     elevation: 4,
   },
   modalGoldBtnGradient: {
     paddingVertical: 14,
+    paddingHorizontal: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#FCD34D',
-    borderRadius: 14,
+    borderRadius: 16,
   },
   modalGoldActionBtnText: {
-    color: '#0C0A12',
-    fontSize: 14,
-    fontWeight: '900',
-    letterSpacing: 0.2,
+    color: '#171420',
+    fontSize: sFont(13.5),
+    fontWeight: '800',
+    letterSpacing: -0.2,
+    textAlign: 'center',
   },
   modalSecondaryOutlineBtn: {
     backgroundColor: '#FAF8F5',
     borderWidth: 1.5,
     borderColor: '#DDD6FE',
     paddingVertical: 12,
+    paddingHorizontal: 12,
     borderRadius: 14,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   modalSecondaryOutlineBtnText: {
     color: '#582CDB',
-    fontSize: 13,
-    fontWeight: '900',
+    fontSize: sFont(13),
+    fontWeight: '700',
+    textAlign: 'center',
   },
   modalDeleteBtn: {
     paddingVertical: 8,
@@ -2906,7 +4032,7 @@ const styles = StyleSheet.create({
   },
   modalDeleteBtnText: {
     color: '#EF4444',
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
   },
 
@@ -2920,58 +4046,223 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
 
-  // GAP MODAL SPECIFIC
+  // GAP MODAL SPECIFIC (JARVIS 3-HOOK PICKER SHEET)
   gapSlotDetectedBanner: {
-    backgroundColor: '#FFFBEB',
+    backgroundColor: '#FEF3C7',
     borderWidth: 1,
-    borderColor: '#FBBF24',
-    borderRadius: 12,
+    borderColor: '#FDE68A',
+    borderRadius: 14,
     padding: 12,
-    marginBottom: 12,
+    marginBottom: 14,
   },
   gapSlotDetectedTitle: {
-    fontSize: 11,
-    fontWeight: '900',
+    fontSize: 12,
+    fontWeight: '800',
     color: '#92400E',
+    letterSpacing: 0.2,
   },
-  gapSlotDetectedSub: {
-    fontSize: 10.5,
-    color: '#B45309',
-    marginTop: 2,
-  },
-  gapSuggestionCard: {
-    backgroundColor: '#FAF8F5',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 8,
-  },
-  gapSuggestionCardSelected: {
-    backgroundColor: '#EDE9FE',
-    borderColor: '#8B5CF6',
-    borderWidth: 1.5,
-  },
-  gapSugFormatText: {
-    fontSize: 10,
-    color: '#64748B',
-    fontWeight: '700',
-  },
-  gapSugScoreBadge: {
-    backgroundColor: '#DCFCE7',
+  gapSlotAudienceBadge: {
+    backgroundColor: '#FDE68A',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
   },
+  gapSlotAudienceBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#92400E',
+  },
+  gapSlotDetectedSub: {
+    fontSize: 11,
+    color: '#B45309',
+    marginTop: 2,
+    lineHeight: 15,
+  },
+  gapSuggestionCard: {
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1.5,
+    borderColor: '#EFECE6',
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  gapSuggestionCardPressed: {
+    backgroundColor: '#EDE9FE',
+    borderColor: '#8B5CF6',
+    transform: [{ scale: 0.985 }],
+  },
+  gapSugTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  gapSugAngleBadge: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  gapSugAngleText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#582CDB',
+  },
+  gapSugScoreBadge: {
+    backgroundColor: '#FEF3C7',
+    borderWidth: 1,
+    borderColor: '#F59E0B',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
   gapSugScoreText: {
-    fontSize: 8.5,
-    fontWeight: '900',
-    color: '#15803D',
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#B45309',
+  },
+  gapSugReasoningBox: {
+    backgroundColor: '#FFFBEB',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    borderRadius: 10,
+    padding: 9,
+    marginTop: 4,
+    marginBottom: 8,
+  },
+  gapSugReasoningTitle: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#92400E',
+    letterSpacing: 0.5,
+    marginBottom: 2,
+  },
+  gapSugReasoningText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#78350F',
+    lineHeight: 15,
   },
   gapSugTitleText: {
-    fontSize: 12.5,
+    fontSize: 13.5,
     fontWeight: '800',
     color: '#171420',
+    lineHeight: 19,
+    marginVertical: 4,
+  },
+  gapSugBottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 6,
+    width: '100%',
+  },
+  gapSugFormatContainer: {
+    flex: 1,
+    minWidth: 0,
+    marginRight: 8,
+  },
+  gapSugFormatText: {
+    fontSize: 11,
+    color: '#64748B',
+    fontWeight: '600',
+  },
+  gapSugDraftPill: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 10,
+    paddingVertical: 4.5,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+    flexShrink: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  gapSugActionTag: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  gapBlankComposerBtn: {
+    paddingVertical: 12,
+    alignItems: 'center',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    backgroundColor: '#FFFFFF',
+    marginTop: 4,
+    marginBottom: 6,
+  },
+  gapBlankComposerBtnText: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#475569',
+  },
+
+  // AUDIENCE FIT MODAL & PILL STYLES
+  audienceFitInlinePill: {
+    backgroundColor: '#FEF3C7',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    paddingHorizontal: 6,
+    paddingVertical: 1.5,
+    borderRadius: 6,
+  },
+  audienceFitInlinePillText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#92400E',
+  },
+  audienceFitDefinitionBanner: {
+    backgroundColor: '#EDE9FE',
+    borderLeftWidth: 4,
+    borderLeftColor: '#582CDB',
+    padding: 12,
+    borderRadius: 10,
+    marginBottom: 14,
+  },
+  audienceFitDefinitionText: {
+    fontSize: 12.5,
+    color: '#1E1B4B',
+    lineHeight: 18,
+    fontWeight: '600',
+  },
+  audienceFitPillarRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+    backgroundColor: '#FAF8F5',
+    padding: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    marginBottom: 8,
+  },
+  audienceFitPillarIconBox: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  audienceFitPillarTitle: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#171420',
+    marginBottom: 2,
+  },
+  audienceFitPillarSub: {
+    fontSize: 11,
+    color: '#64748B',
+    lineHeight: 15,
   },
 
   // POST DETAIL MODAL
@@ -2985,13 +4276,13 @@ const styles = StyleSheet.create({
   postDetailPrimaryBtnText: {
     color: '#FFFFFF',
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   postDetailSecondaryBtn: {
     flex: 1,
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     paddingVertical: 12,
     borderRadius: 12,
     alignItems: 'center',
@@ -3005,9 +4296,39 @@ const styles = StyleSheet.create({
   expandedPostCard: {
     backgroundColor: '#FAF8F5',
     borderRadius: 16,
-    padding: 14,
+    padding: 12,
     borderWidth: 1,
     borderColor: '#EFECE6',
+  },
+  expandedPostTopRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  expandedPostContentCol: {
+    flex: 1,
+    minWidth: 0,
+    marginLeft: 10,
+  },
+  expandedPostTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: 6,
+    marginBottom: 4,
+  },
+  expandedPostTitle: {
+    fontSize: sFont(13.5),
+    fontWeight: '700',
+    color: '#171420',
+    flex: 1,
+    flexShrink: 1,
+    minWidth: 0,
+    lineHeight: 18,
+  },
+  expandedPostPlatformText: {
+    fontSize: sFont(11),
+    color: '#64748B',
+    fontWeight: '700',
   },
   expandedPostActionsRow: {
     flexDirection: 'row',
@@ -3026,21 +4347,21 @@ const styles = StyleSheet.create({
   },
   expandedPostActionBtnText: {
     color: '#FFFFFF',
-    fontSize: 11.5,
-    fontWeight: '900',
+    fontSize: 12,
+    fontWeight: '700',
   },
   expandedPostActionBtnSecondary: {
     flex: 1,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     paddingVertical: 8,
     borderRadius: 8,
     alignItems: 'center',
   },
   expandedPostActionBtnSecondaryText: {
     color: '#171420',
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
   },
   emptyScheduleSub: {
@@ -3054,7 +4375,7 @@ const styles = StyleSheet.create({
   queueFilterChip: {
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 8,
@@ -3086,7 +4407,7 @@ const styles = StyleSheet.create({
   },
   queueStatusBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.4,
   },
@@ -3132,16 +4453,48 @@ const styles = StyleSheet.create({
     borderColor: '#8B5CF6',
   },
   strategyIdeaTitle: {
-    fontSize: 13.5,
-    fontWeight: '900',
+    fontSize: 14,
+    fontWeight: '700',
     color: '#171420',
   },
   strategyIdeaTag: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.4,
     marginTop: 1,
+  },
+  strategyCardHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 4,
+  },
+  strategySummaryText: {
+    fontSize: 12.5,
+    fontWeight: '600',
+    color: '#171420',
+    lineHeight: 17,
+    marginTop: 4,
+    marginBottom: 6,
+  },
+  strategyExpandBtn: {
+    alignSelf: 'flex-start',
+    paddingVertical: 2.5,
+    paddingHorizontal: 7,
+    borderRadius: 6,
+    backgroundColor: '#EDE9FE',
+  },
+  strategyExpandBtnText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  strategyExpandedDetailBox: {
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#EDE9FE',
   },
   strategyIdeaBody: {
     fontSize: 12,
@@ -3151,7 +4504,7 @@ const styles = StyleSheet.create({
 
   // COMMON
   btnPressed: {
-    opacity: 0.85,
+    opacity: 0.9,
     transform: [{ scale: 0.98 }],
   },
   toastContainer: {
@@ -3171,7 +4524,7 @@ const styles = StyleSheet.create({
   toastText: {
     color: '#FFFFFF',
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.2,
   },
 });

@@ -2,32 +2,95 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   StyleSheet,
   View,
-  Text,
   ScrollView,
   Pressable,
   Platform,
   Animated,
   Modal,
-  TextInput,
   Image,
   Dimensions,
   SafeAreaView,
   StatusBar,
+  ActivityIndicator,
 } from 'react-native';
+import { Text, TextInput } from '../components/ui/AppText';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
+import { FreeAppHeader } from '../components/FreeAppHeader';
+import { sFont, sPadding, isNarrowScreen } from '../utils/responsive';
+import Reanimated, { FadeIn, FadeInUp, FadeOut, Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import {
+  getStarterIdeas,
+  getFilmPlan,
+  getSoundIdeas,
+  checkInToday,
+  getDefaultFilmStyle,
+  getGoalCaption,
+  saveDraft as saveDraftToStore,
+  IDEA_GOALS,
+  type FilmStyle,
+  type IdeaGoal,
+} from '../data';
+import { ScheduleSheet } from '../components/composer/ScheduleSheet';
+import { PlatformLogo } from '../components/onboarding/PlatformLogo';
+import { FilmMethodPicker, FilmPlanCard, PostedCheck, type FilmMethod } from '../components/composer/FilmBlocks';
+import { handOffToPlatform, isHandoffPlatform, HANDOFF_NAMES, type HandoffPlatform } from '../utils/handoff';
+import { captureWithCamera, pickFromLibrary, type PickedMedia } from '../utils/media';
+import { AppState } from 'react-native';
+import { GlassBackdrop } from '../components/glass/GlassBackdrop';
+import { GlassCard } from '../components/glass/GlassCard';
+import { FitLines } from '../components/ui/FitLines';
+import { AppButton } from '../components/ui/AppButton';
+import { JarvisOrb } from '../components/JarvisOrb';
+import { STAGE_1_PLATFORMS } from '../config/features';
+import {
+  StepHeader,
+  PlatformChip,
+  RecommendedFormat,
+  FormatTile,
+  MediaZone,
+  CyclePill,
+  AiAction,
+  EditsMeter,
+  TagChip,
+  ModeSwitch,
+  ReadinessCard,
+  ComposerToast,
+} from '../components/composer/ComposerBlocks';
+import { ds } from '../theme/colors';
 
 interface PostComposerScreenProps {
   ideaTitle?: string;
+  /** Goal picked on the Ideas page; the caption is written for it. */
+  ideaGoal?: { goal?: IdeaGoal; hook?: string; caption?: string; tags?: string[] } | null;
+  questDraft?: {
+    title: string;
+    hook: string;
+    story: string;
+    lesson: string;
+    cta: string;
+    badgeLabel?: string;
+    requirements?: string[];
+    xpReward?: number;
+  } | null;
+  initialFormat?: ContentFormatType;
   initialPlatform?: string;
+  /** Pre-pick the kind of video (e.g. from the Repurpose video studio). */
+  initialFilmStyle?: FilmStyle;
+  attachedAudio?: {
+    title: string;
+    voiceName: string;
+    duration: string;
+    speed: string;
+  } | null;
+  onClearAttachedAudio?: () => void;
   onBack: () => void;
   onLogout?: () => void;
   onOpenSchedule?: () => void;
-  onOpenMessages?: () => void;
   onOpenJarvisPro?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   userProfile?: UserProfileData;
@@ -53,7 +116,7 @@ interface PlatformOption {
   multiplier: string;
   bgColor: string;
   gradient?: string[];
-  iconType: 'tiktok' | 'instagram' | 'youtube' | 'linkedin' | 'x' | 'threads' | 'pinterest' | 'snapchat' | 'facebook';
+  iconType: 'tiktok' | 'instagram' | 'youtube' | 'threads' | 'pinterest' | 'facebook';
 }
 
 const NOTIFICATIONS: NotificationItem[] = [
@@ -70,7 +133,7 @@ const NOTIFICATIONS: NotificationItem[] = [
   {
     id: 'n2',
     title: 'Streak Saver Ready',
-    body: "Convert today's idea into a post to keep your 47-day streak.",
+    body: "Convert today's idea into a post to kick off your creator streak.",
     time: '2h ago',
     unread: true,
     iconEmoji: '🔥',
@@ -92,7 +155,7 @@ const ALL_AVAILABLE_PLATFORMS: PlatformOption[] = [
     name: 'TikTok',
     shortName: 'TikTok',
     format: '9:16 Video / Reels',
-    multiplier: '1.2x Reach',
+    multiplier: 'Best Fit',
     bgColor: '#000000',
     iconType: 'tiktok',
   },
@@ -101,7 +164,7 @@ const ALL_AVAILABLE_PLATFORMS: PlatformOption[] = [
     name: 'Instagram',
     shortName: 'IG',
     format: 'Reels & Carousel',
-    multiplier: '1.4x Reach',
+    multiplier: 'Recommended',
     bgColor: '#833AB4',
     gradient: ['#833AB4', '#FD1D1D', '#FCAF45'],
     iconType: 'instagram',
@@ -111,34 +174,16 @@ const ALL_AVAILABLE_PLATFORMS: PlatformOption[] = [
     name: 'YouTube',
     shortName: 'YT',
     format: 'Shorts & Longform',
-    multiplier: '1.1x Reach',
+    multiplier: 'High Retention',
     bgColor: '#FF0000',
     iconType: 'youtube',
-  },
-  {
-    id: 'linkedin',
-    name: 'LinkedIn',
-    shortName: 'LinkedIn',
-    format: 'Carousels & Posts',
-    multiplier: '1.6x Reach',
-    bgColor: '#0A66C2',
-    iconType: 'linkedin',
-  },
-  {
-    id: 'x',
-    name: 'X (Twitter)',
-    shortName: 'X',
-    format: 'Threads & Takes',
-    multiplier: '1.0x Reach',
-    bgColor: '#000000',
-    iconType: 'x',
   },
   {
     id: 'threads',
     name: 'Threads',
     shortName: 'Threads',
     format: 'Quotes & Insights',
-    multiplier: '1.3x Reach',
+    multiplier: 'Strong Fit',
     bgColor: '#000000',
     iconType: 'threads',
   },
@@ -147,52 +192,106 @@ const ALL_AVAILABLE_PLATFORMS: PlatformOption[] = [
     name: 'Pinterest',
     shortName: 'Pinterest',
     format: 'Idea Pins & Saves',
-    multiplier: '1.5x Saves',
+    multiplier: 'Visual Saves',
     bgColor: '#E60023',
     iconType: 'pinterest',
-  },
-  {
-    id: 'snapchat',
-    name: 'Snapchat',
-    shortName: 'Snap',
-    format: 'Spotlight & Stories',
-    multiplier: '0.9x Reach',
-    bgColor: '#FFFC00',
-    iconType: 'snapchat',
   },
   {
     id: 'facebook',
     name: 'Facebook',
     shortName: 'FB',
     format: 'Reels & Groups',
-    multiplier: '0.8x Reach',
+    multiplier: 'Community',
     bgColor: '#1877F2',
     iconType: 'facebook',
   },
 ];
 
-const MONTH_NAMES = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
+export type ContentFormatType = 'short_video' | 'carousel' | 'image' | 'text' | 'long_video';
+
+export interface ContentFormatOption {
+  id: ContentFormatType;
+  title: string;
+  shortTitle: string;
+  badge: string;
+  ratio: string;
+  icon: string;
+  recommendedDescription: string;
+  mediaLabel: string;
+  mediaSub: string;
+  primaryMediaActionText: string;
+  supportedPlatformIds: string[];
+}
+
+export const CONTENT_FORMATS: ContentFormatOption[] = [
+  {
+    id: 'short_video',
+    title: 'Short Video',
+    shortTitle: 'Shorts / Reels',
+    badge: '9:16 Vertical',
+    ratio: '9:16',
+    icon: '🎬',
+    recommendedDescription: 'Best fit for this idea and your selected short-form channels.',
+    mediaLabel: 'Add your short-form video',
+    mediaSub: '9:16 vertical • Recommended 15–60s',
+    primaryMediaActionText: 'Add Video',
+    supportedPlatformIds: ['tiktok', 'instagram', 'youtube', 'facebook'],
+  },
+  {
+    id: 'carousel',
+    title: 'Carousel',
+    shortTitle: 'Multi-Slide',
+    badge: '4:5 / 1:1',
+    ratio: '4:5',
+    icon: '📑',
+    recommendedDescription: 'Great for educational breakdowns, step-by-step swipe posts & saves.',
+    mediaLabel: 'Add carousel slides',
+    mediaSub: 'Up to 30 slides • 4:5 or 1:1 recommended',
+    primaryMediaActionText: 'Add Slides (0/30)',
+    supportedPlatformIds: ['instagram', 'tiktok', 'pinterest', 'facebook'],
+  },
+  {
+    id: 'image',
+    title: 'Single Visual',
+    shortTitle: 'Photo / Visual',
+    badge: '4:5 Portrait',
+    ratio: '4:5',
+    icon: '📸',
+    recommendedDescription: 'High-impact standalone visual or aesthetic graphic for feeds.',
+    mediaLabel: 'Add high-res visual',
+    mediaSub: '4:5 portrait or 9:16 vertical recommended',
+    primaryMediaActionText: 'Add Image',
+    supportedPlatformIds: ['instagram', 'pinterest', 'facebook', 'threads'],
+  },
+  {
+    id: 'text',
+    title: 'Text / Thread',
+    shortTitle: 'Written Take',
+    badge: 'Text-First',
+    ratio: 'Text',
+    icon: '✍️',
+    recommendedDescription: 'Direct text takeaway, opinion, or multi-part insight thread.',
+    mediaLabel: 'Media is optional for text posts',
+    mediaSub: 'Attach an optional visual or write your post below',
+    primaryMediaActionText: 'Add Optional Visual',
+    supportedPlatformIds: ['threads', 'facebook'],
+  },
+  {
+    id: 'long_video',
+    title: 'Long Video',
+    shortTitle: '16:9 Landscape',
+    badge: '16:9 HD',
+    ratio: '16:9',
+    icon: '▶️',
+    recommendedDescription: 'In-depth tutorial, vlog, or full horizontal explanation video.',
+    mediaLabel: 'Add your long-form video',
+    mediaSub: '16:9 landscape • HD/4K recommended',
+    primaryMediaActionText: 'Add Video',
+    supportedPlatformIds: ['youtube', 'facebook'],
+  },
 ];
 
-const TIME_SLOTS = [
-  { id: 't1', time: '7:30 PM', label: '⚡ Peak Reach', peak: true },
-  { id: 't2', time: '9:00 AM', label: 'Morning Wave', peak: false },
-  { id: 't3', time: '12:30 PM', label: 'Lunch Break', peak: false },
-  { id: 't4', time: '6:00 PM', label: 'Evening Prime', peak: false },
-  { id: 't5', time: '8:30 PM', label: 'Night Spike', peak: false },
-];
+
 
 // Official Real Social Media SVG Logos
 const PlatformIcon = ({ iconType, size = 38 }: { iconType: string; size?: number }) => {
@@ -249,24 +348,6 @@ const PlatformIcon = ({ iconType, size = 38 }: { iconType: string; size?: number
       </View>
     );
   }
-  if (iconType === 'linkedin') {
-    return (
-      <View style={[styles.officialIconContainer, { width: size, height: size, backgroundColor: '#0A66C2' }]}>
-        <Svg width={size * 0.55} height={size * 0.55} viewBox="0 0 24 24" fill="#FFFFFF">
-          <Path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
-        </Svg>
-      </View>
-    );
-  }
-  if (iconType === 'x') {
-    return (
-      <View style={[styles.officialIconContainer, { width: size, height: size, backgroundColor: '#000000' }]}>
-        <Svg width={size * 0.52} height={size * 0.52} viewBox="0 0 24 24" fill="#FFFFFF">
-          <Path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-        </Svg>
-      </View>
-    );
-  }
   if (iconType === 'threads') {
     return (
       <View style={[styles.officialIconContainer, { width: size, height: size, backgroundColor: '#000000' }]}>
@@ -285,15 +366,6 @@ const PlatformIcon = ({ iconType, size = 38 }: { iconType: string; size?: number
       </View>
     );
   }
-  if (iconType === 'snapchat') {
-    return (
-      <View style={[styles.officialIconContainer, { width: size, height: size, backgroundColor: '#FFFC00' }]}>
-        <Svg width={size * 0.55} height={size * 0.55} viewBox="0 0 24 24" fill="#000000">
-          <Path d="M12.001 2c-3.8 0-6.2 2.7-6.2 6.2 0 1.2.3 2.6 1 3.5-.1.4-.4.8-.8 1.1-.3.2-.6.4-.9.5-.3.1-.4.3-.4.5 0 .3.3.5.7.6.8.2 1.8.1 2.5-.2.6.8 1.4 1.2 2.2 1.4.3.5.7.8 1.3.8h1.2c.6 0 1-.3 1.3-.8.8-.2 1.6-.6 2.2-1.4.7.3 1.7.4 2.5.2.4-.1.7-.3.7-.6 0-.2-.1-.4-.4-.5-.3-.1-.6-.3-.9-.5-.4-.3-.7-.7-.8-1.1.7-.9 1-2.3 1-3.5 0-3.5-2.4-6.2-6.2-6.2z" />
-        </Svg>
-      </View>
-    );
-  }
   return (
     <View style={[styles.officialIconContainer, { width: size, height: size, backgroundColor: '#1877F2' }]}>
       <Svg width={size * 0.55} height={size * 0.55} viewBox="0 0 24 24" fill="#FFFFFF">
@@ -305,24 +377,37 @@ const PlatformIcon = ({ iconType, size = 38 }: { iconType: string; size?: number
 
 export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   ideaTitle = 'One thing I wish I knew before I started creating',
-  initialPlatform = 'tiktok',
+  ideaGoal,
+  questDraft,
+  initialFormat,
+  initialPlatform = '',
+  initialFilmStyle,
+  attachedAudio,
+  onClearAttachedAudio,
   onBack,
   onLogout,
   onOpenSchedule,
-  onOpenMessages,
   onOpenJarvisPro,
   onNavigateTab,
-
   userProfile,
-  onSaveProfile,}) => {
+  onSaveProfile,
+}) => {
   const isDark = false;
   const [activeTab, setActiveTab] = useState<TabType>('create');
   const [currentIdea, setCurrentIdea] = useState(ideaTitle);
-  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['tiktok', 'instagram']);
-  
+  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(
+    initialPlatform ? [initialPlatform] : []
+  );
+
+  // Content Format State (Intelligent Content Type)
+  const [selectedFormat, setSelectedFormat] = useState<ContentFormatType>(initialFormat || 'short_video');
+  // Short video only: film in TikTok / Reels / Shorts, or upload a finished video
+  const [filmMethod, setFilmMethod] = useState<FilmMethod>('native');
+
   // Media State
   const [hasMedia, setHasMedia] = useState(false);
   const [mediaType, setMediaType] = useState<'video' | 'image' | 'thumbnail' | null>(null);
+  const [hasThumbnail, setHasThumbnail] = useState(false);
 
   // Caption & Tone State
   const [caption, setCaption] = useState(
@@ -332,13 +417,13 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   const [captionCta, setCaptionCta] = useState<'Ask Question' | 'Save Post' | 'Share Thoughts'>('Ask Question');
   const [aiEditsLeft, setAiEditsLeft] = useState(3);
   const [isAiProcessing, setIsAiProcessing] = useState(false);
+  const [isCaptionFocused, setIsCaptionFocused] = useState(false);
 
   // Tags State
   const [tags, setTags] = useState<string[]>([
     '#CreatorTips',
     '#ContentCreation',
     '#Consistency',
-    '#CreatorJourney',
   ]);
   const [newTagInput, setNewTagInput] = useState('');
   const [showAddTagInput, setShowAddTagInput] = useState(false);
@@ -347,29 +432,119 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   const [publishMode, setPublishMode] = useState<'now' | 'schedule' | 'draft'>('schedule');
   const [scheduledTime, setScheduledTime] = useState('Today, 7:30 PM');
 
-  // Calendar State
-  const [calMonthIndex, setCalMonthIndex] = useState(7); // August (0-indexed)
-  const [calYear, setCalYear] = useState(2026);
-  const [selectedCalDay, setSelectedCalDay] = useState(18); // Today = 18th
-  const [selectedTimeSlot, setSelectedTimeSlot] = useState('7:30 PM');
-
   // Modals
   const [showPlatformsModal, setShowPlatformsModal] = useState(false);
   const [showChangeIdeaModal, setShowChangeIdeaModal] = useState(false);
-  const [showCalendarModal, setShowCalendarModal] = useState(false);
+  const [showScheduleSheet, setShowScheduleSheet] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showChatModal, setShowChatModal] = useState(false);
   const [showCelebrationModal, setShowCelebrationModal] = useState(false);
   const [celebrationTitle, setCelebrationTitle] = useState('Post Scheduled!');
   const [celebrationSubtitle, setCelebrationSubtitle] = useState('Your post has been scheduled for Today at 7:30 PM.');
-  const [celebrationSpeech, setCelebrationSpeech] = useState('47-day streak protected! +50 XP added to your creator level.');
+  const [celebrationSpeech, setCelebrationSpeech] = useState('Day 1 post scheduled! +50 XP added to your creator level.');
 
   const [notificationsList, setNotificationsList] = useState<NotificationItem[]>(NOTIFICATIONS);
 
-  // Animations
+  // Animations & Navigation Refs
   const flameFloatY = useRef(new Animated.Value(0)).current;
   const modalPopScale = useRef(new Animated.Value(0.9)).current;
+  const mainScrollViewRef = useRef<ScrollView>(null);
+  const captionInputRef = useRef<TextInput>(null);
+  // Steps are measured when tapped (sections above can change height)
+  const sectionRefs = useRef<{ [key: string]: View | null }>({});
+  const scrollY = useRef(0);
+  // Sizes used to keep jumps inside the page (scrolling past the end
+  // overshoots and springs back on iPhone)
+  const contentH = useRef(0);
+  const viewportH = useRef(0);
+
+  // Sync prop changes for frictionless idea adoption
+  useEffect(() => {
+    if (ideaTitle) {
+      setCurrentIdea(ideaTitle);
+      const lower = ideaTitle.toLowerCase();
+      if (
+        lower.includes('story') ||
+        lower.includes('lesson') ||
+        lower.includes('wish i knew') ||
+        lower.includes('mistake') ||
+        lower.includes('storyteller') ||
+        lower.includes('started creating')
+      ) {
+        setCaption(
+          'When I first started creating content, I delayed posting for months waiting for everything to be perfect.\n\nWhen I finally hit record on my phone and shared one honest lesson, my 3rd video hit 50k views.\n\nKey takeaway: Storytelling and consistency beat high production every time.\n\nWhat is one lesson you learned the hard way? Drop it below 👇'
+        );
+        setCaptionTone('Story');
+        setCaptionCta('Ask Question');
+        setTags(['#CreatorJourney', '#Storytelling', '#LessonsLearned', '#PostStreak']);
+        setSelectedFormat('short_video');
+      } else if (lower.includes('habits')) {
+        setCaption(
+          '3 simple creator habits that helped me post 5x faster:\n1. Batch recording my talking points\n2. Reusing proven hooks\n3. Focusing on 1 key takeaway per post.\n\nWhich of these are you trying next?'
+        );
+        setCaptionTone('Helpful');
+        setCaptionCta('Ask Question');
+        setTags(['#CreatorTips', '#Habits', '#Consistency']);
+      } else if (lower.includes('planning')) {
+        setCaption(
+          'My simple 3-step content planning routine that saves me 4+ hours every week:\n1. Brainstorm 5 pain points\n2. Outline in bullet points\n3. Schedule for peak engagement windows.\n\nSave this for your next planning session!'
+        );
+        setCaptionTone('Helpful');
+        setCaptionCta('Save Post');
+        setTags(['#ContentPlanning', '#CreatorWorkflow', '#GetSaves']);
+      } else if (lower.includes('viral') || lower.includes('hook')) {
+        setCaption(
+          'Stop scrolling if you want to grow as a creator this month.\n\nThe #1 shift that changed my reach wasn’t the algorithm—it was hooking the viewer in the first 2 seconds.\n\nSave this framework for your next post!'
+        );
+        setCaptionTone('Viral');
+        setCaptionCta('Save Post');
+        setTags(['#ViralHooks', '#CreatorGrowth', '#ContentTips']);
+      }
+    }
+  }, [ideaTitle]);
+
+  // Idea picked on the Ideas page with a goal: write the caption for that goal
+  // …or a finished caption + tags from the Caption writer
+  useEffect(() => {
+    if (!ideaGoal) return;
+    if (ideaGoal.caption) {
+      setCaption(ideaGoal.caption);
+      if (ideaGoal.tags?.length) setTags(ideaGoal.tags);
+      return;
+    }
+    if (!ideaGoal.goal || !ideaTitle) return;
+    const g = getGoalCaption(ideaTitle, ideaGoal.goal, ideaGoal.hook);
+    setCaption(g.caption);
+    setCaptionTone(g.tone);
+    setCaptionCta(g.cta);
+  }, [ideaTitle, ideaGoal]);
+
+  // Sync incoming Quest Draft from Jarvis
+  useEffect(() => {
+    if (questDraft) {
+      if (questDraft.title) setCurrentIdea(questDraft.title);
+      setCaption(
+        `${questDraft.hook}\n\n${questDraft.story}\n\nKey lesson: ${questDraft.lesson}\n\n${questDraft.cta}`
+      );
+      setCaptionTone('Story');
+      setCaptionCta('Ask Question');
+      setSelectedFormat('short_video');
+      setTags(['#Storytelling', '#CreatorJourney', '#LessonsLearned', '#PostStreak']);
+    }
+  }, [questDraft]);
+
+  useEffect(() => {
+    if (initialFormat) {
+      setSelectedFormat(initialFormat);
+    }
+  }, [initialFormat]);
+
+  useEffect(() => {
+    if (initialPlatform) {
+      setSelectedPlatforms([initialPlatform]);
+    }
+  }, [initialPlatform]);
 
   useEffect(() => {
     const floatAnim = Animated.loop(
@@ -415,9 +590,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     if (selectedPlatforms.includes(id)) {
-      if (selectedPlatforms.length > 1) {
-        setSelectedPlatforms(selectedPlatforms.filter((p) => p !== id));
-      }
+      setSelectedPlatforms(selectedPlatforms.filter((p) => p !== id));
     } else {
       setSelectedPlatforms([...selectedPlatforms, id]);
     }
@@ -455,12 +628,73 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
     }, 450);
   };
 
+  // Intelligent, platform- and format-aware tag resolution
+  const getIntelligentTagsForContext = (
+    platforms: string[],
+    format: ContentFormatType,
+    text: string
+  ): string[] => {
+    const topicPool: string[] = [];
+
+    // Platform-specific tags
+    if (platforms.includes('tiktok')) {
+      topicPool.push('#TikTokGrowth', '#CreatorTips');
+    }
+    if (platforms.includes('instagram')) {
+      topicPool.push('#ContentCreation', '#CreatorsOfInstagram');
+    }
+    if (platforms.includes('youtube')) {
+      topicPool.push('#Shorts', '#CreatorStrategy');
+    }
+    if (platforms.includes('pinterest')) {
+      topicPool.push('#CreativeInspiration', '#VisualTips');
+    }
+    if (platforms.includes('threads')) {
+      topicPool.push('#BuildInPublic', '#CreatorEconomy');
+    }
+    if (platforms.includes('facebook')) {
+      topicPool.push('#CreatorCommunity');
+    }
+
+    // Format-specific tags
+    if (format === 'carousel') {
+      topicPool.push('#CarouselPost', '#SwipeFiles');
+    } else if (format === 'short_video') {
+      topicPool.push('#ReelsTips', '#ViralReels');
+    } else if (format === 'text') {
+      topicPool.push('#CreatorInsights', '#ThreadPost');
+    } else if (format === 'long_video') {
+      topicPool.push('#FullTutorial', '#DeepDive');
+    }
+
+    // Keyword detection from caption text
+    const lower = text.toLowerCase();
+    if (lower.includes('habit') || lower.includes('daily') || lower.includes('routine')) {
+      topicPool.push('#DailyHabits');
+    }
+    if (lower.includes('consistency') || lower.includes('consistent')) {
+      topicPool.push('#Consistency');
+    }
+    if (lower.includes('grow') || lower.includes('audience') || lower.includes('reach')) {
+      topicPool.push('#AudienceGrowth');
+    }
+    if (lower.includes('start') || lower.includes('beginner') || lower.includes('lesson')) {
+      topicPool.push('#CreatorJourney');
+    }
+
+    // Default core pool
+    topicPool.push('#CreatorTips', '#ContentCreation', '#Consistency');
+
+    const unique = Array.from(new Set(topicPool));
+    return unique.slice(0, 4);
+  };
+
   const handleGenerateTags = () => {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-    const newSuggested = ['#ViralReels', '#PostStreak', '#DailyCreating', '#CreatorEconomy'];
-    setTags((prev) => Array.from(new Set([...prev, ...newSuggested])));
+    const smartTags = getIntelligentTagsForContext(selectedPlatforms, selectedFormat, caption);
+    setTags((prev) => Array.from(new Set([...prev, ...smartTags])));
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
@@ -487,11 +721,89 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
+    if (type === 'thumbnail') {
+      setHasThumbnail(true);
+      if (!hasMedia) {
+        setHasMedia(true);
+        setMediaType('image');
+      }
+    } else {
+      setHasMedia(true);
+      setMediaType(type);
+    }
+  };
+
+  // Real camera / camera roll (expo-image-picker)
+  const [pickedMedia, setPickedMedia] = useState<PickedMedia | null>(null);
+  const wantsVideo = selectedFormat === 'short_video' || selectedFormat === 'long_video';
+  const acceptMedia = (m: PickedMedia | null) => {
+    if (!m) return;
+    if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    setPickedMedia(m);
     setHasMedia(true);
-    setMediaType(type);
+    setMediaType(m.kind);
+  };
+  const addFromLibrary = async () => acceptMedia(await pickFromLibrary(wantsVideo ? 'video' : 'image'));
+  const addFromCamera = async () => acceptMedia(await captureWithCamera(wantsVideo ? 'video' : 'image'));
+  const clearMedia = () => {
+    setPickedMedia(null);
+    setHasMedia(false);
+    setHasThumbnail(false);
+  };
+
+  const [composerToast, setComposerToast] = useState<string | null>(null);
+
+  const showToastNotice = (msg: string) => {
+    setComposerToast(msg);
+    setTimeout(() => {
+      setComposerToast((prev) => (prev === msg ? null : prev));
+    }, 3200);
   };
 
   const handlePublishOrSchedule = () => {
+    // 1. Allow saving draft anytime without restriction
+    if (publishMode === 'draft') {
+      if (Platform.OS !== 'web') {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
+      setCelebrationTitle('Draft Saved!');
+      setCelebrationSubtitle('Your post draft with full media & tags is saved in your queue.');
+      setCelebrationSpeech('Great work preparing ahead!');
+      setShowCelebrationModal(true);
+      return;
+    }
+
+    // 2. If attempting to Post Now or Schedule Post, verify 100% readiness
+    if (!isAllReady) {
+      if (Platform.OS !== 'web') {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      }
+
+      if (!isPlatformsReady) {
+        showToastNotice('Select at least one platform before scheduling');
+        navigateToSection('platforms');
+      } else if (!isMediaReady) {
+        showToastNotice('Add your media before scheduling');
+        navigateToSection('media');
+      } else if (!isCaptionReady) {
+        showToastNotice('Add a post caption (minimum 10 characters)');
+        navigateToSection('caption');
+      } else if (!isFormatReady) {
+        showToastNotice('Select a content format');
+        navigateToSection('format');
+      } else if (!isScheduleReady) {
+        showToastNotice('Select a schedule time');
+        navigateToSection('schedule');
+      }
+      return;
+    }
+
+    // 3. Post is 100% Ready
+    if (publishMode === 'now' && isNativeFilm) {
+      if (filmApp) openPlatformToFilm(filmApp);
+      else showToastNotice('Pick TikTok, Instagram or YouTube to film there');
+      return;
+    }
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
@@ -499,736 +811,675 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
       setCelebrationTitle('Published Live!');
       setCelebrationSubtitle('Your content is live across your connected platforms.');
       setCelebrationSpeech('Streak preserved! Great consistency today.');
+    } else if (publishMode === 'schedule' && isNativeFilm) {
+      setCelebrationTitle('Reminder set!');
+      setCelebrationSubtitle(`We'll nudge you at ${scheduledTime} with your hook, shots and caption ready.`);
+      setCelebrationSpeech('Your plan is saved. Film it when the time comes.');
     } else if (publishMode === 'schedule') {
       setCelebrationTitle('Post Scheduled!');
       setCelebrationSubtitle(`Your post is locked in for ${scheduledTime}.`);
-      setCelebrationSpeech('47-day streak protected! +50 XP added to your creator level.');
-    } else {
-      setCelebrationTitle('Draft Saved!');
-      setCelebrationSubtitle('Your post draft with full media & tags is saved in your queue.');
-      setCelebrationSpeech('Great work preparing ahead!');
+      setCelebrationSpeech('Day 1 post scheduled! +50 XP added to your creator level.');
     }
     setShowCelebrationModal(true);
   };
 
-  // Calendar calculations
-  const daysInMonth = new Date(calYear, calMonthIndex + 1, 0).getDate();
-  const firstDayOfWeek = (new Date(calYear, calMonthIndex, 1).getDay() + 6) % 7; // Monday-first
-  
-  const handlePrevMonth = () => {
+  // Content Format Resolution & Intelligence
+  const getRecommendedFormatId = (platforms: string[]): ContentFormatType => {
+    if (platforms.length === 1 && platforms[0] === 'threads') return 'text';
+    if (platforms.length === 1 && platforms[0] === 'pinterest') return 'carousel';
+    return 'short_video';
+  };
+
+  const recommendedFormatId = getRecommendedFormatId(selectedPlatforms);
+  const currentFormatConfig =
+    CONTENT_FORMATS.find((f) => f.id === selectedFormat) || CONTENT_FORMATS[0];
+  const recommendedFormatConfig =
+    CONTENT_FORMATS.find((f) => f.id === recommendedFormatId) || CONTENT_FORMATS[0];
+  const otherFormats = CONTENT_FORMATS.filter((f) => f.id !== recommendedFormatId);
+
+  // Platform-Aware Dynamic Media Subtitle
+  const getDynamicMediaSub = (formatId: ContentFormatType, platforms: string[]): string => {
+    const activePlats = ALL_AVAILABLE_PLATFORMS.filter((p) => platforms.includes(p.id));
+    const platNames = activePlats.map((p) => p.shortName).join(' + ');
+
+    switch (formatId) {
+      case 'short_video':
+        return platNames
+          ? `9:16 vertical • Recommended 15–60s • Optimized for ${platNames}`
+          : '9:16 vertical • Recommended 15–60s';
+      case 'carousel':
+        return platNames
+          ? `Up to 30 slides • 4:5 or 1:1 • Optimized for ${platNames}`
+          : 'Up to 30 slides • 4:5 or 1:1 recommended';
+      case 'image':
+        return platNames
+          ? `High resolution • 4:5 portrait • Optimized for ${platNames}`
+          : 'High resolution • 4:5 portrait or 9:16 vertical';
+      case 'long_video':
+        return platNames
+          ? `16:9 landscape • HD/4K • Optimized for ${platNames}`
+          : '16:9 landscape • HD/4K recommended';
+      case 'text':
+        return 'Direct text takeaway or insight thread';
+      default:
+        return 'Recommended format';
+    }
+  };
+
+  const dynamicMediaSub = getDynamicMediaSub(selectedFormat, selectedPlatforms);
+
+  // Incompatibility / Adaptation Warnings
+  const incompatiblePlatforms = selectedPlatforms.filter(
+    (platId) => !currentFormatConfig.supportedPlatformIds.includes(platId)
+  );
+
+  // Weighted Readiness Calculation (100% total)
+  // Platforms: 25%, Media: 30%, Caption: 20%, Schedule: 15%, Content Format: 10%
+  const isFormatReady = Boolean(selectedFormat);
+  const isCaptionReady = caption.trim().length >= 10;
+  const isPlatformsReady = selectedPlatforms.length > 0;
+  const isNativeFilm = selectedFormat === 'short_video' && filmMethod === 'native';
+  const isCameraFilm = selectedFormat === 'short_video' && filmMethod === 'camera';
+  const isMediaReady = selectedFormat === 'text' || hasMedia || isNativeFilm;
+  const isScheduleReady =
+    publishMode === 'now' ||
+    publishMode === 'draft' ||
+    (publishMode === 'schedule' && Boolean(scheduledTime));
+
+  const readinessPercent =
+    (isFormatReady ? 10 : 0) +
+    (isCaptionReady ? 20 : 0) +
+    (isPlatformsReady ? 25 : 0) +
+    (isMediaReady ? 30 : 0) +
+    (isScheduleReady ? 15 : 0);
+
+  const isAllReady = readinessPercent === 100;
+
+  const navigateToSection = (section: 'format' | 'caption' | 'platforms' | 'media' | 'schedule') => {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
-    if (calMonthIndex === 0) {
-      setCalMonthIndex(11);
-      setCalYear((y) => y - 1);
-    } else {
-      setCalMonthIndex((m) => m - 1);
+    // Measure where the step is right now inside the scroll content
+    // (sections above can change height after the page first lays out)
+    const target = sectionRefs.current[section];
+    const sv = mainScrollViewRef.current as
+      | (ScrollView & { getInnerViewRef?: () => unknown; getInnerViewNode?: () => unknown })
+      | null;
+    const content = sv?.getInnerViewRef?.() ?? sv?.getInnerViewNode?.();
+    if (target && sv && content) {
+      target.measureLayout(
+        content as never,
+        (_x, y) => {
+          const maxY = Math.max(0, contentH.current - viewportH.current);
+          sv.scrollTo({ y: Math.min(maxY, Math.max(0, y - 12)), animated: true });
+        },
+        () => {},
+      );
+    }
+
+    // No auto-focus on the caption: opening the keyboard scrolled the page a
+    // second time right after landing, which looked like a bounce.
+    if (section === 'schedule') {
+      setTimeout(() => {
+        setShowScheduleSheet(true);
+      }, 350);
     }
   };
-
-  const handleNextMonth = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    if (calMonthIndex === 11) {
-      setCalMonthIndex(0);
-      setCalYear((y) => y + 1);
-    } else {
-      setCalMonthIndex((m) => m + 1);
-    }
-  };
-
-  const handleConfirmCalendarSchedule = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
-    const isToday = selectedCalDay === 18 && calMonthIndex === 7 && calYear === 2026;
-    const isTomorrow = selectedCalDay === 19 && calMonthIndex === 7 && calYear === 2026;
-    
-    let formattedStr = '';
-    if (isToday) {
-      formattedStr = `Today, ${selectedTimeSlot}`;
-    } else if (isTomorrow) {
-      formattedStr = `Tomorrow, ${selectedTimeSlot}`;
-    } else {
-      const monthShort = MONTH_NAMES[calMonthIndex].substring(0, 3);
-      formattedStr = `${monthShort} ${selectedCalDay}, ${selectedTimeSlot}`;
-    }
-
-    setScheduledTime(formattedStr);
-    setPublishMode('schedule');
-    setShowCalendarModal(false);
-
-    // Trigger celebration animation popup
-    setCelebrationTitle('Post Scheduled!');
-    setCelebrationSubtitle(`Your post has been locked in for ${formattedStr}.`);
-    setCelebrationSpeech('47-day streak protected! +50 XP added to your creator level.');
-    setTimeout(() => {
-      setShowCelebrationModal(true);
-    }, 250);
-  };
-
-  // Readiness Calculation
-  const readinessPercent = hasMedia ? 100 : 75;
 
   const unreadNotifCount = notificationsList.filter((n) => n.unread).length;
 
-  // Filter the display platforms: all selected ones + TikTok, Instagram, YouTube
-  const displayedPlatformIds = Array.from(new Set([...selectedPlatforms, 'tiktok', 'instagram', 'youtube']));
-  const displayedPlatforms = ALL_AVAILABLE_PLATFORMS.filter((p) => displayedPlatformIds.includes(p.id));
+  // "Another" swaps the idea in place (same as the Create tab): the icon spins,
+  // Jarvis "picks" for a beat, then the next idea slides in.
+  const ideaPool = React.useMemo(() => {
+    const starter = getStarterIdeas(
+      userProfile?.niches?.length ? userProfile.niches : ['lifestyle'],
+      userProfile?.connectedPlatforms?.length ? userProfile.connectedPlatforms : ['tiktok', 'instagram'],
+    ).map((i) => i.title);
+    return Array.from(new Set([...starter, ...SAMPLE_IDEAS]));
+  }, [userProfile?.niches, userProfile?.connectedPlatforms]);
+  const [ideaThinking, setIdeaThinking] = useState(false);
+
+  // Short video: film in TikTok / Reels / Shorts (sounds + filters) or upload
+  const [pendingHandoff, setPendingHandoff] = useState<HandoffPlatform | null>(null);
+  const [showPostedCheck, setShowPostedCheck] = useState(false);
+  const handoffPlatforms = selectedPlatforms.filter(isHandoffPlatform);
+  // With several platforms picked, the creator chooses which app to film in
+  // (the one whose sound they want); the same video can go to the others after.
+  const [filmAppChoice, setFilmAppChoice] = useState<HandoffPlatform | null>(null);
+  const filmApp: HandoffPlatform | undefined =
+    filmAppChoice && handoffPlatforms.includes(filmAppChoice) ? filmAppChoice : handoffPlatforms[0];
+  // Talking / dance / skit / text-on-screen, pre-picked from the creator's niche
+  const [filmStyle, setFilmStyle] = useState<FilmStyle>(() => initialFilmStyle ?? getDefaultFilmStyle(userProfile?.niches));
+  const filmPlan = React.useMemo(() => getFilmPlan(currentIdea ?? '', filmStyle), [currentIdea, filmStyle]);
+  const soundIdeas = React.useMemo(() => getSoundIdeas(filmStyle), [filmStyle]);
+  const [overlayText, setOverlayText] = useState('');
+  // Filming a dance / trend: the trend is the idea, so the idea card fades away
+  const hideIdea = (isNativeFilm || isCameraFilm) && filmStyle === 'dance';
+
+  // When the creator comes back after filming, ask if it went out
+  useEffect(() => {
+    if (!pendingHandoff) return;
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state === 'active') setShowPostedCheck(true);
+    });
+    // Web: the platform opens in a new tab, so ask shortly after
+    const t = Platform.OS === 'web' ? setTimeout(() => setShowPostedCheck(true), 1500) : null;
+    return () => {
+      sub.remove();
+      if (t) clearTimeout(t);
+    };
+  }, [pendingHandoff]);
+
+  const openPlatformToFilm = async (p: HandoffPlatform) => {
+    if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    const text = [caption.trim(), tags.join(' ')].filter(Boolean).join('\n\n');
+    showToastNotice(`Caption copied. Paste it in ${HANDOFF_NAMES[p]}.`);
+    setPendingHandoff(p);
+    await handOffToPlatform(p, text);
+  };
+
+  const confirmPosted = () => {
+    setShowPostedCheck(false);
+    setPendingHandoff(null);
+    checkInToday(userProfile?.userPersona === 'returning' ? 'returning' : 'new');
+    if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    setCelebrationTitle('Nice work!');
+    setCelebrationSubtitle(`Your ${pendingHandoff ? HANDOFF_NAMES[pendingHandoff] : ''} post counts toward today's check-in.`);
+    setCelebrationSpeech('Posted is better than perfect.');
+    setShowCelebrationModal(true);
+  };
+  const ideaTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const ideaSpin = useSharedValue(0);
+  const ideaSpinStyle = useAnimatedStyle(() => ({ transform: [{ rotate: `${ideaSpin.value * 360}deg` }] }));
+  useEffect(
+    () => () => {
+      if (ideaTimer.current) clearTimeout(ideaTimer.current);
+    },
+    [],
+  );
+  const shuffleIdea = () => {
+    if (ideaThinking) return;
+    if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    ideaSpin.value = withTiming(ideaSpin.value + 1, { duration: 500, easing: Easing.out(Easing.cubic) });
+    setIdeaThinking(true);
+    ideaTimer.current = setTimeout(() => {
+      const i = ideaPool.indexOf(currentIdea ?? '');
+      setCurrentIdea(ideaPool[(i + 1) % ideaPool.length]);
+      setIdeaThinking(false);
+    }, 550);
+  };
+
+  const saveDraft = () => {
+    saveDraftToStore({
+      id: `post-${currentIdea}`,
+      title: currentIdea ?? 'Untitled post',
+      kind: 'post',
+      format: currentFormatConfig.title,
+      platform: selectedPlatforms[0],
+    });
+    if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    setCelebrationTitle('Draft saved!');
+    setCelebrationSubtitle('Your draft with media and tags is saved. Pick it up any time.');
+    setCelebrationSpeech('Nice work getting ahead!');
+    setShowCelebrationModal(true);
+  };
+  const captionTones: ('Helpful' | 'Viral' | 'Story')[] = ['Helpful', 'Viral', 'Story'];
+  const captionCtas: ('Ask Question' | 'Save Post' | 'Share Thoughts')[] = ['Ask Question', 'Save Post', 'Share Thoughts'];
+  const stage1Platforms = ALL_AVAILABLE_PLATFORMS.filter((p) => (STAGE_1_PLATFORMS as readonly string[]).includes(p.id));
+  const readinessSteps = [
+    { key: 'platforms', label: 'Platforms', done: isPlatformsReady },
+    { key: 'format', label: 'Format', done: isFormatReady },
+    { key: 'media', label: isNativeFilm ? 'Film plan' : isCameraFilm ? 'Video' : 'Media', done: isMediaReady },
+    { key: 'caption', label: 'Caption', done: isCaptionReady },
+    { key: 'schedule', label: 'Timing', done: isScheduleReady },
+  ];
+
+  // Filter the display platforms: show only what the user selected. If none selected yet, show starter placeholders.
+  const displayedPlatforms =
+    selectedPlatforms.length > 0
+      ? ALL_AVAILABLE_PLATFORMS.filter((p) => selectedPlatforms.includes(p.id))
+      : ALL_AVAILABLE_PLATFORMS.filter((p) => ['tiktok', 'instagram'].includes(p.id));
 
   return (
     <SafeAreaView style={[styles.safeArea, isDark && { backgroundColor: '#0C0A12' }]}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={isDark ? "#0C0A12" : "#FAF8F5"} />
       <View style={[styles.container, isDark && { backgroundColor: '#0C0A12' }]}>
-        {/* 1. TOP AIRY HEADER BAR (UNIFIED APP-WIDE) */}
-        <View style={styles.headerBar}>
-          <View style={styles.headerLeftGroup}>
-            <Pressable
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                onBack();
-              }}
-              style={({ pressed }) => [styles.backCircleBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-            >
-              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                <Path d="M15 18L9 12L15 6" stroke="#171420" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-              </Svg>
-            </Pressable>
-
-            {/* Mascot Logo with Floating Animation */}
-            <Animated.View
-              style={[
-                styles.headerLogoWrapper,
-                { transform: [{ translateY: flameFloatY }] },
-              ]}
-            >
-              <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerGhostLogo}
-                resizeMode="contain"
-              />
-            </Animated.View>
-          </View>
-
-          {/* Right Icons: Messages, Notification Bell, Profile */}
-          <View style={styles.headerRightGroup}>
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                if (Platform.OS !== "web") {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                if (onOpenMessages) {
-                  onOpenMessages();
-                } else {
-                  triggerModalAnim();
-                  setShowChatModal(true);
-                }
-              }}
-            >
-              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                triggerModalAnim();
-                setShowNotificationModal(true);
-              }}
-            >
-              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <Path
-                  d="M13.73 21a2 2 0 0 1-3.46 0"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-              {unreadNotifCount > 0 && <View style={styles.notificationDot} />}
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                triggerModalAnim();
-                setShowProfileModal(true);
-              }}
-            >
-              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <Circle cx="12" cy="7" r="4" stroke="#171420" strokeWidth="2.2" />
-              </Svg>
-            </Pressable>
-          </View>
-        </View>
+        <GlassBackdrop />
+        {/* 1. TOP AIRY HEADER BAR */}
+        <FreeAppHeader
+          backgroundColor="transparent"
+          onBack={onBack}
+          onOpenJarvisPro={onOpenJarvisPro}
+          onOpenNotifications={() => {
+            triggerModalAnim();
+            setShowNotificationModal(true);
+          }}
+          onOpenProfile={() => {
+            triggerModalAnim();
+            setShowProfileModal(true);
+          }}
+          userProfile={userProfile}
+          unreadCount={unreadNotifCount}
+          isDark={isDark}
+        />
 
         {/* 2. MAIN SCROLLABLE CONTENT */}
         <ScrollView
+          ref={mainScrollViewRef}
+          onScroll={(e) => (scrollY.current = e.nativeEvent.contentOffset.y)}
+          onContentSizeChange={(_w, h) => (contentH.current = h)}
+          onLayout={(e) => (viewportH.current = e.nativeEvent.layout.height)}
+          scrollEventThrottle={32}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           bounces={true}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
         >
-          {/* Top Pill Badges (Gold Gradient & Draft) */}
-          <View style={styles.topBadgesRow}>
-            <LinearGradient
-              colors={['#F59E0B', '#D97706']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={styles.createPostPill}
-            >
-              <Text style={styles.createPostPillText}>CREATE POST</Text>
-            </LinearGradient>
-
-            <View style={styles.draftPill}>
-              <Text style={styles.draftPillText}>DRAFT</Text>
-            </View>
-          </View>
-
-          {/* Main Headline & Subtitle */}
-          <Text style={styles.mainTitle}>Shape your next post.</Text>
-          <Text style={styles.mainSubtitle}>
-            Write your caption, choose platforms, add media and schedule your content.
-          </Text>
-
-          {/* 1. POST IDEA CARD */}
-          <View style={styles.postIdeaCard}>
-            <View style={styles.postIdeaHeaderRow}>
-              <Text style={styles.postIdeaSectionTitle}>Post Idea</Text>
-              <Pressable
-                onPress={() => {
-                  triggerModalAnim();
-                  setShowChangeIdeaModal(true);
-                }}
-                hitSlop={8}
-              >
-                <Text style={styles.changeIdeaLink}>CHANGE IDEA</Text>
-              </Pressable>
-            </View>
-
-            <Text style={styles.postIdeaTitle}>&ldquo;{currentIdea}&rdquo;</Text>
-            <Text style={styles.postIdeaDesc}>
-              Turn this idea into a short-form post for your selected platforms.
-            </Text>
-
-            <View style={styles.ideaTagsRow}>
-              <View style={styles.ideaTagPill}>
-                <Text style={styles.ideaTagPillText}>Personal Lesson</Text>
+          {/* HEADLINE — same two-line structure on every screen size */}
+          <Reanimated.View entering={FadeInUp.duration(500)} style={styles.headlineWrap}>
+            {questDraft && (
+              <View style={styles.questChip}>
+                <Text style={styles.questChipText}>{(questDraft.badgeLabel || 'Quest draft').replace(/^[^A-Za-z0-9]+/, '')}</Text>
               </View>
-              <View style={styles.ideaTagPill}>
-                <Text style={styles.ideaTagPillText}>Creator Advice</Text>
-              </View>
-              <View style={styles.streakSaverPill}>
-                <Text style={styles.streakSaverPillText}>Streak Saver</Text>
-              </View>
-            </View>
-          </View>
-
-          {/* 2. CHOOSE PLATFORMS WITH MORE PLATFORMS TRIGGER */}
-          <View style={styles.sectionLabelRow}>
-            <Text style={styles.sectionLabel}>CHOOSE PLATFORMS</Text>
-            <Pressable
-              style={({ pressed }) => [styles.morePlatformsHeaderBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                triggerModalAnim();
-                setShowPlatformsModal(true);
-              }}
-              hitSlop={8}
-            >
-              <LinearGradient
-                colors={['#7C3AED', '#582CDB']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.morePlatformsHeaderGradient}
-              >
-                <Svg width={13} height={13} viewBox="0 0 24 24" fill="none">
-                  <Path d="M12 5V19M5 12H19" stroke="#FFFFFF" strokeWidth="2.8" strokeLinecap="round" />
-                </Svg>
-                <Text style={styles.morePlatformsHeaderText}>More Platforms</Text>
-              </LinearGradient>
-            </Pressable>
-          </View>
-
-          {/* Clean Evenly Distributed Platforms Row (Full Width Fitting) */}
-          <View style={styles.platformsRow}>
-            {displayedPlatforms.map((plat) => {
-              const isSelected = selectedPlatforms.includes(plat.id);
-              return (
-                <Pressable
-                  key={plat.id}
-                  style={[
-                    styles.platformCard,
-                    isSelected && styles.platformCardActive,
-                  ]}
-                  onPress={() => togglePlatform(plat.id)}
-                >
-                  <PlatformIcon iconType={plat.iconType} size={38} />
-                  <Text style={styles.platformCardName} numberOfLines={1}>{plat.name}</Text>
-                  {isSelected ? (
-                    <View style={styles.platformActiveBadge}>
-                      <Text style={{ fontSize: 10, color: '#FFFFFF', fontWeight: '900' }}>✓</Text>
-                    </View>
-                  ) : (
-                    <View style={styles.platformInactiveBadge} />
-                  )}
-                </Pressable>
-              );
-            })}
-          </View>
-
-          <Text style={styles.platformsDisclaimer}>
-            Free users can prepare posts for selected platforms. Some auto-publishing options may require <Text style={{ color: '#D97706', fontWeight: '800' }}>Pro</Text> or platform approval.
-          </Text>
-
-          {/* 3. MEDIA UPLOAD ZONE */}
-          <Text style={styles.sectionLabel}>MEDIA</Text>
-          <View style={styles.mediaUploadBox}>
-            {hasMedia ? (
-              <View style={styles.mediaPreviewContainer}>
-                <View style={styles.mediaPreviewThumb}>
-                  <Text style={{ fontSize: 28 }}>🎬</Text>
-                  <Text style={styles.mediaPreviewTitle}>ShortForm_Reel_V1.mp4</Text>
-                  <Text style={styles.mediaPreviewMeta}>1080x1920 • 30s • HD</Text>
-                </View>
-                <Pressable
-                  onPress={() => setHasMedia(false)}
-                  style={styles.removeMediaBtn}
-                >
-                  <Text style={styles.removeMediaBtnText}>✕ Remove Media</Text>
-                </Pressable>
-              </View>
-            ) : (
-              <Pressable
-                onPress={() => handleUploadMedia('video')}
-                style={styles.mediaDashedDropzone}
-              >
-                <View style={styles.mediaIconCircle}>
-                  <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-                    <Rect x="3" y="3" width="18" height="18" rx="4" stroke="#6D28D9" strokeWidth="2" />
-                    <Circle cx="8.5" cy="8.5" r="1.5" fill="#6D28D9" />
-                    <Path d="M21 15L16 10L5 21" stroke="#6D28D9" strokeWidth="2" strokeLinecap="round" />
-                  </Svg>
-                </View>
-                <Text style={styles.mediaDropzoneTitle}>Add video, image or thumbnail</Text>
-                <Text style={styles.mediaDropzoneSubtitle}>Video • Image • Carousel</Text>
-              </Pressable>
             )}
+            <FitLines
+              lines={['Shape your', <Text key="n" style={styles.headlineAccent}>next post</Text>]}
+              textStyle={styles.headlineText}
+              maxFontSize={34}
+              align="left"
+              accessibilityLabel="Shape your next post"
+            />
+          </Reanimated.View>
 
-            <View style={styles.mediaButtonsRow}>
-              <Pressable
-                style={({ pressed }) => [styles.mediaActionBtn, pressed && styles.btnPressed]}
-                onPress={() => handleUploadMedia('video')}
-              >
-                <Text style={styles.mediaActionBtnText}>⤓ Upload Media</Text>
-              </Pressable>
+          {/* IDEA (fades away when filming a dance / trend: the trend is the idea) */}
+          {!hideIdea && (
+            <Reanimated.View exiting={FadeOut.duration(200)} entering={FadeIn.duration(250)}>
+              <Reanimated.View entering={FadeInUp.delay(100).duration(550)}>
+                <GlassCard strong radius={26} padding={20}>
+                  <View style={styles.ideaTop}>
+                    <JarvisOrb size={26} />
+                    <Text style={styles.ideaEyebrow}>YOUR IDEA</Text>
+                    <Pressable
+                      onPress={shuffleIdea}
+                      hitSlop={8}
+                      style={({ pressed }) => [styles.changeBtn, pressed && { transform: [{ scale: 0.92 }] }]}
+                      accessibilityRole="button"
+                      accessibilityLabel="Show me another idea"
+                    >
+                      <Reanimated.View style={ideaSpinStyle}>
+                        <Svg width={13} height={13} viewBox="0 0 24 24" fill="none">
+                          <Path d="M4 12a8 8 0 0113.7-5.7L20 8M20 3v5h-5M20 12a8 8 0 01-13.7 5.7L4 16M4 21v-5h5" stroke={ds.purple} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
+                        </Svg>
+                      </Reanimated.View>
+                      <Text style={styles.changeBtnText}>Another</Text>
+                    </Pressable>
+                  </View>
+                  {ideaThinking ? (
+                    <Reanimated.View entering={FadeIn.duration(120)} style={styles.ideaThinking}>
+                      <ActivityIndicator color={ds.purple} />
+                      <Text style={styles.ideaThinkingText}>Jarvis is picking…</Text>
+                    </Reanimated.View>
+                  ) : (
+                    <Reanimated.View key={currentIdea} entering={FadeInUp.duration(300)} style={styles.ideaTitleWrap}>
+                      <Text style={styles.ideaTitle}>“{currentIdea}”</Text>
+                    </Reanimated.View>
+                  )}
+                  <Text style={styles.ideaBody}>Shape this idea into a post your audience will want to see.</Text>
+                </GlassCard>
+              </Reanimated.View>
+            </Reanimated.View>
+          )}
 
-              <Pressable
-                style={({ pressed }) => [styles.mediaActionBtn, pressed && styles.btnPressed]}
-                onPress={() => handleUploadMedia('thumbnail')}
-              >
-                <Text style={styles.mediaActionBtnText}>🖼 Add Thumbnail</Text>
-              </Pressable>
+          {/* QUEST REQUIREMENTS (when started from a quest) */}
+          {questDraft?.requirements && questDraft.requirements.length > 0 && (
+            <View style={styles.questCard}>
+              <GlassCard strong radius={22} padding={16}>
+                <View style={styles.questHead}>
+                  <Text style={styles.questHeadText}>Quest requirements</Text>
+                  {questDraft.xpReward ? <Text style={styles.questXp}>+{questDraft.xpReward} XP</Text> : null}
+                </View>
+                {questDraft.requirements.map((req, idx) => (
+                  <View key={idx} style={styles.questReq}>
+                    <View style={styles.questReqDot} />
+                    <Text style={styles.questReqText}>{req}</Text>
+                  </View>
+                ))}
+              </GlassCard>
             </View>
-          </View>
+          )}
 
-          {/* 4. CAPTION WRITING */}
-          <View style={styles.sectionLabelRow}>
-            <Text style={styles.sectionLabel}>CAPTION WRITING</Text>
-            <View style={styles.aiBadge}>
-              <Text style={styles.aiBadgeText}>{aiEditsLeft} AI EDITS LEFT</Text>
-            </View>
+          {/* 1. PLATFORMS */}
+          <StepHeader
+            n={1}
+            title="Where it goes"
+            done={isPlatformsReady}
+            viewRef={(v) => (sectionRefs.current.platforms = v)}
+          />
+          <View style={styles.chipsWrap}>
+            {stage1Platforms.map((plat) => (
+              <PlatformChip
+                key={plat.id}
+                id={plat.id}
+                name={plat.name}
+                selected={selectedPlatforms.includes(plat.id)}
+                onPress={() => togglePlatform(plat.id)}
+              />
+            ))}
           </View>
+          <Text style={styles.note}>
+            {userProfile?.tier === 'pro' || userProfile?.tier === 'founding'
+              ? 'Pro posts to each platform for you at the time you pick.'
+              : 'Free plans prepare posts for each platform. Auto-posting is part of Pro.'}
+          </Text>
 
-          <View style={styles.captionContainer}>
+          {/* 2. FORMAT */}
+          <StepHeader
+            n={2}
+            title="Format"
+            done={isFormatReady}
+            viewRef={(v) => (sectionRefs.current.format = v)}
+          />
+          <RecommendedFormat
+            id={recommendedFormatConfig.id}
+            title={recommendedFormatConfig.title}
+            badge={recommendedFormatConfig.badge}
+            description={recommendedFormatConfig.recommendedDescription}
+            selected={selectedFormat === recommendedFormatConfig.id}
+            onPress={() => setSelectedFormat(recommendedFormatConfig.id)}
+          />
+          <View style={styles.tilesGrid}>
+            {otherFormats.map((f) => (
+              <FormatTile
+                key={f.id}
+                id={f.id}
+                title={f.title}
+                badge={f.badge}
+                selected={selectedFormat === f.id}
+                onPress={() => setSelectedFormat(f.id)}
+              />
+            ))}
+          </View>
+          {selectedFormat === 'short_video' && <FilmMethodPicker method={filmMethod} onChange={setFilmMethod} />}
+          {incompatiblePlatforms.length > 0 && (
+            <Text style={styles.note}>
+              {incompatiblePlatforms.map((p) => ALL_AVAILABLE_PLATFORMS.find((x) => x.id === p)?.name).join(' & ')} will adapt your{' '}
+              {currentFormatConfig.title.toLowerCase()} to fit its feed.
+            </Text>
+          )}
+
+          {/* 3. MEDIA */}
+          <StepHeader
+            n={3}
+            title={isNativeFilm || isCameraFilm ? 'Film it' : 'Media'}
+            done={isMediaReady}
+            viewRef={(v) => (sectionRefs.current.media = v)}
+          />
+          {isNativeFilm || isCameraFilm ? (
+            <FilmPlanCard
+              plan={filmPlan}
+              sounds={soundIdeas}
+              platforms={handoffPlatforms}
+              onOpen={openPlatformToFilm}
+              onStyleChange={setFilmStyle}
+              mode={isCameraFilm ? 'camera' : 'native'}
+              overlayText={overlayText}
+              onOverlayChange={setOverlayText}
+              recording={hasMedia && pickedMedia?.kind === 'video' ? { duration: pickedMedia.duration } : null}
+              onRecord={addFromCamera}
+              onRemoveRecording={clearMedia}
+            />
+          ) : (
+          <MediaZone
+            isText={selectedFormat === 'text'}
+            hasMedia={hasMedia}
+            hasThumbnail={hasThumbnail}
+            label={currentFormatConfig.mediaLabel}
+            sub={dynamicMediaSub}
+            addLabel={currentFormatConfig.primaryMediaActionText}
+            onAdd={addFromLibrary}
+            onCamera={addFromCamera}
+            cameraLabel={wantsVideo ? 'Record with camera' : 'Take a photo'}
+            onThumbnail={() => setHasThumbnail(!hasThumbnail)}
+            onRemove={clearMedia}
+          />
+          )}
+
+          {attachedAudio && (
+            <Reanimated.View entering={FadeIn.duration(240)} style={styles.voiceAttached}>
+              <View style={styles.voiceAttachedIcon}>
+                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                  <Rect x="9" y="2" width="6" height="12" rx="3" stroke={ds.purple} strokeWidth={2.1} />
+                  <Path d="M5 11a7 7 0 0014 0M12 18v4" stroke={ds.purple} strokeWidth={2.1} strokeLinecap="round" />
+                </Svg>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.voiceAttachedTitle}>Voiceover added</Text>
+                <Text style={styles.voiceAttachedSub} numberOfLines={1}>
+                  {attachedAudio.voiceName} · {attachedAudio.duration}
+                </Text>
+              </View>
+              <Pressable onPress={() => onClearAttachedAudio?.()} hitSlop={8} accessibilityRole="button" accessibilityLabel="Remove voiceover">
+                <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                  <Path d="M18 6L6 18M6 6l12 12" stroke={ds.text3} strokeWidth={2.4} strokeLinecap="round" />
+                </Svg>
+              </Pressable>
+            </Reanimated.View>
+          )}
+
+          {/* 4. CAPTION */}
+          <StepHeader
+            n={4}
+            title="Caption"
+            done={isCaptionReady}
+            right={<EditsMeter left={aiEditsLeft} total={3} />}
+            viewRef={(v) => (sectionRefs.current.caption = v)}
+          />
+          <View style={[styles.captionCard, isCaptionFocused && styles.captionCardFocused]}>
             <TextInput
-              style={styles.captionInput}
+              ref={captionInputRef}
+              style={styles.captionField}
               multiline
               value={caption}
               onChangeText={setCaption}
-              placeholder="Write your post caption..."
-              placeholderTextColor="#94A3B8"
+              onFocus={() => setIsCaptionFocused(true)}
+              onBlur={() => setIsCaptionFocused(false)}
+              placeholder="Write your caption…"
+              placeholderTextColor={ds.text3}
+              selectionColor={ds.purple}
+              cursorColor={ds.purple}
             />
-
-            <View style={styles.captionMetaRow}>
-              <View style={styles.captionMetaLeft}>
-                <Pressable
-                  onPress={() => {
-                    const tones: ('Helpful' | 'Viral' | 'Story')[] = ['Helpful', 'Viral', 'Story'];
-                    const next = tones[(tones.indexOf(captionTone) + 1) % tones.length];
-                    setCaptionTone(next);
-                  }}
-                  style={styles.tonePill}
-                >
-                  <Text style={styles.toneLabel}>TONE</Text>
-                  <Text style={styles.toneValue}>💡 {captionTone}</Text>
-                </Pressable>
-
-                <Pressable
-                  onPress={() => {
-                    const ctas: ('Ask Question' | 'Save Post' | 'Share Thoughts')[] = [
-                      'Ask Question',
-                      'Save Post',
-                      'Share Thoughts',
-                    ];
-                    const next = ctas[(ctas.indexOf(captionCta) + 1) % ctas.length];
-                    setCaptionCta(next);
-                  }}
-                  style={styles.tonePill}
-                >
-                  <Text style={styles.toneLabel}>CTA</Text>
-                  <Text style={styles.toneValue}>{captionCta}</Text>
-                </Pressable>
+            {isAiProcessing && (
+              <View style={styles.aiWorking}>
+                <JarvisOrb size={22} />
+                <Text style={styles.aiWorkingText}>Jarvis is rewriting…</Text>
               </View>
-
-              <Text style={styles.charCountText}>{caption.length} Characters</Text>
+            )}
+            <Text style={styles.charCount}>{caption.length} characters</Text>
+            <View style={styles.captionMeta}>
+              <CyclePill
+                label="TONE"
+                value={captionTone}
+                onPress={() => setCaptionTone(captionTones[(captionTones.indexOf(captionTone) + 1) % captionTones.length])}
+              />
+              <CyclePill
+                label="ENDS WITH"
+                value={captionCta === 'Ask Question' ? 'Question' : captionCta === 'Save Post' ? 'Save' : 'Share'}
+                onPress={() => setCaptionCta(captionCtas[(captionCtas.indexOf(captionCta) + 1) % captionCtas.length])}
+              />
             </View>
-
-            {/* 3 AI Action Pills */}
-            <View style={styles.aiButtonsRow}>
-              <Pressable
-                style={({ pressed }) => [styles.aiPillBtn, pressed && styles.btnPressed]}
-                onPress={() => handleAiAction('rewrite')}
-                disabled={isAiProcessing}
-              >
-                <Text style={styles.aiPillBtnText}>
-                  {isAiProcessing ? '...' : 'REWRITE'}
-                </Text>
-              </Pressable>
-
-              <Pressable
-                style={({ pressed }) => [styles.aiPillBtn, pressed && styles.btnPressed]}
-                onPress={() => handleAiAction('shorter')}
-                disabled={isAiProcessing}
-              >
-                <Text style={styles.aiPillBtnText}>SHORTER</Text>
-              </Pressable>
-
-              <Pressable
-                style={({ pressed }) => [styles.aiPillBtn, pressed && styles.btnPressed]}
-                onPress={() => handleAiAction('cta')}
-                disabled={isAiProcessing}
-              >
-                <Text style={styles.aiPillBtnText}>ADD CTA</Text>
-              </Pressable>
+            <View style={styles.aiRow}>
+              <AiAction label="Rewrite" onPress={() => handleAiAction('rewrite')} disabled={isAiProcessing || aiEditsLeft === 0} />
+              <AiAction label="Shorten" onPress={() => handleAiAction('shorter')} disabled={isAiProcessing || aiEditsLeft === 0} />
+              <AiAction label="Ask viewers" onPress={() => handleAiAction('cta')} disabled={isAiProcessing || aiEditsLeft === 0} />
             </View>
           </View>
+          <Text style={styles.note}>
+            {ideaGoal?.caption
+              ? 'From the Caption writer. Edit it here any time.'
+              : ideaGoal?.goal
+              ? `Written to ${IDEA_GOALS.find((g) => g.id === ideaGoal.goal)?.label.toLowerCase()}. Tone and ending are set for that.`
+              : 'Tip: name the exact moment or mistake, and one thing people can try.'}
+          </Text>
 
-          {/* 5. HASHTAGS & TAGS */}
-          <Text style={styles.sectionLabel}>HASHTAGS &amp; TAGS</Text>
-          <View style={styles.tagsContainer}>
-            <View style={styles.tagsPillsRow}>
+          {/* 5. TAGS */}
+          <StepHeader n={5} title="Tags" done={tags.length > 0} />
+          <GlassCard strong radius={22} padding={16}>
+            <View style={styles.tagsWrap}>
               {tags.map((tag) => (
-                <Pressable
-                  key={tag}
-                  onPress={() => removeTag(tag)}
-                  style={styles.tagPill}
-                >
-                  <Text style={styles.tagPillText}>{tag}</Text>
-                  <Text style={styles.tagPillCross}>✕</Text>
-                </Pressable>
+                <TagChip key={tag} tag={tag} onRemove={() => removeTag(tag)} />
               ))}
+              {tags.length === 0 && <Text style={styles.noTags}>No tags yet</Text>}
             </View>
-
             {showAddTagInput && (
-              <View style={styles.addTagInputRow}>
+              <View style={styles.addTagRow}>
                 <TextInput
-                  style={styles.addTagInput}
-                  placeholder="Enter tag (e.g. #growth)"
-                  placeholderTextColor="#94A3B8"
+                  style={styles.addTagField}
+                  placeholder="#yourtag"
+                  placeholderTextColor={ds.text3}
                   value={newTagInput}
                   onChangeText={setNewTagInput}
                   onSubmitEditing={handleAddCustomTag}
+                  autoFocus
+                  autoCapitalize="none"
                 />
-                <Pressable onPress={handleAddCustomTag} style={styles.addTagConfirmBtn}>
-                  <Text style={styles.addTagConfirmText}>Add</Text>
+                <Pressable onPress={handleAddCustomTag} style={styles.addTagBtn} accessibilityRole="button">
+                  <Text style={styles.addTagBtnText}>Add</Text>
                 </Pressable>
               </View>
             )}
-
-            <View style={styles.tagActionsRow}>
-              <Pressable
-                style={({ pressed }) => [styles.tagActionBtn, pressed && styles.btnPressed]}
-                onPress={() => setShowAddTagInput(!showAddTagInput)}
-              >
-                <Text style={styles.tagActionBtnText}>+ Add Custom Tag</Text>
-              </Pressable>
-
-              <Pressable
-                style={({ pressed }) => [styles.tagActionBtn, pressed && styles.btnPressed]}
-                onPress={handleGenerateTags}
-              >
-                <Text style={styles.tagActionBtnText}>✨ Generate Tags</Text>
-              </Pressable>
-            </View>
-          </View>
-
-          {/* 6. PUBLISHING & SCHEDULE TIMING */}
-          <View style={styles.timingCard}>
-            <View style={styles.timingHeaderRow}>
-              <Text style={styles.timingSuggestedLightbulb}>💡</Text>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.timingSuggestedTitle}>Suggested time: Today • 7:30 PM</Text>
-                <Text style={styles.timingSuggestedSub}>Your audience is usually more active in this window.</Text>
+            <View style={styles.tagActions}>
+              <View style={styles.flex1}>
+                <AppButton title={showAddTagInput ? 'Cancel' : 'Add tag'} variant="outline" onPress={() => setShowAddTagInput(!showAddTagInput)} />
+              </View>
+              <View style={styles.flex1}>
+                <AppButton title="Suggest" variant="quiet" onPress={handleGenerateTags} />
               </View>
             </View>
+          </GlassCard>
 
-            {/* 3 Timing Tabs */}
-            <View style={styles.timingTabsRow}>
-              {(['now', 'schedule', 'draft'] as const).map((m) => {
-                const isActive = publishMode === m;
-                const label = m === 'now' ? 'POST NOW' : m === 'schedule' ? 'SCHEDULE' : 'DRAFT';
-                return (
-                  <Pressable
-                    key={m}
-                    onPress={() => {
-                      if (Platform.OS !== 'web') {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      }
-                      setPublishMode(m);
-                    }}
-                    style={[
-                      styles.timingTabBtn,
-                      isActive && styles.timingTabBtnActive,
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.timingTabBtnText,
-                        isActive && styles.timingTabBtnTextActive,
-                      ]}
-                    >
-                      {label}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-
+          {/* 6. WHEN */}
+          <StepHeader
+            n={6}
+            title="When to post"
+            done={isScheduleReady}
+            viewRef={(v) => (sectionRefs.current.schedule = v)}
+          />
+          <GlassCard strong radius={22} padding={16}>
+            <ModeSwitch mode={publishMode} onChange={setPublishMode} labels={isNativeFilm ? { now: 'Film now', schedule: 'Remind me' } : undefined} />
             {publishMode === 'schedule' && (
-              <View style={styles.scheduledInfoBox}>
-                <View>
-                  <Text style={styles.scheduledLabel}>SCHEDULED FOR</Text>
-                  <Text style={styles.scheduledValue}>{scheduledTime}</Text>
-                </View>
+              <Reanimated.View entering={FadeInUp.duration(250)}>
                 <Pressable
                   onPress={() => {
-                    triggerModalAnim();
-                    setShowCalendarModal(true);
+                    setShowScheduleSheet(true);
                   }}
-                  hitSlop={8}
+                  style={styles.whenRow}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Scheduled for ${scheduledTime}. Change`}
                 >
-                  <Text style={styles.scheduledChangeLink}>CHANGE</Text>
+                  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                    <Rect x="3" y="4" width="18" height="17" rx="3" stroke={ds.purple} strokeWidth={2.1} />
+                    <Path d="M16 2v4M8 2v4M3 10h18" stroke={ds.purple} strokeWidth={2.1} strokeLinecap="round" />
+                  </Svg>
+                  <View style={styles.flex1}>
+                    <Text style={styles.whenLabel}>{isNativeFilm ? 'Remind me at' : 'Scheduled for'}</Text>
+                    <Text style={styles.whenValue}>{scheduledTime}</Text>
+                  </View>
+                  <Text style={styles.whenChange}>Change</Text>
                 </Pressable>
+              </Reanimated.View>
+            )}
+            <View style={styles.jarvisTime}>
+              <JarvisOrb size={22} />
+              <Text style={styles.jarvisTimeText}>
+                Jarvis suggests <Text style={styles.jarvisTimeBold}>7:30 PM</Text>, when your audience is usually around.
+              </Text>
+            </View>
+          </GlassCard>
+
+          {/* READINESS + ACTIONS */}
+          <View style={styles.readyWrap}>
+            <ReadinessCard percent={readinessPercent} steps={readinessSteps} onStep={(k) => navigateToSection(k as 'format' | 'caption' | 'platforms' | 'media' | 'schedule')} />
+          </View>
+          <View style={styles.actions}>
+            {isNativeFilm && publishMode === 'now' && handoffPlatforms.length > 1 && filmApp && (
+              <Reanimated.View entering={FadeIn.duration(200)}>
+                <Text style={styles.filmInLabel}>Film in</Text>
+                <View style={styles.filmInRow}>
+                  {handoffPlatforms.map((p) => {
+                    const on = p === filmApp;
+                    return (
+                      <Pressable
+                        key={p}
+                        onPress={() => {
+                          if (Platform.OS !== 'web') Haptics.selectionAsync();
+                          setFilmAppChoice(p);
+                        }}
+                        accessibilityRole="radio"
+                        accessibilityState={{ checked: on }}
+                        accessibilityLabel={`Film in ${HANDOFF_NAMES[p]}`}
+                        style={[styles.filmInChip, on && styles.filmInChipOn]}
+                      >
+                        <PlatformLogo type={p} size={22} />
+                        <Text style={[styles.filmInText, on && { color: ds.purple }]} numberOfLines={1}>
+                          {HANDOFF_NAMES[p]}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+                <Text style={styles.filmInNote}>
+                  Film once where you want the sound, then share the same video to{' '}
+                  {handoffPlatforms
+                    .filter((p) => p !== filmApp)
+                    .map((p) => HANDOFF_NAMES[p])
+                    .join(' and ')}
+                  .
+                </Text>
+              </Reanimated.View>
+            )}
+            <AppButton
+              title={
+                publishMode === 'draft'
+                  ? 'Save draft'
+                  : isNativeFilm
+                  ? publishMode === 'now'
+                    ? `Film in ${filmApp ? HANDOFF_NAMES[filmApp] : 'the app'}`
+                    : 'Set reminder'
+                  : publishMode === 'now'
+                  ? 'Post now'
+                  : 'Schedule post'
+              }
+              size="lg"
+              onPress={handlePublishOrSchedule}
+              iconRight={
+                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                  <Path d="M5 12h14M13 6l6 6-6 6" stroke="#FFFFFF" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
+                </Svg>
+              }
+            />
+            {publishMode !== 'draft' && (
+              <View style={styles.secondaryAction}>
+                <AppButton title="Save as draft" variant="glass" onPress={saveDraft} />
               </View>
             )}
           </View>
 
-          {/* 7. POST READINESS CHECKLIST */}
-          <View style={styles.readinessCard}>
-            <View style={styles.readinessHeaderRow}>
-              <Text style={styles.readinessTitle}>POST READINESS</Text>
-              <Text style={styles.readinessPercent}>{readinessPercent}%</Text>
-            </View>
-
-            <View style={styles.readinessProgressBarTrack}>
-              <LinearGradient
-                colors={['#7C3AED', '#582CDB']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={[styles.readinessProgressBarFill, { width: `${readinessPercent}%` }]}
-              />
-            </View>
-
-            <View style={styles.checklistRow}>
-              <View style={styles.checkIconFilled}>
-                <Text style={styles.checkMarkWhite}>✓</Text>
-              </View>
-              <Text style={styles.checklistText}>Caption added and optimized</Text>
-            </View>
-
-            <View style={styles.checklistRow}>
-              <View style={styles.checkIconFilled}>
-                <Text style={styles.checkMarkWhite}>✓</Text>
-              </View>
-              <Text style={styles.checklistText}>
-                Platforms selected ({selectedPlatforms.map((p) => {
-                  const match = ALL_AVAILABLE_PLATFORMS.find((item) => item.id === p);
-                  return match ? match.shortName : p;
-                }).join(', ')})
-              </Text>
-            </View>
-
-            <View style={styles.checklistRow}>
-              {hasMedia ? (
-                <View style={styles.checkIconFilled}>
-                  <Text style={styles.checkMarkWhite}>✓</Text>
-                </View>
-              ) : (
-                <View style={styles.checkIconEmpty} />
-              )}
-              <Text style={[styles.checklistText, !hasMedia && { color: '#94A3B8' }]}>
-                {hasMedia ? 'Media uploaded and attached' : 'Media not added'}
-              </Text>
-            </View>
-
-            <View style={styles.checklistRow}>
-              <View style={styles.checkIconFilled}>
-                <Text style={styles.checkMarkWhite}>✓</Text>
-              </View>
-              <Text style={styles.checklistText}>Schedule time selected</Text>
-            </View>
-          </View>
-
-          {/* 8. STREAK IMPACT BANNER */}
-          <View style={styles.streakBannerCard}>
-            <View style={styles.streakBannerIconCircle}>
-              <Text style={{ fontSize: 16 }}>⚡</Text>
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.streakBannerTitle}>
-                Scheduling this post today protects your <Text style={{ fontWeight: '900' }}>47-day streak</Text>.
-              </Text>
-              <View style={styles.streakBannerBadgesRow}>
-                <View style={styles.streakXpPill}>
-                  <Text style={styles.streakXpText}>+50 CREATOR XP</Text>
-                </View>
-                <Text style={styles.streakMissionFraction}>STREAK MISSION: 0 / 1</Text>
-              </View>
-            </View>
-          </View>
-
-          {/* 9. JARVIS WRITING INSIGHT (LUXURY LAVENDER-CREAM DESIGN) */}
-          <LinearGradient
-            colors={['#FFFFFF', '#F8F5FE']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }}
-            style={styles.jarvisWritingCard}
-          >
-            <View style={styles.jarvisWritingHeaderRow}>
-              <View style={styles.jarvisWritingHeaderLeft}>
-                <Animated.View
-                  style={[
-                    styles.jarvisWritingFlameIconBox,
-                    { transform: [{ translateY: flameFloatY }] },
-                  ]}
-                >
-                  <Image
-                    source={require('../../assets/images/jarvis-ghost-clean.png')}
-                    style={styles.jarvisWritingFlame}
-                    resizeMode="contain"
-                  />
-                </Animated.View>
-                <View style={styles.jarvisInsightBadge}>
-                  <Text style={styles.jarvisInsightTag}>⚡ JARVIS WRITING INSIGHT</Text>
-                </View>
-              </View>
-
-              <View style={styles.jarvisScorePill}>
-                <Text style={styles.jarvisScoreText}>95% Retention</Text>
-              </View>
-            </View>
-
-            <Text style={styles.jarvisWritingTitle}>Hook Polish &amp; Audience Retention</Text>
-            <Text style={styles.jarvisWritingBody}>
-              This caption is stronger when it stays specific. Mention the exact mistake, what changed, and one actionable lesson other creators can bookmark.
-            </Text>
-
-            {/* Interactive Quick Filter Chips */}
-            <View style={styles.jarvisChipsRow}>
-              {[
-                { id: 'rewrite', label: '🔥 Stronger Hook' },
-                { id: 'cta', label: '🎯 Add Viral CTA' },
-                { id: 'shorter', label: '⚡ Make Shorter' },
-              ].map((chip) => (
-                <Pressable
-                  key={chip.id}
-                  onPress={() => handleAiAction(chip.id as 'rewrite' | 'cta' | 'shorter')}
-                  style={styles.jarvisChip}
-                >
-                  <Text style={styles.jarvisChipText}>{chip.label}</Text>
-                </Pressable>
-              ))}
-            </View>
-
-            <Pressable
-              style={({ pressed }) => [styles.improveWithJarvisBtn, pressed && styles.btnPressed]}
-              onPress={() => handleAiAction('rewrite')}
-              disabled={isAiProcessing}
-            >
-              <LinearGradient
-                colors={['#7C3AED', '#582CDB']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.improveWithJarvisGradient}
-              >
-                <Text style={styles.improveWithJarvisBtnText}>
-                  {isAiProcessing ? 'Refining with AI...' : '🪄 Improve Caption with Jarvis AI'}
-                </Text>
-              </LinearGradient>
-            </Pressable>
-          </LinearGradient>
-
-          {/* 10. PRIMARY & SECONDARY ACTION BUTTONS */}
-          <View style={styles.composerActionRow}>
-            <Pressable
-              style={({ pressed }) => [styles.primaryComposerBtn, pressed && styles.btnPressed]}
-              onPress={handlePublishOrSchedule}
-            >
-              <LinearGradient
-                colors={['#7C3AED', '#582CDB']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.primaryComposerGradient}
-              >
-                <Text style={styles.primaryComposerBtnText}>
-                  {publishMode === 'now' ? 'Post Now ➔' : publishMode === 'schedule' ? 'Schedule Post' : 'Save as Draft'}
-                </Text>
-              </LinearGradient>
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [styles.secondaryComposerBtn, pressed && styles.btnPressed]}
-              onPress={() => {
-                setPublishMode('draft');
-                handlePublishOrSchedule();
-              }}
-            >
-              <Text style={styles.secondaryComposerBtnText}>Save Draft</Text>
-            </Pressable>
-          </View>
-
-          {/* Bottom spacing to clear floating tab bar */}
-          <View style={{ height: 110 }} />
         </ScrollView>
+
+        {composerToast && <ComposerToast message={composerToast} />}
+
+        {showPostedCheck && pendingHandoff && (
+          <PostedCheck
+            platform={pendingHandoff}
+            onYes={confirmPosted}
+            onNotYet={() => {
+              setShowPostedCheck(false);
+              setPendingHandoff(null);
+              showToastNotice(`No rush. It's saved here when you're ready.`);
+            }}
+          />
+        )}
 
         {/* UNIFIED SIGNATURE FLOATING TAB BAR */}
         <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
@@ -1243,16 +1494,20 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
+                <View style={styles.modalTitleContainer}>
                   <Text style={styles.modalTitle}>Choose Social Platforms</Text>
-                  <Text style={styles.modalSubtitle}>Auto-format &amp; publish across all channels</Text>
+                  <Text style={styles.modalSubtitle}>Choose where your post will be published</Text>
                 </View>
                 <Pressable onPress={() => setShowPlatformsModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
                   <Text style={styles.modalCloseCross}>✕</Text>
                 </Pressable>
               </View>
 
-              <ScrollView style={{ maxHeight: 340 }} showsVerticalScrollIndicator={false}>
+              <ScrollView
+                style={{ maxHeight: 285 }}
+                contentContainerStyle={{ paddingBottom: 6 }}
+                showsVerticalScrollIndicator={true}
+              >
                 {ALL_AVAILABLE_PLATFORMS.map((plat) => {
                   const isSelected = selectedPlatforms.includes(plat.id);
                   return (
@@ -1277,7 +1532,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
                       </View>
 
                       <View style={[styles.modalCheckbox, isSelected && styles.modalCheckboxActive]}>
-                        {isSelected && <Text style={{ color: '#FFFFFF', fontSize: 11, fontWeight: '900' }}>✓</Text>}
+                        {isSelected && <Text style={{ color: '#FFFFFF', fontSize: 11, fontWeight: '700' }}>✓</Text>}
                       </View>
                     </Pressable>
                   );
@@ -1285,7 +1540,11 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
               </ScrollView>
 
               <Pressable
-                style={styles.modalPrimaryActionBtn}
+                disabled={selectedPlatforms.length === 0}
+                style={[
+                  styles.modalPrimaryActionBtn,
+                  selectedPlatforms.length === 0 && styles.modalPrimaryActionBtnDisabled,
+                ]}
                 onPress={() => {
                   if (Platform.OS !== 'web') {
                     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -1293,16 +1552,24 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
                   setShowPlatformsModal(false);
                 }}
               >
-                <LinearGradient
-                  colors={['#7C3AED', '#582CDB']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.modalPrimaryGradient}
-                >
-                  <Text style={styles.modalPrimaryActionText}>
-                    Apply Channels ({selectedPlatforms.length} Selected) ✓
-                  </Text>
-                </LinearGradient>
+                {selectedPlatforms.length > 0 ? (
+                  <LinearGradient
+                    colors={['#7C3AED', '#582CDB']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={styles.modalPrimaryGradient}
+                  >
+                    <Text style={styles.modalPrimaryActionText}>
+                      Apply Channels ({selectedPlatforms.length} Selected) ✓
+                    </Text>
+                  </LinearGradient>
+                ) : (
+                  <View style={styles.modalPrimaryDisabledContainer}>
+                    <Text style={styles.modalPrimaryDisabledText}>
+                      Select at least 1 channel
+                    </Text>
+                  </View>
+                )}
               </Pressable>
             </Animated.View>
           </View>
@@ -1318,16 +1585,16 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
+                <View style={styles.modalTitleContainer}>
                   <Text style={styles.modalTitle}>Choose Post Idea</Text>
-                  <Text style={styles.modalSubtitle}>Select from your Idea Vault or Quick Prompts</Text>
+                  <Text style={styles.modalSubtitle}>Choose an idea from your vault or start with a quick prompt.</Text>
                 </View>
                 <Pressable onPress={() => setShowChangeIdeaModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
                   <Text style={styles.modalCloseCross}>✕</Text>
                 </Pressable>
               </View>
 
-              <ScrollView style={{ maxHeight: 260 }} showsVerticalScrollIndicator={false}>
+              <ScrollView style={{ maxHeight: 340 }} showsVerticalScrollIndicator={false}>
                 {SAMPLE_IDEAS.map((idea, idx) => (
                   <Pressable
                     key={idx}
@@ -1346,203 +1613,30 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
                     <Text style={[styles.ideaChoiceText, currentIdea === idea && styles.ideaChoiceTextActive]}>
                       &ldquo;{idea}&rdquo;
                     </Text>
+                    {currentIdea === idea && (
+                      <View style={styles.ideaChoiceCheckmark}>
+                        <Text style={styles.ideaChoiceCheckmarkText}>✓</Text>
+                      </View>
+                    )}
                   </Pressable>
                 ))}
               </ScrollView>
-
-              <Pressable
-                style={styles.modalFullBtn}
-                onPress={() => setShowChangeIdeaModal(false)}
-              >
-                <Text style={styles.modalFullBtnText}>Close</Text>
-              </Pressable>
             </Animated.View>
           </View>
         </Modal>
 
-        {/* MODAL 2: FULL INTERACTIVE CALENDAR & TIME SCHEDULER */}
-        <Modal
-          visible={showCalendarModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowCalendarModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.calendarModalCard, { transform: [{ scale: modalPopScale }] }]}>
-              {/* Header */}
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Schedule Post</Text>
-                  <Text style={styles.modalSubtitle}>Pick a date &amp; peak audience window</Text>
-                </View>
-                <Pressable onPress={() => setShowCalendarModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
-              </View>
-
-              <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 460 }}>
-                {/* Month Selector Bar */}
-                <View style={styles.calMonthNavRow}>
-                  <Pressable
-                    onPress={handlePrevMonth}
-                    style={({ pressed }) => [styles.calMonthNavBtn, pressed && styles.btnPressed]}
-                    hitSlop={8}
-                  >
-                    <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                      <Path d="M15 18L9 12L15 6" stroke="#171420" strokeWidth="2.5" strokeLinecap="round" />
-                    </Svg>
-                  </Pressable>
-
-                  <View style={{ alignItems: 'center' }}>
-                    <Text style={styles.calMonthNavTitle}>
-                      {MONTH_NAMES[calMonthIndex]} {calYear}
-                    </Text>
-                    {calMonthIndex === 7 && calYear === 2026 && (
-                      <Text style={styles.calMonthNavBadge}>CURRENT MONTH</Text>
-                    )}
-                  </View>
-
-                  <Pressable
-                    onPress={handleNextMonth}
-                    style={({ pressed }) => [styles.calMonthNavBtn, pressed && styles.btnPressed]}
-                    hitSlop={8}
-                  >
-                    <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                      <Path d="M9 18L15 12L9 6" stroke="#171420" strokeWidth="2.5" strokeLinecap="round" />
-                    </Svg>
-                  </Pressable>
-                </View>
-
-                {/* Day of Week Headers */}
-                <View style={styles.calWeekDaysRow}>
-                  {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((dayChar, dIdx) => (
-                    <Text key={dIdx} style={styles.calWeekDayText}>
-                      {dayChar}
-                    </Text>
-                  ))}
-                </View>
-
-                {/* Days Grid */}
-                <View style={styles.calDaysGrid}>
-                  {/* Empty cells before month start */}
-                  {Array.from({ length: firstDayOfWeek }).map((_, emptyIdx) => (
-                    <View key={`empty_${emptyIdx}`} style={styles.calDayCell} />
-                  ))}
-
-                  {/* Day numbers */}
-                  {Array.from({ length: daysInMonth }).map((_, dayIdx) => {
-                    const dayNum = dayIdx + 1;
-                    const isSelected = selectedCalDay === dayNum;
-                    const isToday = dayNum === 18 && calMonthIndex === 7 && calYear === 2026;
-                    const isPeakDay = dayNum % 3 === 0 || dayNum === 18 || dayNum === 19;
-
-                    return (
-                      <Pressable
-                        key={`day_${dayNum}`}
-                        onPress={() => {
-                          if (Platform.OS !== 'web') {
-                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                          }
-                          setSelectedCalDay(dayNum);
-                        }}
-                        style={[
-                          styles.calDayCell,
-                          isSelected && styles.calDayCellSelected,
-                        ]}
-                      >
-                        <Text
-                          style={[
-                            styles.calDayNumText,
-                            isSelected && styles.calDayNumTextSelected,
-                            isToday && !isSelected && styles.calDayNumTextToday,
-                          ]}
-                        >
-                          {dayNum}
-                        </Text>
-                        {isToday && !isSelected && <View style={styles.calTodayDot} />}
-                        {isPeakDay && !isSelected && !isToday && (
-                          <View style={styles.calPeakDot} />
-                        )}
-                      </Pressable>
-                    );
-                  })}
-                </View>
-
-                {/* Time Slots Section */}
-                <Text style={styles.calSectionHeader}>SELECT TIME SLOT</Text>
-                <View style={styles.calTimeSlotsGrid}>
-                  {TIME_SLOTS.map((slot) => {
-                    const isSlotSelected = selectedTimeSlot === slot.time;
-                    return (
-                      <Pressable
-                        key={slot.id}
-                        onPress={() => {
-                          if (Platform.OS !== 'web') {
-                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                          }
-                          setSelectedTimeSlot(slot.time);
-                        }}
-                        style={[
-                          styles.calTimeSlotCard,
-                          isSlotSelected && styles.calTimeSlotCardActive,
-                        ]}
-                      >
-                        <Text
-                          style={[
-                            styles.calTimeSlotTime,
-                            isSlotSelected && styles.calTimeSlotTimeActive,
-                          ]}
-                        >
-                          {slot.time}
-                        </Text>
-                        <Text
-                          style={[
-                            styles.calTimeSlotLabel,
-                            isSlotSelected && styles.calTimeSlotLabelActive,
-                          ]}
-                        >
-                          {slot.label}
-                        </Text>
-                      </Pressable>
-                    );
-                  })}
-                </View>
-
-                {/* Selected Slot Preview Callout */}
-                <View style={styles.calPreviewBox}>
-                  <View style={styles.calPreviewIconCircle}>
-                    <Text style={{ fontSize: 16 }}>⚡</Text>
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.calPreviewTitle}>
-                      {MONTH_NAMES[calMonthIndex].substring(0, 3)} {selectedCalDay}, {calYear} at {selectedTimeSlot}
-                    </Text>
-                    <Text style={styles.calPreviewSub}>
-                      Peak audience active window • Streak protection preserved
-                    </Text>
-                  </View>
-                </View>
-              </ScrollView>
-
-              {/* Schedule Confirmation CTA */}
-              <Pressable
-                style={styles.modalPrimaryActionBtn}
-                onPress={handleConfirmCalendarSchedule}
-              >
-                <LinearGradient
-                  colors={['#7C3AED', '#582CDB']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.modalPrimaryGradient}
-                >
-                  <Text style={styles.modalPrimaryActionText}>
-                    Schedule Post ({MONTH_NAMES[calMonthIndex].substring(0, 3)} {selectedCalDay}, {selectedTimeSlot}) ✓
-                  </Text>
-                </LinearGradient>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
+        {/* WHEN TO POST: Jarvis's best times + any day / time in the next two weeks */}
+        <ScheduleSheet
+          visible={showScheduleSheet}
+          onClose={() => setShowScheduleSheet(false)}
+          mode={isNativeFilm ? 'remind' : 'schedule'}
+          onConfirm={(label) => {
+            setScheduledTime(label);
+            setPublishMode('schedule');
+            setShowScheduleSheet(false);
+            showToastNotice(`${isNativeFilm ? 'Reminder set for' : 'Scheduled for'} ${label}`);
+          }}
+        />
 
         {/* MODAL 3: NOTIFICATIONS CENTER */}
         <Modal
@@ -1554,7 +1648,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
               <View style={styles.modalHeaderRow}>
-                <View>
+                <View style={styles.modalTitleContainer}>
                   <Text style={styles.modalTitle}>Notifications</Text>
                   <Text style={styles.modalSubtitle}>Streak updates &amp; creator alerts</Text>
                 </View>
@@ -1605,46 +1699,6 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
           onSaveProfile={onSaveProfile}
         />
 
-        {/* MODAL 5: CREATOR CHAT */}
-        <Modal
-          visible={showChatModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowChatModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Jarvis AI Chat</Text>
-                  <Text style={styles.modalSubtitle}>Real-time creative assistant</Text>
-                </View>
-                <Pressable
-                  onPress={() => setShowChatModal(false)}
-                  style={styles.modalCloseCircle}
-                  hitSlop={8}
-                >
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
-              </View>
-
-              <View style={styles.chatCard}>
-                <Text style={styles.chatSpeaker}>Jarvis AI</Text>
-                <Text style={styles.chatMsg}>
-                  I reviewed your draft! Adding a clear question at the end boosts comment engagement by 3.2x.
-                </Text>
-              </View>
-
-              <Pressable
-                style={styles.modalFullBtn}
-                onPress={() => setShowChatModal(false)}
-              >
-                <Text style={styles.modalFullBtnText}>Close Chat</Text>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
-
         {/* SIGNATURE ANIMATED GHOST CELEBRATION MODAL */}
         <AnimatedCompletionModal
           visible={showCelebrationModal}
@@ -1653,7 +1707,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
           speechBubble={celebrationSpeech}
           badgeText="POST READY"
           xpEarned={50}
-          streakCount={47}
+          streakCount={userProfile?.streakCount || 1}
           actionText="Keep Editing ➔"
           onDismiss={() => {
             setShowCelebrationModal(false);
@@ -1665,22 +1719,138 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
 };
 
 const styles = StyleSheet.create({
+  voiceAttached: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginTop: 10,
+    padding: 12,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.95)',
+  },
+  voiceAttachedIcon: { width: 38, height: 38, borderRadius: 12, backgroundColor: ds.lavender, alignItems: 'center', justifyContent: 'center' },
+  voiceAttachedTitle: { fontSize: 14.5, fontWeight: '800', color: ds.ink },
+  voiceAttachedSub: { fontSize: 12.5, fontWeight: '600', color: ds.text3, marginTop: 1 },
   safeArea: {
     flex: 1,
-    backgroundColor: '#FAF8F5',
+    backgroundColor: '#F7F5F0',
   },
   container: {
     flex: 1,
-    backgroundColor: '#FAF8F5',
+    width: '100%',
   },
+  flex1: { flex: 1 },
+  headlineWrap: { marginTop: 4, marginBottom: 16 },
+  headlineText: { fontWeight: '800', letterSpacing: -0.8, color: ds.ink },
+  headlineAccent: { color: ds.purple },
+  questChip: { alignSelf: 'flex-start', paddingHorizontal: 10, height: 24, justifyContent: 'center', borderRadius: 999, backgroundColor: ds.lavender, marginBottom: 10 },
+  questChipText: { fontSize: 11, fontWeight: '800', letterSpacing: 0.6, color: ds.purple },
+  ideaTop: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  ideaEyebrow: { flex: 1, fontSize: 11, fontWeight: '800', letterSpacing: 1, color: ds.purple },
+  changeBtn: { flexDirection: 'row', alignItems: 'center', gap: 5, height: 30, paddingHorizontal: 10, borderRadius: 999, backgroundColor: 'rgba(237, 233, 254, 0.9)' },
+  changeBtnText: { fontSize: 12.5, fontWeight: '800', color: ds.purple },
+  ideaTitleWrap: { minHeight: 68, justifyContent: 'center' },
+  ideaTitle: { fontSize: 22, lineHeight: 28, fontWeight: '800', color: ds.ink, letterSpacing: -0.5, marginTop: 12 },
+  ideaThinking: { minHeight: 68, marginTop: 12, flexDirection: 'row', alignItems: 'center', gap: 8 },
+  ideaThinkingText: { fontSize: 13, fontWeight: '700', color: ds.text3 },
+  ideaBody: { fontSize: 14, lineHeight: 20, color: ds.text2, marginTop: 6 },
+  questCard: { marginTop: 12 },
+  questHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
+  questHeadText: { fontSize: 15, fontWeight: '800', color: ds.ink },
+  questXp: { fontSize: 12.5, fontWeight: '800', color: ds.purple },
+  questReq: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 6 },
+  questReqDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: ds.purple },
+  questReqText: { flex: 1, fontSize: 13.5, lineHeight: 19, color: ds.text2 },
+  chipsWrap: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 8 },
+  note: { fontSize: 12.5, lineHeight: 18, color: ds.text3, marginTop: 10 },
+  tilesGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 10 },
+  captionCard: {
+    borderRadius: 22,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.95)',
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    padding: 16,
+  },
+  captionCardFocused: { borderColor: ds.purple, backgroundColor: '#FFFFFF' },
+  captionField: {
+    minHeight: 120,
+    maxHeight: 220,
+    fontSize: 15.5,
+    lineHeight: 23,
+    color: ds.ink,
+    textAlignVertical: 'top',
+    ...(Platform.OS === 'web' ? ({ outlineStyle: 'none' } as object) : {}),
+  },
+  aiWorking: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8 },
+  aiWorkingText: { fontSize: 12.5, fontWeight: '700', color: ds.purple },
+  captionMeta: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8, paddingTop: 12, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: 'rgba(23, 20, 32, 0.1)' },
+  charCount: { alignSelf: 'flex-end', fontSize: 11.5, fontWeight: '700', color: ds.text3, marginTop: 6 },
+  aiRow: { flexDirection: 'row', gap: 8, marginTop: 12 },
+  tagsWrap: { gap: 8 },
+  noTags: { fontSize: 13, color: ds.text3 },
+  addTagRow: { flexDirection: 'row', gap: 8, marginTop: 12 },
+  addTagField: {
+    flex: 1,
+    height: 42,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    fontSize: 14,
+    color: ds.ink,
+    borderWidth: 1.5,
+    borderColor: ds.line,
+    backgroundColor: '#FFFFFF',
+    ...(Platform.OS === 'web' ? ({ outlineStyle: 'none' } as object) : {}),
+  },
+  addTagBtn: { height: 42, paddingHorizontal: 16, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: ds.purple },
+  addTagBtnText: { fontSize: 14, fontWeight: '800', color: '#FFFFFF' },
+  tagActions: { flexDirection: 'row', gap: 8, marginTop: 14 },
+  whenRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginTop: 12,
+    padding: 14,
+    borderRadius: 16,
+    backgroundColor: 'rgba(237, 233, 254, 0.6)',
+  },
+  whenLabel: { fontSize: 11.5, fontWeight: '800', color: ds.text3, letterSpacing: 0.4 },
+  whenValue: { fontSize: 16, fontWeight: '800', color: ds.ink, marginTop: 1 },
+  whenChange: { fontSize: 13, fontWeight: '800', color: ds.purple },
+  jarvisTime: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12 },
+  jarvisTimeText: { flex: 1, fontSize: 13, lineHeight: 18, color: ds.text2 },
+  jarvisTimeBold: { fontWeight: '800', color: ds.ink },
+  readyWrap: { marginTop: 26 },
+  actions: { marginTop: 16, gap: 10 },
+  filmInLabel: { fontSize: 13, fontWeight: '800', color: ds.text2, marginBottom: 8 },
+  filmInRow: { flexDirection: 'row', gap: 8 },
+  // Logo above name so three platforms fit side by side on 320
+  filmInChip: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.95)',
+    backgroundColor: 'rgba(255, 255, 255, 0.75)',
+  },
+  filmInChipOn: { borderColor: ds.purple, backgroundColor: 'rgba(237, 233, 254, 0.9)' },
+  filmInText: { fontSize: 12, fontWeight: '800', color: ds.ink },
+  filmInNote: { fontSize: 12.5, lineHeight: 18, color: ds.text3, marginTop: 8, marginBottom: 4 },
+  secondaryAction: {},
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 8,
-    paddingBottom: 24,
+    // Clears the floating tab bar, no extra gap
+    paddingBottom: 120,
   },
   btnPressed: {
-    opacity: 0.78,
-    transform: [{ scale: 0.97 }],
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
   },
 
   // 1. TOP HEADER
@@ -1770,13 +1940,13 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     shadowColor: '#F59E0B',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.08,
     shadowRadius: 6,
     elevation: 2,
   },
   createPostPillText: {
-    fontSize: 10.5,
-    fontWeight: '900',
+    fontSize: 11,
+    fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: 0.6,
   },
@@ -1794,11 +1964,26 @@ const styles = StyleSheet.create({
     color: '#7F7894',
     letterSpacing: 0.4,
   },
-  mainTitle: {
-    fontSize: 23,
+  questDraftBadge: {
+    backgroundColor: '#FAF5FF',
+    borderWidth: 1,
+    borderColor: '#D8B4FE',
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 100,
+  },
+  questDraftBadgeText: {
+    fontSize: 10,
     fontWeight: '800',
+    color: '#6B21A8',
+    letterSpacing: 0.4,
+  },
+  mainTitle: {
+    fontSize: Platform.OS === 'web' ? ('clamp(15px, 3.8vw, 17px)' as any) : sFont(16),
+    fontWeight: '700',
     color: '#171420',
-    letterSpacing: -0.4,
+    letterSpacing: -0.35,
+    lineHeight: 22,
     marginBottom: 4,
     marginTop: 4,
   },
@@ -1855,35 +2040,99 @@ const styles = StyleSheet.create({
   },
   ideaTagsRow: {
     flexDirection: 'row',
+    alignItems: 'center',
     flexWrap: 'wrap',
     gap: 6,
+    rowGap: 6,
   },
   ideaTagPill: {
     backgroundColor: '#EDE9FE',
     paddingVertical: 4,
     paddingHorizontal: 9,
-    borderRadius: 8,
+    borderRadius: 100,
+    flexShrink: 0,
   },
   ideaTagPillText: {
-    fontSize: 10.5,
+    fontSize: sFont(11),
     fontWeight: '700',
-    color: '#6D28D9',
+    color: '#582CDB',
   },
+
+  // Attached Pro Quest Requirements Card
+  attachedQuestRequirementsCard: {
+    backgroundColor: '#FAF5FF',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+    padding: 14,
+    marginBottom: 18,
+  },
+  attachedQuestHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  attachedQuestHeaderTitle: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#6B21A8',
+    letterSpacing: 0.5,
+  },
+  attachedQuestXpBadge: {
+    backgroundColor: '#7C3AED',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  attachedQuestXpText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: 0.4,
+  },
+  attachedQuestRequirementItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 6,
+  },
+  attachedQuestCheckCircle: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: '#7C3AED',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  attachedQuestCheckMark: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#FFFFFF',
+  },
+  attachedQuestRequirementText: {
+    fontSize: 12.5,
+    fontWeight: '600',
+    color: '#3B0764',
+    flex: 1,
+  },
+
   streakSaverPill: {
     backgroundColor: '#582CDB',
     paddingVertical: 4,
     paddingHorizontal: 9,
-    borderRadius: 8,
+    borderRadius: 100,
+    flexShrink: 0,
   },
   streakSaverPillText: {
-    fontSize: 10.5,
+    fontSize: sFont(11),
     fontWeight: '800',
     color: '#FFFFFF',
   },
 
   // Section Labels
   sectionLabel: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#7F7894',
     letterSpacing: 0.6,
@@ -1907,7 +2156,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   morePlatformsHeaderText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#FFFFFF',
   },
@@ -1916,17 +2165,17 @@ const styles = StyleSheet.create({
   platformsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 10,
+    justifyContent: 'space-between',
     marginBottom: 8,
   },
   platformCard: {
-    flex: 1,
-    minWidth: 95,
+    width: '48%',
     minHeight: 116,
+    marginBottom: 10,
     backgroundColor: '#FFFFFF',
     borderRadius: 18,
     borderWidth: 1.5,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     paddingVertical: 14,
     paddingHorizontal: 6,
     alignItems: 'center',
@@ -1937,6 +2186,35 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.04,
     shadowRadius: 6,
     elevation: 2,
+  },
+  platformCardSingle: {
+    width: '100%',
+    minHeight: 68,
+    marginBottom: 8,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    borderWidth: 1.5,
+    borderColor: '#EFECE6',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  platformCardNameSingle: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  platformCardFormatSingle: {
+    fontSize: 11.5,
+    color: '#64748B',
+    marginTop: 2,
   },
   platformCardActive: {
     borderColor: '#582CDB',
@@ -1984,7 +2262,200 @@ const styles = StyleSheet.create({
     marginBottom: 18,
   },
 
-  // 3. Media Upload Zone
+  sectionHelperText: {
+    fontSize: 12,
+    color: '#64748B',
+    fontWeight: '500',
+  },
+
+  // 3. Content Format Selection Styles
+  formatRecommendedSection: {
+    marginBottom: 14,
+  },
+  otherFormatsSection: {
+    marginBottom: 6,
+  },
+  formatGroupHeaderLabel: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#8E85A2',
+    letterSpacing: 0.5,
+    marginBottom: 8,
+    textTransform: 'uppercase',
+  },
+  formatRecommendedCard: {
+    width: '100%',
+    minHeight: 76,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    borderWidth: 1.5,
+    borderColor: '#EFECE6',
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  formatRecommendedCardActive: {
+    borderColor: '#582CDB',
+    backgroundColor: '#FAF8FE',
+  },
+  formatBestFitPill: {
+    backgroundColor: '#FEF3C7',
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+    borderRadius: 6,
+    borderWidth: 0.5,
+    borderColor: '#FDE68A',
+  },
+  formatBestFitPillText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#B45309',
+  },
+  formatsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  formatCard: {
+    width: '48%',
+    minHeight: 116,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    borderWidth: 1.5,
+    borderColor: '#EFECE6',
+    padding: 12,
+    marginBottom: 10,
+    justifyContent: 'space-between',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  formatCardActive: {
+    borderColor: '#582CDB',
+    backgroundColor: '#FAF8FE',
+  },
+  formatCardTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  formatIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 11,
+    backgroundColor: '#F8FAFC',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  formatIconBoxActive: {
+    backgroundColor: '#EDE9FE',
+  },
+  formatCardTitle: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  formatCardTitleActive: {
+    color: '#582CDB',
+  },
+  formatRatioTag: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  formatCardDesc: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  formatCheckCircle: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    borderWidth: 1.5,
+    borderColor: '#CBD5E1',
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'flex-end',
+  },
+  formatCheckCircleActive: {
+    borderColor: '#582CDB',
+    backgroundColor: '#582CDB',
+  },
+  formatIncompatibleNotice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#FFFBEB',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    padding: 10,
+    marginBottom: 16,
+  },
+  formatIncompatibleText: {
+    fontSize: 11,
+    color: '#92400E',
+    lineHeight: 15,
+    flex: 1,
+  },
+  textFirstFormatBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: '#F8FAFC',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    padding: 14,
+  },
+  textFirstIconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#EDE9FE',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  textFirstTitle: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#171420',
+    marginBottom: 2,
+  },
+  textFirstSubtitle: {
+    fontSize: 11.5,
+    color: '#64748B',
+    lineHeight: 16,
+  },
+  textFirstAddMediaBtn: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  textFirstAddMediaBtnText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+
+  // 4. Media Upload Zone
   mediaUploadBox: {
     backgroundColor: '#FFFFFF',
     borderRadius: 20,
@@ -2025,41 +2496,110 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   mediaDropzoneSubtitle: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
   },
-  mediaPreviewContainer: {
+  // Attached Media Preview Styles
+  mediaAttachedContainer: {
     backgroundColor: '#FAF8FC',
     borderRadius: 16,
     borderWidth: 1,
     borderColor: '#DDD6FE',
-    padding: 16,
+    padding: 12,
+  },
+  mediaAttachedHeaderRow: {
+    flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 12,
   },
-  mediaPreviewThumb: {
+  mediaAttachedThumbBox: {
+    width: 52,
+    height: 64,
+    borderRadius: 12,
+    backgroundColor: '#1E1435',
+    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 8,
+    position: 'relative',
+    overflow: 'hidden',
   },
-  mediaPreviewTitle: {
+  mediaThumbDurationTag: {
+    position: 'absolute',
+    bottom: 3,
+    backgroundColor: 'rgba(0,0,0,0.65)',
+    paddingVertical: 1,
+    paddingHorizontal: 4,
+    borderRadius: 4,
+  },
+  mediaThumbDurationText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+  mediaAttachedStatusBadge: {
+    backgroundColor: '#DCFCE7',
+    paddingVertical: 1.5,
+    paddingHorizontal: 6,
+    borderRadius: 4,
+  },
+  mediaAttachedStatusText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#15803D',
+    letterSpacing: 0.3,
+  },
+  mediaAttachedSizeText: {
+    fontSize: 11,
+    color: '#64748B',
+    fontWeight: '600',
+  },
+  mediaAttachedFileName: {
     fontSize: 13.5,
     fontWeight: '800',
     color: '#171420',
-    marginTop: 6,
+    marginBottom: 2,
   },
-  mediaPreviewMeta: {
+  mediaAttachedSpecsText: {
     fontSize: 11,
     color: '#64748B',
-    marginTop: 2,
   },
-  removeMediaBtn: {
-    backgroundColor: '#FEE2E2',
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 6,
+  mediaAttachedActionsRow: {
+    flexDirection: 'row',
+    gap: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#EDE9FE',
+    paddingTop: 10,
   },
-  removeMediaBtnText: {
-    fontSize: 11,
+  mediaSubActionBtn: {
+    flex: 1,
+    height: 34,
+    borderRadius: 10,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#EDE9FE',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 5,
+  },
+  mediaSubActionBtnText: {
+    fontSize: 11.5,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  mediaSubActionRemoveBtn: {
+    height: 34,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    backgroundColor: '#FEF2F2',
+    borderWidth: 1,
+    borderColor: '#FEE2E2',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+  },
+  mediaSubActionRemoveText: {
+    fontSize: 11.5,
     fontWeight: '800',
     color: '#EF4444',
   },
@@ -2074,8 +2614,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#EDE9FE',
-    justifyContent: 'center',
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
   },
   mediaActionBtnText: {
     fontSize: 12,
@@ -2091,15 +2633,15 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   aiBadgeText: {
-    fontSize: 9.5,
-    fontWeight: '900',
+    fontSize: 10,
+    fontWeight: '700',
     color: '#6D28D9',
     letterSpacing: 0.5,
   },
   captionContainer: {
     backgroundColor: '#FFFFFF',
     borderRadius: 20,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: '#EFEBF8',
     padding: 16,
     marginBottom: 18,
@@ -2109,18 +2651,28 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 3,
   },
+  captionContainerFocused: {
+    borderColor: '#7C3AED',
+    backgroundColor: '#FAF9FE',
+    shadowColor: '#7C3AED',
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+  },
   captionInput: {
-    minHeight: 100,
-    fontSize: 13.5,
+    minHeight: 110,
+    fontSize: 14.5,
     color: '#1E293B',
-    lineHeight: 20,
+    lineHeight: 22,
     textAlignVertical: 'top',
+    padding: 0,
     marginBottom: 12,
   },
   captionMetaRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 6,
     borderTopWidth: 1,
     borderTopColor: '#F1F5F9',
     paddingTop: 10,
@@ -2128,33 +2680,44 @@ const styles = StyleSheet.create({
   },
   captionMetaLeft: {
     flexDirection: 'row',
-    gap: 8,
+    alignItems: 'center',
+    gap: 6,
+    flexWrap: 'wrap',
+    flex: 1,
+    minWidth: 160,
   },
   tonePill: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#F8FAFC',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
-    paddingVertical: 3,
+    borderColor: '#EFECE6',
+    paddingVertical: 3.5,
     paddingHorizontal: 8,
     borderRadius: 6,
     gap: 4,
   },
   toneLabel: {
-    fontSize: 8.5,
-    fontWeight: '900',
+    fontSize: 9,
+    fontWeight: '700',
     color: '#94A3B8',
+    letterSpacing: 0.3,
+  },
+  toneDivider: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#CBD5E1',
   },
   toneValue: {
-    fontSize: 11,
+    fontSize: 10.5,
     fontWeight: '800',
     color: '#334155',
   },
   charCountText: {
-    fontSize: 11,
+    fontSize: 10.5,
     fontWeight: '700',
     color: '#64748B',
+    flexShrink: 0,
   },
   aiButtonsRow: {
     flexDirection: 'row',
@@ -2162,7 +2725,7 @@ const styles = StyleSheet.create({
   },
   aiPillBtn: {
     flex: 1,
-    height: 36,
+    height: 38,
     borderRadius: 10,
     backgroundColor: '#F8FAFC',
     borderWidth: 1,
@@ -2171,17 +2734,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   aiPillBtnText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#475569',
-    letterSpacing: 0.4,
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#334155',
   },
 
   // 5. Tags
+  platformTagsBadgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  platformMiniTagPill: {
+    paddingVertical: 2,
+    paddingHorizontal: 7,
+    borderRadius: 6,
+  },
+  platformMiniTagText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
   tagsContainer: {
     backgroundColor: '#FFFFFF',
     borderRadius: 20,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: '#EFEBF8',
     padding: 16,
     marginBottom: 18,
@@ -2191,30 +2768,46 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 3,
   },
+  tagsContextRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 12,
+  },
+  tagsContextSparkle: {
+    fontSize: 12,
+  },
+  tagsContextText: {
+    fontSize: 11.5,
+    color: '#64748B',
+    fontWeight: '600',
+    flex: 1,
+  },
   tagsPillsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 6,
-    marginBottom: 12,
+    marginBottom: 14,
   },
   tagPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#EDE9FE',
-    paddingVertical: 4,
+    backgroundColor: '#F3E8FF',
+    paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 8,
-    gap: 4,
+    gap: 6,
   },
   tagPillText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '700',
     color: '#6D28D9',
   },
   tagPillCross: {
-    fontSize: 10,
+    fontSize: 14,
     color: '#7C3AED',
-    fontWeight: '900',
+    fontWeight: '700',
+    marginTop: -1,
   },
   addTagInputRow: {
     flexDirection: 'row',
@@ -2247,22 +2840,49 @@ const styles = StyleSheet.create({
   },
   tagActionsRow: {
     flexDirection: 'row',
-    gap: 10,
+    gap: 8,
   },
-  tagActionBtn: {
+  tagActionCustomBtn: {
     flex: 1,
     height: 40,
     borderRadius: 12,
     backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#EDE9FE',
-    justifyContent: 'center',
+    borderWidth: 1.2,
+    borderColor: '#E2E8F0',
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+    gap: 4,
   },
-  tagActionBtnText: {
-    fontSize: 12,
-    fontWeight: '800',
+  tagActionCustomBtnText: {
+    fontSize: 11,
+    fontWeight: '700',
     color: '#582CDB',
+  },
+  tagActionGenerateBtn: {
+    flex: 1,
+    height: 40,
+    borderRadius: 12,
+    overflow: 'hidden',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 5,
+    elevation: 3,
+  },
+  tagActionGenerateGradient: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+    gap: 4,
+  },
+  tagActionGenerateBtnText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#FFFFFF',
   },
 
   // 6. Timing & Scheduling
@@ -2294,7 +2914,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   timingSuggestedSub: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
   },
   timingTabsRow: {
@@ -2335,8 +2955,8 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   scheduledLabel: {
-    fontSize: 9.5,
-    fontWeight: '900',
+    fontSize: 10,
+    fontWeight: '700',
     color: '#6D28D9',
     letterSpacing: 0.5,
     marginBottom: 2,
@@ -2347,7 +2967,7 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   scheduledChangeLink: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#582CDB',
     letterSpacing: 0.5,
@@ -2357,7 +2977,7 @@ const styles = StyleSheet.create({
   readinessCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 20,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: '#EFEBF8',
     padding: 16,
     marginBottom: 18,
@@ -2367,11 +2987,16 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 3,
   },
+  readinessCardComplete: {
+    borderColor: '#A7F3D0',
+    backgroundColor: '#F0FDF4',
+    shadowColor: '#059669',
+  },
   readinessHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 10,
   },
   readinessTitle: {
     fontSize: 11,
@@ -2379,10 +3004,27 @@ const styles = StyleSheet.create({
     color: '#64748B',
     letterSpacing: 0.6,
   },
+  readinessReadyBadge: {
+    backgroundColor: '#D1FAE5',
+    paddingVertical: 2,
+    paddingHorizontal: 7,
+    borderRadius: 6,
+    borderWidth: 0.8,
+    borderColor: '#A7F3D0',
+  },
+  readinessReadyBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#065F46',
+    letterSpacing: 0.3,
+  },
   readinessPercent: {
-    fontSize: 14,
-    fontWeight: '900',
+    fontSize: 15,
+    fontWeight: '800',
     color: '#582CDB',
+  },
+  readinessPercentComplete: {
+    color: '#059669',
   },
   readinessProgressBarTrack: {
     height: 6,
@@ -2395,11 +3037,14 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: 3,
   },
-  checklistRow: {
+  checklistContainer: {
+    gap: 8,
+  },
+  checklistRowInteractive: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 8,
+    gap: 10,
+    paddingVertical: 3,
   },
   checkIconFilled: {
     width: 18,
@@ -2412,7 +3057,7 @@ const styles = StyleSheet.create({
   checkMarkWhite: {
     fontSize: 10,
     color: '#FFFFFF',
-    fontWeight: '900',
+    fontWeight: '800',
   },
   checkIconEmpty: {
     width: 18,
@@ -2420,18 +3065,32 @@ const styles = StyleSheet.create({
     borderRadius: 9,
     borderWidth: 1.5,
     borderColor: '#CBD5E1',
+    backgroundColor: '#FFFFFF',
+  },
+  checklistTextContainer: {
+    flex: 1,
   },
   checklistText: {
     fontSize: 12.5,
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#1E293B',
+  },
+  checklistTextIncomplete: {
+    color: '#94A3B8',
+    fontWeight: '600',
+  },
+  checklistNavChevron: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#7C3AED',
+    marginLeft: 4,
   },
 
   // 8. Streak Banner
   streakBannerCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFBEB',
+    backgroundColor: '#FEF3C7',
     borderRadius: 18,
     borderWidth: 1,
     borderColor: '#FDE68A',
@@ -2449,7 +3108,7 @@ const styles = StyleSheet.create({
   },
   streakBannerTitle: {
     fontSize: 12.5,
-    color: '#92400E',
+    color: '#B45309',
     lineHeight: 17,
     marginBottom: 6,
   },
@@ -2465,13 +3124,13 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   streakXpText: {
-    fontSize: 9.5,
-    fontWeight: '900',
-    color: '#78350F',
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#B45309',
     letterSpacing: 0.4,
   },
   streakMissionFraction: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#B45309',
     letterSpacing: 0.4,
@@ -2495,54 +3154,62 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
+    rowGap: 8,
     marginBottom: 12,
   },
   jarvisWritingHeaderLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 7,
+    flexShrink: 1,
+    flexWrap: 'wrap',
   },
   jarvisWritingFlameIconBox: {
-    width: 32,
-    height: 32,
+    width: 28,
+    height: 28,
     borderRadius: 10,
     backgroundColor: '#EDE9FE',
     borderWidth: 1,
     borderColor: '#DDD6FE',
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 0,
   },
   jarvisWritingFlame: {
-    width: 20,
-    height: 20,
+    width: 17,
+    height: 17,
   },
   jarvisInsightBadge: {
     backgroundColor: '#FAF5FF',
-    paddingVertical: 3.5,
-    paddingHorizontal: 8,
+    paddingVertical: 3,
+    paddingHorizontal: 7,
     borderRadius: 6,
     borderWidth: 1,
     borderColor: '#EDE9FE',
+    flexShrink: 0,
   },
   jarvisInsightTag: {
-    fontSize: 9.5,
-    fontWeight: '900',
+    fontSize: sFont(10),
+    fontWeight: '700',
     color: '#6D28D9',
-    letterSpacing: 0.6,
+    letterSpacing: 0.4,
   },
   jarvisScorePill: {
     backgroundColor: '#FEF3C7',
-    paddingVertical: 3.5,
-    paddingHorizontal: 9,
+    paddingVertical: 3,
+    paddingHorizontal: 8,
     borderRadius: 100,
     borderWidth: 1,
     borderColor: '#FDE68A',
+    flexShrink: 0,
   },
   jarvisScoreText: {
-    fontSize: 10,
-    fontWeight: '900',
+    fontSize: sFont(10),
+    fontWeight: '700',
     color: '#B45309',
-    letterSpacing: 0.4,
+    letterSpacing: 0.3,
   },
   jarvisWritingTitle: {
     fontSize: 15,
@@ -2559,9 +3226,9 @@ const styles = StyleSheet.create({
   },
   jarvisChipsRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
-    marginBottom: 14,
+    gap: 8,
+    paddingHorizontal: 2,
+    paddingVertical: 2,
   },
   jarvisChip: {
     backgroundColor: '#F8FAFC',
@@ -2569,7 +3236,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
   },
   jarvisChipText: {
     fontSize: 11,
@@ -2583,7 +3250,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 3,
   },
@@ -2594,9 +3261,37 @@ const styles = StyleSheet.create({
   },
   improveWithJarvisBtnText: {
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#FFFFFF',
     letterSpacing: 0.5,
+  },
+
+  // Composer Toast Notice
+  composerToastBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#FEF3C7',
+    borderWidth: 1.2,
+    borderColor: '#FDE68A',
+    borderRadius: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    marginBottom: 12,
+    shadowColor: '#B45309',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  composerToastIcon: {
+    fontSize: 15,
+  },
+  composerToastText: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#92400E',
+    flex: 1,
   },
 
   // 10. Bottom Action Row
@@ -2612,7 +3307,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 10,
     elevation: 4,
   },
@@ -2660,7 +3355,7 @@ const styles = StyleSheet.create({
     padding: 20,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.08,
     shadowRadius: 24,
     elevation: 8,
   },
@@ -2674,7 +3369,7 @@ const styles = StyleSheet.create({
     padding: 20,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.22,
+    shadowOpacity: 0.08,
     shadowRadius: 28,
     elevation: 10,
   },
@@ -2683,6 +3378,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginBottom: 14,
+    gap: 12,
+  },
+  modalTitleContainer: {
+    flex: 1,
+    paddingRight: 8,
   },
   modalTitle: {
     fontSize: 17,
@@ -2690,9 +3390,10 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   modalSubtitle: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#64748B',
     marginTop: 2,
+    lineHeight: 16,
   },
   modalCloseCircle: {
     width: 28,
@@ -2701,11 +3402,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#F1F5F9',
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 0,
+    marginTop: 2,
   },
   modalCloseCross: {
     fontSize: 12,
-    fontWeight: '800',
+    fontWeight: '700',
     color: '#64748B',
+    lineHeight: 14,
+    textAlign: 'center',
   },
 
   // Platform Modal Rows
@@ -2716,7 +3421,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8FAFC',
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     padding: 12,
     marginBottom: 8,
   },
@@ -2725,7 +3430,7 @@ const styles = StyleSheet.create({
     borderColor: '#7C3AED',
   },
   modalPlatformName: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#171420',
   },
@@ -2736,7 +3441,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   modalMultiplierText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
     color: '#6D28D9',
   },
@@ -2765,19 +3470,143 @@ const styles = StyleSheet.create({
     marginTop: 14,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 10,
     elevation: 4,
+  },
+  modalPrimaryActionBtnDisabled: {
+    backgroundColor: '#E2E8F0',
+    shadowOpacity: 0,
+    elevation: 0,
   },
   modalPrimaryGradient: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
+  modalPrimaryDisabledContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#E2E8F0',
+  },
   modalPrimaryActionText: {
     fontSize: 14,
     fontWeight: '800',
     color: '#FFFFFF',
+  },
+  modalPrimaryDisabledText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#94A3B8',
+  },
+
+  // SMART SCHEDULE SLOTS STYLES
+  smartScheduleGroup: {
+    marginBottom: 14,
+  },
+  smartScheduleGroupHeader: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#8E85A2',
+    letterSpacing: 0.5,
+    marginBottom: 8,
+    textTransform: 'uppercase',
+  },
+  smartSlotRow: {
+    gap: 8,
+  },
+  smartSlotCard: {
+    backgroundColor: '#FAF8FC',
+    borderRadius: 14,
+    borderWidth: 1.2,
+    borderColor: '#EFEBF8',
+    paddingVertical: 11,
+    paddingHorizontal: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  smartSlotCardActive: {
+    borderColor: '#582CDB',
+    backgroundColor: '#FAF5FF',
+  },
+  smartSlotCardLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flexWrap: 'wrap',
+    flex: 1,
+  },
+  smartSlotTimeText: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#171420',
+  },
+  smartSlotTimeTextActive: {
+    color: '#582CDB',
+  },
+  smartSlotRecBadge: {
+    backgroundColor: '#FEF3C7',
+    paddingVertical: 2,
+    paddingHorizontal: 7,
+    borderRadius: 6,
+    borderWidth: 0.5,
+    borderColor: '#FDE68A',
+  },
+  smartSlotRecBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#B45309',
+  },
+  smartSlotRadioCircle: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    borderWidth: 1.5,
+    borderColor: '#CBD5E1',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 8,
+  },
+  smartSlotRadioCircleActive: {
+    borderColor: '#582CDB',
+    backgroundColor: '#582CDB',
+  },
+  chooseCustomDateBtn: {
+    marginTop: 4,
+    marginBottom: 10,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.2,
+    borderColor: '#E2E8F0',
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  chooseCustomDateBtnText: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  backToSmartSlotsBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 12,
+    alignSelf: 'flex-start',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    backgroundColor: '#EDE9FE',
+  },
+  backToSmartSlotsBtnText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#6D28D9',
   },
 
   // CALENDAR MODAL STYLES
@@ -2801,7 +3630,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
   },
   calMonthNavTitle: {
     fontSize: 14.5,
@@ -2809,8 +3638,8 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   calMonthNavBadge: {
-    fontSize: 8.5,
-    fontWeight: '900',
+    fontSize: 9,
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.6,
     marginTop: 2,
@@ -2847,7 +3676,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#582CDB',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.12,
     shadowRadius: 6,
     elevation: 3,
   },
@@ -2858,11 +3687,11 @@ const styles = StyleSheet.create({
   },
   calDayNumTextSelected: {
     color: '#FFFFFF',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   calDayNumTextToday: {
     color: '#582CDB',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   calTodayDot: {
     position: 'absolute',
@@ -2881,7 +3710,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F59E0B',
   },
   calSectionHeader: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#7F7894',
     letterSpacing: 0.6,
@@ -2899,7 +3728,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8FAFC',
     borderRadius: 12,
     borderWidth: 1.5,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     paddingVertical: 10,
     paddingHorizontal: 10,
     alignItems: 'center',
@@ -2951,17 +3780,22 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   calPreviewSub: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#64748B',
     lineHeight: 14,
   },
 
   ideaChoiceItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
     backgroundColor: '#F8FAFC',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    padding: 12,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: '#EFECE6',
+    paddingVertical: 12,
+    paddingHorizontal: 14,
     marginBottom: 8,
   },
   ideaChoiceItemActive: {
@@ -2969,13 +3803,30 @@ const styles = StyleSheet.create({
     borderColor: '#582CDB',
   },
   ideaChoiceText: {
+    flex: 1,
     fontSize: 13,
     color: '#334155',
     fontWeight: '600',
+    lineHeight: 18,
   },
   ideaChoiceTextActive: {
     color: '#582CDB',
     fontWeight: '800',
+  },
+  ideaChoiceCheckmark: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: '#582CDB',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexShrink: 0,
+  },
+  ideaChoiceCheckmarkText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '800',
+    lineHeight: 14,
   },
   notifCard: {
     flexDirection: 'row',
@@ -2985,7 +3836,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: '#F1F5F9',
+    borderColor: '#F5F2EC',
   },
   notifCardUnread: {
     backgroundColor: '#F5F3FF',
@@ -3011,7 +3862,7 @@ const styles = StyleSheet.create({
     lineHeight: 15,
   },
   notifTime: {
-    fontSize: 9.5,
+    fontSize: 10,
     color: '#94A3B8',
     marginTop: 4,
   },
@@ -3024,7 +3875,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   modalFullBtnText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '800',
     color: '#FFFFFF',
   },
@@ -3063,7 +3914,7 @@ const styles = StyleSheet.create({
     borderColor: '#FDE68A',
   },
   profileModalLevelText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#B45309',
   },
@@ -3077,7 +3928,7 @@ const styles = StyleSheet.create({
   },
   chatSpeaker: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.5,
     marginBottom: 4,

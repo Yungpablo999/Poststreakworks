@@ -47,3 +47,6 @@ yarn-error.*
 
 # Next.js
 .next/
+
+# Local Expo cache
+.expo-home/

@@ -1,117 +1,138 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import {
   StyleSheet,
-  Text,
-  Animated,
   Pressable,
-  ViewStyle,
   Platform,
+  ViewStyle,
+  TextStyle,
+  StyleProp,
+  ActivityIndicator,
   View,
 } from 'react-native';
+import { Text } from './ui/AppText';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
-import { colors } from '../theme/colors';
-import { shadows } from '../theme/shadows';
 
-interface PrimaryButtonProps {
+export interface PrimaryButtonProps {
   title: string;
   onPress: () => void;
-  style?: ViewStyle;
+  icon?: React.ReactNode;
+  disabled?: boolean;
+  loading?: boolean;
+  style?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
 }
 
 export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
   title,
   onPress,
+  icon,
+  disabled = false,
+  loading = false,
   style,
+  textStyle,
 }) => {
-  const scaleAnim = useRef(new Animated.Value(1)).current;
-
-  const handlePressIn = () => {
+  const handlePress = () => {
+    if (disabled || loading) return;
     if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-    Animated.spring(scaleAnim, {
-      toValue: 0.96,
-      useNativeDriver: true,
-      speed: 25,
-      bounciness: 4,
-    }).start();
-  };
-
-  const handlePressOut = () => {
-    Animated.spring(scaleAnim, {
-      toValue: 1,
-      useNativeDriver: true,
-      speed: 25,
-      bounciness: 6,
-    }).start();
+    onPress();
   };
 
   return (
-    <Animated.View
-      style={[
-        styles.container,
-        shadows.primaryButton,
-        { transform: [{ scale: scaleAnim }] },
+    <Pressable
+      onPress={handlePress}
+      disabled={disabled || loading}
+      style={({ pressed }) => [
+        styles.buttonWrapper,
+        disabled && styles.disabledWrapper,
+        pressed && !disabled && styles.pressedWrapper,
         style,
       ]}
     >
-      <Pressable
-        onPress={onPress}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-        style={styles.pressable}
+      <LinearGradient
+        colors={disabled ? ['#94A3B8', '#64748B'] : ['#673DE6', '#5426D7']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.gradient}
       >
-        <LinearGradient
-          colors={['#7048EC', '#522DC7', '#461CC2']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.gradient}
-        >
-          {/* Glass Specular Top Highlight */}
-          <View style={styles.glassTopShine} />
+        {/* Specular top highlight line */}
+        <View style={styles.topHighlight} />
 
-          <Text style={styles.text}>{title}</Text>
-        </LinearGradient>
-      </Pressable>
-    </Animated.View>
+        {loading ? (
+          <ActivityIndicator color="#FFFFFF" size="small" />
+        ) : (
+          <View style={styles.contentRow}>
+            {icon && <View style={styles.iconBox}>{icon}</View>}
+            <Text style={[styles.title, textStyle]}>{title}</Text>
+          </View>
+        )}
+      </LinearGradient>
+    </Pressable>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    width: '100%',
-    maxWidth: 270,
-    height: 56,
-    borderRadius: 16,
+  buttonWrapper: {
+    borderRadius: 100,
     overflow: 'hidden',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    elevation: 3,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.35)',
+    borderColor: 'rgba(255, 255, 255, 0.24)',
+    ...(Platform.OS === 'web'
+      ? ({
+          boxShadow: '0 4px 12px rgba(88, 44, 219, 0.12)',
+        } as any)
+      : {}),
   },
-  pressable: {
-    width: '100%',
-    height: '100%',
+  disabledWrapper: {
+    shadowOpacity: 0,
+    elevation: 0,
+    opacity: 0.6,
+    borderColor: 'transparent',
+  },
+  pressedWrapper: {
+    transform: [{ scale: 0.985 }],
+    opacity: 0.94,
   },
   gradient: {
+    flex: 1,
     width: '100%',
     height: '100%',
-    justifyContent: 'center',
+    paddingVertical: 13,
+    paddingHorizontal: 22,
     alignItems: 'center',
-    borderRadius: 16,
+    justifyContent: 'center',
+    position: 'relative',
   },
-  glassTopShine: {
+  topHighlight: {
     position: 'absolute',
     top: 0,
-    left: 12,
-    right: 12,
-    height: 1.5,
-    backgroundColor: 'rgba(255, 255, 255, 0.45)',
-    borderRadius: 1,
+    left: 24,
+    right: 24,
+    height: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.35)',
   },
-  text: {
-    color: colors.textWhite,
-    fontSize: 19.5,
-    fontWeight: '700',
-    letterSpacing: -0.3,
+  contentRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  iconBox: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 15.5,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    letterSpacing: -0.2,
+    textAlign: 'center',
   },
 });

@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   StyleSheet,
   View,
-  Text,
   Pressable,
   ScrollView,
   Platform,
@@ -11,9 +10,10 @@ import {
   StatusBar,
   Animated,
   Modal,
-  TextInput,
   Dimensions,
 } from 'react-native';
+import { Text, TextInput } from '../components/ui/AppText';
+import { BrandLogo } from '../components/BrandLogo';
 import Svg, { Path, Circle, Rect, G } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -21,16 +21,24 @@ import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
+import { TinyGoldCheck } from '../components/CreatorStoryModal';
+import { sFont, isNarrowScreen } from '../utils/responsive';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+export interface AttachedVoiceoverData {
+  title: string;
+  voiceName: string;
+  duration: string;
+  speed: string;
+}
 
 interface ProVoiceStudioScreenProps {
   onBack: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onOpenJarvisPro?: () => void;
-  onOpenMessages?: (threadId?: string) => void;
   onOpenSchedule?: () => void;
-  onOpenPostComposer?: (prefillTitle?: string) => void;
+  onOpenPostComposer?: (prefillTitle?: string, attachedAudio?: AttachedVoiceoverData) => void;
   onSwitchToFree?: () => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
@@ -52,54 +60,54 @@ const VOICE_STYLES: VoiceStyleItem[] = [
     id: 'energetic',
     name: 'Energetic Storyteller',
     tone: 'Confident & Crisp',
-    pace: 'Medium-fast (1.1x)',
-    desc: 'Warm, clear and confident — designed for viral TikToks and high-retention Reels.',
+    pace: '1.1× Fast',
+    desc: 'Warm, clear and confident. Designed for high-retention TikToks and Reels.',
     sampleDuration: '0:42',
-    tag: '👑 MOST POPULAR',
+    tag: 'POPULAR',
   },
   {
     id: 'deep',
     name: 'Deep Narrator',
-    tone: 'Authoritative & Rich',
-    pace: 'Steady (1.0x)',
-    desc: 'Resonant and cinematic — perfect for long-form video essays, documentaries & tutorials.',
+    tone: 'Rich & Resonant',
+    pace: '1.0× Steady',
+    desc: 'Resonant and cinematic. Perfect for long-form video essays, documentaries & tutorials.',
     sampleDuration: '0:55',
     tag: 'CINEMATIC',
   },
   {
     id: 'casual',
     name: 'Casual Vlogger',
-    tone: 'Conversational & Chill',
-    pace: 'Dynamic (1.05x)',
-    desc: 'Upbeat and relatable — optimal for behind-the-scenes, day-in-the-life & lifestyle vlogs.',
+    tone: 'Conversational',
+    pace: '1.05× Pace',
+    desc: 'Upbeat and relatable. Optimal for behind-the-scenes, day-in-the-life & lifestyle vlogs.',
     sampleDuration: '0:38',
     tag: 'LIFESTYLE',
   },
   {
     id: 'tech',
     name: 'Tech Explainer',
-    tone: 'Analytical & Precise',
-    pace: 'Snappy (1.15x)',
-    desc: 'Crisp and articulate — engineered for SaaS walkthroughs, product reviews & teardowns.',
+    tone: 'Analytical & Crisp',
+    pace: '1.15× Snappy',
+    desc: 'Crisp and articulate. Engineered for SaaS walkthroughs, product reviews & teardowns.',
     sampleDuration: '0:45',
-    tag: 'SAAS & TECH',
+    tag: 'TECH',
   },
   {
     id: 'bold',
     name: 'Bold Motivator',
     tone: 'Inspiring & Punchy',
-    pace: 'High Energy (1.2x)',
-    desc: 'Passionate and commanding — ideal for gym motivation, founder discipline & mindsets.',
+    pace: '1.2× Energy',
+    desc: 'Passionate and commanding. Ideal for gym motivation, founder discipline & mindsets.',
     sampleDuration: '0:32',
-    tag: 'MOTIVATION',
+    tag: 'BOLD',
   },
 ];
 
 const PRESET_SCRIPTS = [
   {
     id: 'hook',
-    label: '🔥 3-Sec Viral Hook',
-    text: "Stop making this mistake if you want to stay consistent as a creator. Consistency isn't about working 24/7—it's about building a system that works even when you're not in the mood. Let me show you my 3-step 'Streak Engine' that has kept me posting for 42 days straight without burn out.",
+    label: '🔥 3-Sec Hook',
+    text: "Stop making this mistake if you want to stay consistent as a creator. Consistency isn't about working 24/7: it's about building a system that works even when you're not in the mood. Let me show you my 3-step 'Streak Engine' that keeps you posting consistently every single day without burn out.",
     title: 'Creator Mistake Reel Voiceover',
   },
   {
@@ -122,11 +130,70 @@ const PRESET_SCRIPTS = [
   },
 ];
 
+export interface RefillPackItem {
+  id: string;
+  name: string;
+  minutes: number;
+  price: string;
+  perMin: string;
+  tag: string;
+}
+
+const REFILL_PACKS: RefillPackItem[] = [
+  { id: 'p30', name: '+30 Minutes', minutes: 30, price: '$9.00', perMin: '$0.30/min', tag: 'STARTER' },
+  { id: 'p60', name: '+60 Minutes', minutes: 60, price: '$16.00', perMin: '$0.27/min', tag: 'BEST VALUE' },
+  { id: 'p120', name: '+120 Minutes', minutes: 120, price: '$28.00', perMin: '$0.23/min', tag: 'PRO SPRINT' },
+];
+
+export interface OptimizedHookItem {
+  id: string;
+  type: string;
+  preview: string;
+  fullText: string;
+  badge: string;
+}
+
+const OPTIMIZED_HOOKS: OptimizedHookItem[] = [
+  {
+    id: 'contrarian',
+    type: '🔥 Contrarian Hook',
+    preview: "Stop making this mistake if you want to stay consistent as a creator. Consistency isn't about hustle 24/7...",
+    fullText: "Stop making this mistake if you want to stay consistent as a creator. Consistency isn't about working 24/7—it's about building a system that works even when you're not in the mood. Let me show you my 3-step 'Streak Engine' that keeps you posting consistently every single day without burn out.",
+    badge: 'High Retention',
+  },
+  {
+    id: 'proof',
+    type: '⚡ Proof-Driven Hook',
+    preview: "Here is the exact 3-step 'Streak Engine' that kept me posting for 42 days straight without burning out...",
+    fullText: "Here is the exact 3-step 'Streak Engine' that kept me posting for 42 days straight without burning out. Step 1: Batch ideas on Sunday. Step 2: Record 3-second hooks first. Step 3: Let Jarvis polish your audio masters.",
+    badge: 'Proof & Authority',
+  },
+  {
+    id: 'question',
+    type: '🎯 Direct Question Hook',
+    preview: "Why do 90% of creators quit in month 2? Because they rely on mood instead of systems...",
+    fullText: "Why do 90% of creators quit in month 2? Because they rely on mood instead of systems. The creators who win in 2026 build friction-free posting habits that execute on autopilot.",
+    badge: 'Curiosity Loop',
+  },
+];
+
+export interface VoiceProjectItem {
+  id: string;
+  name: string;
+  duration: string;
+  status: 'Saved' | 'Exported';
+  platform: string;
+  text: string;
+  voiceStyle: VoiceStyleItem;
+  speed: '0.9x' | '1.0x' | '1.1x' | '1.2x';
+  tone: string;
+  updatedAt: string;
+}
+
 export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
   onBack,
   onNavigateTab,
   onOpenJarvisPro,
-  onOpenMessages,
   onOpenSchedule,
   onOpenPostComposer,
   onSwitchToFree,
@@ -139,28 +206,101 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showManageMinutesModal, setShowManageMinutesModal] = useState(false);
   const [showVoiceStyleModal, setShowVoiceStyleModal] = useState(false);
+  const [previewingVoiceId, setPreviewingVoiceId] = useState<string | null>(null);
   const [showRefillMinutesModal, setShowRefillMinutesModal] = useState(false);
+  const [refillStep, setRefillStep] = useState<'select' | 'confirm'>('select');
+  const [selectedRefillPack, setSelectedRefillPack] = useState<RefillPackItem>(REFILL_PACKS[1]);
   const [showHookOptimizerModal, setShowHookOptimizerModal] = useState(false);
+  const [selectedHookIndex, setSelectedHookIndex] = useState<number>(0);
   const [showAllProjectsModal, setShowAllProjectsModal] = useState(false);
+  const [vaultFilter, setVaultFilter] = useState<'All' | 'Saved' | 'Exported' | 'Recent'>('All');
+  const [vaultSearchQuery, setVaultSearchQuery] = useState('');
 
   // Script & Audio State
   const [scriptTitle, setScriptTitle] = useState('Creator Mistake Reel Voiceover');
   const [scriptText, setScriptText] = useState(PRESET_SCRIPTS[0].text);
   const [selectedVoiceStyle, setSelectedVoiceStyle] = useState(VOICE_STYLES[0]);
-  const [selectedSpeed, setSelectedSpeed] = useState<'0.9x' | '1.0x' | '1.1x' | '1.2x'>('1.0x');
+  const [selectedSpeed, setSelectedSpeed] = useState<'0.9x' | '1.0x' | '1.1x' | '1.2x'>('1.1x');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [playbackSeconds, setPlaybackSeconds] = useState(15);
   const [totalAudioDuration, setTotalAudioDuration] = useState(42);
+  const [playingProjectId, setPlayingProjectId] = useState<string | null>(null);
 
   // Recent Projects
-  const [recentProjects, setRecentProjects] = useState([
-    { id: 'rp1', name: 'Creator Mistake Reel', duration: '0:42', status: 'Exported', platform: 'Reels / TikTok', text: PRESET_SCRIPTS[0].text },
-    { id: 'rp2', name: 'Morning Routine Mini', duration: '0:58', status: 'Saved', platform: 'YouTube Shorts', text: PRESET_SCRIPTS[1].text },
-    { id: 'rp3', name: 'Streak Engine Breakdown', duration: '0:35', status: 'Exported', platform: 'Instagram Reel', text: PRESET_SCRIPTS[2].text },
-    { id: 'rp4', name: '3 Habits For 50K Followers', duration: '0:48', status: 'Saved', platform: 'TikTok Master', text: "3 daily reps that changed everything: 1 script every morning, batch record on Tuesdays, and ruthlessly trim the fluff." },
-    { id: 'rp5', name: 'Batch Filming System', duration: '1:02', status: 'Exported', platform: 'Long-Form Reel', text: "How I shoot 10 reels in 2 hours: write the 3-second hook first, record 2 takes max, and let AI audio handle the voiceover polish." },
-    { id: 'rp6', name: 'Viral Hook Framework', duration: '0:28', status: 'Exported', platform: 'YouTube Shorts', text: "Stop opening videos with hello everyone. Start with the tension or the contrarian belief that forces them to keep watching." },
+  const [recentProjects, setRecentProjects] = useState<VoiceProjectItem[]>([
+    {
+      id: 'rp1',
+      name: 'Creator Mistake Reel',
+      duration: '0:42',
+      status: 'Exported',
+      platform: 'Reels',
+      text: PRESET_SCRIPTS[0].text,
+      voiceStyle: VOICE_STYLES[0],
+      speed: '1.1x',
+      tone: 'Confident & Crisp',
+      updatedAt: 'Today',
+    },
+    {
+      id: 'rp2',
+      name: 'Morning Routine Mini',
+      duration: '0:58',
+      status: 'Saved',
+      platform: 'Shorts',
+      text: PRESET_SCRIPTS[1].text,
+      voiceStyle: VOICE_STYLES[2],
+      speed: '1.0x',
+      tone: 'Conversational',
+      updatedAt: 'Yesterday',
+    },
+    {
+      id: 'rp3',
+      name: 'Streak Engine Breakdown',
+      duration: '0:35',
+      status: 'Exported',
+      platform: 'Instagram',
+      text: PRESET_SCRIPTS[2].text,
+      voiceStyle: VOICE_STYLES[3],
+      speed: '1.1x',
+      tone: 'Analytical & Crisp',
+      updatedAt: '3d ago',
+    },
+    {
+      id: 'rp4',
+      name: '3 Habits For 50K Followers',
+      duration: '0:48',
+      status: 'Saved',
+      platform: 'TikTok',
+      text: "3 daily reps that changed everything: 1 script every morning, batch record on Tuesdays, and ruthlessly trim the fluff.",
+      voiceStyle: VOICE_STYLES[4],
+      speed: '1.2x',
+      tone: 'Inspiring & Punchy',
+      updatedAt: '4d ago',
+    },
+    {
+      id: 'rp5',
+      name: 'Batch Filming System',
+      duration: '1:02',
+      status: 'Exported',
+      platform: 'Long-Form',
+      text: "How I shoot 10 reels in 2 hours: write the 3-second hook first, record 2 takes max, and let AI audio handle the voiceover polish.",
+      voiceStyle: VOICE_STYLES[1],
+      speed: '1.0x',
+      tone: 'Rich & Resonant',
+      updatedAt: '5d ago',
+    },
+    {
+      id: 'rp6',
+      name: 'High-Retention Hook Framework',
+      duration: '0:28',
+      status: 'Exported',
+      platform: 'Shorts',
+      text: "Stop opening videos with hello everyone. Start with the tension or the contrarian belief that forces them to keep watching.",
+      voiceStyle: VOICE_STYLES[0],
+      speed: '1.1x',
+      tone: 'Confident & Crisp',
+      updatedAt: '1w ago',
+    },
   ]);
 
   // 3D Ghost Celebration Modal State
@@ -174,6 +314,9 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
   });
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [remainingMinutes, setRemainingMinutes] = useState<number>(118);
+  const totalAllowanceMinutes = 150;
+  const remainingPercent = Math.round((remainingMinutes / totalAllowanceMinutes) * 100);
 
   // Animations
   const modalPopScale = useRef(new Animated.Value(0.88)).current;
@@ -185,8 +328,8 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
 
   // Calculate live script statistics
   const wordCount = scriptText.trim().split(/\s+/).filter(Boolean).length;
-  const estimatedSeconds = Math.max(8, Math.round(wordCount / 2.6));
-  const estimatedMinutesQuota = Math.ceil(estimatedSeconds / 60);
+  const estimatedSeconds = Math.max(4, Math.round(wordCount / 2.6));
+  const estimatedMinutesCost = Math.max(1, Math.ceil(estimatedSeconds / 60));
 
   useEffect(() => {
     const flameLoop = Animated.loop(
@@ -215,6 +358,7 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
         setPlaybackSeconds((prev) => {
           if (prev >= totalAudioDuration) {
             setIsPlayingAudio(false);
+            setPlayingProjectId(null);
             return 0;
           }
           return prev + 1;
@@ -292,9 +436,25 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
       setIsPlayingAudio(true);
       setPlaybackSeconds(0);
       setTotalAudioDuration(estimatedSeconds);
+
+      // Prepend newly rendered master to recent projects
+      const newProj: VoiceProjectItem = {
+        id: `rp-${Date.now()}`,
+        name: scriptTitle.trim() || 'Creator Voice Master',
+        duration: formatTimer(estimatedSeconds),
+        status: 'Exported',
+        platform: 'Reels / TikTok',
+        text: scriptText,
+        voiceStyle: selectedVoiceStyle,
+        speed: selectedSpeed,
+        tone: selectedVoiceStyle.tone,
+        updatedAt: 'Just now',
+      };
+      setRecentProjects((prev) => [newProj, ...prev.filter((p) => p.name !== newProj.name)]);
+
       setCelebrationData({
         title: 'Studio Voiceover Rendered!',
-        subtitle: `Rendered with "${selectedVoiceStyle.name}" (${estimatedSeconds}s • ${estimatedMinutesQuota} min quota).`,
+        subtitle: `Rendered with "${selectedVoiceStyle.name}" (${estimatedSeconds}s • ${estimatedMinutesCost} min cost).`,
         badgeText: '🎙️ 4K STUDIO AUDIO READY',
         xpEarned: 50,
         speechBubble: 'Sounds clean and punchy, Pablo! Ready for Reels & TikTok! 🎧',
@@ -320,6 +480,60 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
     }
     const newSec = Math.round(percent * totalAudioDuration);
     setPlaybackSeconds(newSec);
+  };
+
+  const handleToggleProjectPlay = (proj: VoiceProjectItem) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    if (playingProjectId === proj.id && isPlayingAudio) {
+      setIsPlayingAudio(false);
+      setPlayingProjectId(null);
+      showToast(`⏸ Paused "${proj.name}"`);
+    } else {
+      setPlayingProjectId(proj.id);
+      setScriptTitle(proj.name);
+      setScriptText(proj.text);
+      if (proj.voiceStyle) {
+        setSelectedVoiceStyle(proj.voiceStyle);
+      }
+      if (proj.speed) {
+        setSelectedSpeed(proj.speed);
+      }
+      setTotalAudioDuration(Math.max(8, Math.round(proj.text.split(/\s+/).filter(Boolean).length / 2.6)));
+      setPlaybackSeconds(0);
+      setIsPlayingAudio(true);
+      showToast(`▶ Playing "${proj.name}" (${proj.voiceStyle?.name || 'Voice'} • ${(proj.speed || '1.0x').replace('x', '×')})`);
+    }
+  };
+
+  const handleLoadProjectIntoEditor = (proj: VoiceProjectItem) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    // Fully preserve everything: voice style, speed, script, and project title
+    setScriptTitle(proj.name);
+    setScriptText(proj.text);
+    if (proj.voiceStyle) {
+      setSelectedVoiceStyle(proj.voiceStyle);
+    }
+    if (proj.speed) {
+      setSelectedSpeed(proj.speed);
+    }
+    const words = proj.text.split(/\s+/).filter(Boolean).length;
+    setTotalAudioDuration(Math.max(8, Math.round(words / 2.6)));
+    setPlaybackSeconds(0);
+    setIsPlayingAudio(false);
+    setShowAllProjectsModal(false);
+    showToast(`✓ Loaded "${proj.name}" with ${proj.voiceStyle?.name || 'Voice'} (${(proj.speed || '1.0x').replace('x', '×')})`);
+  };
+
+  const getActivePaceLabel = (spd: '0.9x' | '1.0x' | '1.1x' | '1.2x', defaultPace: string) => {
+    if (spd === '0.9x') return '0.9× Slow';
+    if (spd === '1.0x') return '1.0× Steady';
+    if (spd === '1.1x') return '1.1× Fast';
+    if (spd === '1.2x') return '1.2× High Energy';
+    return defaultPace;
   };
 
   const formatTimer = (sec: number) => {
@@ -361,62 +575,34 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
               </Svg>
             </Pressable>
 
-            <Animated.View
-              style={[
-                styles.headerLogoWrapper,
-                { transform: [{ translateY: flameFloatY }] },
-              ]}
+            <BrandLogo size="sm" />
+
+            {/* Pro Badge Pill */}
+            <Pressable
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                }
+                if (onSwitchToFree) {
+                  onSwitchToFree();
+                } else if (onSaveProfile && userProfile) {
+                  onSaveProfile({ ...userProfile, tier: 'free' });
+                }
+              }}
+              hitSlop={8}
             >
-              <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerGhostLogo}
-                resizeMode="contain"
-              />
-            </Animated.View>
+              <LinearGradient
+                colors={['#F59E0B', '#F59E0B', '#F59E0B']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.proHeaderBadge}
+              >
+                <Text style={styles.proHeaderBadgeText}>👑 PRO</Text>
+              </LinearGradient>
+            </Pressable>
           </View>
 
           <View style={styles.headerRight}>
-            {/* Pro Active Pill Switch */}
-            {onSwitchToFree && (
-              <Pressable
-                onPress={() => {
-                  if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                  }
-                  onSwitchToFree();
-                }}
-                style={styles.proPillBadge}
-              >
-                <Text style={styles.proPillBadgeText}>⚡ PRO ACTIVE</Text>
-              </Pressable>
-            )}
-
-            {/* Message Bubble Icon */}
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                if (onOpenMessages) {
-                  onOpenMessages();
-                } else if (onNavigateTab) {
-                  onNavigateTab('match');
-                }
-              }}
-            >
-              <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-            </Pressable>
-
             {/* Notification Bell Icon */}
             <Pressable
               style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
@@ -460,11 +646,39 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
               }}
               hitSlop={8}
             >
-              <Image
-                source={userProfile?.avatarSource || require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerProfileImg}
-                resizeMode="cover"
-              />
+              {userProfile?.customAvatarUri ? (
+                <Image
+                  source={{ uri: userProfile.customAvatarUri }}
+                  style={styles.headerProfileImg}
+                  resizeMode="cover"
+                />
+              ) : (userProfile?.avatarSource && userProfile.avatarId && userProfile.avatarId !== 'ghost') ? (
+                <Image
+                  source={userProfile.avatarSource}
+                  style={styles.headerProfileImg}
+                  resizeMode="cover"
+                />
+              ) : (
+                <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
+                  <Path
+                    d="M20 21V19C20 17.9 19.5 16.9 18.7 16.2C17.9 15.5 16.9 15 15.8 15H8.2C7.1 15 6.1 15.5 5.3 16.2C4.5 16.9 4 17.9 4 19V21"
+                    stroke="#F59E0B"
+                    strokeWidth="2.3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <Circle
+                    cx="12"
+                    cy="7"
+                    r="4"
+                    stroke="#F59E0B"
+                    strokeWidth="2.3"
+                  />
+                </Svg>
+              )}
+              <View style={{ position: 'absolute', bottom: -2, right: -2 }}>
+                <TinyGoldCheck size={14} />
+              </View>
             </Pressable>
           </View>
         </View>
@@ -472,13 +686,13 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
         {/* 2. SCROLLABLE CONTENT */}
         <ScrollView
           style={styles.scrollContent}
-          contentContainerStyle={{ paddingBottom: 150 }}
+          contentContainerStyle={{ paddingBottom: 110 }}
           showsVerticalScrollIndicator={false}
         >
           {/* BADGES HEADER ROW */}
           <View style={styles.badgePillRow}>
             <View style={styles.heroPillGold}>
-              <Text style={styles.heroPillGoldText}>✨ VOICE STUDIO — PRO</Text>
+              <Text style={styles.heroPillGoldText}>✨ VOICE STUDIO • PRO</Text>
             </View>
             <View style={styles.heroPillPurple}>
               <View style={styles.livePulseDot} />
@@ -486,9 +700,14 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
             </View>
           </View>
 
-          <Text style={styles.mainTitle}>Turn scripts into voiceovers.</Text>
+          <Text
+            style={styles.mainTitle}
+            numberOfLines={2}
+          >
+            Turn scripts into voiceovers.
+          </Text>
           <Text style={styles.subTitle}>
-            Convert written hooks &amp; storylines into human-grade 4K studio audio in seconds.
+            Clone your own voice or choose an AI narrator for your video script.
           </Text>
 
           {/* ============================================================ */}
@@ -496,60 +715,64 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
           {/* ============================================================ */}
           <View style={styles.minutesLuxuryCard}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-              <View style={{ flex: 1, paddingRight: 10 }}>
+              <View style={{ flex: 1, paddingRight: 8 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                   <Text style={styles.minutesCardLabel}>Voice Minutes</Text>
                   <View style={styles.ultraHdPill}>
-                    <Text style={styles.ultraHdPillText}>48kHz HD</Text>
+                    <Text style={styles.ultraHdPillText}>Studio Audio</Text>
                   </View>
                 </View>
 
                 <View style={{ flexDirection: 'row', alignItems: 'baseline', marginTop: 4 }}>
-                  <Text style={styles.minutesBigNumber}>118</Text>
-                  <Text style={styles.minutesTotalText}> / 150 min remaining</Text>
-                </View>
-
-                <Text style={styles.minutesResetText}>⏳ Resets in 19 days • Monthly Pro Quota</Text>
-
-                <View style={{ flexDirection: 'row', gap: 6, marginTop: 10 }}>
-                  <View style={styles.minuteTagPillPro}>
-                    <Text style={styles.minuteTagTextPro}>✓ PRO INCLUDED</Text>
-                  </View>
-                  <View style={styles.minuteTagPillReady}>
-                    <Text style={styles.minuteTagTextReady}>⚡ EXPORT READY</Text>
-                  </View>
+                  <Text style={styles.minutesBigNumber}>{remainingMinutes}</Text>
+                  <Text style={styles.minutesTotalText}> / {totalAllowanceMinutes} min remaining</Text>
                 </View>
               </View>
 
-              {/* RADIAL / STOPWATCH ICON GAUGE */}
-              <View style={styles.stopwatchCircle}>
+              {/* RADIAL ALLOWANCE PROGRESS GAUGE */}
+              <View style={styles.allowanceProgressGauge}>
                 <Svg width={46} height={46} viewBox="0 0 36 36">
-                  {/* Background Circle */}
+                  {/* Background Track Circle */}
                   <Circle
                     cx="18"
                     cy="18"
-                    r="15"
+                    r="14.5"
                     fill="none"
                     stroke="#EDE9FE"
-                    strokeWidth="3"
+                    strokeWidth="3.2"
                   />
-                  {/* Progress Circle (78.6%) */}
+                  {/* Progress Circle (dynamic remaining) */}
                   <Circle
                     cx="18"
                     cy="18"
-                    r="15"
+                    r="14.5"
                     fill="none"
                     stroke="#582CDB"
-                    strokeWidth="3"
-                    strokeDasharray="94.2"
-                    strokeDashoffset={94.2 * (1 - 118 / 150)}
+                    strokeWidth="3.2"
+                    strokeDasharray="91.1"
+                    strokeDashoffset={91.1 * (1 - remainingMinutes / totalAllowanceMinutes)}
                     strokeLinecap="round"
                     transform="rotate(-90 18 18)"
                   />
                 </Svg>
-                <View style={styles.stopwatchCenterIcon}>
-                  <Text style={{ fontSize: 15 }}>⏱️</Text>
+                <View style={styles.allowanceGaugeCenter}>
+                  <Text style={styles.allowanceGaugePercentText}>{remainingPercent}%</Text>
+                  <Text style={styles.allowanceGaugeSubText}>left</Text>
                 </View>
+              </View>
+            </View>
+
+            {/* FULL WIDTH RESET TEXT (NO TRUNCATION) */}
+            <Text style={styles.minutesResetText}>
+              ⏳ Resets in 19 days • Monthly Pro allowance
+            </Text>
+
+            <View style={{ flexDirection: 'row', gap: 6, marginTop: 10 }}>
+              <View style={styles.minuteTagPillPro}>
+                <Text style={styles.minuteTagTextPro}>✓ PRO INCLUDED</Text>
+              </View>
+              <View style={styles.minuteTagPillReady}>
+                <Text style={styles.minuteTagTextReady}>⚡ EXPORT READY</Text>
               </View>
             </View>
 
@@ -560,7 +783,7 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                 setShowManageMinutesModal(true);
               }}
             >
-              <Text style={styles.manageMinutesBtnText}>Manage Minutes &amp; Quota History</Text>
+              <Text style={styles.manageMinutesBtnText}>Manage Minutes &amp; Allowance →</Text>
             </Pressable>
           </View>
 
@@ -568,7 +791,10 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
           {/* SECTION: SCRIPT TO VOICE                                      */}
           {/* ============================================================ */}
           <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionHeaderTitle}>Script to Voice</Text>
+            <View style={{ flex: 1, minWidth: 0, marginRight: 8 }}>
+              <Text style={styles.sectionHeaderTitle}>Script to Voice</Text>
+              <Text style={styles.presetsSubHint} numberOfLines={1}>Swipe presets ➔</Text>
+            </View>
             <View style={styles.wordCounterPill}>
               <Text style={styles.wordCounterText}>
                 {wordCount} words • ~{estimatedSeconds}s audio
@@ -580,16 +806,17 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ gap: 8, paddingBottom: 10 }}
+            contentContainerStyle={{ gap: 8, paddingBottom: 10, paddingRight: 12 }}
           >
             {PRESET_SCRIPTS.map((preset) => {
               const isSelected = scriptTitle === preset.title;
               return (
                 <Pressable
                   key={preset.id}
-                  style={[
+                  style={({ pressed }) => [
                     styles.presetChip,
                     isSelected && styles.presetChipActive,
+                    pressed && styles.btnPressed,
                   ]}
                   onPress={() => handleLoadPreset(preset)}
                 >
@@ -610,67 +837,93 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
           <View style={styles.scriptEditorCard}>
             <TextInput
               style={styles.scriptTextInput}
-              multiline
+              multiline={true}
+              scrollEnabled={false}
+              autoCapitalize="sentences"
+              autoCorrect={true}
               value={scriptText}
               onChangeText={(text) => {
                 setScriptText(text);
-                setTotalAudioDuration(Math.max(8, Math.round(text.split(/\s+/).filter(Boolean).length / 2.6)));
+                const words = text.trim().split(/\s+/).filter(Boolean).length;
+                const secs = Math.max(4, Math.round(words / 2.6));
+                setTotalAudioDuration(secs);
               }}
               placeholder="Paste or type your video script here..."
               placeholderTextColor="#94A3B8"
+              selectionColor="#582CDB"
             />
 
             {/* Editor Footer Row */}
             <View style={styles.scriptFooterRow}>
-              <View style={{ flexDirection: 'row', gap: 16 }}>
+              <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center', flexShrink: 1 }}>
                 <View>
-                  <Text style={styles.metaKeyLabel}>EST. LENGTH</Text>
-                  <Text style={styles.metaValText}>{formatTimer(estimatedSeconds)}</Text>
+                  <Text style={styles.metaKeyLabel} numberOfLines={1}>LENGTH</Text>
+                  <Text style={styles.metaValText} numberOfLines={1}>{formatTimer(estimatedSeconds)}</Text>
                 </View>
                 <View>
-                  <Text style={styles.metaKeyLabel}>QUOTA USAGE</Text>
-                  <Text style={styles.metaValText}>{estimatedMinutesQuota} min</Text>
+                  <Text style={styles.metaKeyLabel} numberOfLines={1}>COST</Text>
+                  <Text style={styles.metaValText} numberOfLines={1}>{estimatedMinutesCost} min</Text>
                 </View>
                 <View>
-                  <Text style={styles.metaKeyLabel}>SPEED</Text>
-                  <Text style={styles.metaValText}>{selectedSpeed}</Text>
+                  <Text style={styles.metaKeyLabel} numberOfLines={1}>SPEED</Text>
+                  <Text style={styles.metaValText} numberOfLines={1}>{selectedSpeed}</Text>
                 </View>
               </View>
 
-              <View style={{ flexDirection: 'row', gap: 8 }}>
-                {/* AI Hook Optimizer */}
+              <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center', flexShrink: 0 }}>
+                {/* AI Hook Optimizer / Polish */}
                 <Pressable
                   style={({ pressed }) => [styles.toolIconBtn, pressed && styles.btnPressed]}
                   onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    showToast('✨ Jarvis Hook & Script Polish');
                     triggerModalPop();
                     setShowHookOptimizerModal(true);
                   }}
                   hitSlop={6}
+                  accessibilityLabel="AI Hook & Script Polish"
+                  accessibilityHint="Opens Jarvis script and hook optimizer"
                 >
-                  <Text style={{ fontSize: 15 }}>🪄</Text>
+                  <Text style={{ fontSize: 13 }}>✨</Text>
                 </Pressable>
 
-                {/* Voice Style Selector */}
+                {/* Voice Style Selector & Adjustments */}
                 <Pressable
                   style={({ pressed }) => [styles.toolIconBtn, pressed && styles.btnPressed]}
                   onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    showToast('🎚️ Voice Style & Adjustments');
                     triggerModalPop();
                     setShowVoiceStyleModal(true);
                   }}
                   hitSlop={6}
+                  accessibilityLabel="Voice Style & Adjustments"
+                  accessibilityHint="Opens voice style selector and audio tuning"
                 >
-                  <Text style={{ fontSize: 15 }}>🎚️</Text>
+                  <Text style={{ fontSize: 13 }}>🎚️</Text>
                 </Pressable>
 
-                {/* Copy/Paste Action */}
+                {/* Copy Script Action */}
                 <Pressable
                   style={({ pressed }) => [styles.toolIconBtn, pressed && styles.btnPressed]}
                   onPress={() => {
-                    showToast('✓ Script copied to clipboard');
+                    if (Platform.OS !== 'web') {
+                      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                    }
+                    if (Platform.OS === 'web' && typeof navigator !== 'undefined' && navigator.clipboard) {
+                      navigator.clipboard.writeText(scriptText);
+                    }
+                    showToast('📋 Script copied to clipboard!');
                   }}
                   hitSlop={6}
+                  accessibilityLabel="Copy Script to Clipboard"
+                  accessibilityHint="Copies current script text to clipboard"
                 >
-                  <Text style={{ fontSize: 15 }}>📋</Text>
+                  <Text style={{ fontSize: 13 }}>📋</Text>
                 </Pressable>
               </View>
             </View>
@@ -697,7 +950,7 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                 />
               </Svg>
               <Text style={styles.generateVoiceBtnText}>
-                {isGenerating ? '⚡ Synthesizing 4K Audio...' : 'Generate Voice'}
+                {isGenerating ? '⚡ Synthesizing Studio Audio...' : 'Generate Voice'}
               </Text>
             </LinearGradient>
           </Pressable>
@@ -777,7 +1030,10 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
               <View style={{ flexDirection: 'row', gap: 8, marginBottom: 10 }}>
                 <Pressable
                   style={({ pressed }) => [styles.audioSecondaryBtn, pressed && styles.btnPressed]}
-                  onPress={handleGenerateVoice}
+                  onPress={() => {
+                    showToast(`🔄 Regenerating with ${selectedVoiceStyle.name} (${selectedSpeed})...`);
+                    handleGenerateVoice();
+                  }}
                 >
                   <Text style={styles.audioSecondaryBtnText}>🔄 Regenerate</Text>
                 </Pressable>
@@ -788,16 +1044,16 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                     }
                     setCelebrationData({
-                      title: '4K Audio Master Exported!',
-                      subtitle: `"${scriptTitle}.wav" (48kHz Ultra-HD) downloaded & ready for your video editor.`,
-                      badgeText: '📥 4K AUDIO EXPORTED',
+                      title: 'Voiceover Master Exported!',
+                      subtitle: `"${scriptTitle}.wav" (Studio Audio) downloaded & ready for your video editor.`,
+                      badgeText: '📥 AUDIO EXPORTED (+50 XP)',
                       xpEarned: 50,
-                      speechBubble: '4K audio master ready, Pablo! Time to drop some viral magic! 🔥',
+                      speechBubble: 'Studio voiceover ready, Pablo! Ready for your video editor! 🚀',
                     });
                     setShowCelebrationModal(true);
                   }}
                 >
-                  <Text style={styles.audioSecondaryBtnText}>📥 Export (.WAV)</Text>
+                  <Text style={styles.audioSecondaryBtnText}>📥 Export WAV</Text>
                 </Pressable>
               </View>
 
@@ -806,7 +1062,15 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                 style={({ pressed }) => [styles.useInPostBtn, pressed && styles.btnPressed]}
                 onPress={() => {
                   if (onOpenPostComposer) {
-                    onOpenPostComposer(`${scriptTitle} (Voiceover Master Attached)`);
+                    onOpenPostComposer(
+                      scriptTitle,
+                      {
+                        title: scriptTitle,
+                        voiceName: selectedVoiceStyle.name,
+                        duration: formatTimer(totalAudioDuration),
+                        speed: selectedSpeed,
+                      }
+                    );
                   }
                 }}
               >
@@ -852,44 +1116,91 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
           </View>
 
           <View style={{ gap: 8 }}>
-            {recentProjects.map((proj) => (
-              <View key={proj.id} style={styles.projectItemCard}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
-                  <Pressable
-                    style={styles.projectPlayBtn}
-                    onPress={() => {
-                      setScriptTitle(proj.name);
-                      setScriptText(proj.text);
-                      setTotalAudioDuration(Math.round(proj.text.split(' ').length / 2.6));
-                      setPlaybackSeconds(0);
-                      setIsPlayingAudio(true);
-                      showToast(`▶ Playing ${proj.name}`);
-                    }}
-                  >
-                    <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
-                      <Path d="M8 5v14l11-7L8 5z" fill="#582CDB" />
-                    </Svg>
-                  </Pressable>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.projectNameText}>{proj.name}</Text>
-                    <Text style={styles.projectSubText}>
-                      {proj.duration} • {proj.status} • {proj.platform}
-                    </Text>
-                  </View>
-                </View>
-
+            {recentProjects.slice(0, 3).map((proj) => {
+              const isCurrentPlaying = playingProjectId === proj.id && isPlayingAudio;
+              return (
                 <Pressable
-                  style={styles.projectReuseBtn}
-                  onPress={() => {
-                    setScriptTitle(proj.name);
-                    setScriptText(proj.text);
-                    showToast(`✓ Loaded "${proj.name}" into editor`);
-                  }}
+                  key={proj.id}
+                  style={({ pressed }) => [
+                    styles.projectItemCard,
+                    isCurrentPlaying && styles.projectItemCardPlaying,
+                    pressed && styles.btnPressed,
+                  ]}
+                  onPress={() => handleToggleProjectPlay(proj)}
+                  accessibilityRole="button"
+                  accessibilityLabel={isCurrentPlaying ? `Pause ${proj.name}` : `Play preview for ${proj.name}`}
                 >
-                  <Text style={styles.projectReuseBtnText}>Reuse</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
+                    {/* Play/Pause Tile */}
+                    <View
+                      style={[
+                        styles.projectPlayBtn,
+                        isCurrentPlaying && styles.projectPlayBtnActive,
+                      ]}
+                    >
+                      <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+                        {isCurrentPlaying ? (
+                          <Path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" fill="#582CDB" />
+                        ) : (
+                          <Path d="M8 5v14l11-7L8 5z" fill="#582CDB" />
+                        )}
+                      </Svg>
+                    </View>
+
+                    {/* Project Title & Metadata */}
+                    <View style={{ flex: 1, paddingRight: 6 }}>
+                      <Text style={styles.projectNameText} numberOfLines={1}>
+                        {proj.name}
+                      </Text>
+                      <View style={styles.projectSubRow}>
+                        <Text style={styles.projectSubDuration}>{proj.duration}</Text>
+                        <Text style={styles.projectSubDot}>•</Text>
+                        <View style={styles.statusInlineTag}>
+                          <View
+                            style={[
+                              styles.statusMiniDot,
+                              proj.status === 'Exported'
+                                ? styles.statusMiniDotExported
+                                : styles.statusMiniDotSaved,
+                            ]}
+                          />
+                          <Text
+                            style={[
+                              styles.statusInlineText,
+                              proj.status === 'Exported'
+                                ? styles.statusInlineTextExported
+                                : styles.statusInlineTextSaved,
+                            ]}
+                          >
+                            {proj.status}
+                          </Text>
+                        </View>
+                        <Text style={styles.projectSubDot}>•</Text>
+                        <Text style={styles.projectSubPlatform}>
+                          {proj.platform}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+
+                  {/* Explicit Reuse Button */}
+                  <Pressable
+                    style={({ pressed }) => [styles.projectReuseBtn, pressed && styles.btnPressed]}
+                    onPress={(e) => {
+                      if (e && e.stopPropagation) {
+                        e.stopPropagation();
+                      }
+                      handleLoadProjectIntoEditor(proj);
+                    }}
+                    hitSlop={6}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Reuse ${proj.name}`}
+                  >
+                    <Text style={styles.projectReuseBtnText}>Reuse</Text>
+                  </Pressable>
                 </Pressable>
-              </View>
-            ))}
+              );
+            })}
           </View>
 
           {/* ============================================================ */}
@@ -916,25 +1227,29 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
             {/* Tone & Pace Chips */}
             <View style={{ flexDirection: 'row', gap: 8, marginTop: 12 }}>
               <View style={styles.toneChipBox}>
-                <Text style={styles.toneChipLabel}>TONE</Text>
-                <Text style={styles.toneChipValue}>{selectedVoiceStyle.tone}</Text>
+                <Text style={styles.toneChipLabel} numberOfLines={1}>TONE</Text>
+                <Text style={styles.toneChipValue} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
+                  {selectedVoiceStyle.tone}
+                </Text>
               </View>
               <View style={styles.toneChipBox}>
-                <Text style={styles.toneChipLabel}>PACE</Text>
-                <Text style={styles.toneChipValue}>{selectedVoiceStyle.pace}</Text>
+                <Text style={styles.toneChipLabel} numberOfLines={1}>PACE</Text>
+                <Text style={styles.toneChipValue} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
+                  {getActivePaceLabel(selectedSpeed, selectedVoiceStyle.pace)}
+                </Text>
               </View>
             </View>
 
             {/* HIGH-DENSITY ACOUSTIC WAVELENGTH VISUALIZER */}
             <View style={styles.wavelengthCapsuleCard}>
               <View style={styles.wavelengthHeaderRow}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, minWidth: 0, marginRight: 8 }}>
                   <View style={[styles.wavelengthLiveDot, isPlayingAudio && styles.wavelengthLiveDotActive]} />
-                  <Text style={styles.wavelengthLabelText}>
-                    {isPlayingAudio ? 'LIVE MASTER AUDIO FREQUENCY' : 'STUDIO ACOUSTIC WAVELENGTH'}
+                  <Text style={styles.wavelengthLabelText} numberOfLines={1}>
+                    {isPlayingAudio ? 'LIVE AUDIO FREQUENCY' : 'VOICE SPECTRUM'}
                   </Text>
                 </View>
-                <Text style={styles.wavelengthHzText}>48.0 kHz • 24-bit Lossless</Text>
+                <Text style={styles.wavelengthHzText} numberOfLines={1}>48 kHz • 24-bit</Text>
               </View>
 
               <View style={styles.wavelengthDenseBarsRow}>
@@ -968,9 +1283,9 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
               </View>
 
               <View style={styles.wavelengthBottomMetrics}>
-                <Text style={styles.wavelengthMetricItem}>DYNAMIC RANGE: 98dB</Text>
-                <Text style={styles.wavelengthMetricItem}>STEREO SYNCED</Text>
-                <Text style={styles.wavelengthMetricItem}>NEURAL ENHANCED</Text>
+                <Text style={styles.wavelengthMetricItem} numberOfLines={1}>FORMAT: LOSSLESS WAV</Text>
+                <Text style={styles.wavelengthMetricItem} numberOfLines={1}>DYNAMIC EQ</Text>
+                <Text style={styles.wavelengthMetricItem} numberOfLines={1}>STUDIO MASTERS</Text>
               </View>
             </View>
 
@@ -985,8 +1300,11 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                     selectedSpeed === spd && styles.speedPillBtnActive,
                   ]}
                   onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
                     setSelectedSpeed(spd);
-                    showToast(`Speed set to ${spd}`);
+                    showToast(`Speed set to ${spd.replace('x', '×')} (${getActivePaceLabel(spd, selectedVoiceStyle.pace)})`);
                   }}
                 >
                   <Text
@@ -995,13 +1313,13 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                       selectedSpeed === spd && styles.speedPillTextActive,
                     ]}
                   >
-                    {spd}
+                    {spd.replace('x', '×')}
                   </Text>
                 </Pressable>
               ))}
             </View>
 
-            <View style={{ flexDirection: 'row', gap: 10, marginTop: 14 }}>
+            <View style={{ flexDirection: 'row', gap: 8, marginTop: 14 }}>
               <Pressable
                 style={({ pressed }) => [styles.voicePreviewBtn, pressed && styles.btnPressed]}
                 onPress={() => {
@@ -1009,7 +1327,14 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                   showToast(`Playing sample preview for ${selectedVoiceStyle.name}`);
                 }}
               >
-                <Text style={styles.voicePreviewBtnText}>▶ Preview Sample</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, justifyContent: 'center' }}>
+                  <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
+                    <Path d="M8 5v14l11-7L8 5z" fill="#FFFFFF" />
+                  </Svg>
+                  <Text style={styles.voicePreviewBtnText} numberOfLines={1}>
+                    Preview Sample
+                  </Text>
+                </View>
               </Pressable>
 
               <Pressable
@@ -1019,7 +1344,9 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                   setShowVoiceStyleModal(true);
                 }}
               >
-                <Text style={styles.voiceChangeBtnText}>Change Style</Text>
+                <Text style={styles.voiceChangeBtnText} numberOfLines={1}>
+                  Change Style
+                </Text>
               </Pressable>
             </View>
           </View>
@@ -1035,22 +1362,20 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
               <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
+                source={require('../../assets/images/jarvis-core-flame.png')}
                 style={{ width: 24, height: 24 }}
                 resizeMode="contain"
               />
               <Text style={styles.jarvisInsightTitle}>Jarvis Strategy Insight</Text>
             </View>
             <Text style={styles.jarvisInsightBody}>
-              &ldquo;Keep this voiceover under 45 seconds. Shorter voiceovers with a clear hook tend to score 2.4x higher viewer retention for Instagram Reels and TikTok.&rdquo;
+              &ldquo;Your voiceover is {estimatedSeconds} seconds. Jarvis recommends keeping it under 45 seconds and tightening the opening hook to protect early retention.&rdquo;
             </Text>
 
             <Pressable
               style={({ pressed }) => [styles.jarvisAdviceBtn, pressed && styles.btnPressed]}
               onPress={() => {
-                if (onOpenMessages) {
-                  onOpenMessages('conv_jarvis');
-                } else if (onOpenJarvisPro) {
+                if (onOpenJarvisPro) {
                   onOpenJarvisPro();
                 }
               }}
@@ -1062,31 +1387,111 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
           </LinearGradient>
 
           {/* ============================================================ */}
-          {/* CARD: NEED MORE MINUTES (GOLDEN VIP REFILL CARD)             */}
+          {/* DYNAMIC CONTEXTUAL REFILL CARD BASED ON REMAINING MINUTES    */}
           {/* ============================================================ */}
-          <LinearGradient
-            colors={['#FFFBEB', '#FEF3C7', '#FDE68A']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.needMinutesCard}
-          >
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Text style={styles.needMinutesTitle}>Need more minutes?</Text>
-              <Text style={{ fontSize: 16 }}>👑</Text>
-            </View>
-            <Text style={styles.needMinutesSub}>
-              Buy extra voice minutes when your included Pro minutes run low. Refill anytime with instant allocation.
-            </Text>
+          {remainingMinutes >= 100 ? (
+            /* 🟢 100+ min: Subtle, non-intrusive reminder row */
             <Pressable
-              style={({ pressed }) => [styles.buyMoreBtn, pressed && styles.btnPressed]}
+              style={({ pressed }) => [styles.subtleRefillRow, pressed && styles.btnPressed]}
               onPress={() => {
                 triggerModalPop();
                 setShowRefillMinutesModal(true);
               }}
             >
-              <Text style={styles.buyMoreBtnText}>⚡ Buy Extra Minute Packs ➔</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexShrink: 1 }}>
+                <Text style={{ fontSize: 13 }}>⚡</Text>
+                <Text style={styles.subtleRefillText} numberOfLines={1}>
+                  Need extra minutes?
+                </Text>
+              </View>
+              <Text style={styles.subtleRefillLink} numberOfLines={1}>
+                View Packs ➔
+              </Text>
             </Pressable>
-          </LinearGradient>
+          ) : remainingMinutes >= 50 ? (
+            /* 🟡 50-99 min: Small "Need more minutes?" reminder */
+            <View style={styles.moderateRefillCard}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                <View style={{ flex: 1, paddingRight: 10 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Text style={styles.moderateRefillTitle}>Need more minutes?</Text>
+                    <View style={styles.moderateBadge}>
+                      <Text style={styles.moderateBadgeText}>{remainingMinutes}m left</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.moderateRefillSub}>
+                    You have {remainingMinutes} minutes left this cycle. Top up extra packs anytime.
+                  </Text>
+                </View>
+                <Pressable
+                  style={({ pressed }) => [styles.moderateRefillBtn, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    triggerModalPop();
+                    setShowRefillMinutesModal(true);
+                  }}
+                >
+                  <Text style={styles.moderateRefillBtnText}>Top Up ➔</Text>
+                </Pressable>
+              </View>
+            </View>
+          ) : remainingMinutes >= 20 ? (
+            /* 🟠 20-49 min: Prominent refill card */
+            <LinearGradient
+              colors={['#FEF3C7', '#FEF3C7', '#FDE68A']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.needMinutesCard}
+            >
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <Text style={styles.needMinutesTitle}>Running Low on Minutes</Text>
+                  <View style={styles.lowWarningBadge}>
+                    <Text style={styles.lowWarningBadgeText}>{remainingMinutes}m left</Text>
+                  </View>
+                </View>
+                <Text style={{ fontSize: 16 }}>⏳</Text>
+              </View>
+              <Text style={styles.needMinutesSub}>
+                You have {remainingMinutes} of {totalAllowanceMinutes} minutes remaining. Refill an extra minute pack to ensure uninterrupted studio voice generation.
+              </Text>
+              <Pressable
+                style={({ pressed }) => [styles.buyMoreBtn, pressed && styles.btnPressed]}
+                onPress={() => {
+                  triggerModalPop();
+                  setShowRefillMinutesModal(true);
+                }}
+              >
+                <Text style={styles.buyMoreBtnText}>⚡ Buy Extra Minute Packs ➔</Text>
+              </Pressable>
+            </LinearGradient>
+          ) : (
+            /* 🔴 <20 min: Strong critical refill CTA */
+            <LinearGradient
+              colors={['#FFF1F2', '#FFE4E6', '#FECDD3']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.criticalMinutesCard}
+            >
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text style={styles.criticalMinutesTitle}>⚠️ Minutes Almost Exhausted</Text>
+                <View style={styles.criticalBadge}>
+                  <Text style={styles.criticalBadgeText}>{remainingMinutes}m left</Text>
+                </View>
+              </View>
+              <Text style={styles.criticalMinutesSub}>
+                You only have {remainingMinutes} minutes remaining in your allowance. Refill now so your voiceover exports don't pause.
+              </Text>
+              <Pressable
+                style={({ pressed }) => [styles.criticalBuyMoreBtn, pressed && styles.btnPressed]}
+                onPress={() => {
+                  triggerModalPop();
+                  setShowRefillMinutesModal(true);
+                }}
+              >
+                <Text style={styles.criticalBuyMoreBtnText}>🚨 Refill Voice Pack Now ➔</Text>
+              </Pressable>
+            </LinearGradient>
+          )}
         </ScrollView>
 
         {/* FLOATING BOTTOM TAB BAR */}
@@ -1115,7 +1520,7 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
 
                 <Text style={styles.modalTitle}>Select Voice Tone &amp; Style</Text>
                 <Text style={styles.modalSub}>
-                  Neural vocal models calibrated for high-retention social content.
+                  Choose the voice that fits your content, audience, and delivery style.
                 </Text>
 
                 <View style={{ gap: 8, marginVertical: 14 }}>
@@ -1124,44 +1529,120 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                     return (
                       <Pressable
                         key={v.id}
-                        style={[
+                        style={({ pressed }) => [
                           styles.voiceOptionCard,
                           isSelected && styles.voiceOptionCardSelected,
+                          pressed && styles.btnPressed,
                         ]}
                         onPress={() => {
+                          if (Platform.OS !== 'web') {
+                            Haptics.selectionAsync();
+                          }
                           setSelectedVoiceStyle(v);
-                          setShowVoiceStyleModal(false);
-                          showToast(`✓ Switched voice to "${v.name}"`);
+                          if (v.pace.startsWith('1.2×') || v.pace.startsWith('1.2x')) setSelectedSpeed('1.2x');
+                          else if (v.pace.startsWith('1.1×') || v.pace.startsWith('1.15×') || v.pace.startsWith('1.1x') || v.pace.startsWith('1.15x')) setSelectedSpeed('1.1x');
+                          else if (v.pace.startsWith('0.9×') || v.pace.startsWith('0.9x')) setSelectedSpeed('0.9x');
+                          else setSelectedSpeed('1.0x');
                         }}
                       >
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                            <Text style={styles.voiceOptionName}>{v.name}</Text>
-                            <View style={styles.tagPillMini}>
-                              <Text style={styles.tagPillMiniText}>{v.tag}</Text>
+                        <View style={styles.voiceOptionHeaderRow}>
+                          <Text
+                            style={[
+                              styles.voiceOptionName,
+                              isSelected && styles.voiceOptionNameSelected,
+                            ]}
+                          >
+                            {v.name}
+                          </Text>
+                          <View style={styles.voiceOptionBadgesRow}>
+                            <View style={[styles.tagPillMini, isSelected && styles.tagPillMiniSelected]}>
+                              <Text
+                                style={[
+                                  styles.tagPillMiniText,
+                                  isSelected && styles.tagPillMiniTextSelected,
+                                ]}
+                              >
+                                {v.tag}
+                              </Text>
                             </View>
+                            {isSelected && (
+                              <View style={styles.voiceActiveBadge}>
+                                <Text style={styles.voiceActiveBadgeText}>✓ ACTIVE</Text>
+                              </View>
+                            )}
                           </View>
-                          {isSelected && <Text style={styles.voiceOptionCheck}>✓ ACTIVE</Text>}
                         </View>
                         <Text style={styles.voiceOptionDesc}>{v.desc}</Text>
-                        <View style={{ flexDirection: 'row', gap: 6, marginTop: 8 }}>
-                          <View style={styles.minuteTagPill}>
-                            <Text style={styles.minuteTagText}>{v.tone}</Text>
+                        <View style={styles.voiceOptionFooterRow}>
+                          <View style={{ flexDirection: 'row', gap: 6, flexWrap: 'wrap', alignItems: 'center', flex: 1 }}>
+                            <View style={styles.minuteTagPill}>
+                              <Text style={styles.minuteTagText}>{v.tone}</Text>
+                            </View>
+                            <View style={styles.minuteTagPill}>
+                              <Text style={styles.minuteTagText}>{v.pace}</Text>
+                            </View>
                           </View>
-                          <View style={styles.minuteTagPill}>
-                            <Text style={styles.minuteTagText}>{v.pace}</Text>
-                          </View>
+                          <Pressable
+                            style={({ pressed }) => [
+                              styles.voiceInlinePreviewBtn,
+                              previewingVoiceId === v.id && styles.voiceInlinePreviewBtnActive,
+                              pressed && styles.btnPressed,
+                            ]}
+                            onPress={(e) => {
+                              if (e && e.stopPropagation) e.stopPropagation();
+                              if (Platform.OS !== 'web') {
+                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                              }
+                              if (previewingVoiceId === v.id) {
+                                setPreviewingVoiceId(null);
+                                showToast(`⏸ Paused sample: "${v.name}"`);
+                              } else {
+                                setPreviewingVoiceId(v.id);
+                                showToast(`▶ Playing sample: "${v.name}" (${v.sampleDuration})`);
+                                setTimeout(() => {
+                                  setPreviewingVoiceId((current) => (current === v.id ? null : current));
+                                }, 3500);
+                              }
+                            }}
+                            hitSlop={6}
+                            accessibilityLabel={previewingVoiceId === v.id ? `Pause ${v.name} sample` : `Play ${v.name} sample`}
+                          >
+                            <Text
+                              style={[
+                                styles.voiceInlinePreviewBtnText,
+                                previewingVoiceId === v.id && styles.voiceInlinePreviewBtnTextActive,
+                              ]}
+                            >
+                              {previewingVoiceId === v.id ? '⏸ Playing' : '▶ Preview'}
+                            </Text>
+                          </Pressable>
                         </View>
                       </Pressable>
                     );
                   })}
                 </View>
 
+                {/* Primary Apply Action Button */}
+                <Pressable
+                  style={({ pressed }) => [styles.voiceApplyBtn, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                    }
+                    setShowVoiceStyleModal(false);
+                    showToast(`✓ Applied voice "${selectedVoiceStyle.name}"`);
+                  }}
+                >
+                  <Text style={styles.voiceApplyBtnText}>
+                    Apply {selectedVoiceStyle.name} →
+                  </Text>
+                </Pressable>
+
                 <Pressable
                   style={styles.modalCancelBtn}
                   onPress={() => setShowVoiceStyleModal(false)}
                 >
-                  <Text style={styles.modalCancelBtnText}>Close</Text>
+                  <Text style={styles.modalCancelBtnText}>Cancel</Text>
                 </Pressable>
               </ScrollView>
             </Animated.View>
@@ -1182,35 +1663,52 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
               <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
                 <View style={styles.modalHeaderBetween}>
                   <View style={styles.heroPillGold}>
-                    <Text style={styles.heroPillGoldText}>👑 VOICE QUOTA AUDIT</Text>
+                    <Text style={styles.heroPillGoldText}>👑 VOICE ALLOWANCE</Text>
                   </View>
                   <Pressable onPress={() => setShowManageMinutesModal(false)} hitSlop={8}>
                     <Text style={styles.modalCloseText}>✕</Text>
                   </Pressable>
                 </View>
 
-                <Text style={styles.modalTitle}>Voice Minutes Allocation</Text>
+                <Text style={styles.modalTitle}>Voice Minutes &amp; Allowance</Text>
                 <Text style={styles.modalSub}>
-                  118 of 150 Ultra HD minutes remaining for July billing cycle. Resets on Aug 1st.
+                  {remainingMinutes} of {totalAllowanceMinutes} Studio minutes remaining for this cycle. Resets in 19 days.
                 </Text>
 
-                {/* Quota Progress Bar */}
+                {/* Allowance Progress Bar */}
                 <View style={styles.quotaProgressCard}>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                    <Text style={styles.quotaBarLabel}>Usage: 32 / 150 min (21.3%)</Text>
-                    <Text style={styles.quotaBarRemaining}>118m Left</Text>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                    <Text style={styles.quotaBarLabel}>
+                      {totalAllowanceMinutes - remainingMinutes} min used
+                    </Text>
+                    <Text style={styles.quotaBarRemaining}>
+                      {remainingMinutes} min remaining
+                    </Text>
                   </View>
                   <View style={styles.quotaTrackBg}>
-                    <View style={[styles.quotaTrackFill, { width: '21.3%' }]} />
+                    <View
+                      style={[
+                        styles.quotaTrackFill,
+                        { width: `${((totalAllowanceMinutes - remainingMinutes) / totalAllowanceMinutes) * 100}%` },
+                      ]}
+                    />
+                  </View>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 }}>
+                    <Text style={styles.quotaBarFooterText}>
+                      {(((totalAllowanceMinutes - remainingMinutes) / totalAllowanceMinutes) * 100).toFixed(1)}% used
+                    </Text>
+                    <Text style={styles.quotaBarFooterText}>
+                      150 min total allowance
+                    </Text>
                   </View>
                 </View>
 
                 <Text style={[styles.savedVoiceHeaderLabel, { marginTop: 14 }]}>RECENT DEDUCTIONS</Text>
                 <View style={{ gap: 8, marginTop: 8 }}>
                   {[
-                    { title: 'Creator Mistake Reel', date: 'Jul 18', cost: '-1 min', format: 'Reels' },
-                    { title: 'Morning Routine Mini', date: 'Jul 14', cost: '-1 min', format: 'Shorts' },
-                    { title: 'Streak Engine Breakdown', date: 'Jul 10', cost: '-1 min', format: 'Reels' },
+                    { title: 'Creator Mistake Reel', date: 'Yesterday', cost: '-1 min', format: 'Reels' },
+                    { title: 'Morning Routine Mini', date: '3d ago', cost: '-1 min', format: 'Shorts' },
+                    { title: 'Streak Engine Breakdown', date: '5d ago', cost: '-1 min', format: 'Reels' },
                   ].map((item, idx) => (
                     <View key={idx} style={styles.transferRow}>
                       <View>
@@ -1237,7 +1735,7 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                   style={styles.modalCancelBtn}
                   onPress={() => setShowManageMinutesModal(false)}
                 >
-                  <Text style={styles.modalCancelBtnText}>Close Quota</Text>
+                  <Text style={styles.modalCancelBtnText}>Done</Text>
                 </Pressable>
               </ScrollView>
             </Animated.View>
@@ -1251,58 +1749,238 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
           visible={showRefillMinutesModal}
           transparent={true}
           animationType="fade"
-          onRequestClose={() => setShowRefillMinutesModal(false)}
+          onRequestClose={() => {
+            setShowRefillMinutesModal(false);
+            setRefillStep('select');
+          }}
         >
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderBetween}>
-                <View style={styles.heroPillGold}>
-                  <Text style={styles.heroPillGoldText}>⚡ EXTRA MINUTE PACKS</Text>
-                </View>
-                <Pressable onPress={() => setShowRefillMinutesModal(false)} hitSlop={8}>
-                  <Text style={styles.modalCloseText}>✕</Text>
-                </Pressable>
-              </View>
+              {refillStep === 'select' ? (
+                <>
+                  <View style={styles.modalHeaderBetween}>
+                    <View style={styles.heroPillGold}>
+                      <Text style={styles.heroPillGoldText}>⚡ EXTRA MINUTE PACKS</Text>
+                    </View>
+                    <Pressable
+                      onPress={() => {
+                        setShowRefillMinutesModal(false);
+                        setRefillStep('select');
+                      }}
+                      hitSlop={8}
+                    >
+                      <Text style={styles.modalCloseText}>✕</Text>
+                    </Pressable>
+                  </View>
 
-              <Text style={styles.modalTitle}>Refill Voice Minutes</Text>
-              <Text style={styles.modalSub}>
-                Instant credits added directly to your studio balance. Minutes never expire.
-              </Text>
+                  <Text style={styles.modalTitle}>Refill Voice Minutes</Text>
+                  <Text style={styles.modalSub}>
+                    Need more voice time? Add extra minutes instantly without waiting for your monthly reset.
+                  </Text>
 
-              <View style={{ gap: 8, marginVertical: 14 }}>
-                {[
-                  { name: '+30 Extra Minutes', price: '$9.00', perMin: '$0.30/min', tag: 'STARTER' },
-                  { name: '+60 Extra Minutes', price: '$16.00', perMin: '$0.26/min', tag: '👑 BEST VALUE' },
-                  { name: '+120 Extra Minutes', price: '$28.00', perMin: '$0.23/min', tag: 'PRO SPRINT' },
-                ].map((pack, idx) => (
+                  <View style={{ gap: 10, marginVertical: 14 }}>
+                    {REFILL_PACKS.map((pack) => {
+                      const isSelected = selectedRefillPack.id === pack.id;
+                      return (
+                        <Pressable
+                          key={pack.id}
+                          style={[
+                            styles.refillPackCard,
+                            isSelected && styles.refillPackCardSelected,
+                          ]}
+                          onPress={() => {
+                            if (Platform.OS !== 'web') {
+                              Haptics.selectionAsync();
+                            }
+                            setSelectedRefillPack(pack);
+                          }}
+                        >
+                          <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, minWidth: 0, marginRight: 8 }}>
+                            <View style={[styles.refillRadioCircle, isSelected && styles.refillRadioCircleSelected]}>
+                              {isSelected && <View style={styles.refillRadioInnerDot} />}
+                            </View>
+                            <View style={{ flex: 1, minWidth: 0, marginLeft: 10 }}>
+                              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                                <Text style={[styles.refillPackName, isSelected && styles.refillPackNameSelected]}>
+                                  {pack.name}
+                                </Text>
+                                <View style={[styles.tagPillMini, isSelected && styles.tagPillMiniSelected]}>
+                                  <Text style={[styles.tagPillMiniText, isSelected && styles.tagPillMiniTextSelected]}>
+                                    {pack.tag}
+                                  </Text>
+                                </View>
+                                {isSelected && (
+                                  <View style={styles.refillSelectedBadge}>
+                                    <Text style={styles.refillSelectedBadgeText}>✓ Selected</Text>
+                                  </View>
+                                )}
+                              </View>
+                              <Text style={styles.refillPackSub}>
+                                {pack.perMin} · Instant allocation
+                              </Text>
+                            </View>
+                          </View>
+                          <Text style={[styles.refillPackPrice, isSelected && styles.refillPackPriceSelected]}>
+                            {pack.price}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+
+                  {/* Policy Rollover Note */}
+                  <View style={styles.refillPolicyNote}>
+                    <Text style={styles.refillPolicyNoteText}>
+                      🛡️ <Text style={{ fontWeight: '700', color: '#171420' }}>Minutes never expire.</Text> Extra packs are stored in your vault and only consumed if your monthly quota is depleted.
+                    </Text>
+                  </View>
+
+                  {/* Dynamic Action Button */}
                   <Pressable
-                    key={idx}
-                    style={styles.refillPackCard}
+                    style={({ pressed }) => [styles.refillContinueBtn, pressed && styles.btnPressed]}
                     onPress={() => {
-                      setShowRefillMinutesModal(false);
-                      showToast(`✓ ${pack.name} credited to your studio!`);
+                      if (Platform.OS !== 'web') {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }
+                      setRefillStep('confirm');
                     }}
                   >
-                    <View>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                        <Text style={styles.refillPackName}>{pack.name}</Text>
-                        <View style={styles.tagPillMini}>
-                          <Text style={styles.tagPillMiniText}>{pack.tag}</Text>
-                        </View>
-                      </View>
-                      <Text style={styles.refillPackSub}>{pack.perMin}</Text>
-                    </View>
-                    <Text style={styles.refillPackPrice}>{pack.price}</Text>
+                    <Text style={styles.refillContinueBtnText}>
+                      Continue — {selectedRefillPack.price} →
+                    </Text>
                   </Pressable>
-                ))}
-              </View>
 
-              <Pressable
-                style={styles.modalCancelBtn}
-                onPress={() => setShowRefillMinutesModal(false)}
-              >
-                <Text style={styles.modalCancelBtnText}>Close</Text>
-              </Pressable>
+                  <Pressable
+                    style={styles.modalCancelBtn}
+                    onPress={() => {
+                      setShowRefillMinutesModal(false);
+                      setRefillStep('select');
+                    }}
+                  >
+                    <Text style={styles.modalCancelBtnText}>Cancel</Text>
+                  </Pressable>
+                </>
+              ) : (
+                <>
+                  <View style={styles.modalHeaderBetween}>
+                    <View style={styles.heroPillPurple}>
+                      <Text style={styles.heroPillPurpleText}>💳 ORDER SUMMARY</Text>
+                    </View>
+                    <Pressable
+                      onPress={() => {
+                        setShowRefillMinutesModal(false);
+                        setRefillStep('select');
+                      }}
+                      hitSlop={8}
+                    >
+                      <Text style={styles.modalCloseText}>✕</Text>
+                    </Pressable>
+                  </View>
+
+                  <Text style={styles.modalTitle}>Confirm Minute Refill</Text>
+                  <Text style={styles.modalSub}>
+                    Review your extra voice minute package before purchase.
+                  </Text>
+
+                  {/* Order Summary Card */}
+                  <View style={styles.orderSummaryCard}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                      <View>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                          <Text style={styles.orderSummaryPlanName}>{selectedRefillPack.name}</Text>
+                          <View style={styles.tagPillMiniSelected}>
+                            <Text style={styles.tagPillMiniTextSelected}>{selectedRefillPack.tag}</Text>
+                          </View>
+                        </View>
+                        <Text style={styles.orderSummaryRate}>{selectedRefillPack.perMin} · Studio Audio</Text>
+                      </View>
+                      <Text style={styles.orderSummaryPrice}>{selectedRefillPack.price}</Text>
+                    </View>
+
+                    <View style={styles.orderSummaryDivider} />
+
+                    <View style={{ gap: 8, marginVertical: 4 }}>
+                      <View style={styles.orderSummaryRow}>
+                        <Text style={styles.orderSummaryLabel}>Current Studio Balance</Text>
+                        <Text style={styles.orderSummaryValue}>{remainingMinutes} min</Text>
+                      </View>
+                      <View style={styles.orderSummaryRow}>
+                        <Text style={styles.orderSummaryLabel}>New Total Balance</Text>
+                        <Text style={styles.orderSummaryHighlightValue}>
+                          {remainingMinutes + selectedRefillPack.minutes} min
+                        </Text>
+                      </View>
+                      <View style={styles.orderSummaryRow}>
+                        <Text style={styles.orderSummaryLabel}>Payment Method</Text>
+                        <Text style={styles.orderSummaryValue}>Apple Pay (•••• 4242)</Text>
+                      </View>
+                    </View>
+                  </View>
+
+                  {/* What Happens Checklist */}
+                  <View style={styles.refillChecklistCard}>
+                    <Text style={styles.refillChecklistHeader}>WHAT HAPPENS NEXT:</Text>
+                    <View style={{ gap: 6, marginTop: 6 }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                        <Text style={{ fontSize: 12, color: '#582CDB' }}>✓</Text>
+                        <Text style={styles.refillChecklistItem}>
+                          +{selectedRefillPack.minutes} minutes added immediately to your balance
+                        </Text>
+                      </View>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                        <Text style={{ fontSize: 12, color: '#582CDB' }}>✓</Text>
+                        <Text style={styles.refillChecklistItem}>
+                          Extra minutes never expire and roll over indefinitely
+                        </Text>
+                      </View>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                        <Text style={{ fontSize: 12, color: '#582CDB' }}>✓</Text>
+                        <Text style={styles.refillChecklistItem}>
+                          One-time charge — no recurring subscription change
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+
+                  {/* Final Confirm Button */}
+                  <Pressable
+                    style={({ pressed }) => [styles.refillContinueBtn, pressed && styles.btnPressed]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') {
+                        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                      }
+                      const newBal = remainingMinutes + selectedRefillPack.minutes;
+                      setRemainingMinutes(newBal);
+                      setShowRefillMinutesModal(false);
+                      setRefillStep('select');
+                      setCelebrationData({
+                        title: `${selectedRefillPack.name} Credited!`,
+                        subtitle: `Your Studio Voice balance is now ${newBal} minutes. Extra minutes never expire.`,
+                        badgeText: '⚡ REFILL COMPLETE (+50 XP)',
+                        xpEarned: 50,
+                        speechBubble: "Extra voice minutes unlocked! Ready to record studio masters! 🎙️",
+                      });
+                      setShowCelebrationModal(true);
+                    }}
+                  >
+                    <Text style={styles.refillContinueBtnText}>
+                      ⚡ Confirm &amp; Pay {selectedRefillPack.price} →
+                    </Text>
+                  </Pressable>
+
+                  <Pressable
+                    style={styles.modalCancelBtn}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }
+                      setRefillStep('select');
+                    }}
+                  >
+                    <Text style={styles.modalCancelBtnText}>← Change Package</Text>
+                  </Pressable>
+                </>
+              )}
             </Animated.View>
           </View>
         </Modal>
@@ -1318,56 +1996,93 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
         >
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderBetween}>
-                <View style={styles.heroPillPurple}>
-                  <Text style={styles.heroPillPurpleText}>🪄 AI HOOK OPTIMIZER</Text>
-                </View>
-                <Pressable onPress={() => setShowHookOptimizerModal(false)} hitSlop={8}>
-                  <Text style={styles.modalCloseText}>✕</Text>
-                </Pressable>
-              </View>
-
-              <Text style={styles.modalTitle}>Choose High-Retention Hook</Text>
-              <Text style={styles.modalSub}>
-                Jarvis optimized 3 viral opening lines designed to stop the scroll.
-              </Text>
-
-              <View style={{ gap: 8, marginVertical: 14 }}>
-                {[
-                  {
-                    type: '🔥 Contrarian Hook',
-                    text: "Stop making this mistake if you want to stay consistent as a creator. Consistency isn't about hustle 24/7...",
-                  },
-                  {
-                    type: '⚡ Proof-Driven Hook',
-                    text: "Here is the exact 3-step 'Streak Engine' that kept me posting for 42 days straight without burning out...",
-                  },
-                  {
-                    type: '🎯 Direct Question Hook',
-                    text: "Why do 90% of creators quit in month 2? Because they rely on mood instead of systems...",
-                  },
-                ].map((hook, idx) => (
-                  <Pressable
-                    key={idx}
-                    style={styles.hookOptionCard}
-                    onPress={() => {
-                      setScriptText(hook.text);
-                      setShowHookOptimizerModal(false);
-                      showToast(`✓ Applied "${hook.type}"`);
-                    }}
-                  >
-                    <Text style={styles.hookOptionType}>{hook.type}</Text>
-                    <Text style={styles.hookOptionText}>&ldquo;{hook.text}&rdquo;</Text>
+              <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
+                <View style={styles.modalHeaderBetween}>
+                  <View style={styles.heroPillPurple}>
+                    <Text style={styles.heroPillPurpleText}>🪄 AI HOOK OPTIMIZER</Text>
+                  </View>
+                  <Pressable onPress={() => setShowHookOptimizerModal(false)} hitSlop={8}>
+                    <Text style={styles.modalCloseText}>✕</Text>
                   </Pressable>
-                ))}
-              </View>
+                </View>
 
-              <Pressable
-                style={styles.modalCancelBtn}
-                onPress={() => setShowHookOptimizerModal(false)}
-              >
-                <Text style={styles.modalCancelBtnText}>Close</Text>
-              </Pressable>
+                <Text style={styles.modalTitle}>Choose High-Retention Hook</Text>
+                <Text style={styles.modalSub}>
+                  Jarvis optimized 3 high-retention opening lines designed to stop the scroll.
+                </Text>
+
+                <View style={{ gap: 10, marginVertical: 14 }}>
+                  {OPTIMIZED_HOOKS.map((hook, idx) => {
+                    const isSelected = selectedHookIndex === idx;
+                    return (
+                      <Pressable
+                        key={hook.id}
+                        style={({ pressed }) => [
+                          styles.hookOptionCard,
+                          isSelected && styles.hookOptionCardSelected,
+                          pressed && styles.btnPressed,
+                        ]}
+                        onPress={() => {
+                          if (Platform.OS !== 'web') {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          }
+                          setSelectedHookIndex(idx);
+                        }}
+                      >
+                        <View style={styles.hookOptionHeaderRow}>
+                          <Text
+                            style={[
+                              styles.hookOptionType,
+                              isSelected && styles.hookOptionTypeSelected,
+                            ]}
+                          >
+                            {hook.type}
+                          </Text>
+                          {isSelected ? (
+                            <View style={styles.hookSelectedBadge}>
+                              <Text style={styles.hookSelectedBadgeText}>✓ Selected</Text>
+                            </View>
+                          ) : (
+                            <View style={styles.hookSelectCircle} />
+                          )}
+                        </View>
+                        <Text
+                          style={[
+                            styles.hookOptionText,
+                            isSelected && styles.hookOptionTextSelected,
+                          ]}
+                        >
+                          &ldquo;{hook.preview}&rdquo;
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+
+                {/* Primary Action Button */}
+                <Pressable
+                  style={({ pressed }) => [styles.voiceApplyBtn, pressed && styles.btnPressed]}
+                  onPress={() => {
+                    const chosenHook = OPTIMIZED_HOOKS[selectedHookIndex];
+                    setScriptText(chosenHook.fullText);
+                    if (Platform.OS !== 'web') {
+                      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                    }
+                    setShowHookOptimizerModal(false);
+                    showToast(`✓ Applied "${chosenHook.type}"`);
+                  }}
+                >
+                  <Text style={styles.voiceApplyBtnText}>Use This Hook →</Text>
+                </Pressable>
+
+                {/* Secondary Action: Close */}
+                <Pressable
+                  style={styles.modalCancelBtn}
+                  onPress={() => setShowHookOptimizerModal(false)}
+                >
+                  <Text style={styles.modalCancelBtnText}>Close</Text>
+                </Pressable>
+              </ScrollView>
             </Animated.View>
           </View>
         </Modal>
@@ -1393,88 +2108,209 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                   </Pressable>
                 </View>
 
-                <Text style={styles.modalTitle}>All Voice Projects ({recentProjects.length})</Text>
+                <Text style={styles.modalTitle}>Voice Master Vault ({recentProjects.length})</Text>
                 <Text style={styles.modalSub}>
-                  Browse, play, export, or reload your previous AI voiceover masters into the editor.
+                  Search, filter, replay, and reload previous voiceover masters directly into the editor with all voice settings intact.
                 </Text>
 
-                <View style={{ gap: 10, marginVertical: 14 }}>
-                  {recentProjects.map((proj) => (
-                    <View key={proj.id} style={styles.expandedProjectCard}>
-                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
-                          <Pressable
-                            style={styles.projectPlayBtn}
-                            onPress={() => {
-                              setScriptTitle(proj.name);
-                              setScriptText(proj.text);
-                              setTotalAudioDuration(Math.round(proj.text.split(' ').length / 2.6));
-                              setPlaybackSeconds(0);
-                              setIsPlayingAudio(true);
-                              setShowAllProjectsModal(false);
-                              showToast(`▶ Playing "${proj.name}"`);
-                            }}
+                {/* Vault Search Input */}
+                <View style={styles.vaultSearchContainer}>
+                  <Text style={{ fontSize: 13, marginRight: 6 }}>🔍</Text>
+                  <TextInput
+                    style={styles.vaultSearchInput}
+                    placeholder="Search by title, script, or voice..."
+                    placeholderTextColor="#94A3B8"
+                    value={vaultSearchQuery}
+                    onChangeText={setVaultSearchQuery}
+                  />
+                  {vaultSearchQuery.length > 0 && (
+                    <Pressable onPress={() => setVaultSearchQuery('')} hitSlop={8}>
+                      <Text style={{ fontSize: 13, color: '#94A3B8', fontWeight: '800' }}>✕</Text>
+                    </Pressable>
+                  )}
+                </View>
+
+                {/* Vault Filter Tabs */}
+                {/* Vault Filter Tabs (Horizontal Scroll with full words) */}
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.vaultFilterScrollContent}
+                  style={styles.vaultFilterScrollView}
+                >
+                  {(['All', 'Saved', 'Exported', 'Recent'] as const).map((filter) => {
+                    const isFilterActive = vaultFilter === filter;
+                    let count = recentProjects.length;
+                    if (filter === 'Saved') count = recentProjects.filter((p) => p.status === 'Saved').length;
+                    if (filter === 'Exported') count = recentProjects.filter((p) => p.status === 'Exported').length;
+                    if (filter === 'Recent') count = recentProjects.filter((p) => p.updatedAt === 'Today' || p.updatedAt === 'Yesterday' || p.updatedAt === 'Just now').length;
+
+                    return (
+                      <Pressable
+                        key={filter}
+                        style={[
+                          styles.vaultFilterPill,
+                          isFilterActive && styles.vaultFilterPillActive,
+                        ]}
+                        onPress={() => {
+                          if (Platform.OS !== 'web') {
+                            Haptics.selectionAsync();
+                          }
+                          setVaultFilter(filter);
+                        }}
+                      >
+                        <Text
+                          style={[
+                            styles.vaultFilterPillText,
+                            isFilterActive && styles.vaultFilterPillTextActive,
+                          ]}
+                        >
+                          {filter} ({count})
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </ScrollView>
+
+                <View style={{ gap: 10, marginVertical: 10 }}>
+                  {recentProjects.filter((proj) => {
+                    const matchesSearch =
+                      !vaultSearchQuery.trim() ||
+                      proj.name.toLowerCase().includes(vaultSearchQuery.toLowerCase()) ||
+                      proj.text.toLowerCase().includes(vaultSearchQuery.toLowerCase()) ||
+                      proj.platform.toLowerCase().includes(vaultSearchQuery.toLowerCase()) ||
+                      (proj.voiceStyle && proj.voiceStyle.name.toLowerCase().includes(vaultSearchQuery.toLowerCase()));
+
+                    if (!matchesSearch) return false;
+                    if (vaultFilter === 'Saved') return proj.status === 'Saved';
+                    if (vaultFilter === 'Exported') return proj.status === 'Exported';
+                    if (vaultFilter === 'Recent') return proj.updatedAt === 'Today' || proj.updatedAt === 'Yesterday' || proj.updatedAt === 'Just now';
+                    return true;
+                  }).length === 0 ? (
+                    <View style={styles.vaultEmptyState}>
+                      <Text style={{ fontSize: 24, marginBottom: 4 }}>🔍</Text>
+                      <Text style={styles.vaultEmptyTitle}>No matching voice projects</Text>
+                      <Text style={styles.vaultEmptySub}>Try adjusting your search query or filter tab.</Text>
+                    </View>
+                  ) : (
+                    recentProjects.filter((proj) => {
+                      const matchesSearch =
+                        !vaultSearchQuery.trim() ||
+                        proj.name.toLowerCase().includes(vaultSearchQuery.toLowerCase()) ||
+                        proj.text.toLowerCase().includes(vaultSearchQuery.toLowerCase()) ||
+                        proj.platform.toLowerCase().includes(vaultSearchQuery.toLowerCase()) ||
+                        (proj.voiceStyle && proj.voiceStyle.name.toLowerCase().includes(vaultSearchQuery.toLowerCase()));
+
+                      if (!matchesSearch) return false;
+                      if (vaultFilter === 'Saved') return proj.status === 'Saved';
+                      if (vaultFilter === 'Exported') return proj.status === 'Exported';
+                      if (vaultFilter === 'Recent') return proj.updatedAt === 'Today' || proj.updatedAt === 'Yesterday' || proj.updatedAt === 'Just now';
+                      return true;
+                    }).map((proj) => {
+                      const isCurrentPlaying = playingProjectId === proj.id && isPlayingAudio;
+                      return (
+                        <View key={proj.id} style={styles.expandedProjectCard}>
+                          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
+                              <Pressable
+                                style={({ pressed }) => [
+                                  styles.projectPlayBtn,
+                                  isCurrentPlaying && styles.projectPlayBtnActive,
+                                  pressed && styles.btnPressed,
+                                ]}
+                                onPress={() => handleToggleProjectPlay(proj)}
+                                hitSlop={6}
+                                accessibilityLabel={isCurrentPlaying ? `Pause ${proj.name}` : `Play preview for ${proj.name}`}
+                              >
+                                <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+                                  {isCurrentPlaying ? (
+                                    <Path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" fill="#582CDB" />
+                                  ) : (
+                                    <Path d="M8 5v14l11-7L8 5z" fill="#582CDB" />
+                                  )}
+                                </Svg>
+                              </Pressable>
+                              <Pressable
+                                style={{ flex: 1 }}
+                                onPress={() => {
+                                  handleLoadProjectIntoEditor(proj);
+                                }}
+                              >
+                                <Text style={styles.projectNameText} numberOfLines={1}>{proj.name}</Text>
+                                <View style={styles.projectSubRow}>
+                                  <Text style={styles.projectSubDuration}>{proj.duration}</Text>
+                                  <Text style={styles.projectSubDot}>•</Text>
+                                  <View style={styles.statusInlineTag}>
+                                    <View
+                                      style={[
+                                        styles.statusMiniDot,
+                                        proj.status === 'Exported'
+                                          ? styles.statusMiniDotExported
+                                          : styles.statusMiniDotSaved,
+                                      ]}
+                                    />
+                                    <Text
+                                      style={[
+                                        styles.statusInlineText,
+                                        proj.status === 'Exported'
+                                          ? styles.statusInlineTextExported
+                                          : styles.statusInlineTextSaved,
+                                      ]}
+                                    >
+                                      {proj.status}
+                                    </Text>
+                                  </View>
+                                  <Text style={styles.projectSubDot}>•</Text>
+                                  <Text style={styles.projectSubPlatform} numberOfLines={1}>{proj.platform}</Text>
+                                </View>
+                              </Pressable>
+                            </View>
+                          </View>
+
+                          {/* Script Preview Snippet */}
+                          <Text
+                            style={styles.expandedProjectSnippet}
+                            numberOfLines={2}
+                            ellipsizeMode="tail"
                           >
-                            <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
-                              <Path d="M8 5v14l11-7L8 5z" fill="#582CDB" />
-                            </Svg>
-                          </Pressable>
-                          <View style={{ flex: 1 }}>
-                            <Text style={styles.projectNameText}>{proj.name}</Text>
-                            <Text style={styles.projectSubText}>
-                              {proj.duration} • {proj.platform}
-                            </Text>
+                            &ldquo;{proj.text}&rdquo;
+                          </Text>
+
+                          {/* Action Row */}
+                          <View style={styles.expandedActionRow}>
+                            <Pressable
+                              style={({ pressed }) => [styles.expandedActionReuseBtn, pressed && styles.btnPressed]}
+                              onPress={() => {
+                                handleLoadProjectIntoEditor(proj);
+                              }}
+                            >
+                              <Text style={styles.expandedActionReuseText}>✏️ Load in Editor</Text>
+                            </Pressable>
+
+                            <Pressable
+                              style={({ pressed }) => [styles.expandedActionExportBtn, pressed && styles.btnPressed]}
+                              onPress={() => {
+                                if (Platform.OS !== 'web') {
+                                  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                                }
+                                setShowAllProjectsModal(false);
+                                setCelebrationData({
+                                  title: 'Voiceover Master Exported!',
+                                  subtitle: `"${proj.name}.wav" downloaded to your device storage.`,
+                                  badgeText: '📥 AUDIO EXPORTED (+50 XP)',
+                                  xpEarned: 50,
+                                  speechBubble: 'Studio voiceover ready, Pablo! Ready to create! 🚀',
+                                });
+                                setShowCelebrationModal(true);
+                              }}
+                            >
+                              <Text style={styles.expandedActionExportText}>📥 Export WAV</Text>
+                            </Pressable>
                           </View>
                         </View>
-
-                        <View style={[styles.statusTagPill, proj.status === 'Exported' && styles.statusTagExported]}>
-                          <Text style={[styles.statusTagText, proj.status === 'Exported' && styles.statusTagTextExported]}>
-                            {proj.status.toUpperCase()}
-                          </Text>
-                        </View>
-                      </View>
-
-                      {/* Script Preview Snippet */}
-                      <Text style={styles.expandedProjectSnippet} numberOfLines={2}>
-                        &ldquo;{proj.text}&rdquo;
-                      </Text>
-
-                      {/* Action Row */}
-                      <View style={{ flexDirection: 'row', gap: 8, marginTop: 10 }}>
-                        <Pressable
-                          style={styles.expandedActionReuseBtn}
-                          onPress={() => {
-                            setScriptTitle(proj.name);
-                            setScriptText(proj.text);
-                            setShowAllProjectsModal(false);
-                            showToast(`✓ Loaded "${proj.name}" into editor`);
-                          }}
-                        >
-                          <Text style={styles.expandedActionReuseText}>✏️ Load in Editor</Text>
-                        </Pressable>
-
-                        <Pressable
-                          style={styles.expandedActionExportBtn}
-                          onPress={() => {
-                            if (Platform.OS !== 'web') {
-                              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                            }
-                            setShowAllProjectsModal(false);
-                            setCelebrationData({
-                              title: '4K Audio Master Exported!',
-                              subtitle: `"${proj.name}.wav" downloaded to your device storage.`,
-                              badgeText: '📥 4K AUDIO EXPORTED',
-                              xpEarned: 50,
-                              speechBubble: '4K master ready! Time to drop some viral magic! 🔥',
-                            });
-                            setShowCelebrationModal(true);
-                          }}
-                        >
-                          <Text style={styles.expandedActionExportText}>📥 Export WAV</Text>
-                        </Pressable>
-                      </View>
-                    </View>
-                  ))}
+                      );
+                    })
+                  )}
                 </View>
 
                 <Pressable
@@ -1552,13 +2388,14 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+    width: '100%',
     backgroundColor: '#FAF8F5',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
+    paddingHorizontal: 14,
     paddingTop: 10,
     paddingBottom: 12,
     backgroundColor: '#FAF8F5',
@@ -1566,7 +2403,7 @@ const styles = StyleSheet.create({
   headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 8,
   },
   backBtn: {
     width: 36,
@@ -1597,32 +2434,32 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   headerGhostLogo: {
-    width: 26,
-    height: 26,
+    width: 24,
+    height: 24,
   },
   headerRight: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 8,
   },
-  proPillBadge: {
-    backgroundColor: '#FEF3C7',
-    borderWidth: 1,
-    borderColor: '#F59E0B',
+  proHeaderBadge: {
     paddingHorizontal: 8,
-    paddingVertical: 3.5,
-    borderRadius: 6,
+    paddingVertical: 3,
+    borderRadius: 8,
+    backgroundColor: '#F59E0B',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  proPillBadgeText: {
-    fontSize: 9,
+  proHeaderBadgeText: {
+    fontSize: sFont(10),
     fontWeight: '900',
-    color: '#92400E',
-    letterSpacing: 0.3,
+    color: '#78350F',
+    letterSpacing: 0.4,
   },
   headerIconBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#EFECE6',
@@ -1636,8 +2473,8 @@ const styles = StyleSheet.create({
   },
   notificationDot: {
     position: 'absolute',
-    top: 9,
-    right: 9,
+    top: 8,
+    right: 8,
     width: 7,
     height: 7,
     borderRadius: 3.5,
@@ -1646,16 +2483,19 @@ const styles = StyleSheet.create({
     borderColor: '#FFFFFF',
   },
   headerProfileBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    borderWidth: 1.5,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 2,
     borderColor: '#F59E0B',
-    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
   },
   headerProfileImg: {
-    width: '100%',
-    height: '100%',
+    width: 32,
+    height: 32,
+    borderRadius: 16,
   },
   scrollContent: {
     flex: 1,
@@ -1663,52 +2503,55 @@ const styles = StyleSheet.create({
   },
   badgePillRow: {
     flexDirection: 'row',
-    gap: 8,
-    marginTop: 8,
-    marginBottom: 6,
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 6,
+    marginBottom: 3,
   },
   heroPillGold: {
     backgroundColor: '#FEF3C7',
     borderWidth: 1,
     borderColor: '#FDE68A',
-    paddingHorizontal: 9,
-    paddingVertical: 3.5,
+    paddingHorizontal: 7.5,
+    paddingVertical: 2.5,
     borderRadius: 6,
   },
   heroPillGoldText: {
     fontSize: 9.5,
-    fontWeight: '900',
-    color: '#D97706',
+    fontWeight: '700',
+    color: '#92400E',
     letterSpacing: 0.3,
   },
   heroPillPurple: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
-    backgroundColor: '#EDE9FE',
+    gap: 4.5,
+    backgroundColor: '#F5F3FF',
     borderWidth: 1,
-    borderColor: '#DDD6FE',
-    paddingHorizontal: 9,
-    paddingVertical: 3.5,
+    borderColor: '#EDE9FE',
+    paddingHorizontal: 7.5,
+    paddingVertical: 2.5,
     borderRadius: 6,
   },
   livePulseDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#582CDB',
+    width: 4.5,
+    height: 4.5,
+    borderRadius: 2.25,
+    backgroundColor: '#7C3AED',
   },
   heroPillPurpleText: {
-    fontSize: 9.5,
-    fontWeight: '900',
-    color: '#582CDB',
-    letterSpacing: 0.3,
+    fontSize: 9,
+    fontWeight: '600',
+    color: '#6D28D9',
+    letterSpacing: 0.2,
   },
   mainTitle: {
-    fontSize: 23,
-    fontWeight: '900',
+    fontSize: Platform.OS === 'web' ? ('clamp(15px, 3.8vw, 17px)' as any) : sFont(16),
+    fontWeight: '700',
     color: '#171420',
-    letterSpacing: -0.5,
+    letterSpacing: -0.35,
+    lineHeight: 22,
+    marginBottom: 4,
   },
   subTitle: {
     fontSize: 12.5,
@@ -1722,7 +2565,8 @@ const styles = StyleSheet.create({
   minutesLuxuryCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 22,
-    padding: 18,
+    paddingHorizontal: 15,
+    paddingVertical: 16,
     borderWidth: 1,
     borderColor: '#EFECE6',
     shadowColor: '#000',
@@ -1734,7 +2578,7 @@ const styles = StyleSheet.create({
   },
   minutesCardLabel: {
     fontSize: 15.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   ultraHdPill: {
@@ -1744,13 +2588,13 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   ultraHdPillText: {
-    fontSize: 8.5,
-    fontWeight: '900',
+    fontSize: 9,
+    fontWeight: '700',
     color: '#582CDB',
   },
   minutesBigNumber: {
     fontSize: 28,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: -0.5,
   },
@@ -1760,10 +2604,11 @@ const styles = StyleSheet.create({
     color: '#64748B',
   },
   minutesResetText: {
-    fontSize: 11,
+    fontSize: 10.8,
     color: '#D97706',
-    marginTop: 2,
+    marginTop: 6,
     fontWeight: '700',
+    letterSpacing: -0.1,
   },
   minuteTagPillPro: {
     backgroundColor: '#EDE9FE',
@@ -1773,7 +2618,7 @@ const styles = StyleSheet.create({
   },
   minuteTagTextPro: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.3,
   },
@@ -1785,35 +2630,52 @@ const styles = StyleSheet.create({
   },
   minuteTagTextReady: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#15803D',
     letterSpacing: 0.3,
   },
-  stopwatchCircle: {
-    width: 54,
-    height: 54,
+  allowanceProgressGauge: {
+    width: 44,
+    height: 44,
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
   },
-  stopwatchCenterIcon: {
+  allowanceGaugeCenter: {
     position: 'absolute',
     justifyContent: 'center',
     alignItems: 'center',
   },
+  allowanceGaugePercentText: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#582CDB',
+    letterSpacing: -0.3,
+    lineHeight: 12,
+  },
+  allowanceGaugeSubText: {
+    fontSize: 7,
+    fontWeight: '700',
+    color: '#7C3AED',
+    textTransform: 'uppercase',
+    letterSpacing: 0.2,
+    lineHeight: 8,
+  },
   manageMinutesBtn: {
     backgroundColor: '#FAF8F5',
-    borderWidth: 1.2,
-    borderColor: '#E2E8F0',
-    paddingVertical: 11,
-    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 9,
     alignItems: 'center',
-    marginTop: 16,
+    justifyContent: 'center',
+    marginTop: 13,
   },
   manageMinutesBtnText: {
-    fontSize: 12,
-    fontWeight: '900',
-    color: '#171420',
+    fontSize: sFont(11),
+    fontWeight: '600',
+    color: '#475569',
   },
 
   // SCRIPT TO VOICE
@@ -1825,7 +2687,7 @@ const styles = StyleSheet.create({
   },
   sectionHeaderTitle: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   wordCounterPill: {
@@ -1841,13 +2703,19 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#64748B',
   },
+  presetsSubHint: {
+    fontSize: sFont(10),
+    fontWeight: '700',
+    color: '#8B5CF6',
+    marginTop: 1.5,
+  },
   presetChip: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#EFECE6',
-    paddingHorizontal: 12,
+    paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: 10,
+    borderRadius: 9,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.02,
@@ -1858,13 +2726,13 @@ const styles = StyleSheet.create({
     borderColor: '#8B5CF6',
   },
   presetChipText: {
-    fontSize: 11.5,
-    fontWeight: '800',
+    fontSize: sFont(11),
+    fontWeight: '700',
     color: '#475569',
   },
   presetChipTextActive: {
     color: '#582CDB',
-    fontWeight: '900',
+    fontWeight: '800',
   },
   scriptEditorCard: {
     backgroundColor: '#FFFFFF',
@@ -1879,7 +2747,7 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   scriptTextInput: {
-    fontSize: 13.5,
+    fontSize: 14,
     lineHeight: 21,
     color: '#171420',
     minHeight: 120,
@@ -1889,27 +2757,28 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: 12,
+    paddingTop: 10,
     borderTopWidth: 1,
     borderTopColor: '#F1EFE9',
     marginTop: 10,
+    gap: 8,
   },
   metaKeyLabel: {
-    fontSize: 8.5,
-    fontWeight: '900',
+    fontSize: sFont(8.5),
+    fontWeight: '800',
     color: '#94A3B8',
     letterSpacing: 0.3,
   },
   metaValText: {
-    fontSize: 12,
-    fontWeight: '900',
+    fontSize: sFont(11.5),
+    fontWeight: '700',
     color: '#582CDB',
     marginTop: 1,
   },
   toolIconBtn: {
-    width: 34,
-    height: 34,
-    borderRadius: 9,
+    width: 30,
+    height: 30,
+    borderRadius: 8,
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
     borderColor: '#EFECE6',
@@ -1922,7 +2791,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.12,
     shadowRadius: 8,
     elevation: 3,
   },
@@ -1937,7 +2806,7 @@ const styles = StyleSheet.create({
   generateVoiceBtnText: {
     color: '#FFFFFF',
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.4,
   },
 
@@ -1953,7 +2822,7 @@ const styles = StyleSheet.create({
   },
   readyBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#15803D',
     letterSpacing: 0.3,
   },
@@ -1970,8 +2839,8 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   audioTrackTitle: {
-    fontSize: 13.5,
-    fontWeight: '900',
+    fontSize: 14,
+    fontWeight: '700',
     color: '#171420',
   },
   audioTrackVoiceModel: {
@@ -1982,19 +2851,19 @@ const styles = StyleSheet.create({
   },
   audioTrackDuration: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   playPauseCircle: {
     width: 42,
     height: 42,
-    borderRadius: 21,
+    borderRadius: 20,
     backgroundColor: '#582CDB',
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.12,
     shadowRadius: 6,
     elevation: 3,
   },
@@ -2022,7 +2891,7 @@ const styles = StyleSheet.create({
     marginLeft: -7,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.08,
     shadowRadius: 2,
     elevation: 2,
   },
@@ -2030,13 +2899,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     paddingVertical: 10,
     borderRadius: 10,
     alignItems: 'center',
   },
   audioSecondaryBtnText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#475569',
   },
@@ -2048,20 +2917,20 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 4,
     elevation: 2,
   },
   useInPostBtnText: {
     color: '#FFFFFF',
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.3,
   },
   saveLibraryBtn: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1.5,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     paddingVertical: 11,
     borderRadius: 12,
     alignItems: 'center',
@@ -2069,13 +2938,13 @@ const styles = StyleSheet.create({
   saveLibraryBtnText: {
     color: '#171420',
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
   },
 
   // RECENT PROJECTS
   viewAllLink: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   projectItemCard: {
@@ -2092,6 +2961,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.02,
     shadowRadius: 3,
   },
+  projectItemCardPlaying: {
+    borderColor: '#C4B5FD',
+    backgroundColor: '#FAF8FF',
+  },
   projectPlayBtn: {
     width: 36,
     height: 36,
@@ -2100,13 +2973,65 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  projectPlayBtnActive: {
+    backgroundColor: '#DDD6FE',
+    borderWidth: 1.5,
+    borderColor: '#7C3AED',
+  },
   projectNameText: {
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
+  projectSubRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'nowrap',
+    marginTop: 2,
+  },
+  projectSubDuration: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#64748B',
+  },
+  projectSubDot: {
+    fontSize: 11,
+    color: '#CBD5E1',
+    marginHorizontal: 3,
+  },
+  projectSubPlatform: {
+    fontSize: 11,
+    color: '#64748B',
+    flexShrink: 1,
+  },
+  statusInlineTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3.5,
+  },
+  statusMiniDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+  },
+  statusMiniDotExported: {
+    backgroundColor: '#10B981',
+  },
+  statusMiniDotSaved: {
+    backgroundColor: '#8B5CF6',
+  },
+  statusInlineText: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  statusInlineTextExported: {
+    color: '#059669',
+  },
+  statusInlineTextSaved: {
+    color: '#6D28D9',
+  },
   projectSubText: {
-    fontSize: 10.5,
+    fontSize: 11,
     color: '#64748B',
     marginTop: 1,
   },
@@ -2118,7 +3043,7 @@ const styles = StyleSheet.create({
   },
   projectReuseBtnText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
 
@@ -2138,7 +3063,7 @@ const styles = StyleSheet.create({
   },
   savedVoiceHeaderLabel: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#94A3B8',
     letterSpacing: 0.5,
   },
@@ -2149,8 +3074,8 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   activeStyleTagText: {
-    fontSize: 8.5,
-    fontWeight: '900',
+    fontSize: 9,
+    fontWeight: '700',
     color: '#582CDB',
   },
   voiceAvatarBox: {
@@ -2163,7 +3088,7 @@ const styles = StyleSheet.create({
   },
   voiceStyleNameText: {
     fontSize: 14.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   voiceStyleDescText: {
@@ -2174,22 +3099,26 @@ const styles = StyleSheet.create({
   },
   toneChipBox: {
     flex: 1,
+    minWidth: 0,
     backgroundColor: '#FAF8F5',
     borderRadius: 10,
-    padding: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
     borderWidth: 1,
     borderColor: '#EFECE6',
   },
   toneChipLabel: {
-    fontSize: 9,
-    fontWeight: '900',
+    fontSize: sFont(8.5),
+    fontWeight: '800',
     color: '#94A3B8',
+    letterSpacing: 0.3,
   },
   toneChipValue: {
-    fontSize: 12,
-    fontWeight: '900',
+    fontSize: sFont(11),
+    fontWeight: '700',
     color: '#171420',
     marginTop: 2,
+    letterSpacing: -0.2,
   },
   wavelengthCapsuleCard: {
     backgroundColor: '#FAF8F5',
@@ -2215,20 +3144,24 @@ const styles = StyleSheet.create({
     height: 6,
     borderRadius: 3,
     backgroundColor: '#94A3B8',
+    flexShrink: 0,
   },
   wavelengthLiveDotActive: {
     backgroundColor: '#15803D',
   },
   wavelengthLabelText: {
-    fontSize: 9.5,
-    fontWeight: '900',
+    fontSize: sFont(9.5),
+    fontWeight: '800',
     color: '#171420',
-    letterSpacing: 0.5,
+    letterSpacing: 0.4,
+    flex: 1,
+    minWidth: 0,
   },
   wavelengthHzText: {
-    fontSize: 9.5,
-    fontWeight: '900',
+    fontSize: sFont(9.5),
+    fontWeight: '700',
     color: '#582CDB',
+    flexShrink: 0,
   },
   wavelengthDenseBarsRow: {
     flexDirection: 'row',
@@ -2254,10 +3187,10 @@ const styles = StyleSheet.create({
     borderTopColor: '#F1EFE9',
   },
   wavelengthMetricItem: {
-    fontSize: 8.5,
+    fontSize: sFont(8.5),
     fontWeight: '800',
     color: '#64748B',
-    letterSpacing: 0.4,
+    letterSpacing: 0.3,
   },
   speedSelectorRow: {
     flexDirection: 'row',
@@ -2269,8 +3202,8 @@ const styles = StyleSheet.create({
     borderTopColor: '#F1EFE9',
   },
   speedLabel: {
-    fontSize: 9.5,
-    fontWeight: '900',
+    fontSize: 10,
+    fontWeight: '700',
     color: '#94A3B8',
     letterSpacing: 0.4,
   },
@@ -2280,46 +3213,57 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
   },
   speedPillBtnActive: {
     backgroundColor: '#582CDB',
     borderColor: '#582CDB',
   },
   speedPillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#64748B',
   },
   speedPillTextActive: {
     color: '#FFFFFF',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   voicePreviewBtn: {
     flex: 1,
-    backgroundColor: '#EDE9FE',
+    backgroundColor: '#582CDB',
     paddingVertical: 10,
+    paddingHorizontal: 8,
     borderRadius: 10,
     alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 4,
+    elevation: 2,
   },
   voicePreviewBtnText: {
-    fontSize: 12,
-    fontWeight: '900',
-    color: '#582CDB',
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    letterSpacing: -0.1,
   },
   voiceChangeBtn: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1.2,
-    borderColor: '#E2E8F0',
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#EFECE6',
     paddingVertical: 10,
+    paddingHorizontal: 8,
     borderRadius: 10,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   voiceChangeBtnText: {
-    fontSize: 12,
-    fontWeight: '900',
-    color: '#171420',
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#475569',
+    letterSpacing: -0.1,
   },
 
   // JARVIS INSIGHT GRADIENT CARD
@@ -2337,7 +3281,7 @@ const styles = StyleSheet.create({
   },
   jarvisInsightTitle: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   jarvisInsightBody: {
@@ -2355,24 +3299,102 @@ const styles = StyleSheet.create({
   jarvisAdviceBtnText: {
     color: '#FFFFFF',
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
   },
 
-  // NEED MINUTES CARD
+  // DYNAMIC REFILL CARDS
+  subtleRefillRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    backgroundColor: '#FAF8F5',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    marginBottom: 10,
+    gap: 8,
+  },
+  subtleRefillText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#64748B',
+  },
+  subtleRefillLink: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#582CDB',
+    flexShrink: 0,
+  },
+  moderateRefillCard: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    marginBottom: 10,
+  },
+  moderateRefillTitle: {
+    fontSize: 13.5,
+    fontWeight: '700',
+    color: '#171420',
+  },
+  moderateBadge: {
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 5,
+  },
+  moderateBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#D97706',
+  },
+  moderateRefillSub: {
+    fontSize: 11.5,
+    color: '#64748B',
+    marginTop: 3,
+    lineHeight: 16,
+  },
+  moderateRefillBtn: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  moderateRefillBtnText: {
+    fontSize: 11.5,
+    fontWeight: '800',
+    color: '#582CDB',
+  },
   needMinutesCard: {
     borderRadius: 20,
     padding: 18,
     borderWidth: 1,
     borderColor: '#FDE68A',
-    marginBottom: 16,
+    marginBottom: 10,
   },
   needMinutesTitle: {
     fontSize: 14.5,
-    fontWeight: '900',
+    fontWeight: '700',
+    color: '#B45309',
+  },
+  lowWarningBadge: {
+    backgroundColor: '#FDE68A',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 5,
+  },
+  lowWarningBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '800',
     color: '#92400E',
   },
   needMinutesSub: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: '#B45309',
     marginTop: 3,
     lineHeight: 16,
@@ -2387,7 +3409,53 @@ const styles = StyleSheet.create({
   buyMoreBtnText: {
     color: '#FFFFFF',
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
+  },
+  criticalMinutesCard: {
+    borderRadius: 20,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: '#FECDD3',
+    marginBottom: 10,
+  },
+  criticalMinutesTitle: {
+    fontSize: 14.5,
+    fontWeight: '800',
+    color: '#E11D48',
+  },
+  criticalBadge: {
+    backgroundColor: '#FFE4E6',
+    paddingHorizontal: 7,
+    paddingVertical: 2.5,
+    borderRadius: 6,
+  },
+  criticalBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#BE123C',
+  },
+  criticalMinutesSub: {
+    fontSize: 12,
+    color: '#9F1239',
+    marginTop: 4,
+    lineHeight: 17,
+  },
+  criticalBuyMoreBtn: {
+    backgroundColor: '#E11D48',
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 12,
+    shadowColor: '#E11D48',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  criticalBuyMoreBtnText: {
+    color: '#FFFFFF',
+    fontSize: 12.5,
+    fontWeight: '800',
   },
 
   // MODALS
@@ -2415,11 +3483,11 @@ const styles = StyleSheet.create({
   modalCloseText: {
     fontSize: 18,
     color: '#94A3B8',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -0.3,
   },
@@ -2438,45 +3506,133 @@ const styles = StyleSheet.create({
   },
   voiceOptionCardSelected: {
     backgroundColor: '#F5F3FF',
-    borderColor: '#8B5CF6',
+    borderColor: '#582CDB',
+    borderWidth: 2,
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  voiceOptionHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
   },
   voiceOptionName: {
-    fontSize: 13.5,
-    fontWeight: '900',
+    fontSize: sFont(13),
+    fontWeight: '700',
     color: '#171420',
+    flex: 1,
+    minWidth: 0,
+    marginRight: 8,
+  },
+  voiceOptionNameSelected: {
+    color: '#582CDB',
+    fontWeight: '800',
+  },
+  voiceOptionBadgesRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    flexShrink: 0,
+  },
+  voiceActiveBadge: {
+    backgroundColor: '#582CDB',
+    paddingHorizontal: 7,
+    paddingVertical: 2.5,
+    borderRadius: 6,
+    flexShrink: 0,
+  },
+  voiceActiveBadgeText: {
+    fontSize: sFont(9),
+    fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: 0.3,
   },
   voiceOptionCheck: {
-    fontSize: 9.5,
-    fontWeight: '900',
+    fontSize: sFont(9.5),
+    fontWeight: '800',
     color: '#582CDB',
+    flexShrink: 0,
   },
   voiceOptionDesc: {
-    fontSize: 11,
+    fontSize: sFont(11),
     color: '#64748B',
-    marginTop: 3,
+    marginTop: 2,
     lineHeight: 15,
+  },
+  voiceOptionFooterRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  voiceInlinePreviewBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    paddingHorizontal: 8,
+    paddingVertical: 3.5,
+    borderRadius: 8,
+  },
+  voiceInlinePreviewBtnActive: {
+    backgroundColor: '#582CDB',
+    borderColor: '#582CDB',
+  },
+  voiceInlinePreviewBtnText: {
+    fontSize: sFont(10),
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  voiceInlinePreviewBtnTextActive: {
+    color: '#FFFFFF',
+  },
+  voiceApplyBtn: {
+    backgroundColor: '#582CDB',
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 4,
+    marginBottom: 6,
+  },
+  voiceApplyBtnText: {
+    color: '#FFFFFF',
+    fontSize: sFont(14),
+    fontWeight: '800',
+    letterSpacing: 0.3,
   },
   tagPillMini: {
     backgroundColor: '#FEF3C7',
     paddingHorizontal: 5,
     paddingVertical: 1.5,
     borderRadius: 4,
+    flexShrink: 0,
   },
   tagPillMiniText: {
-    fontSize: 8,
-    fontWeight: '900',
+    fontSize: sFont(8),
+    fontWeight: '800',
     color: '#B45309',
   },
   minuteTagPill: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#EFECE6',
-    paddingHorizontal: 7,
+    paddingHorizontal: 6,
     paddingVertical: 2.5,
     borderRadius: 6,
+    flexShrink: 0,
   },
   minuteTagText: {
-    fontSize: 9,
+    fontSize: sFont(8.5),
     fontWeight: '800',
     color: '#64748B',
   },
@@ -2495,7 +3651,7 @@ const styles = StyleSheet.create({
   },
   quotaBarRemaining: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   quotaTrackBg: {
@@ -2508,6 +3664,11 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: '#582CDB',
     borderRadius: 4,
+  },
+  quotaBarFooterText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#94A3B8',
   },
   transferRow: {
     flexDirection: 'row',
@@ -2525,14 +3686,14 @@ const styles = StyleSheet.create({
     color: '#171420',
   },
   transferStatus: {
-    fontSize: 9.5,
+    fontSize: 10,
     color: '#64748B',
     fontWeight: '700',
     marginTop: 1,
   },
   transferAmount: {
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   modalGoldRefillBtn: {
@@ -2544,7 +3705,7 @@ const styles = StyleSheet.create({
   modalGoldRefillBtnText: {
     color: '#FFFFFF',
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   refillPackCard: {
     flexDirection: 'row',
@@ -2552,43 +3713,244 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#FAF8F5',
     borderRadius: 14,
-    padding: 12,
-    borderWidth: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 13,
+    borderWidth: 1.5,
     borderColor: '#EFECE6',
   },
+  refillPackCardSelected: {
+    backgroundColor: '#F5F3FF',
+    borderColor: '#582CDB',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  refillRadioCircle: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#CBD5E1',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+    flexShrink: 0,
+  },
+  refillRadioCircleSelected: {
+    borderColor: '#582CDB',
+    backgroundColor: '#FFFFFF',
+  },
+  refillRadioInnerDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#582CDB',
+  },
   refillPackName: {
-    fontSize: 13,
-    fontWeight: '900',
+    fontSize: sFont(13),
+    fontWeight: '700',
     color: '#171420',
   },
+  refillPackNameSelected: {
+    color: '#582CDB',
+    fontWeight: '800',
+  },
+  tagPillMiniSelected: {
+    backgroundColor: '#EDE9FE',
+    borderColor: '#C4B5FD',
+  },
+  tagPillMiniTextSelected: {
+    color: '#582CDB',
+    fontWeight: '800',
+  },
+  refillSelectedBadge: {
+    backgroundColor: '#582CDB',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  refillSelectedBadgeText: {
+    color: '#FFFFFF',
+    fontSize: sFont(9.5),
+    fontWeight: '800',
+    letterSpacing: 0.2,
+  },
   refillPackSub: {
-    fontSize: 10.5,
+    fontSize: sFont(11),
     color: '#64748B',
     marginTop: 2,
   },
   refillPackPrice: {
-    fontSize: 15,
-    fontWeight: '900',
+    fontSize: sFont(15),
+    fontWeight: '800',
+    color: '#64748B',
+    flexShrink: 0,
+  },
+  refillPackPriceSelected: {
     color: '#582CDB',
+    fontSize: sFont(16),
+  },
+  refillPolicyNote: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginBottom: 14,
+  },
+  refillPolicyNoteText: {
+    fontSize: sFont(11),
+    color: '#475569',
+    lineHeight: 16,
+  },
+  refillContinueBtn: {
+    backgroundColor: '#582CDB',
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 4,
+    marginBottom: 6,
+  },
+  refillContinueBtnText: {
+    color: '#FFFFFF',
+    fontSize: sFont(14),
+    fontWeight: '800',
+    letterSpacing: 0.3,
+  },
+  orderSummaryCard: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 14,
+    padding: 14,
+    borderWidth: 1.5,
+    borderColor: '#EFECE6',
+    marginVertical: 12,
+  },
+  orderSummaryPlanName: {
+    fontSize: sFont(14),
+    fontWeight: '800',
+    color: '#171420',
+  },
+  orderSummaryRate: {
+    fontSize: sFont(11),
+    color: '#64748B',
+    marginTop: 2,
+  },
+  orderSummaryPrice: {
+    fontSize: sFont(18),
+    fontWeight: '800',
+    color: '#582CDB',
+  },
+  orderSummaryDivider: {
+    height: 1,
+    backgroundColor: '#E2E8F0',
+    marginVertical: 10,
+  },
+  orderSummaryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  orderSummaryLabel: {
+    fontSize: sFont(11.5),
+    color: '#64748B',
+    fontWeight: '600',
+  },
+  orderSummaryValue: {
+    fontSize: sFont(12),
+    color: '#171420',
+    fontWeight: '700',
+  },
+  orderSummaryHighlightValue: {
+    fontSize: sFont(12.5),
+    color: '#582CDB',
+    fontWeight: '800',
+  },
+  refillChecklistCard: {
+    backgroundColor: '#F5F3FF',
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+    marginBottom: 14,
+  },
+  refillChecklistHeader: {
+    fontSize: sFont(10),
+    fontWeight: '800',
+    color: '#582CDB',
+    letterSpacing: 0.4,
+  },
+  refillChecklistItem: {
+    fontSize: sFont(11),
+    color: '#334155',
+    lineHeight: 15,
+    flex: 1,
   },
   hookOptionCard: {
     backgroundColor: '#FAF8F5',
     borderRadius: 14,
-    padding: 12,
-    borderWidth: 1,
+    padding: 14,
+    borderWidth: 1.5,
     borderColor: '#EFECE6',
   },
+  hookOptionCardSelected: {
+    backgroundColor: '#F5F3FF',
+    borderColor: '#582CDB',
+    shadowColor: '#582CDB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  hookOptionHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
   hookOptionType: {
-    fontSize: 12,
-    fontWeight: '900',
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#475569',
+  },
+  hookOptionTypeSelected: {
     color: '#582CDB',
-    marginBottom: 4,
+  },
+  hookSelectedBadge: {
+    backgroundColor: '#582CDB',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  hookSelectedBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.2,
+  },
+  hookSelectCircle: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    borderWidth: 1.5,
+    borderColor: '#CBD5E1',
   },
   hookOptionText: {
-    fontSize: 11.5,
-    color: '#334155',
-    lineHeight: 16,
+    fontSize: 12,
+    color: '#475569',
+    lineHeight: 17,
     fontStyle: 'italic',
+  },
+  hookOptionTextSelected: {
+    color: '#1E1B4B',
+    fontWeight: '600',
   },
   modalCancelBtn: {
     paddingVertical: 10,
@@ -2617,7 +3979,7 @@ const styles = StyleSheet.create({
   toastText: {
     color: '#FFFFFF',
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.2,
   },
   expandedProjectCard: {
@@ -2637,48 +3999,133 @@ const styles = StyleSheet.create({
     backgroundColor: '#DCFCE7',
   },
   statusTagText: {
-    fontSize: 8.5,
-    fontWeight: '900',
+    fontSize: 9,
+    fontWeight: '700',
     color: '#582CDB',
   },
   statusTagTextExported: {
     color: '#15803D',
   },
   expandedProjectSnippet: {
-    fontSize: 11.5,
+    fontSize: sFont(12),
     color: '#475569',
-    lineHeight: 16,
-    marginTop: 8,
+    lineHeight: 17,
+    minHeight: 34,
+    marginTop: 10,
+    marginBottom: 12,
     fontStyle: 'italic',
+  },
+  expandedActionRow: {
+    flexDirection: 'row',
+    gap: 8,
   },
   expandedActionReuseBtn: {
     flex: 1,
     backgroundColor: '#EDE9FE',
-    paddingVertical: 8,
-    borderRadius: 8,
+    paddingVertical: 9,
+    borderRadius: 9,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   expandedActionReuseText: {
-    fontSize: 11,
-    fontWeight: '900',
+    fontSize: sFont(11.5),
+    fontWeight: '700',
     color: '#582CDB',
   },
   expandedActionExportBtn: {
     flex: 1,
     backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    paddingVertical: 8,
-    borderRadius: 8,
+    borderWidth: 1.5,
+    borderColor: '#EFECE6',
+    paddingVertical: 9,
+    borderRadius: 9,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   expandedActionExportText: {
-    fontSize: 11,
+    fontSize: sFont(11.5),
     fontWeight: '800',
     color: '#171420',
   },
+  vaultSearchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FAF8F5',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginTop: 12,
+    marginBottom: 10,
+  },
+  vaultSearchInput: {
+    flex: 1,
+    fontSize: sFont(12.5),
+    color: '#171420',
+    paddingVertical: 0,
+  },
+  vaultFilterScrollView: {
+    marginBottom: 12,
+  },
+  vaultFilterScrollContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 2,
+    paddingHorizontal: 2,
+  },
+  vaultFilterPill: {
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    paddingVertical: 7,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  vaultFilterPillActive: {
+    backgroundColor: '#582CDB',
+    borderColor: '#582CDB',
+  },
+  vaultFilterPillText: {
+    fontSize: sFont(11.5),
+    fontWeight: '700',
+    color: '#64748B',
+  },
+  vaultFilterPillTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '800',
+  },
+  vaultEmptyState: {
+    backgroundColor: '#FAF8F5',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    padding: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 10,
+  },
+  vaultEmptyTitle: {
+    fontSize: sFont(13),
+    fontWeight: '800',
+    color: '#171420',
+    marginBottom: 4,
+  },
+  vaultEmptySub: {
+    fontSize: sFont(11),
+    color: '#64748B',
+    textAlign: 'center',
+  },
+  projectSubVoicePill: {
+    fontSize: sFont(10),
+    fontWeight: '800',
+    color: '#582CDB',
+  },
   btnPressed: {
-    transform: [{ scale: 0.96 }],
-    opacity: 0.85,
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
   },
 });

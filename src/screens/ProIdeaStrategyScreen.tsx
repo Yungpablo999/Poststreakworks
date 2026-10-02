@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   StyleSheet,
   View,
-  Text,
   ScrollView,
   Pressable,
   Platform,
@@ -10,10 +9,12 @@ import {
   Modal,
   Image,
   Dimensions,
+  useWindowDimensions,
   SafeAreaView,
   StatusBar,
-  TextInput,
 } from 'react-native';
+import { Text, TextInput } from '../components/ui/AppText';
+import { BrandLogo } from '../components/BrandLogo';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
@@ -22,6 +23,7 @@ import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { TinyGoldCheck } from '../components/CreatorStoryModal';
+import { sFont } from '../utils/responsive';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -29,7 +31,6 @@ interface ProIdeaStrategyScreenProps {
   onBack: () => void;
   onLogout?: () => void;
   onOpenSchedule?: () => void;
-  onOpenMessages?: () => void;
   onOpenJarvisPro?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onUseIdea?: (ideaTitle: string) => void;
@@ -44,6 +45,7 @@ interface IdeaItem {
   badgeEmoji: string;
   score: number;
   title: string;
+  shortTitle: string;
   bestFor: string;
   audienceFit: number;
   virality: number;
@@ -53,7 +55,6 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
   onBack,
   onLogout,
   onOpenSchedule,
-  onOpenMessages,
   onOpenJarvisPro,
   onNavigateTab,
   onUseIdea,
@@ -61,6 +62,10 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
   userProfile,
   onSaveProfile,
 }) => {
+  const { width: windowWidth } = useWindowDimensions();
+  // Dynamically compute font size so 42 characters fit on a single line on any device screen without truncation
+  const titleFontSize = Math.min(17.5, Math.max(13, (windowWidth - 44) / 23.5));
+
   const [activeTab, setActiveTab] = useState<TabType>('create');
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
@@ -84,6 +89,7 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
       badgeEmoji: '👏',
       score: 93,
       title: 'One small creator habit that made posting easier',
+      shortTitle: 'Creator Habit',
       bestFor: 'Fast Completion',
       audienceFit: 96,
       virality: 91,
@@ -94,6 +100,7 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
       badgeEmoji: '📈',
       score: 89,
       title: '3 mistakes that slow down new creators',
+      shortTitle: '3 Creator Mistakes',
       bestFor: 'Saves & Reach',
       audienceFit: 92,
       virality: 87,
@@ -195,6 +202,7 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
         badgeEmoji: '🔥',
         score: 95,
         title: 'The single iPhone camera toggle you forgot to turn on',
+        shortTitle: 'Camera Toggle Trick',
         bestFor: 'Viral Views',
         audienceFit: 97,
         virality: 95,
@@ -205,6 +213,7 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
         badgeEmoji: '⚡',
         score: 92,
         title: 'Why posting every day is actually holding you back',
+        shortTitle: 'Daily Posting Trap',
         bestFor: 'Contrarian Debate',
         audienceFit: 94,
         virality: 89,
@@ -245,18 +254,7 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
             </Pressable>
 
             {/* Mascot */}
-            <Animated.View
-              style={[
-                styles.headerLogoWrapper,
-                { transform: [{ translateY: flameFloatY }] },
-              ]}
-            >
-              <Image
-                source={require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerGhostLogo}
-                resizeMode="contain"
-              />
-            </Animated.View>
+            <BrandLogo size="sm" />
 
             {/* Mode Switcher Pill */}
             <Pressable
@@ -273,37 +271,18 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
               hitSlop={8}
             >
               <LinearGradient
-                colors={['#FDE68A', '#F59E0B', '#D97706']}
+                colors={['#F59E0B', '#F59E0B', '#F59E0B']}
                 start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
+                end={{ x: 1, y: 0 }}
                 style={styles.proHeaderBadge}
               >
-                <Text style={styles.proHeaderBadgeText}>🔥 PRO</Text>
+                <Text style={styles.proHeaderBadgeText}>👑 PRO</Text>
               </LinearGradient>
             </Pressable>
           </View>
 
           {/* Right Header */}
           <View style={styles.headerRightGroup}>
-            <Pressable
-              style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
-              hitSlop={8}
-              onPress={() => {
-                if (onOpenMessages) onOpenMessages();
-                else if (onNavigateTab) onNavigateTab('match');
-              }}
-            >
-              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
-                  stroke="#171420"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-            </Pressable>
-
             <Pressable
               style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
               hitSlop={8}
@@ -340,11 +319,36 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
               style={styles.profileAvatarWrapper}
               hitSlop={8}
             >
-              <Image
-                source={userProfile?.avatarSource || require('../../assets/images/jarvis-ghost-clean.png')}
-                style={styles.headerUserAvatar}
-                resizeMode="cover"
-              />
+              {userProfile?.customAvatarUri ? (
+                <Image
+                  source={{ uri: userProfile.customAvatarUri }}
+                  style={styles.headerUserAvatar}
+                  resizeMode="cover"
+                />
+              ) : (userProfile?.avatarSource && userProfile.avatarId && userProfile.avatarId !== 'ghost') ? (
+                <Image
+                  source={userProfile.avatarSource}
+                  style={styles.headerUserAvatar}
+                  resizeMode="cover"
+                />
+              ) : (
+                <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
+                  <Path
+                    d="M20 21V19C20 17.9 19.5 16.9 18.7 16.2C17.9 15.5 16.9 15 15.8 15H8.2C7.1 15 6.1 15.5 5.3 16.2C4.5 16.9 4 17.9 4 19V21"
+                    stroke="#F59E0B"
+                    strokeWidth="2.3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <Circle
+                    cx="12"
+                    cy="7"
+                    r="4"
+                    stroke="#F59E0B"
+                    strokeWidth="2.3"
+                  />
+                </Svg>
+              )}
               <View style={styles.avatarTinyGoldCheckPos}>
                 <TinyGoldCheck size={14} />
               </View>
@@ -364,9 +368,14 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
               <Text style={styles.goldStrategyBadgeText}>PRO STRATEGY</Text>
             </View>
 
-            <Text style={styles.mainTitleText}>Find the idea with the strongest upside.</Text>
+            <Text
+              style={styles.mainTitleText}
+              numberOfLines={2}
+            >
+              Find the idea with the strongest upside.
+            </Text>
             <Text style={styles.mainSubText}>
-              Generate and score ideas by niche, platform, audience goal, streak impact, brand fit, and collaboration potential.
+              Generate and score ideas using your niche, platform, audience goal, streak impact, brand fit, and collaboration potential.
             </Text>
 
             <View style={{ flexDirection: 'row', gap: 8, marginTop: 10 }}>
@@ -454,8 +463,8 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
               ))}
             </View>
 
-            {/* Audience Question Seed */}
-            <Text style={[styles.setupFieldLabel, { marginTop: 12 }]}>AUDIENCE QUESTION / SEED</Text>
+            {/* Content Seed / Question */}
+            <Text style={[styles.setupFieldLabel, { marginTop: 12 }]}>CONTENT SEED / QUESTION</Text>
             <View style={styles.promptBubbleBox}>
               <Text style={styles.promptBubbleText}>
                 &ldquo;{audiencePrompt}&rdquo;
@@ -493,7 +502,7 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
             <View style={{ flexDirection: 'row', gap: 14, marginTop: 14 }}>
               {/* Audience Fit */}
               <View style={{ flex: 1 }}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 6, marginBottom: 4 }}>
                   <Text style={styles.meterLabel}>AUDIENCE FIT</Text>
                   <Text style={styles.meterValText}>94%</Text>
                 </View>
@@ -502,10 +511,10 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
                 </View>
               </View>
 
-              {/* Virality */}
+              {/* Growth Potential */}
               <View style={{ flex: 1 }}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
-                  <Text style={styles.meterLabel}>VIRALITY</Text>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                  <Text style={styles.meterLabel}>GROWTH POTENTIAL</Text>
                   <Text style={styles.meterValText}>88%</Text>
                 </View>
                 <View style={styles.meterTrack}>
@@ -518,17 +527,17 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
             <View style={styles.insightCalloutBox}>
               <Text style={{ fontSize: 14, marginRight: 6 }}>📍</Text>
               <Text style={styles.insightCalloutText}>
-                &ldquo;The contrarian angle has a 1.4x higher bookmark rate in your niche/format.&rdquo;
+                &ldquo;Contrarian angles show strong bookmark and retention potential in your niche format.&rdquo;
               </Text>
             </View>
           </View>
 
           {/* ============================================================ */}
-          {/* SECTION 3: TOP SCORED RECOMMENDATIONS                        */}
+          {/* SECTION 3: TOP RECOMMENDATIONS                               */}
           {/* ============================================================ */}
           <View style={[styles.sectionHeaderRowBetween, { marginTop: 22 }]}>
-            <Text style={styles.sectionHeaderTitle}>TOP SCORED RECOMMENDATIONS</Text>
-            <Text style={styles.totalGeneratedText}>{ideas.length} TOTAL GENERATED</Text>
+            <Text style={styles.sectionHeaderTitle}>TOP RECOMMENDATIONS</Text>
+            <Text style={styles.totalGeneratedText}>{ideas.length} GENERATED</Text>
           </View>
 
           <View style={{ gap: 10, marginTop: 4 }}>
@@ -551,9 +560,9 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
                     </Text>
                   </View>
 
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
                     <Text style={styles.ideaScoreVal}>{idea.score}</Text>
-                    <Text style={{ fontSize: 14 }}>{idea.badgeEmoji}</Text>
+                    <Text style={styles.ideaScoreDenominator}> / 100</Text>
                   </View>
                 </View>
 
@@ -591,29 +600,26 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
               <Text style={[styles.tableHeadCol, { flex: 0.8, textAlign: 'right' }]}>SCORE</Text>
             </View>
 
-            <View style={styles.tableBodyRow}>
-              <Text style={[styles.tableItemTitle, { flex: 2 }]} numberOfLines={1}>
-                1. Habit Habit: habit
-              </Text>
-              <View style={{ flex: 1.2, alignItems: 'center' }}>
-                <View style={styles.tableTagGold}>
-                  <Text style={styles.tableTagGoldText}>Reach</Text>
+            {ideas.map((idea, idx) => {
+              const isLast = idx === ideas.length - 1;
+              const isStreak = idea.category === 'STREAK-SAVER';
+              const tagLabel = isStreak ? 'Reach' : 'Growth';
+              return (
+                <View key={idea.id} style={[styles.tableBodyRow, isLast && { borderBottomWidth: 0 }]}>
+                  <Text style={[styles.tableItemTitle, { flex: 2 }]} numberOfLines={1}>
+                    {`${idx + 1}. ${idea.shortTitle}`}
+                  </Text>
+                  <View style={{ flex: 1.2, alignItems: 'center' }}>
+                    <View style={isStreak ? styles.tableTagGold : styles.tableTagPurple}>
+                      <Text style={isStreak ? styles.tableTagGoldText : styles.tableTagPurpleText}>
+                        {tagLabel}
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={[styles.tableScoreVal, { flex: 0.8, textAlign: 'right' }]}>{idea.score}</Text>
                 </View>
-              </View>
-              <Text style={[styles.tableScoreVal, { flex: 0.8, textAlign: 'right' }]}>93</Text>
-            </View>
-
-            <View style={[styles.tableBodyRow, { borderBottomWidth: 0 }]}>
-              <Text style={[styles.tableItemTitle, { flex: 2 }]} numberOfLines={1}>
-                2. 3 Mistakes
-              </Text>
-              <View style={{ flex: 1.2, alignItems: 'center' }}>
-                <View style={styles.tableTagPurple}>
-                  <Text style={styles.tableTagPurpleText}>Growth</Text>
-                </View>
-              </View>
-              <Text style={[styles.tableScoreVal, { flex: 0.8, textAlign: 'right' }]}>89</Text>
-            </View>
+              );
+            })}
           </View>
 
           {/* ============================================================ */}
@@ -628,7 +634,7 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
               <View style={styles.jarvisGhostIconBox}>
                 <Image
-                  source={require('../../assets/images/jarvis-ghost-clean.png')}
+                  source={require('../../assets/images/jarvis-core-flame.png')}
                   style={{ width: 28, height: 28 }}
                   resizeMode="contain"
                 />
@@ -640,7 +646,7 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
             </View>
 
             <Text style={styles.jarvisIntelQuote}>
-              &ldquo;Start with the <Text style={{ fontWeight: '900', color: '#582CDB' }}>Growth Idea</Text> if you want stronger saves and authority. Choose the <Text style={{ fontWeight: '900', color: '#D97706' }}>Streak-Saver Idea</Text> if your main goal is to protect today&apos;s streak quickly.&rdquo;
+              &ldquo;Start with the <Text style={{ fontWeight: '700', color: '#582CDB' }}>Growth Idea</Text> if you want stronger saves and more authority. Choose the <Text style={{ fontWeight: '700', color: '#D97706' }}>Streak-Saver Idea</Text> if your main goal is to protect today&apos;s streak.&rdquo;
             </Text>
 
             <Pressable
@@ -669,29 +675,25 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
             </Pressable>
           </View>
 
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ gap: 10, marginTop: 4, paddingBottom: 6 }}
-          >
+          <View style={{ flexDirection: 'row', gap: 10, marginTop: 4 }}>
             {savedIdeas.slice(0, 2).map((item) => (
               <Pressable
                 key={item.id}
-                style={styles.savedIdeaCardHorizontal}
+                style={({ pressed }) => [styles.savedIdeaCardGrid, pressed && styles.btnPressed]}
                 onPress={() => handleSelectIdea(item.title)}
               >
-                <Text style={styles.savedIdeaTitle} numberOfLines={2}>
+                <Text style={styles.savedIdeaTitle} numberOfLines={3}>
                   {item.title}
                 </Text>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
                   <View style={styles.savedScorePill}>
                     <Text style={styles.savedScorePillText}>{item.score} SCORE</Text>
                   </View>
-                  <Text style={{ fontSize: 14 }}>🔖</Text>
+                  <Text style={{ fontSize: 13 }}>🔖</Text>
                 </View>
               </Pressable>
             ))}
-          </ScrollView>
+          </View>
 
           {/* ============================================================ */}
           {/* BOTTOM ACTION BUTTONS                                        */}
@@ -701,7 +703,7 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
               style={({ pressed }) => [styles.buildCompleteWorkflowBtn, pressed && styles.btnPressed]}
               onPress={handleBuildWorkflow}
             >
-              <Text style={styles.buildCompleteWorkflowBtnText}>Build Complete Workflow</Text>
+              <Text style={styles.buildCompleteWorkflowBtnText}>Build Workflow from Top Idea →</Text>
             </Pressable>
 
             <Pressable
@@ -758,17 +760,76 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
                 </Pressable>
               </View>
 
-              <Text style={{ fontSize: 12, color: '#64748B', marginBottom: 12 }}>
-                Customize your niche and audience seed prompt to steer the AI generator.
+              <Text style={{ fontSize: 12, color: '#64748B', marginBottom: 14, lineHeight: 17 }}>
+                Customize your niche, audience goal, and content seed or question to steer the AI generator.
               </Text>
 
-              <Text style={styles.setupFieldLabel}>AUDIENCE SEED PROMPT</Text>
+              {/* Niche */}
+              <Text style={styles.setupFieldLabel}>NICHE</Text>
+              <View style={[styles.pillRow, { marginBottom: 12 }]}>
+                {['Creator Education', 'Lifestyle', 'Business'].map((niche) => (
+                  <Pressable
+                    key={niche}
+                    style={[
+                      styles.setupOptionPill,
+                      selectedNiche === niche && styles.setupOptionPillActive,
+                    ]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }
+                      setSelectedNiche(niche);
+                    }}
+                  >
+                    <Text
+                      style={[
+                        styles.setupOptionText,
+                        selectedNiche === niche && styles.setupOptionTextActive,
+                      ]}
+                    >
+                      {niche}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+
+              {/* Audience Goal */}
+              <Text style={styles.setupFieldLabel}>AUDIENCE GOAL</Text>
+              <View style={[styles.pillRow, { marginBottom: 12 }]}>
+                {['Grow engagement', 'Protect streak'].map((goal) => (
+                  <Pressable
+                    key={goal}
+                    style={[
+                      styles.setupOptionPill,
+                      selectedGoal === goal && styles.setupOptionPillActive,
+                    ]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }
+                      setSelectedGoal(goal);
+                    }}
+                  >
+                    <Text
+                      style={[
+                        styles.setupOptionText,
+                        selectedGoal === goal && styles.setupOptionTextActive,
+                      ]}
+                    >
+                      {goal}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+
+              {/* Content Seed / Question */}
+              <Text style={styles.setupFieldLabel}>CONTENT SEED / QUESTION</Text>
               <TextInput
                 style={styles.modalTextInput}
                 multiline
                 value={audiencePrompt}
                 onChangeText={setAudiencePrompt}
-                placeholder="What creator topic should we explore?"
+                placeholder="What creator topic or question should we explore?"
               />
 
               <Pressable
@@ -780,7 +841,7 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
                   setShowEditStrategyModal(false);
                   setCompletionData({
                     title: 'Strategy Saved & Re-scored!',
-                    subtitle: `AI calibrated your new prompt: "${audiencePrompt.slice(0, 45)}..."`,
+                    subtitle: `AI calibrated ${selectedNiche} + ${selectedGoal}: "${audiencePrompt.slice(0, 35)}..."`,
                     badgeText: '✨ 94 QUALITY SCORE RE-CALIBRATED',
                     xpEarned: 50,
                     speechBubble: 'Strategy locked and re-scored, Pablo! Fresh viral angles ready! 🔥',
@@ -790,7 +851,7 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
                   }, 200);
                 }}
               >
-                <Text style={styles.modalSaveBtnText}>Save &amp; Re-score Ideas</Text>
+                <Text style={styles.modalSaveBtnText}>Save &amp; Re-score Ideas →</Text>
               </Pressable>
             </Animated.View>
           </View>
@@ -812,31 +873,41 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
                 </Pressable>
               </View>
 
-              <View style={{ gap: 8, marginVertical: 12 }}>
+              <View style={{ gap: 8, marginTop: 12, marginBottom: 6 }}>
                 {savedIdeas.map((idea) => (
                   <Pressable
                     key={idea.id}
-                    style={styles.savedModalItem}
+                    style={({ pressed }) => [styles.savedModalItem, pressed && styles.btnPressed]}
                     onPress={() => {
+                      if (Platform.OS !== 'web') {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }
                       setShowSavedIdeasModal(false);
                       handleSelectIdea(idea.title);
                     }}
                   >
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <Text style={{ fontSize: 13, fontWeight: '900', color: '#171420', flex: 1, marginRight: 8 }}>
+                      <Text style={{ fontSize: 13, fontWeight: '700', color: '#171420', flex: 1, marginRight: 10 }}>
                         {idea.title}
                       </Text>
-                      <View style={styles.savedScorePill}>
-                        <Text style={styles.savedScorePillText}>{idea.score} SCORE</Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                        <View style={styles.savedScorePill}>
+                          <Text style={styles.savedScorePillText}>{idea.score} SCORE</Text>
+                        </View>
+                        <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+                          <Path
+                            d="M9 18L15 12L9 6"
+                            stroke="#94A3B8"
+                            strokeWidth="2.4"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </Svg>
                       </View>
                     </View>
                   </Pressable>
                 ))}
               </View>
-
-              <Pressable style={styles.modalCancelBtn} onPress={() => setShowSavedIdeasModal(false)}>
-                <Text style={styles.modalCancelBtnText}>Close</Text>
-              </Pressable>
             </Animated.View>
           </View>
         </Modal>
@@ -906,6 +977,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+    width: '100%',
     backgroundColor: '#FAF8F5',
   },
   headerBar: {
@@ -950,15 +1022,18 @@ const styles = StyleSheet.create({
     height: 26,
   },
   proHeaderBadge: {
-    paddingHorizontal: 9,
-    paddingVertical: 3.5,
-    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+    backgroundColor: '#F59E0B',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   proHeaderBadgeText: {
-    fontSize: 9.5,
+    fontSize: sFont(10),
     fontWeight: '900',
-    color: '#0C0A12',
-    letterSpacing: 0.3,
+    color: '#78350F',
+    letterSpacing: 0.4,
   },
   headerRightGroup: {
     flexDirection: 'row',
@@ -968,7 +1043,7 @@ const styles = StyleSheet.create({
   headerIconBtn: {
     width: 38,
     height: 38,
-    borderRadius: 19,
+    borderRadius: 20,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#EFECE6',
@@ -994,15 +1069,18 @@ const styles = StyleSheet.create({
   profileAvatarWrapper: {
     width: 38,
     height: 38,
-    borderRadius: 19,
-    borderWidth: 1.5,
+    borderRadius: 20,
+    borderWidth: 2,
     borderColor: '#F59E0B',
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
     position: 'relative',
   },
   headerUserAvatar: {
     width: '100%',
     height: '100%',
-    borderRadius: 19,
+    borderRadius: 18,
   },
   avatarTinyGoldCheckPos: {
     position: 'absolute',
@@ -1026,16 +1104,18 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   goldStrategyBadgeText: {
-    fontSize: 9.5,
-    fontWeight: '900',
+    fontSize: 10,
+    fontWeight: '700',
     color: '#D97706',
     letterSpacing: 0.3,
   },
   mainTitleText: {
-    fontSize: 23,
-    fontWeight: '900',
+    fontSize: Platform.OS === 'web' ? ('clamp(15px, 3.8vw, 17px)' as any) : sFont(16),
+    fontWeight: '700',
     color: '#171420',
-    letterSpacing: -0.5,
+    letterSpacing: -0.35,
+    lineHeight: 22,
+    marginBottom: 4,
   },
   mainSubText: {
     fontSize: 12.5,
@@ -1050,8 +1130,8 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   purplePillText: {
-    fontSize: 10.5,
-    fontWeight: '900',
+    fontSize: 11,
+    fontWeight: '700',
     color: '#582CDB',
   },
   goldPill: {
@@ -1061,8 +1141,8 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   goldPillText: {
-    fontSize: 10.5,
-    fontWeight: '900',
+    fontSize: 11,
+    fontWeight: '700',
     color: '#D97706',
   },
 
@@ -1071,17 +1151,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 12,
     marginBottom: 8,
   },
   sectionHeaderTitle: {
     fontSize: 11.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#64748B',
-    letterSpacing: 0.5,
+    letterSpacing: 0.4,
   },
   editAllLink: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.3,
   },
@@ -1098,8 +1179,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   setupFieldLabel: {
-    fontSize: 9.5,
-    fontWeight: '900',
+    fontSize: 10,
+    fontWeight: '700',
     color: '#94A3B8',
     letterSpacing: 0.4,
     marginBottom: 6,
@@ -1122,13 +1203,13 @@ const styles = StyleSheet.create({
     borderColor: '#582CDB',
   },
   setupOptionText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#475569',
   },
   setupOptionTextActive: {
     color: '#FFFFFF',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   promptBubbleBox: {
     backgroundColor: '#FAF8F5',
@@ -1160,13 +1241,13 @@ const styles = StyleSheet.create({
   },
   scoreCardLabel: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#94A3B8',
     letterSpacing: 0.4,
   },
   scoreBigNumber: {
     fontSize: 36,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     letterSpacing: -1,
   },
@@ -1180,7 +1261,7 @@ const styles = StyleSheet.create({
   },
   proPickBadgeText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#D97706',
   },
   sparkleCircle: {
@@ -1192,13 +1273,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   meterLabel: {
-    fontSize: 9.5,
-    fontWeight: '900',
+    fontSize: 9,
+    fontWeight: '700',
     color: '#64748B',
+    letterSpacing: 0.2,
   },
   meterValText: {
-    fontSize: 10.5,
-    fontWeight: '900',
+    fontSize: 11,
+    fontWeight: '700',
     color: '#171420',
   },
   meterTrack: {
@@ -1232,8 +1314,9 @@ const styles = StyleSheet.create({
   // SECTION 3: TOP SCORED RECOMMENDATIONS
   totalGeneratedText: {
     fontSize: 10,
-    fontWeight: '800',
+    fontWeight: '700',
     color: '#94A3B8',
+    letterSpacing: 0.3,
   },
   recommendedIdeaCard: {
     backgroundColor: '#FFFFFF',
@@ -1258,8 +1341,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#EDE9FE',
   },
   categoryTagText: {
-    fontSize: 9.5,
-    fontWeight: '900',
+    fontSize: 10,
+    fontWeight: '700',
     letterSpacing: 0.3,
   },
   tagTextStreakSaver: {
@@ -1270,12 +1353,17 @@ const styles = StyleSheet.create({
   },
   ideaScoreVal: {
     fontSize: 15,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
+  },
+  ideaScoreDenominator: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#94A3B8',
   },
   ideaMainHeadline: {
     fontSize: 15,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
     lineHeight: 21,
     marginTop: 8,
@@ -1289,7 +1377,7 @@ const styles = StyleSheet.create({
     borderColor: '#EFECE6',
   },
   bestForText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#64748B',
   },
@@ -1318,8 +1406,8 @@ const styles = StyleSheet.create({
     borderBottomColor: '#F1EFE9',
   },
   tableHeadCol: {
-    fontSize: 9.5,
-    fontWeight: '900',
+    fontSize: 10,
+    fontWeight: '700',
     color: '#94A3B8',
     letterSpacing: 0.4,
   },
@@ -1343,7 +1431,7 @@ const styles = StyleSheet.create({
   },
   tableTagGoldText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#D97706',
   },
   tableTagPurple: {
@@ -1354,12 +1442,12 @@ const styles = StyleSheet.create({
   },
   tableTagPurpleText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
   tableScoreVal: {
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
   },
 
@@ -1379,12 +1467,12 @@ const styles = StyleSheet.create({
   },
   jarvisIntelTitle: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   jarvisIntelSub: {
     fontSize: 9,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#582CDB',
     letterSpacing: 0.4,
   },
@@ -1403,23 +1491,25 @@ const styles = StyleSheet.create({
   jarvisBuildWorkflowBtnText: {
     color: '#FFFFFF',
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
   },
 
   // SECTION 6: SAVED PRO IDEAS
-  savedIdeaCardHorizontal: {
-    width: 170,
+  savedIdeaCardGrid: {
+    flex: 1,
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    padding: 14,
+    padding: 13,
     borderWidth: 1,
     borderColor: '#EFECE6',
+    justifyContent: 'space-between',
+    minHeight: 104,
   },
   savedIdeaTitle: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
-    lineHeight: 17,
+    lineHeight: 16.5,
   },
   savedScorePill: {
     backgroundColor: '#FEF3C7',
@@ -1428,8 +1518,8 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   savedScorePillText: {
-    fontSize: 8.5,
-    fontWeight: '900',
+    fontSize: 9,
+    fontWeight: '700',
     color: '#D97706',
   },
 
@@ -1441,19 +1531,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     shadowColor: '#582CDB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 3,
   },
   buildCompleteWorkflowBtnText: {
     color: '#FFFFFF',
-    fontSize: 13.5,
-    fontWeight: '900',
+    fontSize: 14,
+    fontWeight: '700',
   },
   generateMoreBtn: {
     backgroundColor: '#FAF8F5',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#EFECE6',
     paddingVertical: 13,
     borderRadius: 14,
     alignItems: 'center',
@@ -1461,7 +1551,7 @@ const styles = StyleSheet.create({
   generateMoreBtnText: {
     color: '#171420',
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   backToCreateLinkBtn: {
     alignItems: 'center',
@@ -1469,8 +1559,8 @@ const styles = StyleSheet.create({
   },
   backToCreateLinkText: {
     color: '#582CDB',
-    fontSize: 10.5,
-    fontWeight: '900',
+    fontSize: 11,
+    fontWeight: '700',
     letterSpacing: 0.5,
   },
 
@@ -1498,13 +1588,13 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#171420',
   },
   modalCloseText: {
     fontSize: 18,
     color: '#94A3B8',
-    fontWeight: '900',
+    fontWeight: '700',
   },
   modalTextInput: {
     backgroundColor: '#FAF8F5',
@@ -1528,7 +1618,7 @@ const styles = StyleSheet.create({
   modalSaveBtnText: {
     color: '#FFFFFF',
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   savedModalItem: {
     backgroundColor: '#FAF8F5',
@@ -1564,11 +1654,11 @@ const styles = StyleSheet.create({
   toastText: {
     color: '#FFFFFF',
     fontSize: 12.5,
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 0.2,
   },
   btnPressed: {
-    transform: [{ scale: 0.96 }],
-    opacity: 0.85,
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
   },
 });
