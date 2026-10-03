@@ -9,6 +9,7 @@ import {
   refreshTikTokTokens,
   revokeTikTokToken,
   sealToken,
+  tiktokFetchForConfig,
   type TikTokConfig,
   type TikTokTokens,
   type TikTokUser,
@@ -96,7 +97,9 @@ export interface TikTokApi {
   listVideos(accessToken: string, opts: { cursor?: number }): ReturnType<typeof listTikTokVideos>;
 }
 
-export function createTikTokApi(config: TikTokConfig, fetchImpl: typeof fetch = fetch): TikTokApi {
+export function createTikTokApi(config: TikTokConfig, baseFetch: typeof fetch = fetch): TikTokApi {
+  // Real TikTok, unless the config points at the local stand-in (local testing only).
+  const fetchImpl = tiktokFetchForConfig(config, baseFetch);
   return {
     exchangeCode: (code) => exchangeTikTokCode(config, code, fetchImpl),
     refreshTokens: (refreshToken) => refreshTikTokTokens(config, refreshToken, fetchImpl),

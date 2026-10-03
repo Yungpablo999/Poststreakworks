@@ -16,6 +16,7 @@ export {
   listVideos as listTikTokVideos,
   refreshTokens as refreshTikTokTokens,
   revokeToken as revokeTikTokToken,
+  fetchForConfig as tiktokFetchForConfig,
   tiktokConfigFromEnv,
 } from "./tiktok";
 export type { TikTokConfig, TikTokTokens, TikTokUser, TikTokVideo } from "./tiktok";

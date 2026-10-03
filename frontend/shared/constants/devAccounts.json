@@ -1,0 +1,45 @@
+{
+  "about": "The four test accounts for trying PostStreak on one machine (backend/scripts/seed-test-users.mjs creates them; the sign-in screen offers them when the local stack is running with DEV_LOGIN=true). One per kind of creator, so every screen can be seen as a new or existing creator on the free or the Pro plan, with no sample data and no preview switches: each account has real rows in the local database. Local only. Never create these on a hosted project.",
+  "accounts": [
+    {
+      "email": "free.new@example.com",
+      "label": "Free · New",
+      "plan": "free",
+      "stage": "new",
+      "displayName": "Ada Okoye",
+      "handle": "ada_free_new",
+      "niches": ["lifestyle", "food"],
+      "blurb": "Just signed up. Nothing done yet, the welcome tour still to come."
+    },
+    {
+      "email": "free.existing@example.com",
+      "label": "Free · Existing",
+      "plan": "free",
+      "stage": "existing",
+      "displayName": "Bayo Alade",
+      "handle": "bayo_free_existing",
+      "niches": ["tech", "education"],
+      "blurb": "Weeks of history: streak, drafts, scheduled and published posts, a connected TikTok."
+    },
+    {
+      "email": "pro.new@example.com",
+      "label": "Pro · New",
+      "plan": "pro",
+      "stage": "new",
+      "displayName": "Chidi Nwosu",
+      "handle": "chidi_pro_new",
+      "niches": ["fitness", "music"],
+      "blurb": "Just upgraded. Pro features open, nothing done yet."
+    },
+    {
+      "email": "pro.existing@example.com",
+      "label": "Pro · Existing",
+      "plan": "pro",
+      "stage": "existing",
+      "displayName": "Dami Bello",
+      "handle": "dami_pro_existing",
+      "niches": ["beauty", "comedy"],
+      "blurb": "Pro with weeks of history and a connected TikTok."
+    }
+  ]
+}

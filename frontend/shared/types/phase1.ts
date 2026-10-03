@@ -199,11 +199,47 @@ export interface BootstrapProfile {
   createdAt: string;
 }
 
+/**
+ * What this server can really do, decided by the keys and approvals it has. The app shows only what
+ * works: a feature the server can't deliver is hidden (never faked with sample data) and appears by
+ * itself once the server is set up for it.
+ */
+export interface Capabilities {
+  /** Ideas, hooks, scripts, captions, Repurpose and Ask Jarvis are written by a real model. */
+  ai: boolean;
+  /** Connecting a TikTok account. */
+  tiktok: boolean;
+  /** A purchase can really unlock Pro. */
+  payments: boolean;
+  /** Voice Studio can really make audio. */
+  voice: boolean;
+  /** Local testing only: the sign-in screen offers one-tap test accounts. */
+  devLogin: boolean;
+  /** Connections for Instagram, YouTube, Facebook and Threads. */
+  otherPlatforms: boolean;
+  /** Posting for the creator at the best time. */
+  autoPost: boolean;
+  /** Age / place / online-time breakdowns of an audience. */
+  audienceDemographics: boolean;
+}
+
+/** The paid plan, when there is one. `Bootstrap.profile.tier` is what to gate on. */
+export interface PlanInfo {
+  status: string;
+  renewsAt: string;
+  cancelAtPeriodEnd: boolean;
+  processor: string;
+}
+
 /** GET /api/v1/me/bootstrap */
 export interface Bootstrap {
   profile: BootstrapProfile;
-  /** "returning" once they've done anything real (checked in, saved something, connected a platform). */
+  /** "returning" once they have a rhythm: 3 check-in days, a published post, or posts read from a connected account. */
   persona: Persona;
+  capabilities: Capabilities;
+  /** Notifications not yet read (the bell's dot). */
+  unreadNotifications: number;
+  plan: PlanInfo | null;
   connectedPlatforms: AppPlatform[];
   /** Real connections with details and health. A subset of `connectedPlatforms`. */
   accounts: ConnectedAccount[];

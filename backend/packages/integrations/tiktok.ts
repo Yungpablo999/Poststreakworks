@@ -34,18 +34,42 @@ export type TikTokConfig = {
   clientSecret: string;
   /** Exactly as registered in the TikTok app, e.g. https://app.poststreak.app/auth/tiktok/callback */
   redirectUri: string;
+  /**
+   * Local testing only. When set, every call that would go to TikTok goes to a stand-in
+   * TikTok running on this machine instead (backend/scripts/mock-tiktok.mjs), so the whole
+   * connect → sync → disconnect flow can be tried on localhost, where real TikTok can't
+   * reach us (it needs an https redirect address). Only a localhost address is accepted.
+   */
+  mockOrigin?: string;
 };
 
 export class TikTokConfigError extends Error {}
 
-export function assertValidRedirectUri(uri: string): void {
+const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
+
+/** A `http://localhost:PORT`-style origin, or a TikTokConfigError. Anything else could redirect tokens away. */
+export function assertLocalOrigin(raw: string): string {
+  let url: URL;
+  try {
+    url = new URL(raw);
+  } catch {
+    throw new TikTokConfigError("TIKTOK_MOCK_ORIGIN is not a valid URL");
+  }
+  if (url.protocol !== "http:" || !LOCAL_HOSTS.has(url.hostname)) {
+    throw new TikTokConfigError("TIKTOK_MOCK_ORIGIN must be an http://localhost address");
+  }
+  return url.origin;
+}
+
+export function assertValidRedirectUri(uri: string, opts: { allowLocalHttp?: boolean } = {}): void {
   let url: URL;
   try {
     url = new URL(uri);
   } catch {
     throw new TikTokConfigError("TIKTOK_REDIRECT_URI is not a valid URL");
   }
-  if (url.protocol !== "https:") throw new TikTokConfigError("TIKTOK_REDIRECT_URI must be https");
+  const localHttp = opts.allowLocalHttp === true && url.protocol === "http:" && LOCAL_HOSTS.has(url.hostname);
+  if (url.protocol !== "https:" && !localHttp) throw new TikTokConfigError("TIKTOK_REDIRECT_URI must be https");
   if (uri.includes("?")) throw new TikTokConfigError("TIKTOK_REDIRECT_URI must not contain query parameters");
   if (uri.includes("#")) throw new TikTokConfigError("TIKTOK_REDIRECT_URI must not contain a fragment");
   if (uri.length > 512) throw new TikTokConfigError("TIKTOK_REDIRECT_URI must be under 512 characters");
@@ -61,8 +85,23 @@ export function tiktokConfigFromEnv(env: Record<string, string | undefined> = pr
   const clientSecret = env.TIKTOK_CLIENT_SECRET?.trim();
   const redirectUri = env.TIKTOK_REDIRECT_URI?.trim();
   if (!clientKey || !clientSecret || !redirectUri) return null;
-  assertValidRedirectUri(redirectUri);
-  return { clientKey, clientSecret, redirectUri };
+  const mockRaw = env.TIKTOK_MOCK_ORIGIN?.trim();
+  const mockOrigin = mockRaw ? assertLocalOrigin(mockRaw) : undefined;
+  // A stand-in TikTok on this machine can't use https, so its redirect may be http://localhost too.
+  assertValidRedirectUri(redirectUri, { allowLocalHttp: mockOrigin !== undefined });
+  return { clientKey, clientSecret, redirectUri, ...(mockOrigin && { mockOrigin }) };
+}
+
+const REAL_API_ORIGIN = "https://open.tiktokapis.com";
+
+/** `fetch` for this config: real TikTok normally; the local stand-in when `mockOrigin` is set. */
+export function fetchForConfig(config: TikTokConfig, fetchImpl: FetchLike = fetch): FetchLike {
+  const mock = config.mockOrigin;
+  if (!mock) return fetchImpl;
+  return ((input: RequestInfo | URL, init?: RequestInit) => {
+    const target = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+    return fetchImpl(target.startsWith(REAL_API_ORIGIN) ? mock + target.slice(REAL_API_ORIGIN.length) : target, init);
+  }) as FetchLike;
 }
 
 // ─── Errors ─────────────────────────────────────────────────────────────────
@@ -147,7 +186,7 @@ async function send(fetchImpl: FetchLike, url: string, init: RequestInit): Promi
 
 /** The TikTok page the creator is sent to. `state` must be single-use and bound to them. */
 export function buildAuthorizeUrl(config: TikTokConfig, state: string): string {
-  const url = new URL(AUTHORIZE_URL);
+  const url = new URL(config.mockOrigin ? `${config.mockOrigin}/v2/auth/authorize/` : AUTHORIZE_URL);
   url.searchParams.set("client_key", config.clientKey);
   url.searchParams.set("scope", TIKTOK_SCOPES.join(","));
   url.searchParams.set("response_type", "code");

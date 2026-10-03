@@ -5,6 +5,7 @@ import {
   TikTokConfigError,
   buildAuthorizeUrl,
   exchangeCode,
+  fetchForConfig,
   fetchUserInfo,
   listVideos,
   refreshTokens,
@@ -73,6 +74,57 @@ describe("configuration", () => {
     ]) {
       expect(() => tiktokConfigFromEnv({ ...env, TIKTOK_REDIRECT_URI: bad }), bad.slice(0, 40)).toThrow(TikTokConfigError);
     }
+  });
+});
+
+describe("the local stand-in for TikTok (testing on one machine)", () => {
+  const env = {
+    TIKTOK_CLIENT_KEY: "k",
+    TIKTOK_CLIENT_SECRET: "s",
+    TIKTOK_REDIRECT_URI: "http://localhost:8081/auth/tiktok/callback",
+    TIKTOK_MOCK_ORIGIN: "http://127.0.0.1:4010",
+  };
+
+  it("lets the redirect be http://localhost, but only together with the stand-in", () => {
+    expect(tiktokConfigFromEnv(env)).toMatchObject({ mockOrigin: "http://127.0.0.1:4010", redirectUri: env.TIKTOK_REDIRECT_URI });
+    expect(() => tiktokConfigFromEnv({ ...env, TIKTOK_MOCK_ORIGIN: undefined })).toThrow(TikTokConfigError);
+  });
+
+  it("never lets the stand-in point anywhere but this machine", () => {
+    for (const bad of ["https://evil.example", "http://evil.example:4010", "http://10.0.0.5:4010", "https://127.0.0.1:4010", "ftp://localhost", "nope"]) {
+      expect(() => tiktokConfigFromEnv({ ...env, TIKTOK_MOCK_ORIGIN: bad }), bad).toThrow(TikTokConfigError);
+    }
+  });
+
+  it("still refuses a non-local http redirect, stand-in or not", () => {
+    expect(() => tiktokConfigFromEnv({ ...env, TIKTOK_REDIRECT_URI: "http://evil.example/cb" })).toThrow(TikTokConfigError);
+  });
+
+  it("sends the creator to the stand-in's sign-in page instead of TikTok's", () => {
+    const local = tiktokConfigFromEnv(env)!;
+    const url = new URL(buildAuthorizeUrl(local, "w.abc"));
+    expect(`${url.origin}${url.pathname}`).toBe("http://127.0.0.1:4010/v2/auth/authorize/");
+    expect(url.searchParams.get("client_key")).toBe("k");
+  });
+
+  it("redirects every API call to the stand-in, and leaves other addresses alone", async () => {
+    const local = tiktokConfigFromEnv(env)!;
+    const seen: string[] = [];
+    const base = (async (url: unknown) => {
+      seen.push(String(url));
+      return new Response("{}");
+    }) as typeof fetch;
+    const f = fetchForConfig(local, base);
+    await f("https://open.tiktokapis.com/v2/user/info/?fields=open_id");
+    await f("https://example.test/elsewhere");
+    expect(seen).toEqual(["http://127.0.0.1:4010/v2/user/info/?fields=open_id", "https://example.test/elsewhere"]);
+  });
+
+  it("is a plain pass-through without the stand-in", async () => {
+    const calls: string[] = [];
+    const base = (async (url: unknown) => (calls.push(String(url)), new Response("{}"))) as typeof fetch;
+    await fetchForConfig(config, base)("https://open.tiktokapis.com/v2/user/info/");
+    expect(calls).toEqual(["https://open.tiktokapis.com/v2/user/info/"]);
   });
 });
 
