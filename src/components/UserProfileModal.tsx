@@ -19,8 +19,8 @@ import { AppToast } from './ui/AppToast';
 import { AutoGrowInput } from './ui/AutoGrowInput';
 import { GlassSheet } from './glass/GlassSheet';
 import { GlassCard } from './glass/GlassCard';
-import { PlatformRow } from './onboarding/PlatformRow';
-import { PlatformLogo, type PlatformLogoType } from './onboarding/PlatformLogo';
+import { AccountsPanel } from './accounts/AccountsPanel';
+import { useAccounts } from '../backend/accounts';
 import { ds, goldTokens } from '../theme/colors';
 import { STAGE_2_ENABLED } from '../config/features';
 import type { UserPersona, UserTier } from '../types/account';
@@ -86,14 +86,6 @@ export const ALL_NICHES = [
   'Travel & Vlogs',
   'Fashion & Beauty',
   'Education',
-];
-
-const ACCOUNTS: { id: PlatformLogoType; name: string }[] = [
-  { id: 'tiktok', name: 'TikTok' },
-  { id: 'instagram', name: 'Instagram' },
-  { id: 'youtube', name: 'YouTube' },
-  { id: 'facebook', name: 'Facebook' },
-  { id: 'threads', name: 'Threads' },
 ];
 
 const BIO_MAX = 150;
@@ -339,7 +331,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ visible, onC
   const [avatarId, setAvatarId] = useState<string | null>(null);
   const [customUri, setCustomUri] = useState<string | null>(null);
   const [niches, setNiches] = useState<string[]>(DEFAULT_NICHES);
-  const [connected, setConnected] = useState<string[]>([]);
+  const nConnected = useAccounts().length;
   const [toast, setToast] = useState<string | null>(null);
   const [confirmOut, setConfirmOut] = useState(false);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -357,18 +349,11 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ visible, onC
     setAvatarId(initialProfile?.avatarId ?? null);
     setCustomUri(initialProfile?.customAvatarUri ?? null);
     setNiches(initialProfile?.niches?.length ? initialProfile.niches : DEFAULT_NICHES);
-    setConnected(initialProfile?.connectedPlatforms ?? []);
     setConfirmOut(false);
     setToast(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
 
-  // A real connection can change while the sheet is open (e.g. TikTok disconnected
-  // from its row): follow the profile's list.
-  const connectedKey = (initialProfile?.connectedPlatforms ?? []).join(',');
-  useEffect(() => {
-    setConnected(connectedKey ? connectedKey.split(',') : []);
-  }, [connectedKey]);
 
   useEffect(
     () => () => {
@@ -405,7 +390,6 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ visible, onC
     avatarSource: avatarSource ?? undefined,
     customAvatarUri: customUri ?? undefined,
     niches,
-    connectedPlatforms: connected,
     streakCount: initialProfile?.streakCount ?? 1,
     level: initialProfile?.level ?? 1,
     xp: initialProfile?.xp ?? 0,
@@ -427,15 +411,6 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ visible, onC
       onSaveProfile?.(build());
     }
     onClose();
-  };
-
-  // Accounts connect on the spot (nothing to save)
-  const toggleAccount = (id: string) => {
-    const next = connected.includes(id) ? connected.filter((x) => x !== id) : [...connected, id];
-    setConnected(next);
-    const n = ACCOUNTS.find((a) => a.id === id)?.name ?? id;
-    showToast(connected.includes(id) ? `${n} removed` : `${n} connected`);
-    onSaveProfile?.({ ...(initialProfile as UserProfileData), connectedPlatforms: next });
   };
 
   const pickAvatar = (id: string) => {
@@ -597,36 +572,8 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ visible, onC
     </>
   );
 
-  const nConnected = ACCOUNTS.filter((a) => connected.includes(a.id)).length;
-  const accountsTab = (
-    <>
-      <GlassCard strong radius={22} padding={14}>
-        <View style={styles.logoRow}>
-          {ACCOUNTS.map((a) => (
-            <View key={a.id} style={{ opacity: connected.includes(a.id) ? 1 : 0.3 }}>
-              <PlatformLogo type={a.id} size={26} />
-            </View>
-          ))}
-        </View>
-        <ProgressBar value={nConnected / ACCOUNTS.length} />
-        <Text style={styles.summary}>{nConnected === 0 ? 'None connected yet. One is enough to start.' : `${nConnected} of ${ACCOUNTS.length} connected`}</Text>
-      </GlassCard>
-      <View style={styles.list}>
-        {ACCOUNTS.map((a) => {
-          const on = connected.includes(a.id);
-          const h = (initialProfile as Record<string, unknown> | undefined)?.[`${a.id}Handle`];
-          return <PlatformRow key={a.id} name={a.name} logo={a.id} description={on ? (typeof h === 'string' && h) || 'Connected' : `Sign in with ${a.name}`} connected={on} onToggle={() => toggleAccount(a.id)} />;
-        })}
-      </View>
-      <View style={styles.privacy}>
-        <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-          <Rect x="5" y="11" width="14" height="10" rx="2.5" stroke={ds.purple} strokeWidth={2} />
-          <Path d="M8 11V8a4 4 0 118 0v3" stroke={ds.purple} strokeWidth={2} strokeLinecap="round" />
-        </Svg>
-        <Text style={styles.privacyText}>We only read your stats. Nothing is posted without you, and you can disconnect any time.</Text>
-      </View>
-    </>
-  );
+  // Accounts connect on the spot through each platform's own sign-in (nothing to save)
+  const accountsTab = <AccountsPanel />;
 
   // Stage 2 (Creator Passport): the badge checklist, built from real profile state
   const steps = [

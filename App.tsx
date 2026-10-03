@@ -83,14 +83,15 @@ import {
 } from './src/backend/sync';
 import {
   appReturnLink,
-  clearTikTokReturn,
-  completeTikTokConnect,
+  clearConnectReturn,
+  completeConnect,
   getAccounts,
-  parseTikTokLink,
-  readTikTokReturn,
+  parseConnectLink,
+  platformName,
+  readConnectReturn,
   startedInPhoneApp,
   subscribeToAccounts,
-  type TikTokReturn,
+  type ConnectReturn,
 } from './src/backend/accounts';
 import { notify, useNotice } from './src/backend/notice';
 import { listTestAccounts, signInAsTestAccount } from './src/backend/testAccounts';
@@ -248,8 +249,8 @@ export default function App() {
   const [authError, setAuthError] = useState<string | null>(null);
   // Local testing: the seeded accounts offered on the sign-in screen (none anywhere else)
   const [testAccounts, setTestAccounts] = useState<TestAccount[]>([]);
-  // Phone creators approve TikTok in a browser; this page then hands them back to the app
-  const [phoneHandoff, setPhoneHandoff] = useState<TikTokReturn | null>(null);
+  // Phone creators approve a platform (Instagram, TikTok…) in a browser; this page then hands them back to the app
+  const [phoneHandoff, setPhoneHandoff] = useState<ConnectReturn | null>(null);
   const notice = useNotice();
   // What the account holds of the editable profile fields, to save only real changes
   const savedProfile = React.useRef<UserProfileData | null>(null);
@@ -289,7 +290,7 @@ export default function App() {
   // The profile sheet opened from the desktop side menu
   const [showProfileFromMenu, setShowProfileFromMenu] = useState(false);
 
-  // ─── Backend: signing in, loading the creator's account, TikTok ─────────────
+  // ─── Backend: signing in, loading the creator's account, connecting platforms ─────
   // None of this runs unless the app was given the backend's address (src/config/backend.ts).
 
   // Loads the signed-in creator's account into the app (profile, drafts, saved hooks,
@@ -330,23 +331,24 @@ export default function App() {
     return run;
   };
 
-  // TikTok has sent the creator back (web: this page load; phone: an app link): finish the connection
-  const finishTikTok = async (ret: TikTokReturn) => {
+  // A platform has sent the creator back (web: this page load; phone: an app link): finish the connection
+  const finishConnect = async (ret: ConnectReturn) => {
+    const name = platformName(ret.provider);
     if (ret.error || !ret.code || !ret.state) {
-      notify('TikTok wasn’t connected. You can try again any time.');
+      notify(`${name} wasn’t connected. You can try again any time.`);
       return;
     }
-    const r = await completeTikTokConnect(ret.code, ret.state);
+    const r = await completeConnect(ret.provider, ret.code, ret.state);
     if (r.ok) {
-      notify(r.name ? `TikTok connected: ${r.name}` : 'TikTok connected');
+      notify(r.name ? `${name} connected: ${r.name}` : `${name} connected`);
       setShowAccountsFromNote(true); // shows the account that just connected
     } else {
       notify(r.message);
     }
   };
 
-  // Launch: restore the saved sign-in and the creator's account, and finish a TikTok round trip if one is landing.
-  // App links that arrive while this runs (a phone opened by TikTok's "allowed") wait on `bootDone`.
+  // Launch: restore the saved sign-in and the creator's account, and finish a platform round trip if one is landing.
+  // App links that arrive while this runs (a phone opened by a platform's "allowed") wait on `bootDone`.
   const bootGate = React.useRef<{ done: Promise<void>; finish: () => void } | null>(null);
   if (!bootGate.current) {
     let finish: () => void = () => {};
@@ -360,7 +362,7 @@ export default function App() {
     let alive = true;
     (async () => {
       connectBackend();
-      const ret = readTikTokReturn();
+      const ret = readConnectReturn();
       if (ret && startedInPhoneApp(ret)) {
         // Approved in a phone browser: this page only hands the creator back to the app
         setPhoneHandoff(ret);
@@ -373,19 +375,19 @@ export default function App() {
       }
       await initSession();
       if (getSessionState().status === 'signedIn') {
-        setBootMessage(ret ? 'Connecting your TikTok…' : 'Signing you in…');
+        setBootMessage(ret ? `Connecting your ${platformName(ret.provider)}…` : 'Signing you in…');
         const remembered = takeOnboarding(); // set when they signed up with Google / Apple on the web
         const loaded = await enterApp({ newAccount: remembered !== null, niches: remembered?.niches });
         if (!alive) return;
         if (!loaded) notify('We couldn’t load your account. Check your connection.');
         setCurrentScreen('dashboard');
         if (ret) {
-          clearTikTokReturn(); // so a refresh can't replay the one-time code
-          await finishTikTok(ret);
+          clearConnectReturn(); // so a refresh can't replay the one-time code
+          await finishConnect(ret);
         }
       } else if (ret) {
-        clearTikTokReturn();
-        notify('Sign in, then connect TikTok again.');
+        clearConnectReturn();
+        notify(`Sign in, then connect ${platformName(ret.provider)} again.`);
       }
     })().finally(() => {
       if (alive) setBooting(false);
@@ -422,7 +424,7 @@ export default function App() {
     });
   }, []);
 
-  // A real connection changed (TikTok connected, disconnected, needs reconnecting): update the profile's list
+  // A real connection changed (connected, disconnected, needs reconnecting): update the profile's list
   React.useEffect(() => {
     if (!BACKEND.enabled) return;
     return subscribeToAccounts(() => setUserProfileRaw((prev) => ({ ...prev, ...connectionsPatch(getAccounts()) })));
@@ -471,7 +473,7 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Phone: links back into the app — TikTok's "allowed" (poststreak://tiktok?…) and Google / Apple sign-in
+  // Phone: links back into the app — a platform's "allowed" (poststreak://connect?…) and Google / Apple sign-in
   React.useEffect(() => {
     if (!BACKEND.enabled || Platform.OS === 'web') return;
     const handle = async (url: string | null) => {
@@ -485,8 +487,8 @@ export default function App() {
         }
         return;
       }
-      const ret = parseTikTokLink(url);
-      if (ret) await finishTikTok(ret);
+      const ret = parseConnectLink(url);
+      if (ret) await finishConnect(ret);
     };
     void Linking.getInitialURL().then(handle);
     const sub = Linking.addEventListener('url', (e) => void handle(e.url));
@@ -962,7 +964,7 @@ export default function App() {
   }
 
   // A holding page while the saved sign-in is restored, and
-  // the page that hands a phone creator back to the app after TikTok's "allow".
+  // the page that hands a phone creator back to the app after a platform's "allow".
   if (booting || phoneHandoff) {
     return (
       <SafeAreaProvider initialMetrics={initialWindowMetrics}>
@@ -1551,7 +1553,7 @@ export default function App() {
         {/* Ghost's welcome tour for brand-new creators */}
         {inApp && <GhostTour />}
 
-        {/* Messages from the backend connection ("Couldn't save that…", "TikTok connected") */}
+        {/* Messages from the backend connection ("Couldn't save that…", "Instagram connected") */}
         <BrandToast message={notice} />
 
         {showSplash && (

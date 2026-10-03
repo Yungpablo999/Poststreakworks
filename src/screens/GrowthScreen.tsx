@@ -32,7 +32,7 @@ import Reanimated, { FadeInUp } from 'react-native-reanimated';
 import { GlassBackdrop } from '../components/glass/GlassBackdrop';
 import { FitLines } from '../components/ui/FitLines';
 import { JarvisOrb } from '../components/JarvisOrb';
-import { PlatformRow } from '../components/onboarding/PlatformRow';
+import { AccountRows } from '../components/accounts/AccountRows';
 import { ConnectAccountsSheet } from '../components/growth/ConnectAccountsSheet';
 import { WeeklyPlanSheet } from '../components/growth/WeeklyPlanSheet';
 import { AudienceHero, BestPostCard, FormatsCard, MilestonesCard, WeeklyReportCard } from '../components/growth/GrowthReturning';
@@ -492,29 +492,10 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
           </TourTarget>
           </Reanimated.View>
 
-          {/* 2. PLATFORMS — tap Connect: spinner, then a green tick */}
+          {/* 2. PLATFORMS — each row connects through the platform's own sign-in */}
           <Reanimated.View entering={FadeInUp.delay(200).duration(550)}>
             <Text style={styles.sectionLabel}>Your platforms</Text>
-            <View style={styles.stack}>
-              {platformsList
-                .filter((p) => isStage1Platform(p.id))
-                .map((p) => (
-                  <PlatformRow
-                    key={p.id}
-                    name={p.name}
-                    logo={p.id as PlatformLogoType}
-                    description={
-                      p.connected
-                        ? isNewUser
-                          ? 'Connected · syncing'
-                          : p.handle || 'Connected'
-                        : 'Tap to connect'
-                    }
-                    connected={p.connected}
-                    onToggle={() => (p.connected ? handleRemoveSinglePlatform(p.id) : handleConnectSinglePlatform(p.id))}
-                  />
-                ))}
-            </View>
+            <AccountRows />
           </Reanimated.View>
 
           {isNewUser && (
@@ -778,16 +759,7 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
 
         
         {/* Connect accounts: glass sheet */}
-        <ConnectAccountsSheet
-          visible={showConnectPlatformModal}
-          onClose={() => setShowConnectPlatformModal(false)}
-          platforms={platformsList.filter((p) => isStage1Platform(p.id))}
-          onToggle={(id) => {
-            const p = platformsList.find((x) => x.id === id);
-            if (p?.connected) handleRemoveSinglePlatform(id);
-            else handleConnectSinglePlatform(id);
-          }}
-        />
+        <ConnectAccountsSheet visible={showConnectPlatformModal} onClose={() => setShowConnectPlatformModal(false)} />
 
         {/* PROFILE MODAL */}
         {/* UNIVERSAL CREATOR PASSPORT & PROFILE MODAL */}

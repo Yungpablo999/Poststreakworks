@@ -17,7 +17,8 @@ import { UserProfileModal, UserProfileData } from '../components/UserProfileModa
 import { ProUpsellCard } from '../components/home/ProUpsellCard';
 import { MonthlyHistoryCard, WhoAudienceCard } from '../components/growth/ProInsights';
 import { PlatformLogo, type PlatformLogoType } from '../components/onboarding/PlatformLogo';
-import { ConnectAccountsSheet, useConnectedAccounts } from '../components/growth/ConnectAccountsSheet';
+import { ConnectAccountsSheet } from '../components/growth/ConnectAccountsSheet';
+import { useAccounts } from '../backend/accounts';
 import { ds } from '../theme/colors';
 
 // Platform growth (returning creators): which platform is growing, side by
@@ -144,9 +145,9 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
   const [showProfile, setShowProfile] = useState(false);
   const [showAccounts, setShowAccounts] = useState(false);
   const [focus, setFocus] = useState<string | null>(null);
-  const accounts = useConnectedAccounts(userProfile, onSaveProfile);
+  const connectedIds = useAccounts().map((a) => a.platform as string);
 
-  const list = accounts.connectedIds.map((id) => STATS[id]).filter(Boolean).sort((a, b) => b.thisWeek - a.thisWeek);
+  const list = connectedIds.map((id) => STATS[id]).filter(Boolean).sort((a, b) => b.thisWeek - a.thisWeek);
   const total = list.reduce((a, p) => a + p.thisWeek, 0);
   const lastTotal = list.reduce((a, p) => a + p.lastWeek, 0);
   const max = Math.max(1, ...list.map((p) => p.thisWeek));
@@ -331,7 +332,7 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
       </SafeAreaView>
 
       <FloatingTabBar activeTab="growth" onTabPress={(t) => onNavigateTab?.(t)} />
-      <ConnectAccountsSheet visible={showAccounts} onClose={() => setShowAccounts(false)} platforms={accounts.platforms} onToggle={accounts.toggle} />
+      <ConnectAccountsSheet visible={showAccounts} onClose={() => setShowAccounts(false)} />
       <UserProfileModal visible={showProfile} onClose={() => setShowProfile(false)} onLogout={onLogout} initialProfile={userProfile} onSaveProfile={onSaveProfile} />
     </View>
   );

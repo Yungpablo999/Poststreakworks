@@ -56,11 +56,11 @@ export const API_ROUTES = {
     SYNC_ALL: '/api/v1/platforms/sync-all',
     // Connected accounts with details: name, avatar, followers, health, last sync
     ACCOUNTS: '/api/v1/platforms/accounts',
-    // TikTok signs in on TikTok's own page: authorize -> (TikTok) -> callback
-    TIKTOK_AUTHORIZE: '/api/v1/platforms/tiktok/authorize', // POST { client? } -> { url }
-    TIKTOK_CALLBACK: '/api/v1/platforms/tiktok/callback', // POST { code, state }
-    TIKTOK_SYNC: '/api/v1/platforms/tiktok/sync', // POST — refresh the numbers now
-    TIKTOK_DISCONNECT: '/api/v1/platforms/tiktok/disconnect', // POST
+    // TikTok, Instagram, Threads, Facebook and YouTube sign in on their own page:
+    // authorize -> (the platform) -> callback. Disconnect is DISCONNECT(id) above.
+    AUTHORIZE: (id: string) => `/api/v1/platforms/${id}/authorize`, // POST { client? } -> { url }
+    CALLBACK: (id: string) => `/api/v1/platforms/${id}/callback`, // POST { code, state }
+    SYNC: (id: string) => `/api/v1/platforms/${id}/sync`, // POST — refresh the numbers now
   },
   // Growth Analytics
   GROWTH: {

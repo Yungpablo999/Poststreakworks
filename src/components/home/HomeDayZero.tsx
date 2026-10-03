@@ -23,8 +23,8 @@ import { JarvisOrb } from '../JarvisOrb';
 import { ds, goldTokens } from '../../theme/colors';
 import { CheckInCard } from '../CheckInCard';
 import { CalendarSheet } from './CalendarSheet';
-import { PlatformRow } from '../onboarding/PlatformRow';
-import { useAccounts } from '../../backend/accounts';
+import { AccountRows } from '../accounts/AccountRows';
+import { useAccounts, useConnectablePlatforms } from '../../backend/accounts';
 
 // Day-0 Home for brand-new creators. No stats, no streak counts, no fake
 // numbers: a warm welcome, one clear next step, and a gentle check-in.
@@ -191,7 +191,8 @@ export function HomeDayZero({
   onOpenQuests,
 }: HomeDayZeroProps) {
   const [calendarOpen, setCalendarOpen] = useState(false);
-  const tiktokConnected = useAccounts().some((a) => a.platform === 'tiktok');
+  const anyConnected = useAccounts().length > 0;
+  const canConnect = useConnectablePlatforms().length > 0;
   const previews: { key: string; title: string; body: string; icon: React.ReactNode; onPress?: () => void; pro?: boolean }[] = [
     {
       key: 'schedule',
@@ -282,17 +283,20 @@ export function HomeDayZero({
         <CheckInCard onOpenCalendar={() => setCalendarOpen(true)} />
       </Animated.View>
 
-      {/* 2b. Connect TikTok right from Home. The row does the whole trip (TikTok's own sign-in
-          page) and shows the account once it's connected. */}
-      <Animated.View entering={FadeInUp.delay(180).duration(550)}>
-        <GlassCard radius={26} padding={16}>
-          <Text style={styles.cardTitle}>{tiktokConnected ? 'Your TikTok' : 'Connect your TikTok'}</Text>
-          <Text style={styles.cardSub}>{tiktokConnected ? 'Jarvis can now see what works for you' : 'So Jarvis can see what works for you'}</Text>
-          <View style={{ marginTop: 12 }}>
-            <PlatformRow name="TikTok" logo="tiktok" description="Sign in with TikTok" connected={tiktokConnected} onToggle={() => {}} />
-          </View>
-        </GlassCard>
-      </Animated.View>
+      {/* 2b. Connect the accounts you post on, right from Home. Each row does the whole trip (the
+          platform's own sign-in page) and shows the account once it's connected. Only platforms this
+          server can really connect are listed; with none, the card isn't shown. */}
+      {canConnect && (
+        <Animated.View entering={FadeInUp.delay(180).duration(550)}>
+          <GlassCard radius={26} padding={16}>
+            <Text style={styles.cardTitle}>{anyConnected ? 'Your accounts' : 'Connect where you post'}</Text>
+            <Text style={styles.cardSub}>{anyConnected ? 'Jarvis can now see what works for you' : 'So Jarvis can see what works for you'}</Text>
+            <View style={{ marginTop: 12 }}>
+              <AccountRows />
+            </View>
+          </GlassCard>
+        </Animated.View>
+      )}
 
       {/* 3. What will appear here — a preview with no numbers */}
       <Animated.View entering={FadeInUp.delay(240).duration(550)}>

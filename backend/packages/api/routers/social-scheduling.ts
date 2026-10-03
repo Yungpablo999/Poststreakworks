@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure, TIER_LIMITS } from "../context";
 import { TRPCError } from "@trpc/server";
+import { PROVIDER_NAMES, isProviderId } from "@poststreak/integrations";
 import { recordStreakEvent } from "@poststreak/workflows";
 
 // Every platform the database knows (platform_type). The app's "x" is stored as "twitter".
@@ -63,13 +64,13 @@ export const socialSchedulingRouter = createTRPCRouter({
   connect: protectedProcedure
     .input(connectPlatformSchema)
     .mutation(async ({ ctx, input }) => {
-      // TikTok connects through its own sign-in (platformConnect.tiktokAuthorize).
-      // This path stores whatever string the caller sends as the token, which for
-      // a platform with real OAuth would be a fake connection.
-      if (input.platform === "tiktok") {
+      // TikTok, Instagram, Threads, Facebook and YouTube connect through their own sign-in
+      // (platformConnect.authorize). This path stores whatever string the caller sends as the
+      // token, which for a platform with real OAuth would be a fake connection.
+      if (isProviderId(input.platform)) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "TikTok connects through TikTok's own sign-in. Use the Connect TikTok button.",
+          message: `${PROVIDER_NAMES[input.platform]} connects through its own sign-in. Use the Connect ${PROVIDER_NAMES[input.platform]} button.`,
         });
       }
 

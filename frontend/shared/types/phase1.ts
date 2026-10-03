@@ -119,7 +119,11 @@ export interface SaveOnboardingBody {
   timezone?: string;
 }
 
-// ─── Connected accounts (TikTok first) ──────────────────────────────────────
+// ─── Connected accounts ─────────────────────────────────────────────────────
+
+/** The platforms a creator can really connect (each signs in on its own page). */
+export type ConnectablePlatform = 'tiktok' | 'instagram' | 'threads' | 'facebook' | 'youtube';
+export const CONNECTABLE_PLATFORMS: readonly ConnectablePlatform[] = ['tiktok', 'instagram', 'youtube', 'facebook', 'threads'];
 
 export type ConnectionStatus = 'connected' | 'needs_reauth' | 'error';
 
@@ -128,7 +132,7 @@ export interface ConnectedAccount {
   platform: AppPlatform;
   /** The account's display name on that platform. */
   name: string | null;
-  /** The @handle, when the platform gives it to us (TikTok needs an extra permission for it). */
+  /** The @handle, when the platform gives it to us (TikTok needs an extra permission for it, so it has none). */
   handle: string | null;
   avatarUrl: string | null;
   followers: number | null;
@@ -138,28 +142,28 @@ export interface ConnectedAccount {
   scopes: string[];
 }
 
-export interface TikTokAuthorizeBody {
+export interface ConnectAuthorizeBody {
   /** Which app the creator is in; the callback page uses it to decide where to hand the code back. */
   client?: 'web' | 'mobile';
 }
 
-/** Send the creator here (web: `window.location.assign`; phone: an in-app browser session). */
-export interface TikTokAuthorizeResult {
+/** Send the creator here (web: `window.location.assign`; phone: the system browser). */
+export interface ConnectAuthorizeResult {
   url: string;
 }
 
-/** What TikTok sends to the callback page, passed straight on. */
-export interface TikTokCallbackBody {
+/** What the platform sends to the callback page, passed straight on. */
+export interface ConnectCallbackBody {
   code: string;
   state: string;
 }
 
-export interface TikTokCallbackResult {
+export interface ConnectCallbackResult {
   connected: true;
-  account: Pick<ConnectedAccount, 'name' | 'avatarUrl' | 'followers' | 'status' | 'scopes'> & { platform: 'tiktok' };
+  account: Pick<ConnectedAccount, 'name' | 'handle' | 'avatarUrl' | 'followers' | 'status' | 'scopes'> & { platform: ConnectablePlatform };
 }
 
-export type TikTokSyncResult =
+export type ConnectSyncResult =
   | { status: 'synced'; posts: number; followers: number | null }
   | { status: 'busy' | 'not_connected' | 'needs_reauth' | 'error' };
 
@@ -209,7 +213,9 @@ export interface BootstrapProfile {
 export interface Capabilities {
   /** Ideas, hooks, scripts, captions, Repurpose and Ask Jarvis are written by a real model. */
   ai: boolean;
-  /** Connecting a TikTok account. */
+  /** Which platforms can really be connected here. The app lists only these. */
+  platforms: Record<ConnectablePlatform, boolean>;
+  /** Same as `platforms.tiktok` (the app on the main branch reads this name). */
   tiktok: boolean;
   /** A purchase can really unlock Pro. */
   payments: boolean;
@@ -217,8 +223,6 @@ export interface Capabilities {
   voice: boolean;
   /** Local testing only: the sign-in screen offers one-tap test accounts. */
   devLogin: boolean;
-  /** Connections for Instagram, YouTube, Facebook and Threads. */
-  otherPlatforms: boolean;
   /** Posting for the creator at the best time. */
   autoPost: boolean;
   /** Age / place / online-time breakdowns of an audience. */

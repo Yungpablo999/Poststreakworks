@@ -7,8 +7,8 @@ import { GlassBackdrop } from '../components/glass/GlassBackdrop';
 import { ds } from '../theme/colors';
 
 // A calm holding page with Ghost: shown while the app signs the creator back in
-// at launch, while TikTok's "allow" round trip is being finished, as the page
-// that hands a phone creator back to the app after approving TikTok in a browser,
+// at launch, while a platform's "allow" round trip is being finished, as the page
+// that hands a phone creator back to the app after approving a platform in a browser,
 // and as the page that says this copy of the app has no server to talk to.
 
 interface BackendBootScreenProps {

@@ -39,8 +39,6 @@ export const BACKEND = {
   supabaseAnonKey,
   socialProviders: providers,
   testAccounts,
-  /** Where TikTok sends the creator back to; the app's own address plus this path. */
-  tiktokCallbackPath: '/auth/tiktok/callback',
   /** The phone app's link scheme (app.json "scheme"). */
   appScheme: 'poststreak',
 } as const;

@@ -19,8 +19,8 @@ export function supabase(): SupabaseClient {
       autoRefreshToken: true,
       // Switched off on purpose. The built-in detection treats ANY page address with
       // `error`, `error_description` or `error_code` in it as a failed sign-in and
-      // clears the saved session, and that is exactly what TikTok sends back when a
-      // creator taps "Cancel" (/auth/tiktok/callback?error=access_denied&…): it
+      // clears the saved session, and that is exactly what a platform sends back when a
+      // creator taps "Cancel" (/auth/instagram/callback?error=access_denied&…): it
       // would sign them out of PostStreak. session.ts reads the sign-in redirect
       // (#access_token=…) itself instead.
       detectSessionInUrl: false,

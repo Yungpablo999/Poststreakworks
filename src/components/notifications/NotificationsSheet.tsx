@@ -29,6 +29,11 @@ export function setNotificationHandler(fn: ((t: NoteTarget) => void) | null) {
   handler = fn;
 }
 
+/** Takes the creator to a place in the app from anywhere ("See Pro"). */
+export function openPlace(target: NoteTarget) {
+  handler?.(target);
+}
+
 /** Unread count for the bell's dot. */
 export function useUnreadNotifications(): number {
   return useUnread();

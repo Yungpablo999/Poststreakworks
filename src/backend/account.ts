@@ -8,11 +8,11 @@ import { createStore } from './store';
 /** Nothing is assumed to work until the server says so. */
 export const NO_CAPABILITIES: Capabilities = {
   ai: false,
+  platforms: { tiktok: false, instagram: false, threads: false, facebook: false, youtube: false },
   tiktok: false,
   payments: false,
   voice: false,
   devLogin: false,
-  otherPlatforms: false,
   autoPost: false,
   audienceDemographics: false,
 };

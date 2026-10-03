@@ -45,7 +45,7 @@ export function consent(res, url, { provider, scopes, codeFor, extra = [], denie
     clientKey: url.searchParams.get('client_id') ?? '',
     accounts: people.map((c) => ({
       label: c.name,
-      detail: c.followers ? c.niche : 'will not be able to finish',
+      detail: c.followers ? c.niche : 'cannot finish',
       allow: back({ ...extraParams, code: codeFor(c) }),
     })),
     cancel: back(denied),

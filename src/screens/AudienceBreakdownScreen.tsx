@@ -25,7 +25,7 @@ import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { ProUpsellCard } from '../components/home/ProUpsellCard';
 import { MonthlyHistoryCard, WhoAudienceCard } from '../components/growth/ProInsights';
-import { ConnectAccountsSheet, useConnectedAccounts } from '../components/growth/ConnectAccountsSheet';
+import { ConnectAccountsSheet } from '../components/growth/ConnectAccountsSheet';
 import { PlatformLogo, type PlatformLogoType } from '../components/onboarding/PlatformLogo';
 import { ds } from '../theme/colors';
 
@@ -246,7 +246,6 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
   const pageWidth = usePageWidth();
   const [showProfile, setShowProfile] = useState(false);
   const [showAccounts, setShowAccounts] = useState(false);
-  const accounts = useConnectedAccounts(userProfile, onSaveProfile);
   const [focus, setFocus] = useState<string | null>(null);
   const [period, setPeriod] = useState<Period>('week');
   const bars = BARS[period];
@@ -467,7 +466,7 @@ export const AudienceBreakdownScreen: React.FC<AudienceBreakdownScreenProps> = (
       </SafeAreaView>
 
       <FloatingTabBar activeTab="growth" onTabPress={(t) => onNavigateTab?.(t)} />
-      <ConnectAccountsSheet visible={showAccounts} onClose={() => setShowAccounts(false)} platforms={accounts.platforms} onToggle={accounts.toggle} />
+      <ConnectAccountsSheet visible={showAccounts} onClose={() => setShowAccounts(false)} />
       <UserProfileModal visible={showProfile} onClose={() => setShowProfile(false)} onLogout={onLogout} initialProfile={userProfile} onSaveProfile={onSaveProfile} />
     </View>
   );
