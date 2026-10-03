@@ -96,6 +96,13 @@ describe("the local stand-in for TikTok (testing on one machine)", () => {
     }
   });
 
+  it("accepts a path prefix (one stand-in server serves every platform) but nothing sneakier", () => {
+    expect(tiktokConfigFromEnv({ ...env, TIKTOK_MOCK_ORIGIN: "http://127.0.0.1:4010/tiktok/" })!.mockOrigin).toBe("http://127.0.0.1:4010/tiktok");
+    for (const bad of ["http://user:pw@127.0.0.1:4010", "http://127.0.0.1:4010/tiktok?x=1", "http://127.0.0.1:4010/#frag"]) {
+      expect(() => tiktokConfigFromEnv({ ...env, TIKTOK_MOCK_ORIGIN: bad }), bad).toThrow(TikTokConfigError);
+    }
+  });
+
   it("still refuses a non-local http redirect, stand-in or not", () => {
     expect(() => tiktokConfigFromEnv({ ...env, TIKTOK_REDIRECT_URI: "http://evil.example/cb" })).toThrow(TikTokConfigError);
   });

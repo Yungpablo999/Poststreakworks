@@ -47,7 +47,10 @@ export class TikTokConfigError extends Error {}
 
 const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
 
-/** A `http://localhost:PORT`-style origin, or a TikTokConfigError. Anything else could redirect tokens away. */
+/**
+ * A `http://localhost:PORT[/prefix]` address (no trailing slash), or a TikTokConfigError. Anything
+ * else could send tokens somewhere they shouldn't go.
+ */
 export function assertLocalOrigin(raw: string): string {
   let url: URL;
   try {
@@ -58,7 +61,10 @@ export function assertLocalOrigin(raw: string): string {
   if (url.protocol !== "http:" || !LOCAL_HOSTS.has(url.hostname)) {
     throw new TikTokConfigError("TIKTOK_MOCK_ORIGIN must be an http://localhost address");
   }
-  return url.origin;
+  if (url.username || url.password || url.search || url.hash) {
+    throw new TikTokConfigError("TIKTOK_MOCK_ORIGIN must be a plain address");
+  }
+  return url.origin + url.pathname.replace(/\/+$/, "");
 }
 
 export function assertValidRedirectUri(uri: string, opts: { allowLocalHttp?: boolean } = {}): void {
