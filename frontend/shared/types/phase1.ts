@@ -181,6 +181,99 @@ export interface AccountSnapshotDto {
   topFormat: string;
 }
 
+// ─── Growth ─────────────────────────────────────────────────────────────────
+// GET /api/v1/growth/overview. Worked out on the server from what the connected accounts have
+// reported (backend/packages/workflows/growth-overview.ts). A number the platform hasn't given us
+// is null, never zero or a guess. Post numbers are lifetime totals as of the last sync.
+
+export interface GrowthPost {
+  /** `${platform}:${id}`: the address of this post (GET /growth/post?key=…). */
+  key: string;
+  platform: ConnectablePlatform;
+  platformName: string;
+  title: string;
+  postedAt: string | null;
+  coverUrl: string | null;
+  shareUrl: string | null;
+  durationSeconds: number | null;
+  views: number;
+  likes: number;
+  comments: number;
+  shares: number;
+  saves: number | null;
+  /** Against this account's other posts of the last 90 days; null with fewer than 3 others. */
+  comparison: { averageViews: number; percent: number } | null;
+  engagementRate: number | null;
+  /** Plain statements that are true of this post. */
+  insights: string[];
+}
+
+export interface GrowthDay {
+  day: string;
+  followers: number;
+}
+
+export interface GrowthPlatform {
+  platform: ConnectablePlatform;
+  name: string | null;
+  handle: string | null;
+  avatarUrl: string | null;
+  status: ConnectionStatus;
+  lastSyncedAt: string | null;
+  followers: number | null;
+  change7: number | null;
+  change30: number | null;
+  trackedSince: string | null;
+  series: GrowthDay[];
+  posts30: number;
+  views30: number;
+  avgViews30: number | null;
+  likes30: number;
+  comments30: number;
+  shares30: number;
+  postsTotal: number;
+  /** This account's newest posts (at most five). */
+  recentPosts: GrowthPost[];
+}
+
+export interface GrowthMilestone {
+  platform: ConnectablePlatform;
+  label: string;
+  current: number;
+  target: number;
+  ratio: number;
+  note: string;
+}
+
+export interface GrowthOverview {
+  hasAccounts: boolean;
+  hasData: boolean;
+  connected: number;
+  needsReconnect: ConnectablePlatform[];
+  updatedAt: string | null;
+  totals: {
+    followers: number | null;
+    change7: number | null;
+    change30: number | null;
+    /** Not every account has that much history, so the change covers only those that do. */
+    partial: boolean;
+    posts30: number;
+    postsPrev30: number;
+    views30: number;
+    likes30: number;
+    comments30: number;
+    shares30: number;
+  };
+  platforms: GrowthPlatform[];
+  series: GrowthDay[];
+  months: { month: string; gain: number }[];
+  bestPost: GrowthPost | null;
+  recentPosts: GrowthPost[];
+  bestTime: { label: string; hour: number; postsAtBestTime: number } | null;
+  week: { followersChange: number | null; postsThisWeek: number; postsLastWeek: number };
+  milestones: GrowthMilestone[];
+}
+
 // ─── Launch payload ─────────────────────────────────────────────────────────
 
 export interface BootstrapProfile {

@@ -26,6 +26,7 @@ import { platformConnectRouter } from "./routers/platform-connect";
 import { homeRouter } from "./routers/home";
 import { ideasRouter } from "./routers/ideas";
 import { calendarRouter } from "./routers/calendar";
+import { growthRouter } from "./routers/growth";
 
 export const appRouter = createTRPCRouter({
   accounts: accountsRouter,
@@ -64,6 +65,8 @@ export const appRouter = createTRPCRouter({
   ideas: ideasRouter,
   // What is planned and what was posted, in one list — see routers/calendar.ts
   calendar: calendarRouter,
+  // Growth from the numbers the connected accounts report — see routers/growth.ts
+  growth: growthRouter,
 });
 
 export type AppRouter = typeof appRouter;

@@ -32,6 +32,7 @@ import { BACKEND } from '../config/backend';
 import { api, backendReady, type ApiResult } from './api';
 import { setAccounts } from './accounts';
 import { capabilitiesStore, NO_CAPABILITIES, planStore, unreadStore } from './account';
+import { clearGrowth } from './growth';
 import { notify } from './notice';
 import { clearNotifications } from './notifications';
 import { clearQuests } from './quests';
@@ -124,6 +125,7 @@ export function clearAccountData(): void {
   clearNotifications();
   clearQuests();
   clearHome();
+  clearGrowth();
   seedTipsSeen([], true);
   setTourFinished(false);
   loaded = false;

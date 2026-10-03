@@ -1,130 +1,74 @@
 import React, { useEffect } from 'react';
-import { View, StyleSheet, useWindowDimensions } from 'react-native';
-import Animated, {
-  Easing,
-  useAnimatedProps,
-  useAnimatedStyle,
-  useReducedMotion,
-  useSharedValue,
-  withDelay,
-  withRepeat,
-  withSequence,
-  withTiming,
-} from 'react-native-reanimated';
-import Svg, { Path, Rect, Circle, Defs, LinearGradient as SvgGradient, Stop } from 'react-native-svg';
+import { View, StyleSheet } from 'react-native';
+import Animated, { Easing, useAnimatedStyle, useReducedMotion, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
+import Svg, { Path, Rect, Circle } from 'react-native-svg';
 import { Text } from '../ui/AppText';
 import { AppButton } from '../ui/AppButton';
 import { GlassCard } from '../glass/GlassCard';
 import { ds, goldTokens } from '../../theme/colors';
 
-// Building blocks for the Growth tab. Day 0 shows no fake numbers: the chart
-// is a clearly-labelled preview line, and every empty state says what's coming.
+// Building blocks for the Growth tab when there is nothing to show yet. No sample numbers and no
+// stand-in chart: every empty state says plainly what is missing and what will appear.
 
-const AnimatedPath = Animated.createAnimatedComponent(Path);
-
-// ─── A preview line that draws itself (no real data) ───────────────────────
-export function PreviewChart({ width, height, color = '#A99BFF' }: { width: number; height: number; color?: string }) {
-  const reduceMotion = useReducedMotion();
-  const draw = useSharedValue(reduceMotion ? 1 : 0);
-  const shimmer = useSharedValue(0);
-  const len = width * 1.4;
-
-  useEffect(() => {
-    if (reduceMotion) return;
-    draw.value = withDelay(250, withTiming(1, { duration: 1400, easing: Easing.out(Easing.cubic) }));
-    shimmer.value = withDelay(1700, withRepeat(withSequence(withTiming(1, { duration: 1400 }), withTiming(0, { duration: 1400 })), -1, false));
-  }, [reduceMotion, draw, shimmer]);
-
-  const lineProps = useAnimatedProps(() => ({ strokeDashoffset: len * (1 - draw.value) }));
-  const areaStyle = useAnimatedStyle(() => ({ opacity: draw.value * (0.7 + 0.3 * shimmer.value) }));
-
-  const w = width;
-  const h = height;
-  const d = `M0 ${h * 0.82} C ${w * 0.18} ${h * 0.78}, ${w * 0.28} ${h * 0.6}, ${w * 0.42} ${h * 0.62} S ${w * 0.66} ${h * 0.4}, ${w * 0.78} ${h * 0.34} S ${w * 0.94} ${h * 0.14}, ${w} ${h * 0.1}`;
-
-  return (
-    <View style={{ width: w, height: h }}>
-      <Animated.View style={[StyleSheet.absoluteFill, areaStyle]}>
-        <Svg width={w} height={h}>
-          <Defs>
-            <SvgGradient id="gArea" x1="0" y1="0" x2="0" y2="1">
-              <Stop offset="0" stopColor={ds.purple} stopOpacity={0.16} />
-              <Stop offset="1" stopColor={ds.purple} stopOpacity={0} />
-            </SvgGradient>
-          </Defs>
-          <Path d={`${d} L ${w} ${h} L 0 ${h} Z`} fill="url(#gArea)" />
-        </Svg>
-      </Animated.View>
-      <Svg width={w} height={h} style={StyleSheet.absoluteFill}>
-        <AnimatedPath
-          d={d}
-          stroke={color}
-          strokeWidth={3}
-          strokeLinecap="round"
-          fill="none"
-          strokeDasharray={`${len} ${len}`}
-          animatedProps={lineProps}
-        />
-      </Svg>
-    </View>
-  );
-}
-
-export function AudienceEmptyHero({ connectedCount, onConnect }: { connectedCount: number; onConnect: () => void }) {
-  const { width } = useWindowDimensions();
-  const chartW = Math.min(width, 520) - 40 - 40;
-  const syncing = connectedCount > 0;
+// ─── Before there is an account (or any reading) ────────────────────────────
+export function AudienceEmptyHero({
+  state,
+  connectedCount,
+  onConnect,
+  onReconnect,
+}: {
+  /** none: nothing connected. reading: connected, nothing read yet. reconnect: the only account needs approving again. */
+  state: 'none' | 'reading' | 'reconnect';
+  connectedCount: number;
+  onConnect: () => void;
+  onReconnect?: () => void;
+}) {
+  const title = state === 'none' ? 'No data yet' : state === 'reconnect' ? 'Reconnect to see your numbers' : 'Getting your stats';
+  const body =
+    state === 'none'
+      ? 'Connect an account and your first numbers show up within a minute or two.'
+      : state === 'reconnect'
+        ? 'The platform needs you to approve PostStreak again before it will share your numbers.'
+        : `Reading ${connectedCount} account${connectedCount === 1 ? '' : 's'}. This can take a minute. Pull to refresh in a little while.`;
   return (
     <GlassCard strong radius={26} padding={20}>
-      <View style={styles.heroTop}>
-        <Text style={styles.eyebrow}>TOTAL AUDIENCE</Text>
-        <View style={styles.previewTag}>
-          <Text style={styles.previewTagText}>Preview</Text>
+      <Text style={styles.eyebrow}>TOTAL AUDIENCE</Text>
+      <Text style={styles.heroTitle}>{title}</Text>
+      <Text style={styles.heroBody}>{body}</Text>
+      {state !== 'reading' && (
+        <View style={styles.heroAction}>
+          <AppButton
+            title={state === 'none' ? 'Connect an account' : 'Reconnect'}
+            size="lg"
+            onPress={state === 'none' ? onConnect : (onReconnect ?? onConnect)}
+            iconRight={
+              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                <Path d="M5 12h14M13 6l6 6-6 6" stroke="#FFFFFF" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
+              </Svg>
+            }
+          />
         </View>
-      </View>
-      <Text style={styles.heroTitle}>{syncing ? 'Getting your stats' : 'No data yet'}</Text>
-      <Text style={styles.heroBody}>
-        {syncing
-          ? `Syncing ${connectedCount} account${connectedCount === 1 ? '' : 's'}. Your first numbers show up within minutes.`
-          : 'Connect an account and your first stats show up within minutes.'}
-      </Text>
-      <View style={styles.chart} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-        <PreviewChart width={chartW} height={96} />
-      </View>
-      {!syncing && (
-        <AppButton
-          title="Connect an account"
-          size="lg"
-          onPress={onConnect}
-          iconRight={
-            <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-              <Path d="M5 12h14M13 6l6 6-6 6" stroke="#FFFFFF" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
-            </Svg>
-          }
-        />
       )}
     </GlassCard>
   );
 }
 
-// ─── What's coming (day 0) ──────────────────────────────────────────────────
+// ─── What's coming (before the first numbers) ───────────────────────────────
 const COMING = [
   {
-    key: 'formats',
-    title: 'Best formats',
-    body: 'Reels, carousels or Shorts: which works for you.',
+    key: 'audience',
+    title: 'Your audience',
+    body: 'Followers across your accounts, and how they move.',
     icon: (
       <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-        <Rect x="4" y="12" width="4" height="8" rx="1" stroke={ds.purple} strokeWidth={2} />
-        <Rect x="10" y="6" width="4" height="14" rx="1" stroke={ds.purple} strokeWidth={2} />
-        <Rect x="16" y="9" width="4" height="11" rx="1" stroke={ds.purple} strokeWidth={2} />
+        <Path d="M3 17l6-6 4 4 8-8M21 7h-6M21 7v6" stroke={ds.purple} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
       </Svg>
     ),
   },
   {
     key: 'top',
     title: 'Top posts',
-    body: 'Your strongest posts, and why they worked.',
+    body: 'Your strongest posts, and how they compare with the rest.',
     icon: (
       <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
         <Path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9L12 3z" stroke={ds.purple} strokeWidth={2} strokeLinejoin="round" />
@@ -134,7 +78,7 @@ const COMING = [
   {
     key: 'time',
     title: 'Best time to post',
-    body: 'When your audience is most active.',
+    body: 'The hour your posts do best, once you have a few.',
     icon: (
       <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
         <Circle cx="12" cy="12" r="9" stroke={ds.purple} strokeWidth={2} />
@@ -144,22 +88,12 @@ const COMING = [
   },
 ];
 
-// Extra rows Pro members will see once data arrives (gold tag = Pro)
+// Extra row Pro members get (gold tag = Pro)
 const COMING_PRO = [
   {
-    key: 'who',
-    title: 'Who your audience is',
-    body: 'Ages, places and when they’re online.',
-    icon: (
-      <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-        <Path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM22 21v-2a4 4 0 00-3-3.9M16 3.1a4 4 0 010 7.8" stroke={ds.purple} strokeWidth={2} strokeLinecap="round" />
-      </Svg>
-    ),
-  },
-  {
     key: 'history',
-    title: 'Growth history',
-    body: 'Month by month, for every platform.',
+    title: 'Growth month by month',
+    body: 'New followers each month, for all your accounts.',
     icon: (
       <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
         <Rect x="3" y="4" width="18" height="17" rx="3" stroke={ds.purple} strokeWidth={2} />
@@ -170,14 +104,12 @@ const COMING_PRO = [
 ];
 
 export function ComingUpCard({ pro = false }: { pro?: boolean }) {
-  const rows: { key: string; title: string; body: string; icon: React.ReactNode; pro?: boolean }[] = pro
-    ? [...COMING, ...COMING_PRO.map((r) => ({ ...r, pro: true }))]
-    : COMING;
+  const rows: { key: string; title: string; body: string; icon: React.ReactNode; pro?: boolean }[] = pro ? [...COMING, ...COMING_PRO.map((r) => ({ ...r, pro: true }))] : COMING;
   return (
     <GlassCard radius={26} padding={0}>
       <View style={styles.comingHeader}>
         <Text style={styles.cardTitle}>What you'll see here</Text>
-        <Text style={styles.cardSub}>Fills in after your first posts</Text>
+        <Text style={styles.cardSub}>Fills in after you connect and post</Text>
       </View>
       {rows.map((c, i) => (
         <View key={c.key} style={[styles.comingRow, i > 0 && styles.divider]}>
@@ -199,14 +131,19 @@ export function ComingUpCard({ pro = false }: { pro?: boolean }) {
   );
 }
 
-// ─── Jarvis strategy ────────────────────────────────────────────────────────
+// ─── This week's plan ───────────────────────────────────────────────────────
 export function JarvisStrategyCard({
   orb,
-  isNewUser,
+  title,
+  quote,
+  buttonTitle,
   onOpen,
 }: {
   orb: React.ReactNode;
-  isNewUser: boolean;
+  title: string;
+  /** One true sentence drawn from the creator's own numbers (or what Jarvis is waiting for). */
+  quote: string;
+  buttonTitle: string;
   onOpen: () => void;
 }) {
   return (
@@ -215,18 +152,14 @@ export function JarvisStrategyCard({
         {orb}
         <View style={styles.flex}>
           <Text style={styles.eyebrow}>JARVIS STRATEGY</Text>
-          <Text style={styles.cardTitle}>{isNewUser ? 'Learning your style' : 'Your growth strategy'}</Text>
+          <Text style={styles.cardTitle}>{title}</Text>
         </View>
       </View>
       <View style={styles.quote}>
         <View style={styles.quoteBar} />
-        <Text style={styles.quoteText}>
-          {isNewUser
-            ? 'Jarvis learns your patterns as you post. Your first strategy tip shows up after a few posts.'
-            : 'Posts that deliver their main value within 4 seconds keep people watching longest. Lean into mistake-based hooks.'}
-        </Text>
+        <Text style={styles.quoteText}>{quote}</Text>
       </View>
-      <AppButton title={isNewUser ? "See your starter plan" : "See this week’s plan"} variant="quiet" onPress={onOpen} />
+      <AppButton title={buttonTitle} variant="quiet" onPress={onOpen} />
     </GlassCard>
   );
 }
@@ -263,9 +196,7 @@ export function FirstReportCard({ daysOfData }: { daysOfData: number }) {
         {Array.from({ length: 7 }).map((_, i) => (
           <DayDot key={i} index={i} filled={i < days} />
         ))}
-        <Text style={styles.dayLabel}>
-          {days} of 7 days
-        </Text>
+        <Text style={styles.dayLabel}>{days} of 7 days</Text>
       </View>
     </GlassCard>
   );
@@ -276,13 +207,10 @@ const styles = StyleSheet.create({
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
   proTag: { paddingHorizontal: 6, height: 18, borderRadius: 999, justifyContent: 'center', backgroundColor: goldTokens.light, borderWidth: 1, borderColor: goldTokens.border },
   proTagText: { fontSize: 10, fontWeight: '800', letterSpacing: 0.5, color: goldTokens.dark },
-  heroTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   eyebrow: { fontSize: 11, fontWeight: '800', letterSpacing: 1, color: ds.purple },
-  previewTag: { paddingHorizontal: 8, height: 20, justifyContent: 'center', borderRadius: 999, backgroundColor: 'rgba(23, 20, 32, 0.05)' },
-  previewTagText: { fontSize: 10.5, fontWeight: '700', color: ds.text3 },
   heroTitle: { fontSize: 28, lineHeight: 34, fontWeight: '800', color: ds.ink, letterSpacing: -0.8, marginTop: 8 },
   heroBody: { fontSize: 14.5, lineHeight: 21, color: ds.text2, marginTop: 4 },
-  chart: { marginTop: 14, marginBottom: 16 },
+  heroAction: { marginTop: 16 },
   comingHeader: { paddingHorizontal: 20, paddingTop: 18, paddingBottom: 6 },
   cardTitle: { fontSize: 17, fontWeight: '800', color: ds.ink, letterSpacing: -0.2 },
   cardSub: { fontSize: 12.5, fontWeight: '600', color: ds.text3, marginTop: 2 },

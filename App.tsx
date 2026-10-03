@@ -95,7 +95,8 @@ import {
 } from './src/backend/accounts';
 import { notify, useNotice } from './src/backend/notice';
 import { listTestAccounts, signInAsTestAccount } from './src/backend/testAccounts';
-import type { QuestPlace, TestAccount } from './frontend/shared/types/phase1';
+import type { ConnectablePlatform, GrowthPost, QuestPlace, TestAccount } from './frontend/shared/types/phase1';
+import { useCapabilities } from './src/backend/account';
 
 type Screen =
   | 'welcome'
@@ -193,6 +194,10 @@ export default function App() {
   const [composerFilmStyle, setComposerFilmStyle] = useState<FilmStyle | undefined>(undefined);
   // A post sent from Growth into the Repurpose video studio
   const [studioVideo, setStudioVideo] = useState<StudioVideo | undefined>(undefined);
+  // Growth: which post and which account the detail pages open on
+  const [growthPostKey, setGrowthPostKey] = useState<string | null>(null);
+  const [growthPlatform, setGrowthPlatform] = useState<ConnectablePlatform | null>(null);
+  const capabilities = useCapabilities();
   const [composerIdeaGoal, setComposerIdeaGoal] = useState<{ goal?: IdeaGoal; hook?: string; caption?: string; tags?: string[] } | null>(null);
   const [composerIdeaFormat, setComposerIdeaFormat] = useState<'short_video' | 'carousel' | 'image' | 'long_video' | 'text' | undefined>(undefined);
   const [composerQuestDraft, setComposerQuestDraft] = useState<{
@@ -837,6 +842,12 @@ export default function App() {
   };
   setComposerOpener(openBlankComposer);
 
+  // "Make more like this" on a post: ideas on the same topic (only offered when the server can write ideas)
+  const makeMoreLikeThis = (post: GrowthPost) => {
+    setSelectedIdeaTitle(post.title);
+    navigateTo('content-angle');
+  };
+
   // Where a quest's button takes the creator
   const openQuestPlace = (place: QuestPlace) => {
     switch (place) {
@@ -1209,29 +1220,27 @@ export default function App() {
         )}
 
         {currentScreen === 'growth' && (
-          (
-            <GrowthScreen
-              tier={desktopTier}
-              onBackToDashboard={() => navigateTo('dashboard')}
-              onLogout={handleLogout}
-              onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-              userPersona={userPersona}
-              onOpenAudienceBreakdown={() => navigateTo('audience-breakdown')}
-              onOpenPostPerformance={() => navigateTo('post-performance')}
-              onOpenPlatformGrowth={() => navigateTo('platform-growth')}
-              onNavigateTab={handleTabNavigation}
-              onOpenSchedule={() => navigateTo('schedule')}
-              onOpenIdeas={() => navigateTo('content-angle')}
-              onOpenChallenge={() => navigateTo('challenge-detail')}
-              onMakeMoreLikeThis={(video) => {
-                setStudioVideo(video);
-                setSelectedIdeaTitle(video.name);
-                navigateTo('repurpose');
-              }}
-              userProfile={userProfile}
-              onSaveProfile={editProfile}
-            />
-          )
+          <GrowthScreen
+            tier={desktopTier}
+            onLogout={handleLogout}
+            onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+            onOpenAudienceBreakdown={() => navigateTo('audience-breakdown')}
+            onOpenPostPerformance={(key) => {
+              setGrowthPostKey(key);
+              navigateTo('post-performance');
+            }}
+            onOpenPlatformGrowth={(platform) => {
+              setGrowthPlatform(platform ?? null);
+              navigateTo('platform-growth');
+            }}
+            onNavigateTab={handleTabNavigation}
+            onOpenSchedule={() => navigateTo('schedule')}
+            onOpenIdeas={() => navigateTo('content-angle')}
+            onOpenChallenge={() => navigateTo('challenge-detail')}
+            onMakeMoreLikeThis={capabilities.ai ? makeMoreLikeThis : undefined}
+            userProfile={userProfile}
+            onSaveProfile={editProfile}
+          />
         )}
 
         {currentScreen === 'jarvis-pro' && (
@@ -1423,26 +1432,14 @@ export default function App() {
 
         {currentScreen === 'platform-growth' && (
           <PlatformGrowthScreen
-            tier={desktopTier}
+            platform={growthPlatform}
             onBack={() => navigateTo(previousScreen ? previousScreen : 'growth')}
-            onOpenRepurpose={() => {
-              setStudioVideo(undefined);
-              navigateTo('repurpose');
-            }}
             onLogout={handleLogout}
-            onOpenSchedule={() => navigateTo('schedule')}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-            onOpenComposer={(prefillTitle) => {
-              if (prefillTitle) setComposerIdeaTitle(prefillTitle);
-              setComposerIdeaGoal(null);
-                setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
-              navigateTo('composer');
+            onOpenPostPerformance={(key) => {
+              setGrowthPostKey(key);
+              navigateTo('post-performance');
             }}
-            onOpenScript={(prefillTitle) => {
-              if (prefillTitle) setSelectedIdeaTitle(prefillTitle);
-              navigateTo('script');
-            }}
-            onOpenContentAngle={() => navigateTo('content-angle')}
             onNavigateTab={handleTabNavigation}
             userProfile={userProfile}
             onSaveProfile={editProfile}
@@ -1451,36 +1448,12 @@ export default function App() {
 
         {currentScreen === 'post-performance' && (
           <PostPerformanceScreen
-            tier={desktopTier}
+            postKey={growthPostKey}
             onBack={() => navigateTo(previousScreen ? previousScreen : 'growth')}
-            onMakeMoreLikeThis={(video) => {
-              setStudioVideo(video);
-              setSelectedIdeaTitle(video.name);
-              navigateTo('repurpose');
-            }}
-            onReuseOpening={(title, hook) => {
-              setComposerQuestDraft(null);
-              setComposerIdeaTitle(title);
-              setComposerIdeaGoal({ hook });
-              setComposerIdeaPlatform('tiktok');
-              setComposerFilmStyle('talking');
-              navigateTo('composer');
-            }}
+            onMakeMoreLikeThis={capabilities.ai ? makeMoreLikeThis : undefined}
+            onPlanSimilar={(title) => openBlankComposer(title)}
             onLogout={handleLogout}
-            onOpenSchedule={() => navigateTo('schedule')}
-            onOpenAudienceBreakdown={() => navigateTo('audience-breakdown')}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-            onOpenComposer={(prefillTitle) => {
-              if (prefillTitle) setComposerIdeaTitle(prefillTitle);
-              setComposerIdeaGoal(null);
-                setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
-              navigateTo('composer');
-            }}
-            onOpenScript={(prefillTitle) => {
-              if (prefillTitle) setSelectedIdeaTitle(prefillTitle);
-              navigateTo('script');
-            }}
-            onOpenContentAngle={() => navigateTo('content-angle')}
             onNavigateTab={handleTabNavigation}
             userProfile={userProfile}
             onSaveProfile={editProfile}
@@ -1492,22 +1465,10 @@ export default function App() {
             tier={desktopTier}
             onBack={() => navigateTo('growth')}
             onLogout={handleLogout}
-            onOpenSchedule={() => navigateTo('schedule')}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-            onOpenPlatformConnect={() => navigateTo('platforms')}
-            onOpenPostPerformance={() => navigateTo('post-performance')}
-            onOpenPlatformGrowth={() => navigateTo('platform-growth')}
-            onOpenCreate={(prefillTopic) => {
-              if (prefillTopic) setComposerIdeaTitle(prefillTopic);
-              setComposerIdeaGoal(null);
-                setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
-              navigateTo('create');
-            }}
-            onOpenPostComposer={(prefillTitle) => {
-              if (prefillTitle) setComposerIdeaTitle(prefillTitle);
-              setComposerIdeaGoal(null);
-                setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
-              navigateTo('composer');
+            onOpenPlatformGrowth={(platform) => {
+              setGrowthPlatform(platform ?? null);
+              navigateTo('platform-growth');
             }}
             onNavigateTab={handleTabNavigation}
             userProfile={userProfile}

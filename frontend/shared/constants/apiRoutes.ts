@@ -64,11 +64,11 @@ export const API_ROUTES = {
   },
   // Growth Analytics
   GROWTH: {
-    AGGREGATE: '/api/v1/growth/aggregate',
-    POST_PERFORMANCE: (postId: string) => `/api/v1/growth/posts/${postId}`,
-    AUDIENCE_BREAKDOWN: '/api/v1/growth/audience',
-    PLATFORM_COMPARISON: '/api/v1/growth/comparison',
-    // AccountSnapshot[] from real synced posts (onboarding's account card, Growth)
+    // Everything the Growth screens show, from the numbers the connected accounts report
+    OVERVIEW: '/api/v1/growth/overview',
+    // One post's numbers and how they compare with the account's others
+    POST: (key: string) => `/api/v1/growth/post?key=${encodeURIComponent(key)}`,
+    // AccountSnapshot[] from real synced posts (onboarding's account card)
     SNAPSHOTS: '/api/v1/growth/snapshots',
   },
   // Post ideas from the PostStreak idea library (no AI needed)

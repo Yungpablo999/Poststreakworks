@@ -15,6 +15,9 @@ export type { ClientKind, ConnectedAccount, SocialDeps, SocialStore, SyncBatchRe
 export { createSupabaseSocialStore, listConnectedAccounts, loadAccountSnapshots } from "./social-store";
 export type { ConnectedAccountSummary } from "./social-store";
 export { buildAccountSnapshot } from "./growth";
+export { getGrowthOverview, getPostPerformance } from "./growth-load";
+export { buildGrowthOverview, findPostPerf } from "./growth-overview";
+export type { GrowthOverview, Milestone, PlatformGrowth, PostPerf } from "./growth-overview";
 export type { AccountSnapshot } from "./growth";
 export { notify } from "./notify";
 export type { NewNotification, NoteKind, NoteTarget, NotificationType } from "./notify";

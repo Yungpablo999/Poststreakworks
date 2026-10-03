@@ -22,6 +22,8 @@ export type AccountSnapshot = {
   avgViews: string;
   /** The hour their posts do best, e.g. "7 PM". */
   bestTime: string;
+  /** The same hour as a number, 0–23. */
+  bestHour: number;
   /** How many of the last 30 days' posts went out within an hour of that time. */
   postsAtBestTime: number;
   recentPosts: number;
@@ -53,7 +55,7 @@ export function formatHour(hour: number): string {
   return `${h % 12 === 0 ? 12 : h % 12} ${suffix}`;
 }
 
-function safeTimezone(zone: string): string {
+export function safeTimezone(zone: string): string {
   try {
     new Intl.DateTimeFormat("en-US", { timeZone: zone });
     return zone;
@@ -63,7 +65,7 @@ function safeTimezone(zone: string): string {
 }
 
 /** The creator's calendar date (YYYY-MM-DD) and hour (0–23) for an instant. */
-function localParts(date: Date, timeZone: string): { day: string; hour: number } {
+export function localParts(date: Date, timeZone: string): { day: string; hour: number } {
   const day = new Intl.DateTimeFormat("en-CA", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" }).format(date);
   const hourText = new Intl.DateTimeFormat("en-US", { timeZone, hour: "numeric", hourCycle: "h23" })
     .formatToParts(date)
@@ -71,14 +73,14 @@ function localParts(date: Date, timeZone: string): { day: string; hour: number }
   return { day, hour: Number(hourText) % 24 };
 }
 
-function addDays(day: string, delta: number): string {
+export function addDays(day: string, delta: number): string {
   const d = new Date(`${day}T00:00:00Z`);
   d.setUTCDate(d.getUTCDate() + delta);
   return d.toISOString().slice(0, 10);
 }
 
 /** Circular distance between two hours of the day. */
-const hourGap = (a: number, b: number) => Math.min(Math.abs(a - b), 24 - Math.abs(a - b));
+export const hourGap = (a: number, b: number) => Math.min(Math.abs(a - b), 24 - Math.abs(a - b));
 
 export function buildAccountSnapshot(input: {
   platform: string;
@@ -128,6 +130,7 @@ export function buildAccountSnapshot(input: {
     postedDays,
     avgViews: formatCompactCount(avgViews),
     bestTime: formatHour(bestHour),
+    bestHour,
     postsAtBestTime: recent.filter((p) => hourGap(p.hour, bestHour) <= 1).length,
     recentPosts: recent.length,
     topFormat: input.topFormat,
