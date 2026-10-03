@@ -9,6 +9,6 @@ export default defineConfig({
     hookTimeout: 120_000,
     // Each of those databases is a WebAssembly Postgres of a few hundred MB. Running every test file at
     // once can exhaust the memory of a laptop ("Worker exited unexpectedly", "could not allocate memory").
-    poolOptions: { forks: { maxForks: 2 } },
+    poolOptions: { forks: { minForks: 1, maxForks: 2 } },
   },
 });
