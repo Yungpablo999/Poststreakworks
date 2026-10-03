@@ -81,13 +81,6 @@ interface PostComposerScreenProps {
   initialPlatform?: string;
   /** Pre-pick the kind of video (e.g. from the Repurpose video studio). */
   initialFilmStyle?: FilmStyle;
-  attachedAudio?: {
-    title: string;
-    voiceName: string;
-    duration: string;
-    speed: string;
-  } | null;
-  onClearAttachedAudio?: () => void;
   onBack: () => void;
   onLogout?: () => void;
   onOpenSchedule?: () => void;
@@ -382,8 +375,6 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   initialFormat,
   initialPlatform = '',
   initialFilmStyle,
-  attachedAudio,
-  onClearAttachedAudio,
   onBack,
   onLogout,
   onOpenSchedule,
@@ -981,7 +972,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   const confirmPosted = () => {
     setShowPostedCheck(false);
     setPendingHandoff(null);
-    checkInToday(userProfile?.userPersona === 'returning' ? 'returning' : 'new');
+    checkInToday();
     if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setCelebrationTitle('Nice work!');
     setCelebrationSubtitle(`Your ${pendingHandoff ? HANDOFF_NAMES[pendingHandoff] : ''} post counts toward today's check-in.`);
@@ -1050,16 +1041,11 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
           backgroundColor="transparent"
           onBack={onBack}
           onOpenJarvisPro={onOpenJarvisPro}
-          onOpenNotifications={() => {
-            triggerModalAnim();
-            setShowNotificationModal(true);
-          }}
           onOpenProfile={() => {
             triggerModalAnim();
             setShowProfileModal(true);
           }}
           userProfile={userProfile}
-          unreadCount={unreadNotifCount}
           isDark={isDark}
         />
 
@@ -1243,28 +1229,6 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
             onThumbnail={() => setHasThumbnail(!hasThumbnail)}
             onRemove={clearMedia}
           />
-          )}
-
-          {attachedAudio && (
-            <Reanimated.View entering={FadeIn.duration(240)} style={styles.voiceAttached}>
-              <View style={styles.voiceAttachedIcon}>
-                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                  <Rect x="9" y="2" width="6" height="12" rx="3" stroke={ds.purple} strokeWidth={2.1} />
-                  <Path d="M5 11a7 7 0 0014 0M12 18v4" stroke={ds.purple} strokeWidth={2.1} strokeLinecap="round" />
-                </Svg>
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.voiceAttachedTitle}>Voiceover added</Text>
-                <Text style={styles.voiceAttachedSub} numberOfLines={1}>
-                  {attachedAudio.voiceName} · {attachedAudio.duration}
-                </Text>
-              </View>
-              <Pressable onPress={() => onClearAttachedAudio?.()} hitSlop={8} accessibilityRole="button" accessibilityLabel="Remove voiceover">
-                <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-                  <Path d="M18 6L6 18M6 6l12 12" stroke={ds.text3} strokeWidth={2.4} strokeLinecap="round" />
-                </Svg>
-              </Pressable>
-            </Reanimated.View>
           )}
 
           {/* 4. CAPTION */}

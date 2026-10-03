@@ -17,7 +17,7 @@ import { SIDEBAR_W } from '../../hooks/useBreakpoint';
 // the creator's profile at the bottom. Frosted glass like the rest of the
 // app; the highlight glides between items (no bounce).
 
-export type SidebarId = 'home' | 'create' | 'quests' | 'growth' | 'schedule' | 'repurpose' | 'hook-studio' | 'voice-studio';
+export type SidebarId = 'home' | 'create' | 'quests' | 'growth' | 'schedule' | 'repurpose' | 'hook-studio';
 
 type Item = { id: SidebarId; label: string; icon: (c: string) => React.ReactNode; pro?: boolean };
 
@@ -58,17 +58,6 @@ const STUDIOS: Item[] = [
       <Svg width={20} height={20} viewBox="0 0 24 24">
         <Path d="M12 3v9a4 4 0 11-4-4" {...stroke(c)} />
         <Circle cx="12" cy="3" r="0.6" {...stroke(c)} />
-      </Svg>
-    ),
-  },
-  {
-    id: 'voice-studio',
-    label: 'Voice Studio',
-    pro: true,
-    icon: (c) => (
-      <Svg width={20} height={20} viewBox="0 0 24 24">
-        <Rect x="9" y="3" width="6" height="11" rx="3" {...stroke(c)} />
-        <Path d="M5.5 11a6.5 6.5 0 0013 0M12 17.5V21" {...stroke(c)} />
       </Svg>
     ),
   },
@@ -191,7 +180,7 @@ export function AppSidebar({
               </Svg>
               <Text style={styles.proCardTitle}>Jarvis Pro</Text>
             </View>
-            <Text style={styles.proCardBody}>Unlimited ideas, Repurpose and Voice Studio.</Text>
+            <Text style={styles.proCardBody}>Unlimited ideas and Repurpose, and a daily brief.</Text>
             <View style={styles.proBtn}>
               <Text style={styles.proBtnText}>See Pro</Text>
             </View>

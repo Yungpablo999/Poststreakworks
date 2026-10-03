@@ -71,12 +71,27 @@ export const API_ROUTES = {
     // AccountSnapshot[] from real synced posts (onboarding's account card, Growth)
     SNAPSHOTS: '/api/v1/growth/snapshots',
   },
-  // Quests & Gamification
+  // Post ideas from the PostStreak idea library (no AI needed)
+  IDEAS: {
+    STARTER: '/api/v1/public/ideas', // GET ?niches=a,b&platforms=tiktok — before sign-up, no account needed
+    FEED: '/api/v1/ideas', // GET ?goal=followers|saves|comments|often — for the signed-in creator's own topics
+    TOPIC: '/api/v1/ideas/topic', // GET ?topic=…&goal=…&format=…&round=0 — three ideas about a typed topic
+  },
+  // What the creator planned and what they posted, in one list
+  CALENDAR: '/api/v1/calendar', // GET ?from=<ISO>&to=<ISO> (at most 62 days) -> { items: CalendarItem[] }
+  // Home for creators who post: next post, the week, the audience, level, today's quest, the brief
+  HOME: '/api/v1/home',
+  // The bell. The server writes the notifications; the app only reads them and marks them read.
+  NOTIFICATIONS: {
+    LIST: '/api/v1/notifications', // GET -> NotificationFeed
+    READ: '/api/v1/notifications/read', // POST { ids? } -> { unread }
+  },
+  // Quests, XP and the weekly challenge. Nothing is "completed" by the app: the server looks at
+  // what the creator has done and pays finished quests once (QuestBoard.justCompleted).
   QUESTS: {
-    DAILY_MISSIONS: '/api/v1/quests/daily',
-    COMPLETE: (questId: string) => `/api/v1/quests/${questId}/complete`,
-    CHALLENGES: '/api/v1/quests/challenges',
-    JOIN_CHALLENGE: (id: string) => `/api/v1/quests/challenges/${id}/join`,
+    BOARD: '/api/v1/quests', // GET -> QuestBoard
+    JOIN_CHALLENGE: '/api/v1/quests/challenge/join', // POST
+    CHALLENGE_REMINDERS: '/api/v1/quests/challenge/reminders', // PUT { days } -> { days }
     STREAK_STATUS: '/api/v1/quests/streak',
   },
   // Earnings & Brand Deals

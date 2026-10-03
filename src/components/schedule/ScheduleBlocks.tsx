@@ -3,7 +3,6 @@ import { LiveMascot } from '../mascot/LiveMascot';
 import { View, Pressable, StyleSheet, Platform, type LayoutChangeEvent } from 'react-native';
 import Animated, {
   Easing,
-  FadeIn,
   FadeInUp,
   useAnimatedStyle,
   useSharedValue,
@@ -61,6 +60,7 @@ export function TodayCard({
   const posts = today.posts;
   const posted = posts.filter((p) => p.status === 'posted').length;
   const next = posts.find((p) => p.status === 'scheduled');
+  const ready = posts.filter((p) => p.status === 'ready').length;
   const drafts = posts.filter((p) => p.status === 'draft').length;
   const empty = posts.length === 0;
   const label = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
@@ -85,6 +85,7 @@ export function TodayCard({
           </Text>
           <Text style={styles.heroBody}>
             {[
+              ready > 0 ? `${ready} ready to post` : null,
               next ? `Next up at ${next.time}` : null,
               posted > 0 ? `${posted} posted` : null,
               drafts > 0 ? `${drafts} draft${drafts === 1 ? '' : 's'} to finish` : null,
@@ -177,8 +178,10 @@ export function PostRow({ post, onPress }: { post: CalendarPost; onPress: () => 
       ? { label: 'Posted', bg: ds.greenBg, fg: ds.greenFill }
       : post.status === 'draft'
       ? { label: 'Draft', bg: ds.cream, fg: ds.text2 }
-      : { label: 'Scheduled', bg: ds.lavender, fg: ds.purple };
-  const action = post.status === 'draft' ? 'Finish' : post.status === 'posted' ? 'View' : 'Open';
+      : post.status === 'ready'
+        ? { label: 'Ready to post', bg: goldTokens.light, fg: goldTokens.dark }
+        : { label: 'Scheduled', bg: ds.lavender, fg: ds.purple };
+  const action = post.status === 'draft' ? 'Finish' : post.status === 'posted' ? (post.url ? 'View' : 'Posted') : post.status === 'ready' ? 'Post it' : 'Open';
   return (
     <PressableCard onPress={onPress} accessibilityLabel={`${post.title}. ${PLATFORM_NAMES[post.platform]} at ${post.time}. ${chip.label}. ${action}`}>
       <GlassCard strong radius={20} padding={14}>
@@ -258,14 +261,15 @@ export function PlatformMixCard({ mix }: { mix: { platform: string; count: numbe
 }
 
 // ─── Jarvis best time ───────────────────────────────────────────────────────
-export function BestTimeCard({ orb, time, isNewUser, onUse }: { orb: React.ReactNode; time: string; isNewUser: boolean; onUse: () => void }) {
+// Only shown once the creator's own posts say when they do best (never a guess).
+export function BestTimeCard({ orb, time, platform, onUse }: { orb: React.ReactNode; time: string; platform: string; onUse: () => void }) {
   return (
     <GlassCard strong radius={26} padding={20}>
       <View style={styles.row}>
         {orb}
         <View style={styles.flex}>
           <Text style={styles.eyebrow}>JARVIS SUGGESTS</Text>
-          <Text style={styles.cardTitle}>{isNewUser ? 'A good time for your first post' : 'Your best time today'}</Text>
+          <Text style={styles.cardTitle}>Your best time</Text>
         </View>
       </View>
       <View style={styles.timeBox}>
@@ -274,24 +278,15 @@ export function BestTimeCard({ orb, time, isNewUser, onUse }: { orb: React.React
           <Path d="M12 7v5l3 2" stroke={ds.purple} strokeWidth={2.2} strokeLinecap="round" />
         </Svg>
         <Text style={styles.timeBig}>{time}</Text>
-        <Text style={styles.timeSub}>{isNewUser ? 'When most people scroll' : 'Your audience is most active'}</Text>
+        <Text style={styles.timeSub}>When your posts on {platform} have done best</Text>
       </View>
-      <AppButton title="Use this time" variant="quiet" onPress={onUse} />
+      <AppButton title="Plan a post" variant="quiet" onPress={onUse} />
     </GlassCard>
   );
 }
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  autoTop: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  autoProTag: { alignSelf: 'flex-start', paddingHorizontal: 7, height: 20, borderRadius: 999, justifyContent: 'center', backgroundColor: goldTokens.light, borderWidth: 1, borderColor: goldTokens.border },
-  autoProText: { fontSize: 10.5, fontWeight: '800', letterSpacing: 0.6, color: goldTokens.dark },
-  autoTitle: { fontSize: 17, fontWeight: '800', color: ds.ink, marginTop: 6 },
-  autoBody: { fontSize: 13.5, lineHeight: 19, color: ds.text2, marginTop: 8 },
-  switchWrap: { width: 50, height: 30, borderRadius: 15, overflow: 'hidden', justifyContent: 'center' },
-  switchBase: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(23, 20, 32, 0.12)' },
-  switchOn: { backgroundColor: ds.purple },
-  switchKnob: { position: 'absolute', left: 3, width: 24, height: 24, borderRadius: 12, backgroundColor: '#FFFFFF', shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 4, shadowOffset: { width: 0, height: 2 } },
   eyebrow: { fontSize: 11, fontWeight: '800', letterSpacing: 1, color: ds.purple },
   heroTitle: { fontSize: 28, lineHeight: 34, fontWeight: '800', color: ds.ink, letterSpacing: -0.8, marginTop: 8 },
   heroBody: { fontSize: 14.5, lineHeight: 21, color: ds.text2, marginTop: 4 },
@@ -353,58 +348,3 @@ const styles = StyleSheet.create({
   timeSub: { fontSize: 12.5, fontWeight: '700', color: ds.text3 },
 });
 
-// ─── Pro: auto-post (posts go out on their own at their time) ───────────────
-function Switch({ on, onToggle }: { on: boolean; onToggle: () => void }) {
-  const t = useSharedValue(on ? 1 : 0);
-  useEffect(() => {
-    t.value = withTiming(on ? 1 : 0, { duration: 220, easing: Easing.out(Easing.cubic) });
-  }, [on, t]);
-  const knob = useAnimatedStyle(() => ({ transform: [{ translateX: 20 * t.value }] }));
-  const track = useAnimatedStyle(() => ({ opacity: t.value }));
-  return (
-    <Pressable
-      onPress={onToggle}
-      hitSlop={8}
-      accessibilityRole="switch"
-      accessibilityState={{ checked: on }}
-      accessibilityLabel="Auto-post"
-      style={styles.switchWrap}
-    >
-      <View style={styles.switchBase} />
-      <Animated.View style={[StyleSheet.absoluteFill, styles.switchOn, track]} />
-      <Animated.View style={[styles.switchKnob, knob]} />
-    </Pressable>
-  );
-}
-
-export function AutoPostCard({ isNewUser }: { isNewUser: boolean }) {
-  const [on, setOn] = useState(!isNewUser);
-  return (
-    <GlassCard strong radius={24} padding={16}>
-      <View style={styles.autoTop}>
-        <View style={styles.flex}>
-          <View style={styles.autoProTag}>
-            <Text style={styles.autoProText}>PRO</Text>
-          </View>
-          <Text style={styles.autoTitle}>Auto-post</Text>
-        </View>
-        <Switch
-          on={on}
-          onToggle={() => {
-            if (Platform.OS !== 'web') Haptics.selectionAsync();
-            setOn((v) => !v);
-          }}
-        />
-      </View>
-      <Animated.View key={on ? 'on' : 'off'} entering={FadeIn.duration(200)}>
-        <Text style={styles.autoBody}>
-          {on
-            ? 'Scheduled posts go out on their own at their time. You get a note when each one is live.'
-            : isNewUser
-              ? 'Turn this on and your scheduled posts go out on their own, so you don’t have to be online.'
-              : 'Off. We’ll remind you when it’s time to post instead.'}
-        </Text>
-      </Animated.View>
-    </GlassCard>
-  );
-}

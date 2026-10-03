@@ -442,16 +442,11 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
             backgroundColor="transparent"
             onBack={onBack}
             onOpenJarvisPro={onOpenJarvisPro}
-            onOpenNotifications={() => {
-              triggerModalAnim();
-              setShowNotificationModal(true);
-            }}
             onOpenProfile={() => {
               triggerModalAnim();
               setShowProfileModal(true);
             }}
             userProfile={userProfile}
-            unreadCount={unreadNotifCount}
             isDark={isDark}
           />
 

@@ -23,6 +23,9 @@ import { savedHooksRouter } from "./routers/saved-hooks";
 import { repurposeRouter } from "./routers/repurpose";
 import { jarvisRouter } from "./routers/jarvis";
 import { platformConnectRouter } from "./routers/platform-connect";
+import { homeRouter } from "./routers/home";
+import { ideasRouter } from "./routers/ideas";
+import { calendarRouter } from "./routers/calendar";
 
 export const appRouter = createTRPCRouter({
   accounts: accountsRouter,
@@ -55,6 +58,12 @@ export const appRouter = createTRPCRouter({
   jarvis: jarvisRouter,
   // Real social-account connections (TikTok first) — see routers/platform-connect.ts
   platformConnect: platformConnectRouter,
+  // Home for creators who post — see routers/home.ts
+  home: homeRouter,
+  // Post ideas — see routers/ideas.ts
+  ideas: ideasRouter,
+  // What is planned and what was posted, in one list — see routers/calendar.ts
+  calendar: calendarRouter,
 });
 
 export type AppRouter = typeof appRouter;

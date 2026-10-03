@@ -15,7 +15,7 @@ import {
   hydrateCheckIn,
   hydrateCheckInMonth,
   hydrateDrafts,
-  hydrateRepurposeUsed,
+  hydrateRepurpose,
   hydrateSavedHooks,
   markCheckInDay,
   resetUserData,
@@ -33,6 +33,9 @@ import { api, backendReady, type ApiResult } from './api';
 import { setAccounts } from './accounts';
 import { capabilitiesStore, NO_CAPABILITIES, planStore, unreadStore } from './account';
 import { notify } from './notice';
+import { clearNotifications } from './notifications';
+import { clearQuests } from './quests';
+import { clearHome } from './home';
 
 // The glue between the app's in-memory stores (src/data, the tour, the mascot's
 // tips, Jarvis's chat) and the API. Screens never call the API themselves: they
@@ -95,7 +98,7 @@ export function applyBootstrap(b: Bootstrap): void {
   );
   hydrateSavedHooks(b.savedHooks);
   hydrateCheckIn(toStreak(b.checkIn));
-  hydrateRepurposeUsed(b.repurpose.usedThisWeek);
+  hydrateRepurpose(b.repurpose);
   setAccounts(b.accounts);
   capabilitiesStore.set(b.capabilities);
   planStore.set(b.plan);
@@ -118,6 +121,9 @@ export function clearAccountData(): void {
   capabilitiesStore.set(NO_CAPABILITIES);
   planStore.set(null);
   unreadStore.set(0);
+  clearNotifications();
+  clearQuests();
+  clearHome();
   seedTipsSeen([], true);
   setTourFinished(false);
   loaded = false;
@@ -317,7 +323,7 @@ function writeThrough() {
       if (!backendReady()) return;
       void enqueue(async () => {
         const res = await api.post<SpendRepurposeResult>(API_ROUTES.REPURPOSE.SPEND);
-        if (res.ok) hydrateRepurposeUsed(res.data.usedThisWeek); // the server enforces the limit
+        if (res.ok) hydrateRepurpose({ usedThisWeek: res.data.usedThisWeek, weeklyLimit: res.data.weeklyLimit }); // the server enforces the limit
         else await saveFailed();
       });
     },

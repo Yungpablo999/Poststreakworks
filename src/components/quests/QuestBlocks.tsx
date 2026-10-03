@@ -81,12 +81,15 @@ export function TodayQuestCard({
   body,
   xp,
   done,
+  progress = 0,
   onStart,
 }: {
   title: string;
   body: string;
   xp: number;
   done: boolean;
+  /** Steps done, 0 to 1 */
+  progress?: number;
   onStart: () => void;
 }) {
   return (
@@ -99,8 +102,8 @@ export function TodayQuestCard({
           </View>
           <Text style={styles.todayTitle}>{title}</Text>
         </View>
-        <View style={styles.ringWrap} accessibilityLabel={done ? 'Completed' : '0 of 1 done'}>
-          <ProgressRing progress={done ? 1 : 0.04} done={done} />
+        <View style={styles.ringWrap} accessibilityLabel={done ? 'Completed' : `${Math.round(progress * 100)} percent done`}>
+          <ProgressRing progress={done ? 1 : Math.max(0.04, progress)} done={done} />
           <View style={styles.ringCenter}>
             <Text style={[styles.ringXp, done && { color: ds.greenFill }]}>+{xp}</Text>
             <Text style={styles.ringXpLabel}>XP</Text>
@@ -110,7 +113,7 @@ export function TodayQuestCard({
       <Text style={styles.todayBody}>{body}</Text>
       <View style={styles.todayCta}>
         <AppButton
-          title={done ? 'Completed' : 'Start quest'}
+          title={done ? 'Completed' : progress > 0 ? 'Keep going' : 'Start quest'}
           size="lg"
           variant={done ? 'quiet' : 'primary'}
           onPress={onStart}
@@ -129,7 +132,7 @@ export function TodayQuestCard({
 }
 
 // ─── Quest row ──────────────────────────────────────────────────────────────
-export type QuestIcon = 'idea' | 'audience' | 'calendar' | 'voice' | 'hook';
+export type QuestIcon = 'idea' | 'audience' | 'calendar' | 'repurpose' | 'hook';
 
 const ICONS: Record<QuestIcon, React.ReactNode> = {
   idea: (
@@ -142,10 +145,9 @@ const ICONS: Record<QuestIcon, React.ReactNode> = {
       <Path d="M3 17l6-6 4 4 8-8M21 7h-6M21 7v6" stroke={ds.purple} strokeWidth={2.1} strokeLinecap="round" strokeLinejoin="round" />
     </Svg>
   ),
-  voice: (
+  repurpose: (
     <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-      <Rect x="9" y="2" width="6" height="12" rx="3" stroke={ds.purple} strokeWidth={2} />
-      <Path d="M5 11a7 7 0 0014 0M12 18v4" stroke={ds.purple} strokeWidth={2} strokeLinecap="round" />
+      <Path d="M4 9a7 7 0 0112.5-3.5L19 8M20 15a7 7 0 01-12.5 3.5L5 16M19 3.5V8h-4.5M5 20.5V16h4.5" stroke={ds.purple} strokeWidth={2.1} strokeLinecap="round" strokeLinejoin="round" />
     </Svg>
   ),
   hook: (
@@ -185,6 +187,8 @@ export function QuestRow({
   action,
   onPress,
   pro,
+  done,
+  progress,
 }: {
   icon: QuestIcon;
   title: string;
@@ -194,9 +198,13 @@ export function QuestRow({
   onPress: () => void;
   /** Pro-only quest: small gold PRO tag */
   pro?: boolean;
+  /** Finished for this period: shows Done instead of the action */
+  done?: boolean;
+  /** Shown beside the cadence when a quest takes more than one step (2 of 3) */
+  progress?: { done: number; of: number };
 }) {
   return (
-    <PressableCard onPress={onPress} accessibilityLabel={`${title}. ${cadence}, plus ${xp} XP. ${action}`}>
+    <PressableCard onPress={onPress} accessibilityLabel={`${title}. ${cadence}, plus ${xp} XP. ${done ? 'Done' : action}`}>
       {(hover) => (
         <GlassCard strong radius={22} padding={14}>
           <View style={styles.row}>
@@ -217,11 +225,21 @@ export function QuestRow({
                 <View style={styles.dot} />
                 <Text style={styles.rowCadence} numberOfLines={1}>
                   {cadence}
+                  {progress && progress.of > 1 && !done ? ` · ${progress.done} of ${progress.of}` : ''}
                 </Text>
 
               </View>
             </View>
-            <ActionPill label={action} hover={hover} />
+            {done ? (
+              <View style={styles.donePill}>
+                <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
+                  <Path d="M20 6L9 17l-5-5" stroke={ds.greenFill} strokeWidth={3.2} strokeLinecap="round" strokeLinejoin="round" />
+                </Svg>
+                <Text style={styles.doneText}>Done</Text>
+              </View>
+            ) : (
+              <ActionPill label={action} hover={hover} />
+            )}
           </View>
         </GlassCard>
       )}
@@ -285,8 +303,28 @@ function PostSlot({ index, filled }: { index: number; filled: boolean }) {
   );
 }
 
-/** Without onJoin (the challenge page itself) the join button is hidden. */
-export function ChallengeCard({ done, goal, onJoin }: { done: number; goal: number; onJoin?: () => void }) {
+/**
+ * This week's challenge, as the server counts it. The button is the next step for this creator
+ * ("Join the challenge", or "See the challenge" once they're in); the challenge page itself has none.
+ */
+export function ChallengeCard({
+  title,
+  done,
+  goal,
+  xp,
+  others,
+  completed,
+  cta,
+}: {
+  title: string;
+  done: number;
+  goal: number;
+  xp: number;
+  /** Other creators in this week's challenge */
+  others: number;
+  completed?: boolean;
+  cta?: { label: string; onPress: () => void };
+}) {
   return (
     <View style={styles.challenge}>
       <LinearGradient colors={['#6A4BF0', '#4B2FD6']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
@@ -299,8 +337,10 @@ export function ChallengeCard({ done, goal, onJoin }: { done: number; goal: numb
         <View style={styles.challengeChip}>
           <Text style={styles.challengeChipText}>THIS WEEK'S CHALLENGE</Text>
         </View>
-        <Text style={styles.challengeTitle}>Post 3 times this week</Text>
-        <Text style={styles.challengeBody}>At your own pace, alongside other creators doing the same.</Text>
+        <Text style={styles.challengeTitle}>{title}</Text>
+        <Text style={styles.challengeBody}>
+          {others > 0 ? `At your own pace, alongside ${others} other ${others === 1 ? 'creator' : 'creators'} doing the same.` : 'At your own pace. Any platform and any format counts.'}
+        </Text>
 
         <View style={styles.slots}>
           {Array.from({ length: goal }).map((_, i) => (
@@ -320,17 +360,17 @@ export function ChallengeCard({ done, goal, onJoin }: { done: number; goal: numb
           </View>
           <View style={styles.rowText}>
             <Text style={styles.rewardTitle}>Consistency badge</Text>
-            <Text style={styles.rewardSub}>+250 XP when you finish</Text>
+            <Text style={styles.rewardSub}>{completed ? `Finished: +${xp} XP earned` : `+${xp} XP when you finish`}</Text>
           </View>
         </View>
 
-        {onJoin && (
+        {cta && (
           <Pressable
-            onPress={onJoin}
+            onPress={cta.onPress}
             accessibilityRole="button"
             style={({ pressed }) => [styles.joinBtn, pressed && { transform: [{ translateY: 2 }] }, Platform.OS === 'web' && ({ cursor: 'pointer' } as object)]}
           >
-            <Text style={styles.joinText}>Join the challenge</Text>
+            <Text style={styles.joinText}>{cta.label}</Text>
           </Pressable>
         )}
       </View>
@@ -468,6 +508,8 @@ const styles = StyleSheet.create({
     backgroundColor: ds.lavender,
   },
   actionText: { fontSize: 12.5, fontWeight: '800', color: ds.purple },
+  donePill: { flexDirection: 'row', alignItems: 'center', gap: 4, height: 32, paddingHorizontal: 11, borderRadius: 999, backgroundColor: ds.greenBg },
+  doneText: { fontSize: 12.5, fontWeight: '800', color: ds.greenFill },
   statsRow: { flexDirection: 'row', gap: 8 },
   stat: {
     flex: 1,

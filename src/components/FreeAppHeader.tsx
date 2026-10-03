@@ -26,12 +26,10 @@ export interface FreeAppHeaderProps {
   onBack?: () => void;
   userPersona?: UserPersona;
   onOpenJarvisPro?: () => void;
-  /** @deprecated The bell now opens the shared notifications sheet itself. */
-  onOpenNotifications?: () => void;
   onOpenProfile?: () => void;
   userProfile?: UserProfileData;
-  /** @deprecated The unread dot now comes from the shared notifications. */
-  unreadCount?: number;
+  /** Ghost rides along in the header on most pages; Home has him in its own card. */
+  showMascot?: boolean;
   backgroundColor?: string;
   isDark?: boolean;
 }
@@ -42,31 +40,10 @@ export const FreeAppHeader: React.FC<FreeAppHeaderProps> = ({
   onOpenJarvisPro,
   onOpenProfile,
   userProfile,
+  showMascot = true,
   backgroundColor = '#FAF8F5',
   isDark = false,
 }) => {
-  // Gentle floating animation for ghost logo
-  const ghostFloatY = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    const floatLoop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(ghostFloatY, {
-          toValue: -3.5,
-          duration: 1800,
-          useNativeDriver: true,
-        }),
-        Animated.timing(ghostFloatY, {
-          toValue: 0,
-          duration: 1800,
-          useNativeDriver: true,
-        }),
-      ])
-    );
-    floatLoop.start();
-    return () => floatLoop.stop();
-  }, [ghostFloatY]);
-
   const handleNotifPress = () => {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -90,7 +67,7 @@ export const FreeAppHeader: React.FC<FreeAppHeaderProps> = ({
   const currentTier = (userProfile?.tier as UserTier) || 'free';
   // The bell opens the shared notifications sheet on every screen
   const [showNotifications, setShowNotifications] = useState(false);
-  const unreadCount = useUnreadNotifications(currentPersona, currentTier);
+  const unreadCount = useUnreadNotifications();
 
   // Desktop web app: the top bar and side menu replace this phone header
   if (onDesktop) return null;
@@ -129,9 +106,11 @@ export const FreeAppHeader: React.FC<FreeAppHeaderProps> = ({
       {/* Right: Notification & Person Profile Photo */}
       <View style={styles.headerRightGroup}>
         {/* The live mascot rides along on every page */}
-        <TourTarget id="ghost" style={{ zIndex: 50 }}>
-          <LiveMascot size={42} bubble="under" bubbleWidth={220} />
-        </TourTarget>
+        {showMascot ? (
+          <TourTarget id="ghost" style={{ zIndex: 50 }}>
+            <LiveMascot size={42} bubble="under" bubbleWidth={220} />
+          </TourTarget>
+        ) : null}
         {/* Notification bell: swings on tap, unread dot breathes */}
         <TourTarget id="bell">
           <BellButton unread={unreadCount > 0} onPress={handleNotifPress} />
@@ -189,7 +168,7 @@ export const FreeAppHeader: React.FC<FreeAppHeaderProps> = ({
         </Pressable>
       </View>
 
-      <NotificationsSheet visible={showNotifications} onClose={() => setShowNotifications(false)} persona={currentPersona} tier={currentTier} />
+      <NotificationsSheet visible={showNotifications} onClose={() => setShowNotifications(false)} />
     </View>
   );
 };

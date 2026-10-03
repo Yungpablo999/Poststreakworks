@@ -59,6 +59,22 @@ async function call<T>(method: string, path: string, body: unknown, canRetry: bo
   }
 }
 
+/** For the few things a visitor with no account may ask for (the "Your plan" ideas). No token is sent. */
+export async function publicGet<T>(path: string): Promise<ApiResult<T>> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  try {
+    const res = await fetch(`${BACKEND.apiUrl}${path}`, { signal: controller.signal, headers: { Accept: 'application/json' } });
+    const json = (await res.json().catch(() => null)) as (Partial<ApiErrorBody> & Record<string, unknown>) | null;
+    if (res.ok) return { ok: true, data: json as T };
+    return { ok: false, status: res.status, message: typeof json?.message === 'string' ? json.message : 'Something went wrong. Please try again.', code: json?.code, upsell: json?.upsell, offline: false };
+  } catch {
+    return { ok: false, status: 0, message: 'Can’t reach PostStreak right now.', offline: true };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 export const api = {
   get: <T>(path: string) => call<T>('GET', path, undefined, true),
   post: <T>(path: string, body?: unknown) => call<T>('POST', path, body ?? {}, true),

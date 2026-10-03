@@ -29,7 +29,6 @@ export const GHOST_PLACES = [
   "growth",
   "repurpose",
   "hook-studio",
-  "voice-studio",
   "quests",
   "challenge",
   "jarvis-pro",

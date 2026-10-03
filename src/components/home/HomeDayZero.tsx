@@ -24,8 +24,6 @@ import { ds, goldTokens } from '../../theme/colors';
 import { CheckInCard } from '../CheckInCard';
 import { CalendarSheet } from './CalendarSheet';
 import { PlatformRow } from '../onboarding/PlatformRow';
-import { BACKEND } from '../../config/backend';
-import { useSession } from '../../backend/session';
 import { useAccounts } from '../../backend/accounts';
 
 // Day-0 Home for brand-new creators. No stats, no streak counts, no fake
@@ -34,14 +32,11 @@ import { useAccounts } from '../../backend/accounts';
 // Jarvis helps with light up in turn so the first action explains itself.
 
 interface HomeDayZeroProps {
-  tier: 'free' | 'pro';
   firstName?: string;
-  isDark?: boolean;
   onPlanFirstPost: () => void;
   onOpenSchedule?: () => void;
   onOpenGrowth?: () => void;
   onOpenQuests?: () => void;
-  onOpenVoiceStudio?: () => void;
 }
 
 const STEP_MS = 1400;
@@ -189,19 +184,13 @@ export function PreviewRow({
 }
 
 export function HomeDayZero({
-  tier,
   firstName,
-  isDark = false,
   onPlanFirstPost,
   onOpenSchedule,
   onOpenGrowth,
   onOpenQuests,
-  onOpenVoiceStudio,
 }: HomeDayZeroProps) {
   const [calendarOpen, setCalendarOpen] = useState(false);
-  // Signed in to the real backend: offer the real TikTok connection right here
-  const session = useSession();
-  const realAccount = BACKEND.enabled && session.status === 'signedIn';
   const tiktokConnected = useAccounts().some((a) => a.platform === 'tiktok');
   const previews: { key: string; title: string; body: string; icon: React.ReactNode; onPress?: () => void; pro?: boolean }[] = [
     {
@@ -227,31 +216,17 @@ export function HomeDayZero({
       ),
       onPress: onOpenGrowth,
     },
-    tier === 'pro'
-      ? {
-          key: 'voice',
-          title: 'Voice Studio',
-          body: 'Clone your voice for hands-free voiceovers.',
-          pro: true,
-          icon: (
-            <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-              <Rect x="9" y="2" width="6" height="12" rx="3" stroke={ds.purple} strokeWidth={2} />
-              <Path d="M5 11a7 7 0 0014 0M12 18v4" stroke={ds.purple} strokeWidth={2} strokeLinecap="round" />
-            </Svg>
-          ),
-          onPress: onOpenVoiceStudio,
-        }
-      : {
-          key: 'quests',
-          title: 'Quests',
-          body: 'Small weekly goals to help you find your rhythm.',
-          icon: (
-            <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-              <Path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z" stroke={ds.purple} strokeWidth={2} strokeLinejoin="round" />
-            </Svg>
-          ),
-          onPress: onOpenQuests,
-        },
+    {
+      key: 'quests',
+      title: 'Quests',
+      body: 'Small weekly goals to help you find your rhythm.',
+      icon: (
+        <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+          <Path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z" stroke={ds.purple} strokeWidth={2} strokeLinejoin="round" />
+        </Svg>
+      ),
+      onPress: onOpenQuests,
+    },
   ];
 
   return (
@@ -304,22 +279,20 @@ export function HomeDayZero({
 
       {/* 2. Gentle daily check-in */}
       <Animated.View entering={FadeInUp.delay(120).duration(550)}>
-        <CheckInCard persona="new" isDark={isDark} onOpenCalendar={() => setCalendarOpen(true)} />
+        <CheckInCard onOpenCalendar={() => setCalendarOpen(true)} />
       </Animated.View>
 
-      {/* 2b. Signed in to the real backend: connect TikTok right from Home. The row does the whole
-          trip (TikTok's own sign-in page) and shows the account once it's connected. */}
-      {realAccount && (
-        <Animated.View entering={FadeInUp.delay(180).duration(550)}>
-          <GlassCard radius={26} padding={16}>
-            <Text style={styles.cardTitle}>{tiktokConnected ? 'Your TikTok' : 'Connect your TikTok'}</Text>
-            <Text style={styles.cardSub}>{tiktokConnected ? 'Jarvis can now see what works for you' : 'So Jarvis can see what works for you'}</Text>
-            <View style={{ marginTop: 12 }}>
-              <PlatformRow name="TikTok" logo="tiktok" description="Sign in with TikTok" connected={tiktokConnected} onToggle={() => {}} />
-            </View>
-          </GlassCard>
-        </Animated.View>
-      )}
+      {/* 2b. Connect TikTok right from Home. The row does the whole trip (TikTok's own sign-in
+          page) and shows the account once it's connected. */}
+      <Animated.View entering={FadeInUp.delay(180).duration(550)}>
+        <GlassCard radius={26} padding={16}>
+          <Text style={styles.cardTitle}>{tiktokConnected ? 'Your TikTok' : 'Connect your TikTok'}</Text>
+          <Text style={styles.cardSub}>{tiktokConnected ? 'Jarvis can now see what works for you' : 'So Jarvis can see what works for you'}</Text>
+          <View style={{ marginTop: 12 }}>
+            <PlatformRow name="TikTok" logo="tiktok" description="Sign in with TikTok" connected={tiktokConnected} onToggle={() => {}} />
+          </View>
+        </GlassCard>
+      </Animated.View>
 
       {/* 3. What will appear here — a preview with no numbers */}
       <Animated.View entering={FadeInUp.delay(240).duration(550)}>
@@ -336,7 +309,7 @@ export function HomeDayZero({
 
       </ResponsiveColumns>
 
-      <CalendarSheet visible={calendarOpen} onClose={() => setCalendarOpen(false)} persona="new" onPlanPost={onPlanFirstPost} />
+      <CalendarSheet visible={calendarOpen} onClose={() => setCalendarOpen(false)} onPlanPost={onPlanFirstPost} />
     </View>
   );
 }

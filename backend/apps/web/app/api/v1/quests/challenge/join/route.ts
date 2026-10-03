@@ -3,9 +3,10 @@ import { getCaller, withErrorHandling } from "@/lib/trpc/server-caller";
 
 export const runtime = "nodejs";
 
-export async function GET(request: NextRequest) {
+// "Join the challenge" for this week. Idempotent.
+export async function POST(request: NextRequest) {
   return withErrorHandling(async () => {
     const caller = await getCaller(request);
-    return caller.quests.listChallenges();
+    return caller.quests.joinChallenge();
   });
 }

@@ -38,7 +38,8 @@ export function setDataBackend(next: DataBackend | null) {
 // ---------------------------------------------------------------------------
 // Check-in streak
 // A gentle daily check-in habit. Missing a day never "breaks" anything in the
-// copy — there are no freezes, countdowns or warnings.
+// copy: there are no freezes, countdowns or warnings. The server owns the count;
+// this holds its last answer so Home, Quests and the calendar agree.
 // ---------------------------------------------------------------------------
 
 export interface CheckInStreak {
@@ -53,40 +54,23 @@ export interface CheckInStreak {
 
 const mondayFirstIndex = (date: Date) => (date.getDay() + 6) % 7;
 
-function initialCheckInStreak(persona: Persona): CheckInStreak {
-  const todayIndex = mondayFirstIndex(new Date());
-  if (persona === 'new') {
-    return { currentDays: 0, week: Array(7).fill(false), todayIndex, checkedInToday: false };
-  }
-  // Returning: checked in every day this week up to (not including) today.
-  return {
-    currentDays: 17,
-    week: Array.from({ length: 7 }, (_, i) => i < todayIndex),
-    todayIndex,
-    checkedInToday: false,
-  };
-}
-
-// In-memory mock store so Home and Quests share the same check-in state.
-// A real backend would persist this; screens only use the functions below.
-const checkInStore: Partial<Record<Persona, CheckInStreak>> = {};
+let checkIn: CheckInStreak = { currentDays: 0, week: Array(7).fill(false), todayIndex: mondayFirstIndex(new Date()), checkedInToday: false };
 const checkInListeners = new Set<() => void>();
 
-export function getCheckInStreak(persona: Persona): CheckInStreak {
-  if (!checkInStore[persona]) checkInStore[persona] = initialCheckInStreak(persona);
-  return checkInStore[persona]!;
+export function getCheckInStreak(): CheckInStreak {
+  return checkIn;
 }
 
-export function checkInToday(persona: Persona): CheckInStreak {
-  const current = getCheckInStreak(persona);
-  if (current.checkedInToday) return current;
-  const week = [...current.week];
-  week[current.todayIndex] = true;
-  checkInStore[persona] = { ...current, week, checkedInToday: true, currentDays: current.currentDays + 1 };
+/** The creator taps "Check in": shown at once, then the server's count replaces it (hydrateCheckIn). */
+export function checkInToday(): CheckInStreak {
+  if (checkIn.checkedInToday) return checkIn;
+  const week = [...checkIn.week];
+  week[checkIn.todayIndex] = true;
+  checkIn = { ...checkIn, week, checkedInToday: true, currentDays: checkIn.currentDays + 1 };
   checkInListeners.forEach((listener) => listener());
   react('checkIn');
   dataBackend?.checkedIn?.();
-  return checkInStore[persona]!;
+  return checkIn;
 }
 
 export function subscribeToCheckIns(listener: () => void): () => void {
@@ -94,14 +78,9 @@ export function subscribeToCheckIns(listener: () => void): () => void {
   return () => checkInListeners.delete(listener);
 }
 
-/**
- * Replaces the check-in state with the creator's real one. A signed-in account
- * has one history, so both personas show it (the New / Returning preview switch
- * is hidden when the app is connected).
- */
+/** Replaces the check-in state with the creator's real one. */
 export function hydrateCheckIn(streak: CheckInStreak): void {
-  checkInStore.new = streak;
-  checkInStore.returning = streak;
+  checkIn = streak;
   checkInListeners.forEach((listener) => listener());
 }
 
@@ -121,28 +100,8 @@ export function markCheckInDay(localDate: string): void {
 }
 
 // ---------------------------------------------------------------------------
-// Voice Studio (Pro)
-// `accuracy` is the voice-clone accuracy score: how closely the AI voice
-// sounds like the creator. It is NOT Creator Match.
-// ---------------------------------------------------------------------------
-
-export interface VoiceCloneSummary {
-  minutesUsed: number;
-  minutesIncluded: number;
-  /** 0–100, or null if the creator hasn't cloned their voice yet. */
-  accuracy: number | null;
-  voiceName: string | null;
-}
-
-export function getVoiceCloneSummary(persona: Persona): VoiceCloneSummary {
-  if (persona === 'new') {
-    return { minutesUsed: 0, minutesIncluded: 150, accuracy: null, voiceName: null };
-  }
-  return { minutesUsed: 118, minutesIncluded: 150, accuracy: 78, voiceName: 'Energetic Narrator' };
-}
-
-// ---------------------------------------------------------------------------
-// Repurpose (Free: FREE_REPURPOSES_PER_WEEK per week; Pro: unlimited)
+// Repurpose: how many this week, and the plan's weekly limit (null = unlimited).
+// Both numbers come from the server, which is also the one that enforces the limit.
 // ---------------------------------------------------------------------------
 
 export interface RepurposeAllowance {
@@ -151,18 +110,17 @@ export interface RepurposeAllowance {
   weeklyLimit: number | null;
 }
 
-// Repurposes used this week (mock store; a real backend would count them)
-const repurposeUsed: Record<Persona, number> = { new: 0, returning: 0 };
+let repurpose: RepurposeAllowance = { usedThisWeek: 0, weeklyLimit: 1 };
 const repurposeListeners = new Set<() => void>();
 
-export function getRepurposeAllowance(persona: Persona, tier: 'free' | 'pro'): RepurposeAllowance {
-  return { usedThisWeek: repurposeUsed[persona], weeklyLimit: tier === 'pro' ? null : FREE_REPURPOSES_PER_WEEK };
+export function getRepurposeAllowance(): RepurposeAllowance {
+  return repurpose;
 }
 
-/** Uses one repurpose. Returns false when a free plan has none left. */
-export function spendRepurpose(persona: Persona, tier: 'free' | 'pro'): boolean {
-  if (tier !== 'pro' && repurposeUsed[persona] >= FREE_REPURPOSES_PER_WEEK) return false;
-  repurposeUsed[persona] += 1;
+/** Uses one repurpose. Returns false when the plan has none left; the server confirms (and may refuse). */
+export function spendRepurpose(): boolean {
+  if (repurpose.weeklyLimit !== null && repurpose.usedThisWeek >= repurpose.weeklyLimit) return false;
+  repurpose = { ...repurpose, usedThisWeek: repurpose.usedThisWeek + 1 };
   repurposeListeners.forEach((l) => l());
   react('repurposed');
   dataBackend?.repurposeSpent?.();
@@ -174,10 +132,9 @@ export function subscribeToRepurposes(listener: () => void): () => void {
   return () => repurposeListeners.delete(listener);
 }
 
-/** The week's real count from the backend (it is the one that enforces the limit). */
-export function hydrateRepurposeUsed(usedThisWeek: number): void {
-  repurposeUsed.new = usedThisWeek;
-  repurposeUsed.returning = usedThisWeek;
+/** The server's count and limit. */
+export function hydrateRepurpose(next: RepurposeAllowance): void {
+  repurpose = next;
   repurposeListeners.forEach((l) => l());
 }
 
@@ -191,9 +148,13 @@ export interface ScheduleSummary {
   nextPostLabel: string | null;
 }
 
-export function getScheduleSummary(persona: Persona): ScheduleSummary {
-  if (persona === 'new') return { scheduledCount: 0, nextPostLabel: null };
-  return { scheduledCount: 1, nextPostLabel: 'Today · 7:30 PM' };
+export function getScheduleSummary(): ScheduleSummary {
+  const upcoming = Array.from(calendarPosts.values())
+    .flat()
+    .filter((p) => p.status === 'scheduled' && p.at >= Date.now())
+    .sort((a, b) => a.at - b.at);
+  const next = upcoming[0];
+  return { scheduledCount: upcoming.length, nextPostLabel: next ? whenLabel(next.at) : null };
 }
 
 // ---------------------------------------------------------------------------
@@ -338,10 +299,10 @@ export const PLAN_POSTS_PER_WEEK = 3;
 
 // ---------------------------------------------------------------------------
 // Calendar (the pop-up behind the Home check-in card)
-// One month at a time: which days had a check-in, what was posted, and what's
-// scheduled. Mock posts are generated relative to today so the calendar always
-// looks current; check-ins come from the check-in store above so tapping
-// "Check in" on Home shows up here straight away.
+// One month at a time: which days had a check-in, and what was posted or is
+// planned. Check-ins come from the check-in store above (so tapping "Check in"
+// on Home shows up here straight away); posts come from the creator's schedule
+// (hydrateCalendarPosts), nothing is made up.
 // ---------------------------------------------------------------------------
 
 export type CalendarPlatform = 'tiktok' | 'instagram' | 'youtube' | 'threads' | 'facebook';
@@ -350,8 +311,14 @@ export interface CalendarPost {
   id: string;
   title: string;
   platform: CalendarPlatform;
+  /** When it goes (or went) out, in milliseconds. */
+  at: number;
+  /** The time of day, e.g. "7:30 PM". */
   time: string;
-  status: 'posted' | 'scheduled' | 'draft';
+  /** "ready" = it is time, and the creator needs to post it by hand and confirm. */
+  status: 'posted' | 'scheduled' | 'ready' | 'draft';
+  /** A link to the live post, when the platform gave one. */
+  url?: string;
 }
 
 export interface CalendarDay {
@@ -379,60 +346,60 @@ export interface CalendarMonth {
 
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
-const MOCK_POSTS: { title: string; platform: CalendarPlatform; time: string }[] = [
-  { title: 'My 5-minute morning reset', platform: 'tiktok', time: '7:30 AM' },
-  { title: '3 small habits that changed my week', platform: 'instagram', time: '8:00 PM' },
-  { title: 'A day in my life, honestly', platform: 'youtube', time: '6:00 PM' },
-  { title: 'How I plan my week in 10 minutes', platform: 'tiktok', time: '7:00 PM' },
-  { title: 'What I wish I knew before starting', platform: 'instagram', time: '7:30 PM' },
-  { title: 'Quick tip: hooks that hold attention', platform: 'threads', time: '12:30 PM' },
-];
-
 const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 const dayKey = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
-export function getCalendarMonth(persona: Persona, year: number, month: number): CalendarMonth {
+const clock = (ms: number) => new Date(ms).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+
+/** "Today · 7:30 PM", "Tomorrow · 6:00 PM", "Sat, 3 Oct · 7:30 PM" */
+export function whenLabel(ms: number, now: number = Date.now()): string {
+  const days = Math.round((startOfDay(new Date(ms)).getTime() - startOfDay(new Date(now)).getTime()) / 86_400_000);
+  const day = days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : days === -1 ? 'Yesterday' : new Date(ms).toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' });
+  return `${day} · ${clock(ms)}`;
+}
+
+/** The creator's posts by day (YYYY-MM-DD), as the calendar loads them. */
+const calendarPosts = new Map<string, CalendarPost[]>();
+
+/**
+ * Puts what the server says about [from, to) into the calendar, replacing whatever was shown for
+ * that window (a post that was moved or cancelled disappears from where it was).
+ */
+export function hydrateCalendarPosts(from: number, to: number, posts: Omit<CalendarPost, 'time'>[]): void {
+  for (const [key, list] of calendarPosts) {
+    const kept = list.filter((p) => p.at < from || p.at >= to);
+    if (kept.length) calendarPosts.set(key, kept);
+    else calendarPosts.delete(key);
+  }
+  for (const p of posts) {
+    const key = dayKey(new Date(p.at));
+    calendarPosts.set(key, [...(calendarPosts.get(key) ?? []), { ...p, time: clock(p.at) }].sort((a, b) => a.at - b.at));
+  }
+  checkInListeners.forEach((listener) => listener());
+}
+
+export function getCalendarMonth(year: number, month: number): CalendarMonth {
   const today = startOfDay(new Date());
-  const streak = getCheckInStreak(persona);
   const first = new Date(year, month, 1);
   const daysCount = new Date(year, month + 1, 0).getDate();
   const startOffset = mondayFirstIndex(first);
-  // Days before today that count toward the current run of check-ins
-  const priorRun = streak.currentDays - (streak.checkedInToday ? 1 : 0);
+  const realDays = checkInMonths.get(`${year}-${month}`);
 
   const days: CalendarDay[] = [];
   for (let d = 1; d <= daysCount; d++) {
     const date = new Date(year, month, d);
     const diff = Math.round((date.getTime() - today.getTime()) / 86400000); // days from today
     const isToday = diff === 0;
-    const isPast = diff < 0;
-
-    // A signed-in creator's real check-ins (loaded month by month) win over the sample run
-    const realDays = checkInMonths.get(`${year}-${month}`);
-    const checkedIn = isToday
-      ? streak.checkedInToday
-      : realDays
-        ? realDays.has(dayKey(date))
-        : isPast && persona === 'returning' && -diff <= priorRun;
-
-    const posts: CalendarPost[] = [];
-    if (persona === 'returning') {
-      const pick = MOCK_POSTS[(d + month * 3) % MOCK_POSTS.length];
-      const weekday = mondayFirstIndex(date);
-      // About three posts a week: Mon / Wed / Fri, within ~10 weeks of today
-      const onPlan = weekday === 0 || weekday === 2 || weekday === 4;
-      if (onPlan && isPast && diff >= -70) {
-        posts.push({ id: `p-${dayKey(date)}`, ...pick, status: 'posted' });
-      } else if (onPlan && !isPast && diff <= 21) {
-        posts.push({ id: `s-${dayKey(date)}`, ...pick, status: 'scheduled' });
-      }
-      if (isToday) {
-        posts.push({ id: `d-${dayKey(date)}-t`, ...MOCK_POSTS[4], time: '7:30 PM', status: 'draft' });
-      }
-    }
-
-    days.push({ key: dayKey(date), day: d, isToday, isPast, checkedIn, posts });
+    const key = dayKey(date);
+    days.push({
+      key,
+      day: d,
+      isToday,
+      isPast: diff < 0,
+      checkedIn: isToday ? checkIn.checkedInToday : realDays ? realDays.has(key) : false,
+      posts: calendarPosts.get(key) ?? [],
+    });
   }
 
   const all = days.flatMap((x) => x.posts);
@@ -462,11 +429,9 @@ export interface WeekSchedule {
   openDays: number;
   /** Posts per platform this week, most first. */
   platformMix: { platform: CalendarPlatform; count: number }[];
-  /** Suggested posting time (mock until real audience data). */
-  bestTime: string;
 }
 
-export function getWeekSchedule(persona: Persona): WeekSchedule {
+export function getWeekSchedule(): WeekSchedule {
   const today = startOfDay(new Date());
   const todayIndex = mondayFirstIndex(today);
   const monday = new Date(today.getFullYear(), today.getMonth(), today.getDate() - todayIndex);
@@ -475,7 +440,7 @@ export function getWeekSchedule(persona: Persona): WeekSchedule {
   for (let i = 0; i < 7; i++) {
     const d = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + i);
     const k = `${d.getFullYear()}-${d.getMonth()}`;
-    if (!cache[k]) cache[k] = getCalendarMonth(persona, d.getFullYear(), d.getMonth());
+    if (!cache[k]) cache[k] = getCalendarMonth(d.getFullYear(), d.getMonth());
     days.push(cache[k].days[d.getDate() - 1]);
   }
   const all = days.flatMap((d) => d.posts);
@@ -490,7 +455,6 @@ export function getWeekSchedule(persona: Persona): WeekSchedule {
     platformMix: (Object.keys(counts) as CalendarPlatform[])
       .map((platform) => ({ platform, count: counts[platform]! }))
       .sort((a, b) => b.count - a.count),
-    bestTime: '7:30 PM',
   };
 }
 
@@ -1359,11 +1323,10 @@ export function hydrateSavedHooks(list: SavedHook[]): void {
 export function resetUserData(): void {
   draftStore = [];
   savedHooks = [];
-  checkInStore.new = undefined;
-  checkInStore.returning = undefined;
+  checkIn = { currentDays: 0, week: Array(7).fill(false), todayIndex: mondayFirstIndex(new Date()), checkedInToday: false };
   checkInMonths.clear();
-  repurposeUsed.new = 0;
-  repurposeUsed.returning = 0;
+  calendarPosts.clear();
+  repurpose = { usedThisWeek: 0, weeklyLimit: 1 };
   draftListeners.forEach((l) => l());
   emitHooks();
   checkInListeners.forEach((l) => l());

@@ -46,7 +46,7 @@ export function MobileWebBar({
 }) {
   const [notesOpen, setNotesOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const unread = useUnreadNotifications(persona, tier);
+  const unread = useUnreadNotifications();
   // Small phones: just the word, so the mascot and buttons fit beside it
   const narrow = useWindowDimensions().width < 380;
 
@@ -94,7 +94,7 @@ export function MobileWebBar({
         ) : null}
       </View>
 
-      <NotificationsSheet visible={notesOpen} onClose={() => setNotesOpen(false)} persona={persona} tier={tier} />
+      <NotificationsSheet visible={notesOpen} onClose={() => setNotesOpen(false)} />
       <MenuDrawer open={menuOpen} onClose={() => setMenuOpen(false)}>
         {menu(() => setMenuOpen(false))}
       </MenuDrawer>

@@ -22,8 +22,9 @@ import { Text } from '../ui/AppText';
 import { AppButton } from '../ui/AppButton';
 import { PlatformLogo } from '../onboarding/PlatformLogo';
 import { ds } from '../../theme/colors';
-import { getCalendarMonth, subscribeToCheckIns, type CalendarDay, type Persona } from '../../data';
+import { getCalendarMonth, subscribeToCheckIns, type CalendarDay } from '../../data';
 import { loadCheckInMonth } from '../../backend/sync';
+import { loadCalendarMonth } from '../../backend/calendar';
 
 // The calendar behind the Home check-in card: a glass sheet that slides up.
 // Month by month (swipe or arrows), each day shows check-ins, posts and
@@ -44,7 +45,6 @@ const PLATFORM_NAMES: Record<string, string> = {
 interface CalendarSheetProps {
   visible: boolean;
   onClose: () => void;
-  persona: Persona;
   onPlanPost?: () => void;
 }
 
@@ -134,7 +134,7 @@ function DayDetails({ day, label, onPlanPost }: { day: CalendarDay; label: strin
               ]}
             >
               <Text style={[styles.statusText, { color: p.status === 'posted' ? ds.greenFill : p.status === 'draft' ? ds.text2 : ds.purple }]}>
-                {p.status === 'posted' ? 'Posted' : p.status === 'draft' ? 'Draft' : 'Scheduled'}
+                {p.status === 'posted' ? 'Posted' : p.status === 'draft' ? 'Draft' : p.status === 'ready' ? 'Ready to post' : 'Scheduled'}
               </Text>
             </View>
           </Animated.View>
@@ -161,7 +161,7 @@ function DayDetails({ day, label, onPlanPost }: { day: CalendarDay; label: strin
   );
 }
 
-export function CalendarSheet({ visible, onClose, persona, onPlanPost }: CalendarSheetProps) {
+export function CalendarSheet({ visible, onClose, onPlanPost }: CalendarSheetProps) {
   const insets = useSafeAreaInsets();
   const { height: screenH } = useWindowDimensions();
   const now = new Date();
@@ -175,11 +175,13 @@ export function CalendarSheet({ visible, onClose, persona, onPlanPost }: Calenda
   useEffect(() => subscribeToCheckIns(() => setVersion((v) => v + 1)), []);
 
   const target = new Date(now.getFullYear(), now.getMonth() + offset, 1);
-  const month = getCalendarMonth(persona, target.getFullYear(), target.getMonth());
-  // A signed-in creator's real check-ins for the month on show (a no-op without a backend)
+  const month = getCalendarMonth(target.getFullYear(), target.getMonth());
+  // The creator's real check-ins and posts for the month on show
   const [shownYear, shownMonth] = [target.getFullYear(), target.getMonth()];
   useEffect(() => {
-    if (visible) void loadCheckInMonth(shownYear, shownMonth);
+    if (!visible) return;
+    void loadCheckInMonth(shownYear, shownMonth);
+    void loadCalendarMonth(shownYear, shownMonth);
   }, [visible, shownYear, shownMonth]);
   const today = month.days.find((d) => d.isToday);
   const selected = month.days.find((d) => d.key === selectedKey) ?? today ?? null;

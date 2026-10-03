@@ -31,7 +31,6 @@ import { CaptionScreen } from './src/screens/CaptionScreen';
 import { AudienceBreakdownScreen } from './src/screens/AudienceBreakdownScreen';
 import { PostPerformanceScreen } from './src/screens/PostPerformanceScreen';
 import { PlatformGrowthScreen } from './src/screens/PlatformGrowthScreen';
-import { VoiceStudioScreen } from './src/screens/VoiceStudioScreen';
 import { HookStudioScreen } from './src/screens/HookStudioScreen';
 import { ScreenTransitionContainer, ScreenTransitionType } from './src/components/ScreenTransitionContainer';
 import { EdgeSwipeBackWrapper } from './src/components/EdgeSwipeBackWrapper';
@@ -95,7 +94,7 @@ import {
 } from './src/backend/accounts';
 import { notify, useNotice } from './src/backend/notice';
 import { listTestAccounts, signInAsTestAccount } from './src/backend/testAccounts';
-import type { TestAccount } from './frontend/shared/types/phase1';
+import type { QuestPlace, TestAccount } from './frontend/shared/types/phase1';
 
 type Screen =
   | 'welcome'
@@ -122,7 +121,6 @@ type Screen =
   | 'audience-breakdown'
   | 'post-performance'
   | 'platform-growth'
-  | 'voice-studio'
   | 'hook-studio';
 
 // What the app holds before sign-in and after sign-out, until the creator's own profile loads.
@@ -194,8 +192,6 @@ export default function App() {
   const [composerFilmStyle, setComposerFilmStyle] = useState<FilmStyle | undefined>(undefined);
   // A post sent from Growth into the Repurpose video studio
   const [studioVideo, setStudioVideo] = useState<StudioVideo | undefined>(undefined);
-  // A script sent from Script into Voice Studio
-  const [voiceScript, setVoiceScript] = useState<string | undefined>(undefined);
   const [composerIdeaGoal, setComposerIdeaGoal] = useState<{ goal?: IdeaGoal; hook?: string; caption?: string; tags?: string[] } | null>(null);
   const [composerIdeaFormat, setComposerIdeaFormat] = useState<'short_video' | 'carousel' | 'image' | 'long_video' | 'text' | undefined>(undefined);
   const [composerQuestDraft, setComposerQuestDraft] = useState<{
@@ -208,18 +204,11 @@ export default function App() {
     requirements?: string[];
     xpReward?: number;
   } | null>(null);
-  const [composerAttachedAudio, setComposerAttachedAudio] = useState<{
-    title: string;
-    voiceName: string;
-    duration: string;
-    speed: string;
-  } | null>(null);
 
   const handleUseIdea = (title: string, format?: string, goal?: IdeaGoal, hook?: string) => {
     setComposerQuestDraft(null);
     setComposerIdeaGoal(goal ? { goal, hook } : null);
     setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
-    setComposerAttachedAudio(null);
     if (title) setComposerIdeaTitle(title);
     if (format) {
       const f = format.toLowerCase();
@@ -248,6 +237,7 @@ export default function App() {
       return { ...next, tier: prev.tier, userPersona: prev.userPersona };
     });
   const userPersona: UserPersona = userProfile.userPersona;
+  const editProfile = (updated: UserProfileData) => setUserProfile((prev) => ({ ...prev, ...updated }));
 
   // ─── Backend state ────────────────────────────────────────────────────────
   // Whether we're still restoring the saved sign-in at launch (a holding page shows meanwhile)
@@ -772,8 +762,6 @@ export default function App() {
         return 'growth';
       case 'platform-growth':
         return 'growth';
-      case 'voice-studio':
-        return 'create';
       case 'hook-studio':
         return 'create';
       case 'schedule':
@@ -790,11 +778,11 @@ export default function App() {
     create: 'create', 'idea-detail': 'create', composer: 'create', 'content-angle': 'create', script: 'create', caption: 'create',
     quests: 'quests', 'challenge-detail': 'quests',
     growth: 'growth', 'audience-breakdown': 'growth', 'post-performance': 'growth', 'platform-growth': 'growth',
-    schedule: 'schedule', repurpose: 'repurpose', 'hook-studio': 'hook-studio', 'voice-studio': 'voice-studio',
+    schedule: 'schedule', repurpose: 'repurpose', 'hook-studio': 'hook-studio',
   };
   const SCREEN_FOR: Record<SidebarId, Screen> = {
     home: 'dashboard', create: 'create', quests: 'quests', growth: 'growth',
-    schedule: 'schedule', repurpose: 'repurpose', 'hook-studio': 'hook-studio', 'voice-studio': 'voice-studio',
+    schedule: 'schedule', repurpose: 'repurpose', 'hook-studio': 'hook-studio',
   };
   const inApp = currentScreen in SIDEBAR_FOR;
   // Side menu: desktop, and tablets in a browser. Phones in a browser get the
@@ -816,7 +804,7 @@ export default function App() {
   // Desktop web app: a top bar on every signed-in page, and the Today panel
   // on the right of the main pages when the window is wide enough
   const { width: windowW } = useWindowDimensions();
-  const MAIN_PAGES: Screen[] = ['dashboard', 'create', 'quests', 'growth', 'schedule', 'repurpose', 'hook-studio', 'voice-studio'];
+  const MAIN_PAGES: Screen[] = ['dashboard', 'create', 'quests', 'growth', 'schedule', 'repurpose', 'hook-studio'];
   // Every signed-in page except the studios (they have their own panel) gets the Today panel
   const RAIL_PAGES: Screen[] = [
     'dashboard', 'create', 'quests', 'growth', 'schedule',
@@ -825,7 +813,7 @@ export default function App() {
   ];
   const wideEnough = windowW >= 1360;
   const showRail = showSidebar && RAIL_PAGES.includes(currentScreen) && wideEnough;
-  const STUDIO_FOR: Partial<Record<Screen, StudioKind>> = { repurpose: 'repurpose', 'hook-studio': 'hook', 'voice-studio': 'voice' };
+  const STUDIO_FOR: Partial<Record<Screen, StudioKind>> = { repurpose: 'repurpose', 'hook-studio': 'hook' };
   const studioRail = showSidebar && wideEnough ? STUDIO_FOR[currentScreen] : undefined;
   const PAGE_TITLE: Partial<Record<Screen, string>> = {
     composer: 'New post', 'idea-detail': 'Idea', 'content-angle': 'Ideas', script: 'Script', caption: 'Caption',
@@ -847,6 +835,33 @@ export default function App() {
   };
   setComposerOpener(openBlankComposer);
 
+  // Where a quest's button takes the creator
+  const openQuestPlace = (place: QuestPlace) => {
+    switch (place) {
+      case 'create':
+        return navigateTo('create');
+      case 'ideas':
+        return navigateTo('content-angle');
+      case 'script':
+        return navigateTo('script');
+      case 'composer':
+        return openBlankComposer();
+      case 'schedule':
+        return navigateTo('schedule');
+      case 'growth':
+        return navigateTo('growth');
+      case 'repurpose':
+        setStudioVideo(undefined);
+        return navigateTo('repurpose');
+      case 'hook-studio':
+        return navigateTo('hook-studio');
+      case 'accounts':
+        return setShowAccountsFromNote(true);
+      case 'challenge':
+        return navigateTo('challenge-detail');
+    }
+  };
+
   // The side menu (desktop/tablet), also shown in the phone menu drawer
   const renderMenu = (close?: () => void) => (
     <AppSidebar
@@ -866,7 +881,7 @@ export default function App() {
     composer: 'working', script: 'working', caption: 'working',
     quests: 'determined', 'mission-detail': 'determined', 'challenge-detail': 'determined',
     growth: 'happy', 'audience-breakdown': 'happy', 'post-performance': 'love', 'platform-growth': 'happy',
-    schedule: 'calm', repurpose: 'idea', 'hook-studio': 'idea', 'voice-studio': 'happy', 'jarvis-pro': 'cool',
+    schedule: 'calm', repurpose: 'idea', 'hook-studio': 'idea', 'jarvis-pro': 'cool',
   };
   // Jarvis chat: the button shows on every signed-in page on wide screens, and
   // on the main pages on phones (inner pages have their own bottom buttons).
@@ -891,7 +906,6 @@ export default function App() {
     schedule: 'Plan your posts here and I’ll remind you when it’s time.',
     repurpose: 'Turn one video into posts for every platform.',
     'hook-studio': 'A strong first line keeps people watching. Let’s find yours.',
-    'voice-studio': 'Teach me how you talk so everything sounds like you.',
   };
   React.useEffect(() => {
     preloadMascot();
@@ -1101,59 +1115,40 @@ export default function App() {
         {currentScreen === 'dashboard' && (
           (
             <DashboardScreen
-              tier={userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free'}
-              onOpenVoiceStudio={() => {
-                setVoiceScript(undefined);
-                navigateTo('voice-studio');
-              }}
               onOpenHookStudio={() => navigateTo('hook-studio')}
               onLogout={handleLogout}
               onStartMission={() => navigateTo('mission-detail')}
-              onOpenQuest={() => navigateTo('quests')}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-              userPersona={userPersona}
               onOpenSchedule={() => navigateTo('schedule')}
+              onOpenAccounts={() => setShowAccountsFromNote(true)}
               onNavigateTab={handleTabNavigation}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
+              onSaveProfile={editProfile}
             />
           )
         )}
 
         {currentScreen === 'mission-detail' && (
-          (
-            <MissionDetailScreen
-              onBack={() => navigateTo(previousScreen ? previousScreen : 'quests')}
-              userPersona={userPersona}
-              onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-              onLogout={handleLogout}
-              onOpenCreateIdea={() => navigateTo('create')}
-              onOpenScript={(title) => {
-                setSelectedIdeaTitle(title);
-                navigateTo('script');
-              }}
-              onOpenIdeaAngle={() => navigateTo('content-angle')}
-              onOpenPostComposer={(title, platform) => {
-                if (title) setComposerIdeaTitle(title);
-                setComposerIdeaGoal(null);
-                setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
-                navigateTo('composer');
-              }}
-              onNavigateTab={handleTabNavigation}
-              userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
-            />
-          )
+          <MissionDetailScreen
+            onBack={() => navigateTo(previousScreen ? previousScreen : 'quests')}
+            onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+            onLogout={handleLogout}
+            onOpenPlace={openQuestPlace}
+            onOpenScript={(title) => {
+              setSelectedIdeaTitle(title);
+              navigateTo('script');
+            }}
+            onOpenPostComposer={(title) => openBlankComposer(title)}
+            onNavigateTab={handleTabNavigation}
+            userProfile={userProfile}
+            onSaveProfile={editProfile}
+          />
         )}
 
         {currentScreen === 'create' && (
           (
             <CreateScreen
-              tier={userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free'}
-              onOpenVoiceStudio={() => {
-                setVoiceScript(undefined);
-                navigateTo('voice-studio');
-              }}
+              tier={desktopTier}
               onOpenHookStudio={() => navigateTo('hook-studio')}
               onLogout={handleLogout}
               onOpenSchedule={() => navigateTo('schedule')}
@@ -1185,7 +1180,7 @@ export default function App() {
               onNavigateTab={handleTabNavigation}
               userPersona={userPersona}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
+              onSaveProfile={editProfile}
             />
           )
         )}
@@ -1193,21 +1188,20 @@ export default function App() {
         {currentScreen === 'schedule' && (
           (
             <ScheduleScreen
-              tier={userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free'}
-              userPersona={userPersona}
-              onBack={() => navigateTo(previousScreen ? previousScreen : 'dashboard')}
+              tier={desktopTier}
               onLogout={handleLogout}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onOpenCreateIdea={() => navigateTo('create')}
               onOpenPostComposer={(title, platform) => {
                 if (title) setComposerIdeaTitle(title);
                 setComposerIdeaGoal(null);
-                setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
+                setComposerIdeaPlatform(platform);
+                setComposerFilmStyle(undefined);
                 navigateTo('composer');
               }}
               onNavigateTab={handleTabNavigation}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
+              onSaveProfile={editProfile}
             />
           )
         )}
@@ -1215,7 +1209,7 @@ export default function App() {
         {currentScreen === 'growth' && (
           (
             <GrowthScreen
-              tier={userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free'}
+              tier={desktopTier}
               onBackToDashboard={() => navigateTo('dashboard')}
               onLogout={handleLogout}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
@@ -1233,7 +1227,7 @@ export default function App() {
                 navigateTo('repurpose');
               }}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
+              onSaveProfile={editProfile}
             />
           )
         )}
@@ -1248,53 +1242,32 @@ export default function App() {
             onLogout={handleLogout}
             onNavigateTab={handleTabNavigation}
             userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
+            onSaveProfile={editProfile}
           />
         )}
 
         {currentScreen === 'quests' && (
-          (
-            <QuestsScreen
-              tier={userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free'}
-              onOpenVoiceStudio={() => {
-                setVoiceScript(undefined);
-                navigateTo('voice-studio');
-              }}
-              onOpenHookStudio={() => navigateTo('hook-studio')}
-              onBackToDashboard={() => navigateTo('dashboard')}
-              onLogout={handleLogout}
-              onOpenMissionDetail={() => navigateTo('mission-detail')}
-              onOpenCommunityChallenge={() => navigateTo('challenge-detail')}
-              onOpenSchedule={() => navigateTo('schedule')}
-              onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-              userPersona={userPersona}
-              onNavigateTab={handleTabNavigation}
-              userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
-            />
-          )
+          <QuestsScreen
+            onLogout={handleLogout}
+            onOpenMissionDetail={() => navigateTo('mission-detail')}
+            onOpenCommunityChallenge={() => navigateTo('challenge-detail')}
+            onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+            onOpenPlace={openQuestPlace}
+            onNavigateTab={handleTabNavigation}
+            userProfile={userProfile}
+            onSaveProfile={editProfile}
+          />
         )}
 
         {currentScreen === 'challenge-detail' && (
           <ChallengeDetailScreen
             onBackToDashboard={() => navigateTo('quests')}
-            userPersona={userPersona}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onLogout={handleLogout}
-            onOpenComposer={(idea?: string, platform?: string, questDraft?: any) => {
-              if (idea) setComposerIdeaTitle(idea);
-              setComposerIdeaGoal(null);
-                setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
-              if (questDraft) {
-                setComposerQuestDraft(questDraft);
-              } else {
-                setComposerQuestDraft(null);
-              }
-              navigateTo('composer');
-            }}
+            onOpenComposer={(idea) => openBlankComposer(idea)}
             onNavigateTab={handleTabNavigation}
             userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
+            onSaveProfile={editProfile}
           />
         )}
 
@@ -1314,7 +1287,7 @@ export default function App() {
             }}
             onNavigateTab={handleTabNavigation}
             userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
+            onSaveProfile={editProfile}
           />
         )}
 
@@ -1326,22 +1299,20 @@ export default function App() {
             initialFilmStyle={composerFilmStyle}
             questDraft={composerQuestDraft}
             initialFormat={composerIdeaFormat}
-            attachedAudio={composerAttachedAudio}
-            onClearAttachedAudio={() => setComposerAttachedAudio(null)}
             onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
             onLogout={handleLogout}
             onOpenSchedule={() => navigateTo('schedule')}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onNavigateTab={handleTabNavigation}
             userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
+            onSaveProfile={editProfile}
           />
         )}
 
         {currentScreen === 'content-angle' && (
           (
             <ContentAngleScreen
-              tier={userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free'}
+              tier={desktopTier}
               onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
               onLogout={handleLogout}
               onOpenSchedule={() => navigateTo('schedule')}
@@ -1349,7 +1320,7 @@ export default function App() {
               onUseIdea={handleUseIdea}
               onNavigateTab={handleTabNavigation}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
+              onSaveProfile={editProfile}
             />
           )
         )}
@@ -1357,11 +1328,7 @@ export default function App() {
         {currentScreen === 'script' && (
           (
             <ScriptScreen
-              tier={userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free'}
-              onOpenVoiceStudio={(script) => {
-                setVoiceScript(script);
-                navigateTo('voice-studio');
-              }}
+              tier={desktopTier}
               ideaTitle={selectedIdeaTitle}
               format={composerIdeaFormat}
               onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
@@ -1376,7 +1343,7 @@ export default function App() {
               }}
               onNavigateTab={handleTabNavigation}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
+              onSaveProfile={editProfile}
             />
           )
         )}
@@ -1384,7 +1351,7 @@ export default function App() {
         {currentScreen === 'caption' && (
           (
             <CaptionScreen
-              tier={userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free'}
+              tier={desktopTier}
               ideaTitle={selectedIdeaTitle}
               onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
               onLogout={handleLogout}
@@ -1401,7 +1368,7 @@ export default function App() {
               }}
               onNavigateTab={handleTabNavigation}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
+              onSaveProfile={editProfile}
             />
           )
         )}
@@ -1410,7 +1377,7 @@ export default function App() {
           ((
             // Free and Pro share the glass Repurpose studio (Pro: unlimited + plan the order)
             <RepurposeScreen
-              tier={userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free'}
+              tier={desktopTier}
               ideaTitle={selectedIdeaTitle}
               userProfile={userProfile}
               userPersona={userPersona}
@@ -1432,26 +1399,6 @@ export default function App() {
             />
           ))}
 
-        {currentScreen === 'voice-studio' && (
-          <VoiceStudioScreen
-            initialScript={voiceScript}
-            userPersona={userPersona}
-            onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
-            onLogout={handleLogout}
-            onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-            onOpenPostComposer={(prefillTitle, attachedAudio) => {
-              if (prefillTitle) setComposerIdeaTitle(prefillTitle);
-              setComposerIdeaGoal(null);
-                setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
-              if (attachedAudio) setComposerAttachedAudio(attachedAudio);
-              navigateTo('composer');
-            }}
-            onNavigateTab={handleTabNavigation}
-            userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
-          />
-        )}
-
         {currentScreen === 'hook-studio' && (
           <HookStudioScreen
             ideaTitle={selectedIdeaTitle}
@@ -1468,13 +1415,13 @@ export default function App() {
             }}
             onNavigateTab={handleTabNavigation}
             userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
+            onSaveProfile={editProfile}
           />
         )}
 
         {currentScreen === 'platform-growth' && (
           <PlatformGrowthScreen
-            tier={userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free'}
+            tier={desktopTier}
             onBack={() => navigateTo(previousScreen ? previousScreen : 'growth')}
             onOpenRepurpose={() => {
               setStudioVideo(undefined);
@@ -1496,13 +1443,13 @@ export default function App() {
             onOpenContentAngle={() => navigateTo('content-angle')}
             onNavigateTab={handleTabNavigation}
             userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
+            onSaveProfile={editProfile}
           />
         )}
 
         {currentScreen === 'post-performance' && (
           <PostPerformanceScreen
-            tier={userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free'}
+            tier={desktopTier}
             onBack={() => navigateTo(previousScreen ? previousScreen : 'growth')}
             onMakeMoreLikeThis={(video) => {
               setStudioVideo(video);
@@ -1534,13 +1481,13 @@ export default function App() {
             onOpenContentAngle={() => navigateTo('content-angle')}
             onNavigateTab={handleTabNavigation}
             userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
+            onSaveProfile={editProfile}
           />
         )}
 
         {currentScreen === 'audience-breakdown' && (
           <AudienceBreakdownScreen
-            tier={userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free'}
+            tier={desktopTier}
             onBack={() => navigateTo('growth')}
             onLogout={handleLogout}
             onOpenSchedule={() => navigateTo('schedule')}
@@ -1562,13 +1509,13 @@ export default function App() {
             }}
             onNavigateTab={handleTabNavigation}
             userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
+            onSaveProfile={editProfile}
           />
         )}
           </ScreenTransitionContainer>
         </EdgeSwipeBackWrapper>
             </View>
-            {studioRail && <StudioRail kind={studioRail} persona={desktopPersona} tier={desktopTier} />}
+            {studioRail && <StudioRail kind={studioRail} />}
             {showRail && (
               <TodayRail
                 persona={desktopPersona}
@@ -1587,7 +1534,7 @@ export default function App() {
           onClose={() => setShowAccountsFromNote(false)}
           onLogout={handleLogout}
           initialProfile={userProfile}
-          onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
+          onSaveProfile={editProfile}
         />
 
         <UserProfileModal
@@ -1595,7 +1542,7 @@ export default function App() {
           onClose={() => setShowProfileFromMenu(false)}
           onLogout={handleLogout}
           initialProfile={userProfile}
-          onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
+          onSaveProfile={editProfile}
         />
 
         {/* Ask Jarvis from anywhere in the app; Ghost does the jobs */}

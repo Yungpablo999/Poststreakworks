@@ -450,10 +450,6 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
           backgroundColor="transparent"
           onOpenJarvisPro={onOpenJarvisPro}
           userPersona={userPersona || userProfile?.userPersona}
-          onOpenNotifications={() => {
-            triggerModalPop();
-            setShowNotificationModal(true);
-          }}
           onOpenProfile={() => {
             triggerModalPop();
             setShowProfileModal(true);

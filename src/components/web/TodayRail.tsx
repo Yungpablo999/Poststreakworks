@@ -129,7 +129,7 @@ function YourWeek({ persona, onPlan }: { persona: 'new' | 'returning'; onPlan: (
     const days = [];
     for (let i = 0; i < 7; i++) {
       const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dow + i);
-      const m = getCalendarMonth(persona, d.getFullYear(), d.getMonth());
+      const m = getCalendarMonth(d.getFullYear(), d.getMonth());
       days.push({ date: d, info: m.days.find((x) => x.day === d.getDate()) });
     }
     return days;

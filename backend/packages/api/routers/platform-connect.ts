@@ -6,6 +6,7 @@ import {
   disconnectTikTok,
   listConnectedAccounts,
   loadAccountSnapshots,
+  notify,
   startTikTokConnect,
   syncTikTok,
 } from "@poststreak/workflows";
@@ -85,6 +86,14 @@ export const platformConnectRouter = createTRPCRouter({
       try {
         const account = await completeTikTokConnect(deps, { userId: ctx.user.id, code: input.code, state: input.state });
         await ctx.track("platform_connected", { platform: "tiktok", status: account.status });
+        await notify(ctx.user.id, {
+          key: "connected:tiktok",
+          type: "system",
+          kind: "link",
+          title: "Your TikTok is connected",
+          body: "PostStreak reads your numbers once a day.",
+          action: { label: "See your growth", target: "platform-growth" },
+        });
         return { connected: true as const, account };
       } catch (err) {
         connectErrorToTrpc(err);

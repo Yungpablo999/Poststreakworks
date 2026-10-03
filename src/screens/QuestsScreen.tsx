@@ -1,30 +1,14 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
+import { ActivityIndicator, Platform, SafeAreaView, ScrollView, StatusBar, StyleSheet, View } from 'react-native';
+import Reanimated, { FadeInUp } from 'react-native-reanimated';
+import * as Haptics from 'expo-haptics';
 import { TourTarget, useTourScroll } from '../components/tour/GhostTour';
 import { ResponsiveColumns } from '../components/ui/ResponsiveColumns';
-import {
-  StyleSheet,
-  View,
-  Pressable,
-  ScrollView,
-  Platform,
-  Image,
-  SafeAreaView,
-  StatusBar,
-  Animated,
-  Modal,
-} from 'react-native';
 import { Text } from '../components/ui/AppText';
 import { CheckInCard } from '../components/CheckInCard';
-import Svg, { Path, Circle, Rect } from 'react-native-svg';
-import * as Haptics from 'expo-haptics';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
-import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { FreeAppHeader } from '../components/FreeAppHeader';
-import { sFont, isNarrowScreen, isSmallScreen, sPadding } from '../utils/responsive';
-
-import type { UserPersona } from '../types/account';
-import Reanimated, { FadeInUp } from 'react-native-reanimated';
 import { GlassBackdrop } from '../components/glass/GlassBackdrop';
 import { FitLines } from '../components/ui/FitLines';
 import { JarvisOrb } from '../components/JarvisOrb';
@@ -32,6 +16,15 @@ import { CalendarSheet } from '../components/home/CalendarSheet';
 import { ProUpsellCard } from '../components/home/ProUpsellCard';
 import { TodayQuestCard, QuestRow, LevelCard, ChallengeCard, JarvisTip } from '../components/quests/QuestBlocks';
 import { ds } from '../theme/colors';
+import { sPadding } from '../utils/responsive';
+import { compactCount } from '../utils/format';
+import { joinChallenge, loadQuestBoard, useQuestBoard } from '../backend/quests';
+import { useAsync } from '../hooks/useAsync';
+import type { QuestPlace } from '../../frontend/shared/types/phase1';
+
+// Quests. Everything here is the server's view of what the creator has really done: their level,
+// today's quest and its steps, the list of small quests, and this week's challenge. The app
+// never ticks a quest off; it reloads the board when the creator comes back to this page.
 
 interface QuestsScreenProps {
   onBackToDashboard?: () => void;
@@ -39,162 +32,53 @@ interface QuestsScreenProps {
   onNavigateTab?: (tab: TabType) => void;
   onOpenMissionDetail?: () => void;
   onOpenCommunityChallenge?: () => void;
-  onOpenSchedule?: () => void;
   onOpenJarvisPro?: () => void;
-  /** Pro members: Pro quests instead of the upgrade card. */
-  tier?: 'free' | 'pro';
-  onOpenVoiceStudio?: () => void;
-  onOpenHookStudio?: () => void;
-  userPersona?: UserPersona;
-  userProfile?: UserProfileData;
+  /** Where a quest's button takes the creator (the Create page, the schedule, the accounts…). */
+  onOpenPlace: (place: QuestPlace) => void;
+  userProfile: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
 }
 
 export const QuestsScreen: React.FC<QuestsScreenProps> = ({
-  onBackToDashboard,
-  onLogout,
   onNavigateTab,
   onOpenMissionDetail,
   onOpenCommunityChallenge,
-  onOpenSchedule,
   onOpenJarvisPro,
-  tier = 'free',
-  onOpenVoiceStudio,
-  onOpenHookStudio,
-  userPersona,
+  onOpenPlace,
+  onLogout,
   userProfile,
   onSaveProfile,
 }) => {
   // Lets Ghost's tour scroll this page
   const tourScroll = useTourScroll();
-  const isNewUser = (userPersona || userProfile?.userPersona) === 'new';
-  const isDark = false;
-  const [activeTab, setActiveTab] = useState<TabType>('quests');
-  const [completedQuests, setCompletedQuests] = useState<string[]>([]);
-
-  // Modal States
-  const [showCelebrationModal, setShowCelebrationModal] = useState(false);
-  const [celebrationTitle, setCelebrationTitle] = useState('Quest Started!');
-  const [celebrationSubtitle, setCelebrationSubtitle] = useState('Your quest progress is now active.');
-  const [celebrationSpeech, setCelebrationSpeech] = useState('Ghost says: You got this Amara!');
-  const [celebrationBadge, setCelebrationBadge] = useState('QUEST ACTIVE');
-  const [celebrationXp, setCelebrationXp] = useState(60);
-
-  const [showNotificationModal, setShowNotificationModal] = useState(false);
-  const [showProfileModal, setShowProfileModal] = useState(false);
+  const isNewUser = userProfile.userPersona === 'new';
+  const pro = userProfile.tier === 'pro' || userProfile.tier === 'founding';
+  const [showProfile, setShowProfile] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
 
-  // Animations
-  const modalPopScale = useRef(new Animated.Value(0.88)).current;
+  const board = useQuestBoard();
+  // Each time this page opens it asks the server where the creator is
+  const { failed, reload } = useAsync(loadQuestBoard, []);
 
-
-  const triggerModalPop = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    }
-    modalPopScale.setValue(0.88);
-    Animated.spring(modalPopScale, {
-      toValue: 1,
-      useNativeDriver: true,
-      speed: 26,
-      bounciness: 12,
-    }).start();
+  const tap = () => {
+    if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
   };
 
-  const handleTabPress = (tab: TabType) => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    setActiveTab(tab);
-    if (onNavigateTab) {
-      onNavigateTab(tab);
-    }
-  };
-
-  const handleStartTodayQuest = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    }
-    if (onOpenMissionDetail) {
-      onOpenMissionDetail();
-    } else if (onNavigateTab) {
-      onNavigateTab('mission-detail' as TabType);
-    }
-  };
-
-  const handleJoinCommunityChallenge = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    }
-    if (onOpenCommunityChallenge) {
-      onOpenCommunityChallenge();
-    } else if (onNavigateTab) {
-      onNavigateTab('challenge-detail' as TabType);
-    }
-  };
-
-  const handleStartStarterQuest = (questId: string, title: string, xp: number, routeTab?: TabType) => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    }
-    if (routeTab && onNavigateTab) {
-      onNavigateTab(routeTab);
-      return;
-    }
-
-    setCelebrationTitle('Quest Started!');
-    setCelebrationSubtitle(`"${title}" is now active in your studio.`);
-    setCelebrationSpeech(
-      isNewUser
-        ? 'Ghost says: Complete this quest today to level up your streak!'
-        : 'Ghost says: Complete this quest today to level up your Creator Level!'
-    );
-    setCelebrationBadge('QUEST ACTIVE');
-    setCelebrationXp(xp);
-    setShowCelebrationModal(true);
-  };
-
-  const handleExplorePro = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    }
-    if (onOpenJarvisPro) {
-      onOpenJarvisPro();
-    } else if (onNavigateTab) {
-      onNavigateTab('growth');
-    }
+  const challenge = board?.challenge;
+  const openChallenge = async () => {
+    tap();
+    if (challenge && !challenge.joined) await joinChallenge();
+    onOpenCommunityChallenge?.();
   };
 
   return (
-    <SafeAreaView style={[styles.safeArea, isDark && { backgroundColor: '#0C0A12' }]}>
-      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={isDark ? "#0C0A12" : "#FAF8F5"} />
-      <View style={[styles.container, isDark && { backgroundColor: '#0C0A12' }]}>
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
+      <View style={styles.container}>
         <GlassBackdrop />
-        {/* 1. TOP AIRY HEADER BAR */}
-        <FreeAppHeader
-          backgroundColor="transparent"
-          onOpenJarvisPro={onOpenJarvisPro}
-          userPersona={userPersona}
-          onOpenNotifications={() => {
-            triggerModalPop();
-            setShowNotificationModal(true);
-          }}
-          onOpenProfile={() => {
-            triggerModalPop();
-            setShowProfileModal(true);
-          }}
-          userProfile={userProfile}
-          isDark={isDark}
-        />
+        <FreeAppHeader backgroundColor="transparent" onOpenJarvisPro={onOpenJarvisPro} onOpenProfile={() => setShowProfile(true)} userProfile={userProfile} />
 
-        {/* 2. MAIN SCROLLABLE CONTENT */}
-        <ScrollView
-          {...tourScroll}
-          style={{ flex: 1 }}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-          bounces={true}
-        >
+        <ScrollView {...tourScroll} style={{ flex: 1 }} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} bounces>
           {/* HEADLINE — same two-line structure on every screen size */}
           <Reanimated.View entering={FadeInUp.duration(500)} style={styles.headline}>
             <FitLines
@@ -206,1304 +90,149 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
             />
           </Reanimated.View>
 
-          {/* Desktop: today's quest and check-in on the left, the rest beside them */}
-          <ResponsiveColumns split={2} gap={16}>
-          {/* 1. TODAY'S QUEST */}
-          <Reanimated.View entering={FadeInUp.delay(100).duration(550)}>
-            <TourTarget id="quest-card">
-            <TodayQuestCard
-              title={isNewUser ? 'Complete your first Studio session' : 'Share one post today'}
-              body={
-                isNewUser
-                  ? 'Try one Studio tool to get your first idea ready.'
-                  : 'Whenever suits you. One post keeps your rhythm going.'
-              }
-              xp={80}
-              done={completedQuests.includes('today_quest')}
-              onStart={handleStartTodayQuest}
-            />
-            </TourTarget>
-          </Reanimated.View>
-
-          {/* 2. LEVEL (returning only) + CHECK-IN */}
-          <Reanimated.View entering={FadeInUp.delay(200).duration(550)} style={styles.stack}>
-            {!isNewUser && <LevelCard level={12} xp="8.4k" active={3} progress={0.65} />}
-            <CheckInCard
-              persona={isNewUser ? 'new' : 'returning'}
-              isDark={isDark}
-              onOpenCalendar={() => setCalendarOpen(true)}
-            />
-          </Reanimated.View>
-
-          {/* 3. QUESTS LIST */}
-          <Reanimated.View entering={FadeInUp.delay(300).duration(550)}>
-            <Text style={styles.sectionLabel}>{isNewUser ? 'Starter quests' : 'This week'}</Text>
-            <View style={styles.stack}>
-              <QuestRow
-                icon="idea"
-                title="Create your next post idea"
-                xp={60}
-                cadence="Daily"
-                action="Start"
-                onPress={() => handleStartStarterQuest('q1', 'Create your next post idea', 60, 'create')}
-              />
-              <QuestRow
-                icon="audience"
-                title="See what your audience likes"
-                xp={90}
-                cadence="Suggested"
-                action="View"
-                onPress={() => handleStartStarterQuest('q2', 'See what your audience likes', 90, 'growth')}
-              />
-              <QuestRow
-                icon="calendar"
-                title="Schedule your next post"
-                xp={50}
-                cadence="Weekly"
-                action="Plan"
-                onPress={() => {
-                  if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                  if (onOpenSchedule) onOpenSchedule();
-                  else if (onNavigateTab) onNavigateTab('schedule' as TabType);
-                }}
-              />
+          {!board ? (
+            <View style={styles.loading}>
+              {failed ? (
+                <>
+                  <Text style={styles.loadingText}>Couldn’t load your quests.</Text>
+                  <Text style={[styles.loadingText, styles.retry]} onPress={reload} accessibilityRole="button">
+                    Try again
+                  </Text>
+                </>
+              ) : (
+                <ActivityIndicator color={ds.purple} />
+              )}
             </View>
-          </Reanimated.View>
-
-          {/* 4. WEEKLY CHALLENGE */}
-          <Reanimated.View entering={FadeInUp.delay(400).duration(550)} style={styles.section}>
-            <ChallengeCard done={isNewUser ? 0 : 1} goal={3} onJoin={handleJoinCommunityChallenge} />
-          </Reanimated.View>
-
-          {/* 5. PRO: Pro quests for members, the upgrade card for free (gold = Pro only) */}
-          {tier === 'pro' ? (
-            <Reanimated.View entering={FadeInUp.delay(500).duration(550)}>
-              <Text style={styles.sectionLabel}>Pro quests</Text>
-              <View style={styles.stack}>
-                <QuestRow
-                  pro
-                  icon="voice"
-                  title={isNewUser ? 'Set up your voice' : 'Make a voiceover for your next post'}
-                  xp={120}
-                  cadence={isNewUser ? 'One time' : 'Weekly'}
-                  action="Start"
-                  onPress={() => onOpenVoiceStudio?.()}
-                />
-                <QuestRow
-                  pro
-                  icon="hook"
-                  title="Try 3 openings for one idea"
-                  xp={80}
-                  cadence="Weekly"
-                  action="Start"
-                  onPress={() => onOpenHookStudio?.()}
-                />
-              </View>
-            </Reanimated.View>
           ) : (
-          <Reanimated.View entering={FadeInUp.delay(500).duration(550)} style={styles.section}>
-            <ProUpsellCard
-              title="Get more with Jarvis Pro"
-              benefits={['A daily brief from Jarvis', 'Unlimited repurposing', 'Voice Studio']}
-              buttonTitle="Explore Pro"
-              onUpgrade={handleExplorePro}
-            />
-          </Reanimated.View>
+            // Desktop: today's quest and check-in on the left, the rest beside them
+            <ResponsiveColumns split={2} gap={16}>
+              {/* 1. TODAY'S QUEST */}
+              <Reanimated.View entering={FadeInUp.delay(100).duration(550)}>
+                <TourTarget id="quest-card">
+                  <TodayQuestCard
+                    title={isNewUser ? 'Complete your first Studio session' : 'Share one post today'}
+                    body={
+                      isNewUser
+                        ? 'Try one Studio tool to get your first idea ready.'
+                        : board.today.steps.some((s) => s.done) && !board.today.done
+                          ? `${board.today.steps.filter((s) => s.done).length} of ${board.today.steps.length} steps done. Whenever suits you.`
+                          : 'Whenever suits you. One post keeps your rhythm going.'
+                    }
+                    xp={board.today.xp}
+                    done={board.today.done}
+                    progress={board.today.steps.filter((s) => s.done).length / board.today.steps.length}
+                    onStart={() => {
+                      tap();
+                      onOpenMissionDetail?.();
+                    }}
+                  />
+                </TourTarget>
+              </Reanimated.View>
+
+              {/* 2. LEVEL (creators who post) + CHECK-IN */}
+              <Reanimated.View entering={FadeInUp.delay(200).duration(550)} style={styles.stack}>
+                {!isNewUser && <LevelCard level={board.level} xp={compactCount(board.xp)} active={board.active} progress={board.xpIntoLevel / board.xpPerLevel} />}
+                <CheckInCard onOpenCalendar={() => setCalendarOpen(true)} />
+              </Reanimated.View>
+
+              {/* 3. QUESTS LIST */}
+              <Reanimated.View entering={FadeInUp.delay(300).duration(550)}>
+                <Text style={styles.sectionLabel}>{isNewUser ? 'Starter quests' : 'This week'}</Text>
+                <View style={styles.stack}>
+                  {board.list.map((q) => (
+                    <QuestRow
+                      key={q.key}
+                      icon={q.icon}
+                      title={q.title}
+                      xp={q.xp}
+                      cadence={q.cadence}
+                      action={q.action}
+                      done={q.done}
+                      progress={q.progress}
+                      onPress={() => {
+                        tap();
+                        onOpenPlace(q.place);
+                      }}
+                    />
+                  ))}
+                </View>
+              </Reanimated.View>
+
+              {/* 4. WEEKLY CHALLENGE */}
+              <Reanimated.View entering={FadeInUp.delay(400).duration(550)} style={styles.section}>
+                <ChallengeCard
+                  title={board.challenge.title}
+                  done={board.challenge.done}
+                  goal={board.challenge.goal}
+                  xp={board.challenge.xp}
+                  others={board.challenge.others}
+                  completed={board.challenge.completed}
+                  cta={{ label: board.challenge.joined ? 'See the challenge' : 'Join the challenge', onPress: openChallenge }}
+                />
+              </Reanimated.View>
+
+              {/* 5. PRO: Pro quests for members, the upgrade card for free (gold = Pro only) */}
+              {pro && board.pro && board.pro.length > 0 ? (
+                <Reanimated.View entering={FadeInUp.delay(500).duration(550)}>
+                  <Text style={styles.sectionLabel}>Pro quests</Text>
+                  <View style={styles.stack}>
+                    {board.pro.map((q) => (
+                      <QuestRow
+                        key={q.key}
+                        pro
+                        icon={q.icon}
+                        title={q.title}
+                        xp={q.xp}
+                        cadence={q.cadence}
+                        action={q.action}
+                        done={q.done}
+                        progress={q.progress}
+                        onPress={() => {
+                          tap();
+                          onOpenPlace(q.place);
+                        }}
+                      />
+                    ))}
+                  </View>
+                </Reanimated.View>
+              ) : !pro ? (
+                <Reanimated.View entering={FadeInUp.delay(500).duration(550)} style={styles.section}>
+                  <ProUpsellCard title="Get more with Jarvis Pro" buttonTitle="Explore Pro" onUpgrade={() => onOpenJarvisPro?.()} />
+                </Reanimated.View>
+              ) : null}
+
+              {/* 6. JARVIS TIP */}
+              <Reanimated.View entering={FadeInUp.delay(600).duration(550)} style={styles.section}>
+                <JarvisTip orb={<JarvisOrb size={30} />} text="Start with today's quest. Small daily steps add up faster than you'd think." />
+              </Reanimated.View>
+            </ResponsiveColumns>
           )}
-
-          {/* 6. JARVIS TIP */}
-          <Reanimated.View entering={FadeInUp.delay(600).duration(550)} style={styles.section}>
-            <JarvisTip
-              orb={<JarvisOrb size={30} />}
-              text="Start with today's quest. Small daily steps add up faster than you'd think."
-            />
-          </Reanimated.View>
-
-          </ResponsiveColumns>
           {/* Bottom Space for Floating Tab Bar */}
           <View style={{ height: 110 }} />
         </ScrollView>
 
-        <CalendarSheet
-          visible={calendarOpen}
-          onClose={() => setCalendarOpen(false)}
-          persona={isNewUser ? 'new' : 'returning'}
-          onPlanPost={() => onNavigateTab?.('create')}
-        />
+        <CalendarSheet visible={calendarOpen} onClose={() => setCalendarOpen(false)} onPlanPost={() => onNavigateTab?.('create')} />
 
         {/* FLOATING LIQUID GLASS TAB BAR */}
-        <FloatingTabBar activeTab={activeTab} onTabPress={handleTabPress} />
+        <FloatingTabBar activeTab="quests" onTabPress={(tab) => onNavigateTab?.(tab)} />
 
-        {/* SIGNATURE ANIMATED GHOST CELEBRATION MODAL */}
-        <AnimatedCompletionModal
-          visible={showCelebrationModal}
-          title={celebrationTitle}
-          subtitle={celebrationSubtitle}
-          speechBubble={celebrationSpeech}
-          badgeText={celebrationBadge}
-          xpEarned={celebrationXp}
-          streakCount={userProfile?.streakCount || 1}
-          actionText="Continue ➔"
-          onDismiss={() => setShowCelebrationModal(false)}
-        />
-
-        {/* NOTIFICATION MODAL */}
-        <Modal
-          visible={showNotificationModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowNotificationModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalCard, { transform: [{ scale: modalPopScale }] }]}>
-              <View style={styles.modalHeaderRow}>
-                <View>
-                  <Text style={styles.modalTitle}>Quest Notifications</Text>
-                  <Text style={styles.modalSubtitle}>Today&apos;s active quest alerts</Text>
-                </View>
-                <Pressable onPress={() => setShowNotificationModal(false)} style={styles.modalCloseCircle} hitSlop={8}>
-                  <Text style={styles.modalCloseCross}>✕</Text>
-                </Pressable>
-              </View>
-
-              <View style={styles.notifCard}>
-                <Text style={{ fontSize: 18 }}>🔥</Text>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.notifTitle}>
-                    {isNewUser ? 'Complete your first Studio session' : 'Share one post today'}
-                  </Text>
-                  <Text style={styles.notifBody}>
-                    {isNewUser ? 'Try one Studio tool to start your streak.' : 'Ends tonight • Streak protection ready.'}
-                  </Text>
-                </View>
-              </View>
-
-              <Pressable style={styles.modalFullBtn} onPress={() => setShowNotificationModal(false)}>
-                <Text style={styles.modalFullBtnText}>Close</Text>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </Modal>
-
-        {/* PROFILE MODAL */}
-        {/* UNIVERSAL CREATOR PASSPORT & PROFILE MODAL */}
-        <UserProfileModal
-          visible={showProfileModal}
-          onClose={() => setShowProfileModal(false)}
-          onLogout={onLogout}
-          initialProfile={userProfile}
-          onSaveProfile={onSaveProfile}
-        />
+        <UserProfileModal visible={showProfile} onClose={() => setShowProfile(false)} onLogout={onLogout} initialProfile={userProfile} onSaveProfile={onSaveProfile} />
       </View>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: ds.bg,
-  },
-  container: {
-    flex: 1,
-    width: '100%',
-  },
+  safeArea: { flex: 1, backgroundColor: ds.bg },
+  container: { flex: 1, width: '100%' },
   headline: { marginTop: 4, marginBottom: 16 },
   headlineText: { fontWeight: '800', letterSpacing: -0.8, color: ds.ink },
   headlineAccent: { color: ds.purple },
   sectionLabel: { fontSize: 17, fontWeight: '800', color: ds.ink, letterSpacing: -0.2, marginTop: 24 },
   stack: { gap: 12, marginTop: 12 },
   section: { marginTop: 24 },
-  btnPressed: {
-    opacity: 0.9,
-    transform: [{ scale: 0.98 }],
-  },
-
-  // 1. TOP HEADER BAR
-  headerBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 22,
-    paddingTop: 10,
-    paddingBottom: 14,
-    backgroundColor: '#FAF8F5',
-  },
-  headerLogoWrapper: {
-    width: 42,
-    height: 42,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.95)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#171420',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.04,
-    shadowRadius: 10,
-    elevation: 2,
-  },
-  headerGhostLogo: {
-    width: 36,
-    height: 36,
-  },
-  headerRightGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  headerIconBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderWidth: 1,
-    borderColor: 'rgba(235, 230, 248, 0.8)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
-    shadowColor: '#171420',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 6,
-    elevation: 1,
-  },
-  notificationDot: {
-    position: 'absolute',
-    top: 9,
-    right: 9,
-    width: 7,
-    height: 7,
-    borderRadius: 3.5,
-    backgroundColor: '#EF4444',
-    borderWidth: 1.2,
-    borderColor: '#FFFFFF',
-  },
-
-  scrollContent: {
-    paddingHorizontal: sPadding(18),
-    paddingTop: 8,
-  },
-
-  // TOP PILL BADGES
-  topBadgesRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 12,
-  },
-  questsPill: {
-    backgroundColor: '#784DF0',
-    paddingVertical: 4,
-    paddingHorizontal: 12,
-    borderRadius: 100,
-  },
-  questsPillText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    letterSpacing: 0.4,
-  },
-  earnRankPill: {
-    backgroundColor: '#EDE9FE',
-    paddingVertical: 4,
-    paddingHorizontal: 12,
-    borderRadius: 100,
-  },
-  earnRankPillText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#5B3EE8',
-    letterSpacing: 0.4,
-  },
-
-  // HEADLINE
-  mainHeading: {
-    fontSize:
-      Platform.OS === 'web'
-        ? ('clamp(15px, 3.8vw, 17px)' as any)
-        : isNarrowScreen
-        ? 15
-        : 16,
-    fontWeight: '700',
-    color: '#171420',
-    letterSpacing: -0.35,
-    lineHeight: 22,
-    marginBottom: 4,
-  },
-  mainSubtitle: {
-    fontSize: 13,
-    fontWeight: '400',
-    color: '#5E576E',
-    lineHeight: 18,
-    marginBottom: 16,
-  },
-
-  // 1. TODAY'S QUEST HERO CARD
-  todayQuestCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(23, 20, 32, 0.07)',
-    padding: 20,
-    marginBottom: 18,
-    shadowColor: '#171420',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.04,
-    shadowRadius: 16,
-    elevation: 3,
-  },
-  todayQuestHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  todayQuestTag: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#8E869E',
-    letterSpacing: 0.3,
-  },
-  flameIconCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#FFFBEB',
-    borderWidth: 1,
-    borderColor: '#FEF3C7',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  todayQuestTitle: {
-    fontSize: 19,
-    fontWeight: '700',
-    color: '#171420',
-    marginBottom: 3,
-    letterSpacing: -0.2,
-  },
-  todayQuestSub: {
-    fontSize: 13,
-    color: '#5E576E',
-    lineHeight: 18,
-    marginBottom: 14,
-  },
-  progressLabelRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 6,
-  },
-  progressLabelLeft: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#582CDB',
-    letterSpacing: 0.3,
-  },
-  progressLabelRight: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#8E869E',
-    letterSpacing: 0.3,
-  },
-  progressBarTrack: {
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: 'rgba(23, 20, 32, 0.06)',
-    overflow: 'hidden',
-    marginBottom: 14,
-  },
-  progressBarFill: {
-    height: '100%',
-    backgroundColor: '#582CDB',
-    borderRadius: 3,
-  },
-  todayQuestFooterRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: 10,
-    marginTop: 8,
-  },
-  todayQuestRewardsText: {
-    fontSize: 12.5,
-    fontWeight: '600',
-    color: '#171420',
-    flex: 1,
-    minWidth: 140,
-  },
-  startQuestBtn: {
-    backgroundColor: '#582CDB',
-    paddingVertical: 8,
-    paddingHorizontal: 18,
-    borderRadius: 100,
-    flexShrink: 0,
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.12,
-    shadowRadius: 6,
-  },
-  startQuestBtnText: {
-    fontSize: 12.5,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  completedQuestBtn: {
-    backgroundColor: '#ECFDF5',
-    borderWidth: 1,
-    borderColor: '#A7F3D0',
-    shadowOpacity: 0,
-  },
-  completedQuestBtnText: {
-    fontSize: 12.5,
-    fontWeight: '800',
-    color: '#059669',
-  },
-
-  // 2. CREATOR STATS BAR & LEVEL
-  statsBarContainer: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: 'rgba(23, 20, 32, 0.07)',
-    padding: 16,
-    marginBottom: 18,
-    shadowColor: '#171420',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.03,
-    shadowRadius: 10,
-    elevation: 2,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 14,
-  },
-  statCol: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  statColLabel: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#8E869E',
-    letterSpacing: 0.3,
-    marginBottom: 3,
-  },
-  statColValue: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: '#171420',
-  },
-  statColDivider: {
-    width: 1,
-    height: 28,
-    backgroundColor: 'rgba(23, 20, 32, 0.06)',
-  },
-  levelProgressContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    paddingHorizontal: 14,
-    marginTop: 2,
-  },
-  levelProgressLabel: {
-    fontSize: 10.5,
-    fontWeight: '800',
-    color: '#7F7894',
-    letterSpacing: 0.2,
-  },
-  levelTrack: {
-    flex: 1,
-    maxWidth: 220,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: 'rgba(23, 20, 32, 0.06)',
-    overflow: 'hidden',
-  },
-  levelFill: {
-    height: '100%',
-    borderRadius: 3,
-  },
-
-  // 3. STARTER QUESTS SECTION
-  sectionHeaderRow: {
-    marginBottom: 12,
-  },
-  sectionHeading: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: '#171420',
-    letterSpacing: -0.3,
-  },
-  starterQuestsList: {
-    gap: 10,
-    marginBottom: 20,
-  },
-  starterQuestCard: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(23, 20, 32, 0.07)',
-    padding: 14,
-    shadowColor: '#171420',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.02,
-    shadowRadius: 6,
-  },
-  starterQuestLeft: {
-    flex: 1,
-    paddingRight: 10,
-  },
-  starterQuestBadgeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    marginBottom: 4,
-  },
-  xpPillGold: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#5B3EE8',
-  },
-  typePillDot: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#A39CB5',
-  },
-  typePill: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#5E576E',
-  },
-  starterQuestTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#171420',
-  },
-  starterQuestActionBtn: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-  },
-  starterQuestActionText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#582CDB',
-  },
-
-  // 4. COMMUNITY CHALLENGE HERO CARD
-  communityCard: {
-    backgroundColor: '#582CDB',
-    borderRadius: 20,
-    overflow: 'hidden',
-    marginBottom: 18,
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.12,
-    shadowRadius: 14,
-    elevation: 4,
-  },
-  communityTopBanner: {
-    backgroundColor: 'rgba(255, 255, 255, 0.12)',
-    paddingVertical: 6,
-    paddingHorizontal: 16,
-  },
-  communityTopBannerText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#E0E7FF',
-    letterSpacing: 0.4,
-  },
-  communityBody: {
-    padding: 20,
-  },
-  communityTitle: {
-    fontSize: 21,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    letterSpacing: -0.3,
-    marginBottom: 4,
-  },
-  communitySub: {
-    fontSize: 13,
-    color: '#E0E7FF',
-    lineHeight: 18,
-    marginBottom: 14,
-  },
-  communityProgressLabelRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 6,
-  },
-  communityProgressLabel: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#E0E7FF',
-    letterSpacing: 0.3,
-  },
-  communityProgressTrack: {
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: 'rgba(255, 255, 255, 0.25)',
-    overflow: 'hidden',
-    marginBottom: 14,
-  },
-  communityProgressFill: {
-    height: '100%',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 3,
-  },
-  socialProofPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: 'rgba(0, 0, 0, 0.15)',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 100,
-    alignSelf: 'flex-start',
-    marginBottom: 18,
-  },
-  stackedAvatarsRow: {
-    flexDirection: 'row',
-  },
-  miniAvatar: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 1.2,
-    borderColor: '#FFFFFF',
-  },
-  socialProofText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  communityFooterRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: 10,
-    marginTop: 4,
-  },
-  challengeRewardBox: {
-    flex: 1,
-    paddingRight: 6,
-    justifyContent: 'center',
-  },
-  challengeRewardTitle: {
-    fontSize: sFont(12),
-    fontWeight: '800',
-    color: '#FEF08A',
-    letterSpacing: -0.3,
-    marginBottom: 2,
-  },
-  challengeRewardSub: {
-    fontSize: sFont(10.5),
-    fontWeight: '700',
-    color: 'rgba(255, 255, 255, 0.9)',
-  },
-  joinChallengeBtn: {
-    borderRadius: 100,
-    overflow: 'hidden',
-    shadowColor: '#F59E0B',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.12,
-    shadowRadius: 6,
-    elevation: 3,
-    flexShrink: 0,
-  },
-  joinChallengeGradient: {
-    paddingVertical: 8.5,
-    paddingHorizontal: 14,
-    borderRadius: 100,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  joinChallengeBtnText: {
-    fontSize: sFont(12),
-    fontWeight: '800',
-    color: '#FFFFFF',
-    letterSpacing: -0.2,
-  },
-
-  // 5. CREATOR REPUTATION CARD
-  reputationCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: '#EFEBF8',
-    padding: 20,
-    marginBottom: 18,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 8,
-  },
-  reputationMainTitle: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#171420',
-    marginBottom: 2,
-  },
-  reputationSubtitle: {
-    fontSize: 12.5,
-    color: '#64748B',
-    marginBottom: 16,
-  },
-  repRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9',
-  },
-  repLabel: {
-    fontSize: 13,
-    color: '#64748B',
-    fontWeight: '500',
-  },
-  repValueStrong: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: '#582CDB',
-  },
-  repValueMuted: {
-    fontSize: 13,
-    color: '#94A3B8',
-  },
-  repValueDark: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: '#171420',
-  },
-  reputationFooterRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: 12,
-    rowGap: 10,
-    marginTop: 14,
-  },
-  repPercentGroup: {
-    flexShrink: 1,
-  },
-  repPercentText: {
-    fontSize: sFont(19),
-    fontWeight: '800',
-    color: '#582CDB',
-  },
-  repPercentSub: {
-    fontSize: sFont(10.5),
-    color: '#64748B',
-    fontWeight: '600',
-  },
-  improveRepBtn: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1.5,
-    borderColor: '#582CDB',
-    paddingVertical: 6.5,
-    paddingHorizontal: 12,
-    borderRadius: 100,
-    flexShrink: 0,
-  },
-  improveRepBtnText: {
-    fontSize: sFont(11.5),
-    fontWeight: '800',
-    color: '#582CDB',
-  },
-
-  // CREATOR EARNINGS HUB CARD
-  earningsHubCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 22,
-    borderWidth: 1,
-    borderColor: '#EDE8E1',
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#171420',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.04,
-    shadowRadius: 10,
-    elevation: 2,
-  },
-  earningsHubHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: 10,
-    marginBottom: 12,
-  },
-  earningsHubHeaderLeft: {
-    flex: 1,
-    flexShrink: 1,
-  },
-  earningsHubTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: 6,
-    rowGap: 4,
-  },
-  earningsHubTitle: {
-    fontSize: sFont(15.5),
-    fontWeight: '700',
-    color: '#171420',
-  },
-  readinessTag: {
-    backgroundColor: '#EDE9FE',
-    paddingVertical: 2,
-    paddingHorizontal: 6,
-    borderRadius: 4,
-    flexShrink: 0,
-  },
-  readinessTagText: {
-    fontSize: sFont(9),
-    fontWeight: '700',
-    color: '#582CDB',
-  },
-  earningsHubSub: {
-    fontSize: sFont(11.5),
-    color: '#64748B',
-    marginTop: 2,
-  },
-  earningsHubIconCircle: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    backgroundColor: '#FEF9C3',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#F59E0B',
-    flexShrink: 0,
-  },
-  earningsHubStatsRow: {
-    flexDirection: 'row',
-    backgroundColor: '#FAF8F5',
-    borderRadius: 12,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderWidth: 1,
-    borderColor: '#EDE8E1',
-    marginBottom: 12,
-  },
-  earningsHubStatCol: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  earningsHubStatLabel: {
-    fontSize: 9,
-    fontWeight: '700',
-    color: '#64748B',
-    letterSpacing: 0.4,
-    marginBottom: 2,
-  },
-  earningsHubStatVal: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#171420',
-  },
-  earningsHubDivider: {
-    width: 1,
-    height: '80%',
-    backgroundColor: '#E2E8F0',
-    alignSelf: 'center',
-  },
-  earningsHubBtn: {
-    height: 42,
-    borderRadius: 12,
-    backgroundColor: '#582CDB',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  earningsHubBtnText: {
-    fontSize: 12.5,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-
-  // 6. BRAND QUEST PREVIEW CARD
-  brandQuestCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: '#EFEBF8',
-    padding: 20,
-    marginBottom: 18,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 8,
-  },
-  brandQuestHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  brandQuestTag: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#D97706',
-    letterSpacing: 0.6,
-  },
-  stampBadge: {
-    width: 28,
-    height: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  brandQuestTitle: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#171420',
-    marginBottom: 3,
-  },
-  brandQuestSub: {
-    fontSize: 12.5,
-    color: '#64748B',
-    lineHeight: 18,
-    marginBottom: 14,
-  },
-  requirementsList: {
-    gap: 8,
-    marginBottom: 16,
-  },
-  reqItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  reqTextActive: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#171420',
-  },
-  reqText: {
-    fontSize: 13,
-    color: '#64748B',
-  },
-  brandQuestFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: 8,
-    rowGap: 4,
-  },
-  unlocksAtLvlText: {
-    fontSize: sFont(11.5),
-    fontWeight: '700',
-    color: '#DC2626',
-    flexShrink: 1,
-  },
-  viewReqsLink: {
-    fontSize: sFont(12),
-    fontWeight: '800',
-    color: '#582CDB',
-    flexShrink: 0,
-  },
-
-  // 7. UNLOCK PRO QUESTS CARD
-  unlockProCard: {
-    backgroundColor: '#1E1B2E',
-    borderRadius: 24,
-    padding: 22,
-    marginBottom: 20,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
-    shadowRadius: 14,
-  },
-  unlockProHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 6,
-  },
-  unlockProTitle: {
-    fontSize: 19,
-    fontWeight: '800',
-    color: '#FFFFFF',
-  },
-  proGoldBadge: {
-    backgroundColor: '#F59E0B',
-    paddingVertical: 2,
-    paddingHorizontal: 7,
-    borderRadius: 6,
-  },
-  proGoldBadgeText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#171420',
-  },
-  unlockProSubtitle: {
-    fontSize: 13,
-    color: '#A19BB0',
-    lineHeight: 18,
-    marginBottom: 16,
-  },
-  proFeaturesList: {
-    gap: 8,
-    marginBottom: 20,
-  },
-  proFeatureItem: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#E5E1EE',
-  },
-  exploreProBtn: {
-    height: 46,
-    borderRadius: 100,
-    overflow: 'hidden',
-    shadowColor: '#F59E0B',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-  },
-  exploreProGradient: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  exploreProBtnText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#171420',
-    letterSpacing: -0.2,
-  },
-
-  // 8. JARVIS FLOATING INSIGHT FOOTER
-  jarvisFooterContainer: {
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    marginBottom: 10,
-  },
-  jarvisFooterFlameWrapper: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#EDE9FE',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  jarvisFooterFlame: {
-    width: 22,
-    height: 22,
-  },
-  jarvisFooterQuote: {
-    fontSize: 12.5,
-    color: '#475569',
-    textAlign: 'center',
-    fontStyle: 'italic',
-    lineHeight: 18,
-    marginBottom: 6,
-  },
-  jarvisFooterLink: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: '#582CDB',
-    letterSpacing: 0.4,
-  },
-
-  // MODALS
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(15, 12, 24, 0.65)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  modalCard: {
-    width: '100%',
-    maxWidth: 380,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 26,
-    borderWidth: 1,
-    borderColor: '#EFEBF8',
-    padding: 22,
-    shadowColor: '#582CDB',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.18,
-    shadowRadius: 28,
-    elevation: 10,
-  },
-  modalHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 14,
-  },
-  modalCloseCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#F1F5F9',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalCloseCross: {
-    fontSize: 14,
-    color: '#64748B',
-    fontWeight: '800',
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#171420',
-    letterSpacing: -0.4,
-    marginBottom: 3,
-  },
-  modalSubtitle: {
-    fontSize: 13,
-    color: '#6B637B',
-    lineHeight: 18,
-  },
-  modalFullBtn: {
-    backgroundColor: '#582CDB',
-    height: 48,
-    borderRadius: 14,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 14,
-  },
-  modalFullBtnText: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#FFFFFF',
-  },
-  repDetailRow: {
-    backgroundColor: '#FAF8F5',
-    borderRadius: 14,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#EFEBF8',
-  },
-  repDetailTitle: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#171420',
-    marginBottom: 2,
-  },
-  repDetailDesc: {
-    fontSize: 12,
-    color: '#64748B',
-  },
-  notifCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    backgroundColor: '#FAF8F5',
-    borderRadius: 14,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#EFEBF8',
-  },
-  notifTitle: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: '#171420',
-    marginBottom: 2,
-  },
-  notifBody: {
-    fontSize: 12,
-    color: '#64748B',
-  },
-  profileRing: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#EDE9FE',
-    borderWidth: 2,
-    borderColor: '#582CDB',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  chatCard: {
-    backgroundColor: '#FAF8F5',
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#EFEBF8',
-    padding: 12,
-    marginBottom: 10,
-  },
-  greenCheckBadge: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    backgroundColor: '#DCFCE7',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 2,
-  },
-  greenCheckBadgeText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#15803D',
-  },
-  greyCircleBadge: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    borderWidth: 1.5,
-    borderColor: '#CBD5E1',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 2,
-  },
-  reqGoalBanner: {
-    backgroundColor: '#FAF5FF',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#E9D5FF',
-    padding: 10,
-    marginTop: 10,
-    marginBottom: 12,
-  },
-  reqGoalBannerText: {
-    fontSize: 12,
-    color: '#475569',
-    lineHeight: 16,
-    fontWeight: '600',
-  },
-  reqListContainer: {
-    gap: 8,
-    marginBottom: 4,
-  },
-  reqItemRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    backgroundColor: '#FAF8F5',
-    borderRadius: 12,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#EDE8E1',
-  },
-  reqItemTitle: {
-    fontSize: 12.5,
-    fontWeight: '700',
-    color: '#171420',
-    marginBottom: 1,
-  },
-  reqItemStatusActive: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#15803D',
-  },
-  reqItemStatusPending: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#582CDB',
-  },
+  scrollContent: { paddingHorizontal: sPadding(18), paddingTop: 8 },
+  loading: { alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 48 },
+  loadingText: { fontSize: 14.5, fontWeight: '600', color: ds.text2 },
+  retry: { color: ds.purple, fontWeight: '800' },
 });

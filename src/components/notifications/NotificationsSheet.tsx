@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useSyncExternalStore } from 'react';
+import React, { useEffect, useState } from 'react';
 import { MascotSays } from '../mascot/MascotSays';
-import { Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { Easing, FadeInUp } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
@@ -9,27 +9,19 @@ import { AppButton } from '../ui/AppButton';
 import { GlassSheet } from '../glass/GlassSheet';
 import { JarvisOrb } from '../JarvisOrb';
 import { ds, goldTokens } from '../../theme/colors';
+import type { NoteKind, NoteTarget, NotificationItem } from '../../../frontend/shared/types/phase1';
+import { useUnread } from '../../backend/account';
+import { feedStore, loadNotifications, markNotificationsRead, useNotificationFeed } from '../../backend/notifications';
+import { timeAgo } from '../../utils/time';
 
-// The bell's sheet, the same on every screen. What's in it depends on the
-// creator: new creators get a few getting-started notes; returning creators
-// get real updates (numbers match the Growth page). Pro adds Jarvis's daily
-// brief. No countdowns or "don't lose your streak" messages.
-// Notes about something to do say where they lead and open it when tapped.
-// Plain news has no action. Opening the sheet counts as reading: the new
-// ones stay highlighted while it's open, then the bell's dot clears.
+// The bell's sheet, the same on every screen. Everything in it was written by the server:
+// a welcome, news about the week's challenge and quests, followers and top posts from the
+// accounts they connected. Notes about something to do say where they lead and open it when
+// tapped; plain news has no action. Opening the sheet counts as reading: the new ones stay
+// highlighted while it's open, and are marked read (on the server too) when it closes.
+// No countdowns or "don't lose your streak" messages.
 
-type Kind = 'jarvis' | 'growth' | 'star' | 'clock' | 'flag' | 'link' | 'mic' | 'calendar' | 'pro';
-/** Where a note can take the creator. App.tsx decides how to get there. */
-export type NoteTarget = 'create' | 'accounts' | 'challenge' | 'jarvis-pro' | 'voice-studio' | 'platform-growth' | 'post-performance' | 'schedule' | 'home';
-interface Note {
-  id: string;
-  kind: Kind;
-  title: string;
-  body: string;
-  time: string;
-  /** Notes about something to do open it; plain news has no action. */
-  action?: { label: string; target: NoteTarget };
-}
+export type { NoteTarget };
 
 let handler: ((t: NoteTarget) => void) | null = null;
 /** App.tsx registers how to open each target. */
@@ -37,66 +29,13 @@ export function setNotificationHandler(fn: ((t: NoteTarget) => void) | null) {
   handler = fn;
 }
 
-type Persona = 'new' | 'returning';
-type Tier = 'free' | 'pro';
-
-const JARVIS_HI: Note = { id: 'hi', kind: 'jarvis', title: 'Hi, I’m Jarvis', body: 'Whenever you have an idea, I’ll help you shape it into a post.', time: 'Just now', action: { label: 'Start a post', target: 'create' } };
-const CONNECT: Note = { id: 'connect', kind: 'link', title: 'Connect where you post', body: 'Link TikTok, Instagram or YouTube to see your stats here.', time: '1h ago', action: { label: 'Connect an account', target: 'accounts' } };
-const CHALLENGE: Note = { id: 'challenge', kind: 'flag', title: 'This week’s challenge is open', body: 'Post 3 times this week, at your own pace.', time: 'Today', action: { label: 'See the challenge', target: 'challenge' } };
-
-const FEEDS: Record<`${Persona}-${Tier}`, Note[]> = {
-  'new-free': [JARVIS_HI, CONNECT, CHALLENGE],
-  'new-pro': [
-    { id: 'pro', kind: 'pro', title: 'Welcome to Pro', body: 'Unlimited ideas, repurposing and Voice Studio are ready for you.', time: 'Just now', action: { label: 'See what’s in Pro', target: 'jarvis-pro' } },
-    { id: 'voice', kind: 'mic', title: 'Set up your voice', body: 'Record a short clip and Jarvis can read your scripts in your voice.', time: 'Just now', action: { label: 'Open Voice Studio', target: 'voice-studio' } },
-    CONNECT,
-    CHALLENGE,
-  ],
-  'returning-free': [
-    { id: 'followers', kind: 'growth', title: '1,280 new followers this week', body: 'Across TikTok, Instagram and YouTube.', time: '2h ago', action: { label: 'See your growth', target: 'platform-growth' } },
-    { id: 'best', kind: 'star', title: 'Your best post passed 14.2K views', body: '“3 creator mistakes I stopped making this year” has 84 shares so far.', time: '5h ago', action: { label: 'See how it did', target: 'post-performance' } },
-    { id: 'time', kind: 'clock', title: 'Your audience is online tonight', body: 'Most of them are on between 7 and 9 PM.', time: 'Today' },
-    { id: 'challenge', kind: 'flag', title: 'New weekly challenge', body: 'Post 3 times this week, at your own pace.', time: 'Yesterday', action: { label: 'See the challenge', target: 'challenge' } },
-  ],
-  'returning-pro': [
-    { id: 'brief', kind: 'jarvis', title: 'Today’s brief is ready', body: 'Jarvis has 3 ideas for today, based on what worked for you last week.', time: '1h ago', action: { label: 'Read the brief', target: 'home' } },
-    { id: 'followers', kind: 'growth', title: '1,280 new followers this week', body: 'Across TikTok, Instagram and YouTube.', time: '2h ago', action: { label: 'See your growth', target: 'platform-growth' } },
-    { id: 'best', kind: 'star', title: 'Your best post passed 14.2K views', body: '“3 creator mistakes I stopped making this year” has 84 shares so far.', time: '5h ago', action: { label: 'See how it did', target: 'post-performance' } },
-    { id: 'posted', kind: 'calendar', title: 'Your TikTok went out', body: 'Scheduled for 7:30 PM and posted on time.', time: 'Yesterday' },
-    { id: 'time', kind: 'clock', title: 'Your audience is online tonight', body: 'Most of them are on between 7 and 9 PM.', time: 'Yesterday' },
-  ],
-};
-// Which notes start unread
-const START_UNREAD: Record<string, number> = { 'new-free': 2, 'new-pro': 2, 'returning-free': 2, 'returning-pro': 3 };
-
-// ─── Read state (in memory for the session) ─────────────────────────────────
-let read: Record<string, true> = {};
-const listeners = new Set<() => void>();
-const emit = () => listeners.forEach((l) => l());
-const subscribe = (l: () => void) => {
-  listeners.add(l);
-  return () => listeners.delete(l);
-};
-const getRead = () => read;
-const keyOf = (feed: string, id: string) => `${feed}:${id}`;
-const markRead = (feed: string, ids: string[]) => {
-  read = { ...read };
-  ids.forEach((id) => (read[keyOf(feed, id)] = true));
-  emit();
-};
-
-const feedKey = (persona?: string, tier?: string) => `${persona === 'returning' ? 'returning' : 'new'}-${tier === 'pro' || tier === 'founding' ? 'pro' : 'free'}` as `${Persona}-${Tier}`;
-const isUnread = (feed: string, idx: number, id: string, r: Record<string, true>) => idx < START_UNREAD[feed] && !r[keyOf(feed, id)];
-
 /** Unread count for the bell's dot. */
-export function useUnreadNotifications(persona?: string, tier?: string) {
-  const r = useSyncExternalStore(subscribe, getRead, getRead);
-  const feed = feedKey(persona, tier);
-  return FEEDS[feed].filter((n, i) => isUnread(feed, i, n.id, r)).length;
+export function useUnreadNotifications(): number {
+  return useUnread();
 }
 
 // ─── Icons ──────────────────────────────────────────────────────────────────
-function KindIcon({ kind }: { kind: Kind }) {
+function KindIcon({ kind }: { kind: NoteKind }) {
   if (kind === 'jarvis') {
     return (
       <View style={styles.icon}>
@@ -140,7 +79,7 @@ function KindIcon({ kind }: { kind: Kind }) {
 
 const pointer = Platform.OS === 'web' ? ({ cursor: 'pointer' } as object) : null;
 
-function NoteRow({ note, unread, index, onAction }: { note: Note; unread: boolean; index: number; onAction: () => void }) {
+function NoteRow({ note, unread, index, onAction }: { note: NotificationItem; unread: boolean; index: number; onAction: () => void }) {
   const content = (
     <>
       {unread ? <View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.rowUnread]} /> : null}
@@ -152,7 +91,7 @@ function NoteRow({ note, unread, index, onAction }: { note: Note; unread: boolea
         </View>
         <Text style={styles.rowBody}>{note.body}</Text>
         <View style={styles.rowFoot}>
-          <Text style={styles.rowTime}>{note.time}</Text>
+          <Text style={styles.rowTime}>{timeAgo(note.createdAt)}</Text>
           {note.action ? (
             <View style={styles.go}>
               <Text style={styles.goText}>{note.action.label}</Text>
@@ -185,25 +124,34 @@ function NoteRow({ note, unread, index, onAction }: { note: Note; unread: boolea
   );
 }
 
-export function NotificationsSheet({ visible, onClose, persona, tier }: { visible: boolean; onClose: () => void; persona?: string; tier?: string }) {
-  useSyncExternalStore(subscribe, getRead, getRead);
-  const feed = feedKey(persona, tier);
-  const notes = FEEDS[feed];
+export function NotificationsSheet({ visible, onClose }: { visible: boolean; onClose: () => void }) {
+  const { items, loaded } = useNotificationFeed();
+  const [failed, setFailed] = useState(false);
 
   // What was new when the sheet opened stays highlighted while it's open.
   // Opening the sheet counts as seeing them: they're marked read on close.
   const [newIds, setNewIds] = useState<string[]>([]);
   useEffect(() => {
-    if (visible) setNewIds(notes.filter((n, i) => isUnread(feed, i, n.id, getRead())).map((n) => n.id));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visible, feed]);
+    if (!visible) return;
+    let alive = true;
+    setFailed(false);
+    void loadNotifications().then((ok) => {
+      if (!alive) return;
+      if (!ok) setFailed(true);
+      else setNewIds(feedStore.get().items.filter((n) => !n.read).map((n) => n.id));
+    });
+    return () => {
+      alive = false;
+    };
+  }, [visible]);
 
   const close = () => {
-    if (newIds.length) markRead(feed, newIds);
+    if (newIds.length) void markNotificationsRead(newIds);
+    setNewIds([]);
     onClose();
   };
 
-  const open = (note: Note) => {
+  const open = (note: NotificationItem) => {
     if (!note.action) return;
     if (Platform.OS !== 'web') Haptics.selectionAsync();
     const target = note.action.target;
@@ -212,20 +160,28 @@ export function NotificationsSheet({ visible, onClose, persona, tier }: { visibl
     setTimeout(() => handler?.(target), 180);
   };
 
-  const fresh = notes.filter((n) => newIds.includes(n.id));
-  const earlier = notes.filter((n) => !newIds.includes(n.id));
-  
+  const fresh = items.filter((n) => newIds.includes(n.id));
+  const earlier = items.filter((n) => !newIds.includes(n.id));
+
   return (
     <GlassSheet
       visible={visible}
       onClose={close}
       title="Notifications"
-      subtitle={fresh.length ? `${fresh.length} new` : 'You’re all caught up'}
+      subtitle={!loaded ? (failed ? 'Couldn’t load them' : 'Loading…') : fresh.length ? `${fresh.length} new` : 'You’re all caught up'}
       maxHeight={0.86}
       footer={<AppButton title="Done" size="lg" onPress={close} />}
     >
       <ScrollView style={styles.scroll} contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
-        <MascotSays size={52} emotion={fresh.length ? 'excited' : 'calm'} text={fresh.length ? 'Here’s what’s new!' : 'All caught up. Nice!'} />
+        {!loaded ? (
+          failed ? (
+            <MascotSays size={52} emotion="calm" text="I couldn’t reach the server. Check your connection and open this again." />
+          ) : (
+            <ActivityIndicator color={ds.purple} style={{ marginVertical: 24 }} />
+          )
+        ) : (
+          <MascotSays size={52} emotion={fresh.length ? 'excited' : 'calm'} text={fresh.length ? 'Here’s what’s new!' : items.length ? 'All caught up. Nice!' : 'Nothing yet. I’ll tell you here when there’s news.'} />
+        )}
         {fresh.length > 0 ? (
           <>
             <Text style={styles.section}>New</Text>

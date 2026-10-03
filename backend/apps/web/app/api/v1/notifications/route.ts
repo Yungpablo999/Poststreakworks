@@ -3,13 +3,10 @@ import { getCaller, withErrorHandling } from "@/lib/trpc/server-caller";
 
 export const runtime = "nodejs";
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
+// The bell: { items: [{ id, kind, title, body, createdAt, read, action }], unread }
+export async function GET(request: NextRequest) {
   return withErrorHandling(async () => {
-    const { id } = await params;
     const caller = await getCaller(request);
-    return caller.quests.joinChallenge({ challengeId: id });
+    return caller.notifications.feed();
   });
 }

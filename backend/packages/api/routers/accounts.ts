@@ -7,7 +7,7 @@ import {
   TIER_LIMITS,
 } from "../context";
 import { TRPCError } from "@trpc/server";
-import { getCheckInSummary, getXpBalance, levelForXp, listConnectedAccounts } from "@poststreak/workflows";
+import { countPosts, getCheckInSummary, getXpBalance, levelForXp, listConnectedAccounts, personaFor, refreshEverydayNotes } from "@poststreak/workflows";
 import { saveOnboardingInput } from "../lib/onboarding";
 import { toAppPlatform } from "../lib/platforms";
 import { capabilitiesFromEnv } from "../lib/capabilities";
@@ -347,7 +347,10 @@ export const accountsRouter = createTRPCRouter({
   bootstrap: protectedProcedure.query(async ({ ctx }) => {
     const userId = ctx.user.id;
 
-    const [userRes, profileRes, platformsRes, draftsRes, hooksRes, checkIn, xp, usedRes, accountsList, publishedRes, syncedRes, unreadRes, subRes] = await Promise.all([
+    // The bell's welcome, challenge and audience notes are made now, so its dot is right from the first screen
+    await refreshEverydayNotes(userId, ctx.user.tier);
+
+    const [userRes, profileRes, platformsRes, draftsRes, hooksRes, checkIn, xp, usedRes, accountsList, postsMade, unreadRes, subRes] = await Promise.all([
       ctx.supabase
         .from("users")
         .select("display_name, email, avatar_url, timezone, tour_done_at, tips_seen, created_at")
@@ -372,8 +375,7 @@ export const accountsRouter = createTRPCRouter({
       createSupabaseServiceClient().rpc("repurpose_used_this_week", { p_user_id: userId }),
       listConnectedAccounts(ctx.supabase, userId),
       // What decides "new" vs "returning": have they actually posted, or had posts read from a platform?
-      ctx.supabase.from("scheduled_posts").select("id", { count: "exact", head: true }).eq("user_id", userId).eq("status", "published"),
-      ctx.supabase.from("post_stats").select("platform_post_id", { count: "exact", head: true }).eq("user_id", userId),
+      countPosts(userId),
       ctx.supabase.from("notifications").select("id", { count: "exact", head: true }).eq("user_id", userId).eq("read", false),
       ctx.supabase
         .from("subscriptions")
@@ -428,18 +430,13 @@ export const accountsRouter = createTRPCRouter({
         xp,
         nextLevelXp,
         // Posts they have made: the ones they published through PostStreak, or the posts read from a connected account
-        postsCount: Math.max(publishedRes.count ?? 0, syncedRes.count ?? 0),
+        postsCount: postsMade,
         timezone: user.timezone as string,
         createdAt: user.created_at as string,
       },
-      // "returning" once they have a rhythm going: three check-in days, a post they've
-      // published, or posts read from a connected account. A first check-in or a first
-      // draft doesn't flip the Home yet; the app uses this to choose between the
-      // first-day Home and the everyday one.
-      persona:
-        checkIn.longestDays >= 3 || (publishedRes.count ?? 0) > 0 || (syncedRes.count ?? 0) > 0
-          ? ("returning" as const)
-          : ("new" as const),
+      // "returning" once they have a rhythm going (workflows/persona.ts). The app uses this to
+      // choose between the first-day Home and the everyday one.
+      persona: personaFor({ longestStreakDays: checkIn.longestDays, postsMade }),
       capabilities: capabilitiesFromEnv(),
       unreadNotifications: unreadRes.count ?? 0,
       // Pro details for Settings and the plan page. `tier` above is the truth for gating.

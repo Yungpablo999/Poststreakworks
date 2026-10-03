@@ -22,7 +22,6 @@ import { GlassCard } from './glass/GlassCard';
 import { ds } from '../theme/colors';
 import { isNarrowScreen } from '../utils/responsive';
 import { useCheckInStreak } from '../hooks/useCheckInStreak';
-import type { Persona } from '../data';
 
 // The daily check-in streak. Deliberately gentle: no countdowns, no warnings,
 // no "you'll lose it" copy. Missing a day is fine — the creator just picks up again.
@@ -34,9 +33,6 @@ const DOT = isNarrowScreen ? 30 : 34;
 const SPARKS = 8;
 
 interface CheckInCardProps {
-  persona: Persona;
-  /** Kept for older callers; the card is always light glass now. */
-  isDark?: boolean;
   title?: string;
   /** When set, the week row and a calendar button open the full calendar. */
   onOpenCalendar?: () => void;
@@ -105,8 +101,8 @@ function TodayDot({ filled, fire }: { filled: boolean; fire: number }) {
   );
 }
 
-export function CheckInCard({ persona, title = 'Daily check-in', onOpenCalendar }: CheckInCardProps) {
-  const { streak, checkIn } = useCheckInStreak(persona);
+export function CheckInCard({ title = 'Daily check-in', onOpenCalendar }: CheckInCardProps) {
+  const { streak, checkIn } = useCheckInStreak();
   const checkedIn = streak.checkedInToday;
   const [fire, setFire] = React.useState(0);
 
@@ -123,15 +119,11 @@ export function CheckInCard({ persona, title = 'Daily check-in', onOpenCalendar 
     onOpenCalendar();
   };
 
+  const days = streak.currentDays;
   const message = (() => {
-    if (persona === 'new') {
-      return checkedIn
-        ? 'Nice start! Come back whenever you can. Every check-in counts.'
-        : 'Check in once a day to build a gentle habit. Missed a day? Just pick up again.';
-    }
-    return checkedIn
-      ? `${streak.currentDays} days of showing up. That's a real habit forming.`
-      : `${streak.currentDays} days and counting. Check in whenever you're ready today.`;
+    if (days === 0) return 'Check in once a day to build a gentle habit. Missed a day? Just pick up again.';
+    if (checkedIn) return days === 1 ? 'Nice start! Come back whenever you can. Every check-in counts.' : `${days} days of showing up. That's a real habit forming.`;
+    return `${days} ${days === 1 ? 'day' : 'days'} and counting. Check in whenever you're ready today.`;
   })();
 
   return (

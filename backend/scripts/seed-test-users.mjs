@@ -343,23 +343,23 @@ async function seedRepurpose(id, a) {
   await insert('repurpose_jobs', rows);
 }
 
+// The server makes its own notes the first time the app asks (a welcome, the week's challenge, news
+// about followers and top posts…). What this adds is only HISTORY, with the keys the server uses so
+// nothing shows twice: for creators who joined weeks ago, the welcome they already read, the
+// connection note, and the Pro welcome. The database's own milestone and level notes were just
+// written for the XP and streaks seeded above, stamped "now": clear those and date them properly.
 async function seedNotifications(id, a) {
+  await rest('DELETE', 'notifications', { query: `?user_id=eq.${id}` });
+  if (a.stage === 'new') return; // a new creator's first notes are made by the server when they first open the app
+
   const rows = [];
-  const add = (type, title, body, ago, extra = {}) => rows.push({ user_id: id, type, title, body, created_at: daysAgo(ago, 9), ...extra });
-  if (a.stage === 'new') {
-    add('system', 'Hi, I’m Jarvis', 'Whenever you have an idea, I’ll help you shape it into a post.', 0, { action_text: 'Start a post', metadata: { target: 'create', kind: 'jarvis' } });
-    add('system', 'Connect where you post', 'Link TikTok to see your stats here.', 0, { action_text: 'Connect an account', metadata: { target: 'accounts', kind: 'link' } });
-    if (a.plan === 'pro') add('system', 'Welcome to Pro', 'Unlimited ideas and repurposing are ready for you.', 0, { action_text: 'See what’s in Pro', metadata: { target: 'jarvis-pro', kind: 'pro' } });
-  } else {
-    const c = CREATORS[a.handle];
-    add('growth', `${(followersToday(c) - followersToday(c, NOW - 7 * DAY)).toLocaleString('en')} new followers this week`, 'On TikTok, since last week.', 0, { action_text: 'See your growth', metadata: { target: 'platform-growth', kind: 'growth' } });
-    add('growth', 'One of your posts passed 10K views', `“${videosFor(c).sort((x, y) => y.view_count - x.view_count)[0].title}” is your top post right now.`, 1, { action_text: 'See how it did', metadata: { target: 'post-performance', kind: 'star' } });
-    add('quest', 'This week’s challenge is open', 'Post 3 times this week, at your own pace.', 2, { action_text: 'See the challenge', metadata: { target: 'challenge', kind: 'flag' }, read: true });
-    add('streak', 'A 7-day streak', 'A week of check-ins. Nice rhythm.', 6, { metadata: { kind: 'star' }, read: true });
-    add('system', 'Your TikTok is connected', 'PostStreak reads your numbers once a day.', 20, { metadata: { kind: 'link' }, read: true });
-    if (a.plan === 'pro') add('system', 'Welcome to Pro', 'Unlimited ideas and repurposing are ready for you.', 18, { action_text: 'See what’s in Pro', metadata: { target: 'jarvis-pro', kind: 'pro' }, read: true });
-  }
-  await insert('notifications', rows.map((r) => ({ read: false, ...r })));
+  const add = (key, type, title, body, ago, extra = {}) =>
+    rows.push({ user_id: id, key, type, title, body, created_at: daysAgo(ago, 9), read: true, ...extra });
+  add('welcome', 'system', 'Hi, I’m Jarvis', 'Whenever you have an idea, I’ll help you shape it into a post.', 30, { action_text: 'Start a post', metadata: { target: 'create', kind: 'jarvis' } });
+  add('connected:tiktok', 'system', 'Your TikTok is connected', 'PostStreak reads your numbers once a day.', 20, { action_text: 'See your growth', metadata: { target: 'platform-growth', kind: 'link' } });
+  add('milestone:7_day_streak', 'streak', 'A 7-day streak', 'A week of check-ins. Nice rhythm.', 6, { metadata: { kind: 'star' } });
+  if (a.plan === 'pro') add('pro-welcome', 'system', 'Welcome to Pro', 'Unlimited ideas and Repurpose, and a daily brief from Jarvis, are ready for you.', 18, { action_text: 'See what’s in Pro', metadata: { target: 'jarvis-pro', kind: 'pro' } });
+  await insert('notifications', rows);
 }
 
 // ─── Run ────────────────────────────────────────────────────────────────────

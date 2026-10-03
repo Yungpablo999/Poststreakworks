@@ -19,7 +19,6 @@ export type GhostPlace =
   | 'growth'
   | 'repurpose'
   | 'hook-studio'
-  | 'voice-studio'
   | 'quests'
   | 'challenge'
   | 'jarvis-pro'
@@ -182,7 +181,7 @@ export function runTask(task: GhostTask, opts: { closeAfter?: boolean } = {}) {
         react('copied');
         break;
       case 'checkIn':
-        checkInToday(ctx.persona); // the mascot cheers from inside
+        checkInToday(); // the mascot cheers from inside
         break;
       case 'compose':
         express('excited', 'Let’s make it!', 2200, true);
@@ -211,7 +210,6 @@ const PLACE_NAME: Record<GhostPlace, string> = {
   growth: 'Growth',
   repurpose: 'Repurpose',
   'hook-studio': 'Hook Studio',
-  'voice-studio': 'Voice Studio',
   quests: 'Quests',
   challenge: 'this week’s challenge',
   'jarvis-pro': 'Pro',
@@ -326,16 +324,13 @@ function think(q: string): ChatMessage {
       chips: ['Give me post ideas', 'Give me hooks'],
     });
   }
-  if (has(l, /voice|read (it )?(out|aloud)|narrat/)) {
-    return j('Voice Studio reads your scripts in your own voice. Record a short clip once and you’re set.', { tasks: [openTask('voice-studio', 'Ghost, open Voice Studio')] });
-  }
   if (has(l, /challenge|quest|badge/)) {
     return j('This week’s challenge is to post 3 times, any day, any platform, at your own pace.', {
       tasks: [openTask('challenge', 'Ghost, show the challenge'), openTask('quests', 'Ghost, open Quests')],
     });
   }
   if (has(l, /\bpro\b|upgrade|price|pricing|cost|subscription/)) {
-    return j('Pro gives you unlimited ideas, Repurpose any time and Voice Studio.', { tasks: [openTask('jarvis-pro', 'Ghost, show me Pro')] });
+    return j('Pro gives you unlimited ideas and Repurpose, and a daily brief from me.', { tasks: [openTask('jarvis-pro', 'Ghost, show me Pro')] });
   }
   if (has(l, /draft/)) {
     return j('Your drafts live on the Create page.', { tasks: [openTask('create', 'Ghost, open my drafts')] });

@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { usePageWidth } from '../hooks/useBreakpoint';
-import { View, ScrollView, Pressable, StyleSheet, Platform } from 'react-native';
+import { ActivityIndicator, View, ScrollView, Pressable, StyleSheet, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, {
   Easing,
@@ -23,16 +23,18 @@ import { JarvisOrb } from '../components/JarvisOrb';
 import { FreeAppHeader } from '../components/FreeAppHeader';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
-import type { UserPersona } from '../types/account';
 import { JarvisPickCard, ProgressRing, PulsingTarget, type PickIdea } from '../components/quests/QuestBlocks';
-import { getStarterIdeas } from '../data';
 import { ds } from '../theme/colors';
+import { useAsync } from '../hooks/useAsync';
+import { loadQuestBoard, useQuestBoard } from '../backend/quests';
+import { loadIdeaFeed } from '../backend/ideas';
+import { trackEvent } from '../backend/track';
+import type { QuestPlace, TodayStep } from '../../frontend/shared/types/phase1';
 
-// Today's quest, opened from the Quests tab. Three tappable steps, Jarvis's
-// idea pick (shuffle through a few), and what finishing earns. No deadline,
-// no streak warnings: post whenever suits you.
+// Today's quest, opened from the Quests tab. Three steps the server ticks off as the creator does
+// them (an idea picked, a script or post saved, a post out), Jarvis's idea pick, and what finishing
+// earns. No deadline, no streak warnings: post whenever suits you.
 
-const XP = 80;
 const pointer = Platform.OS === 'web' ? ({ cursor: 'pointer' } as object) : null;
 const tick = () => {
   if (Platform.OS !== 'web') Haptics.selectionAsync();
@@ -43,31 +45,17 @@ interface MissionDetailScreenProps {
   onLogout?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onOpenJarvisPro?: () => void;
-  onOpenCreateIdea?: () => void;
-  onOpenIdeaAngle?: () => void;
-  onOpenPostComposer?: (prefillTitle?: string, prefillPlatform?: string) => void;
+  /** Where a step's button takes the creator. */
+  onOpenPlace: (place: QuestPlace) => void;
+  onOpenPostComposer?: (prefillTitle?: string) => void;
   /** New creators: shape the idea in Script. */
   onOpenScript?: (title: string) => void;
-  userProfile?: UserProfileData;
+  userProfile: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
-  userPersona?: UserPersona;
 }
 
-type StepIcon = 'idea' | 'make' | 'post';
-
-interface Step {
-  id: StepIcon;
-  title: string;
-  body: string;
-  /** Button label; none = tracked automatically */
-  action?: string;
-  onPress?: () => void;
-  /** Done from Jarvis's pick below, so no button of its own */
-  hint?: boolean;
-}
-
-function StepGlyph({ id, color }: { id: StepIcon; color: string }) {
-  const paths: Record<StepIcon, React.ReactNode> = {
+function StepGlyph({ id, color }: { id: TodayStep['id']; color: string }) {
+  const paths: Record<TodayStep['id'], React.ReactNode> = {
     idea: (
       <Path
         d="M9 18h6M10 21h4M12 3a6 6 0 00-3.5 10.9c.6.4 1 1.1 1 1.8V16h5v-.3c0-.7.4-1.4 1-1.8A6 6 0 0012 3z"
@@ -95,21 +83,29 @@ function StepRow({
   open,
   next,
   onToggle,
+  onAction,
 }: {
-  step: Step;
+  step: TodayStep;
   index: number;
   last: boolean;
   open: boolean;
   next: boolean;
   onToggle: () => void;
+  onAction: () => void;
 }) {
   const [hover, setHover] = useState(false);
   return (
     <Animated.View style={styles.stepRow}>
       {/* Rail */}
       <View style={styles.rail}>
-        <View style={[styles.stepCircle, next && styles.stepCircleNext]}>
-          <StepGlyph id={step.id} color={next ? '#FFFFFF' : ds.purple} />
+        <View style={[styles.stepCircle, next && styles.stepCircleNext, step.done && styles.stepCircleDone]}>
+          {step.done ? (
+            <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+              <Path d="M20 6L9 17l-5-5" stroke="#FFFFFF" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
+            </Svg>
+          ) : (
+            <StepGlyph id={step.id} color={next ? '#FFFFFF' : ds.purple} />
+          )}
         </View>
         {!last && <View style={styles.railLine} />}
       </View>
@@ -120,17 +116,21 @@ function StepRow({
         onHoverOut={() => setHover(false)}
         accessibilityRole="button"
         accessibilityState={{ expanded: open }}
-        accessibilityLabel={`Step ${index + 1}: ${step.title}`}
+        accessibilityLabel={`Step ${index + 1}: ${step.title}${step.done ? ', done' : ''}`}
         style={[styles.stepBody, open && styles.stepBodyOpen, hover && !open && styles.stepBodyHover, pointer]}
       >
         <View style={styles.stepTop}>
           <Text style={styles.stepNum}>STEP {index + 1}</Text>
-          {next && (
+          {step.done ? (
+            <View style={styles.autoChip}>
+              <Text style={styles.autoChipText}>Done</Text>
+            </View>
+          ) : next ? (
             <View style={styles.nextChip}>
               <Text style={styles.nextChipText}>Next up</Text>
             </View>
-          )}
-          {!step.action && !step.hint && (
+          ) : null}
+          {!step.done && !step.action && (
             <View style={styles.autoChip}>
               <Text style={styles.autoChipText}>Automatic</Text>
             </View>
@@ -140,9 +140,9 @@ function StepRow({
         {open && (
           <Animated.View entering={FadeIn.duration(220)}>
             <Text style={styles.stepText}>{step.body}</Text>
-            {step.action && step.onPress && (
+            {!step.done && step.action && (
               <View style={styles.stepAction}>
-                <AppButton title={step.action} onPress={step.onPress} variant={next ? 'primary' : 'glass'} />
+                <AppButton title={step.action.label} onPress={onAction} variant={next ? 'primary' : 'glass'} />
               </View>
             )}
           </Animated.View>
@@ -152,7 +152,7 @@ function StepRow({
   );
 }
 
-// Soft glow behind the finish badge
+// Soft glow behind the level badge
 function BadgeGlow() {
   const reduce = useReducedMotion();
   const t = useSharedValue(0);
@@ -168,61 +168,42 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
   onLogout,
   onNavigateTab,
   onOpenJarvisPro,
-  onOpenCreateIdea,
-  onOpenIdeaAngle,
+  onOpenPlace,
   onOpenPostComposer,
   onOpenScript,
   userProfile,
   onSaveProfile,
-  userPersona,
 }) => {
   const pageWidth = usePageWidth();
-  const isNew = (userPersona || userProfile?.userPersona || 'new') === 'new';
+  const isNew = userProfile.userPersona === 'new';
   const [showProfile, setShowProfile] = useState(false);
   const [open, setOpen] = useState(0);
 
-  const ideas = useMemo(
-    () => getStarterIdeas(userProfile?.niches ?? [], (userProfile as { platforms?: string[] } | undefined)?.platforms ?? []).slice(0, 5),
-    [userProfile],
-  );
+  // The server's view of today: reloaded each time this page opens
+  const board = useQuestBoard();
+  useAsync(loadQuestBoard, []);
+  const ideas = useAsync(() => loadIdeaFeed('followers'), []);
+  const pick: PickIdea[] = (ideas.data ?? []).slice(0, 5);
 
-  const findIdeas = () => (onOpenIdeaAngle ? onOpenIdeaAngle() : onOpenCreateIdea ? onOpenCreateIdea() : onNavigateTab?.('create'));
+  const today = board?.today;
+  const steps = today?.steps ?? [];
+  const stepsDone = steps.filter((s) => s.done).length;
+  const nextIndex = steps.findIndex((s) => !s.done);
+
   const useIdea = (idea: PickIdea) => {
-    if (isNew) {
-      if (onOpenScript) onOpenScript(idea.title);
-      else if (onOpenCreateIdea) onOpenCreateIdea();
-      else onNavigateTab?.('create');
-    } else {
-      onOpenPostComposer?.(idea.title);
-    }
+    trackEvent('idea_picked', { title: idea.title.slice(0, 80) });
+    if (isNew) onOpenScript?.(idea.title);
+    else onOpenPostComposer?.(idea.title);
   };
 
-  const steps: Step[] = isNew
-    ? [
-        { id: 'idea', title: 'Pick an idea', body: 'Use Jarvis’s pick below, or look through more ideas.', action: 'Find ideas', onPress: findIdeas },
-        { id: 'make', title: 'Write the script', body: 'Tap “Use this idea” below and Jarvis helps you turn it into a short script.', hint: true },
-        { id: 'post', title: 'Save it', body: 'We tick this off when you save a draft or schedule it.' },
-      ]
-    : [
-        { id: 'idea', title: 'Pick an idea', body: 'Use Jarvis’s pick below, or find one that fits today.', action: 'Find ideas', onPress: findIdeas },
-        { id: 'make', title: 'Make your post', body: 'Tap “Use this idea” below to film, write or design it.', hint: true },
-        { id: 'post', title: 'Post it', body: 'We tick this off when your post goes live. Whenever suits you.' },
-      ];
-
   const title = isNew ? ['Your first', 'Studio session'] : ['Share one', 'post today'];
+  const xp = today?.xp ?? 0;
 
   return (
     <View style={styles.root}>
       <GlassBackdrop />
       <SafeAreaView style={styles.flex} edges={['top']}>
-        <FreeAppHeader
-          backgroundColor="transparent"
-          onBack={onBack}
-          onOpenJarvisPro={onOpenJarvisPro}
-          onOpenProfile={() => setShowProfile(true)}
-          userPersona={userPersona}
-          userProfile={userProfile}
-        />
+        <FreeAppHeader backgroundColor="transparent" onBack={onBack} onOpenJarvisPro={onOpenJarvisPro} onOpenProfile={() => setShowProfile(true)} userProfile={userProfile} />
         <ScrollView contentContainerStyle={[styles.scroll, pageWidth]} showsVerticalScrollIndicator={false}>
           {/* Hero */}
           <Animated.View entering={FadeInUp.duration(500).easing(Easing.out(Easing.cubic))}>
@@ -242,23 +223,21 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
                     accessibilityLabel={title.join(' ')}
                   />
                 </View>
-                <View style={styles.ring} accessibilityLabel={`${XP} XP when you finish`}>
-                  <ProgressRing progress={0.04} size={70} />
+                <View style={styles.ring} accessibilityLabel={`${xp} XP when you finish`}>
+                  <ProgressRing progress={steps.length ? Math.max(0.04, stepsDone / steps.length) : 0.04} done={today?.done} />
                   <View style={styles.ringCenter}>
-                    <Text style={styles.ringXp}>+{XP}</Text>
+                    <Text style={styles.ringXp}>+{xp}</Text>
                     <Text style={styles.ringLabel}>XP</Text>
                   </View>
                 </View>
               </View>
-              <Text style={styles.heroBody}>
-                {isNew ? 'Get one idea ready. No need to post yet.' : 'Whenever suits you. There’s no deadline.'}
-              </Text>
-              <View style={styles.segments} accessibilityLabel="0 of 3 steps done">
-                {steps.map((s) => (
-                  <View key={s.id} style={styles.segment} />
+              <Text style={styles.heroBody}>{isNew ? 'Get one idea ready. No need to post yet.' : 'Whenever suits you. There’s no deadline.'}</Text>
+              <View style={styles.segments} accessibilityLabel={`${stepsDone} of ${steps.length || 3} steps done`}>
+                {(steps.length ? steps : [0, 1, 2]).map((s, i) => (
+                  <View key={i} style={[styles.segment, typeof s !== 'number' && s.done && styles.segmentDone]} />
                 ))}
               </View>
-              <Text style={styles.segmentsLabel}>0 of 3 steps done</Text>
+              <Text style={styles.segmentsLabel}>{today?.done ? 'All done. Nice work.' : `${stepsDone} of ${steps.length || 3} steps done`}</Text>
             </GlassCard>
           </Animated.View>
 
@@ -266,70 +245,72 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
           <Animated.View entering={FadeInUp.delay(100).duration(500).easing(Easing.out(Easing.cubic))}>
             <Text style={styles.section}>How to finish</Text>
             <GlassCard radius={24} padding={14}>
-              {steps.map((s, i) => (
-                <StepRow
-                  key={s.id}
-                  step={s}
-                  index={i}
-                  last={i === steps.length - 1}
-                  open={open === i}
-                  next={i === 0}
-                  onToggle={() => {
-                    tick();
-                    setOpen(open === i ? -1 : i);
-                  }}
-                />
-              ))}
+              {!today ? (
+                <ActivityIndicator color={ds.purple} style={{ marginVertical: 24 }} />
+              ) : (
+                steps.map((s, i) => (
+                  <StepRow
+                    key={s.id}
+                    step={s}
+                    index={i}
+                    last={i === steps.length - 1}
+                    open={open === i}
+                    next={i === nextIndex}
+                    onToggle={() => {
+                      tick();
+                      setOpen(open === i ? -1 : i);
+                    }}
+                    onAction={() => s.action && onOpenPlace(s.action.place)}
+                  />
+                ))
+              )}
             </GlassCard>
           </Animated.View>
 
           {/* Jarvis's pick */}
-          {ideas.length > 0 && (
+          {pick.length > 0 && (
             <Animated.View entering={FadeInUp.delay(200).duration(500).easing(Easing.out(Easing.cubic))}>
               <Text style={styles.section}>Jarvis’s pick for today</Text>
-              <JarvisPickCard orb={<JarvisOrb size={30} />} ideas={ideas} onUse={useIdea} />
+              <JarvisPickCard orb={<JarvisOrb size={30} />} ideas={pick} onUse={useIdea} />
             </Animated.View>
           )}
 
           {/* Reward */}
-          <Animated.View entering={FadeInUp.delay(300).duration(500).easing(Easing.out(Easing.cubic))}>
-            <Text style={styles.section}>When you finish</Text>
-            <View style={styles.rewards}>
-              <GlassCard radius={22} padding={14} style={styles.rewardTile}>
-                <View style={styles.rewardIcon}>
-                  <Svg width={18} height={18} viewBox="0 0 24 24">
-                    <Path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z" fill={ds.purple} />
-                  </Svg>
-                </View>
-                <Text style={styles.rewardValue}>+{XP} XP</Text>
-                <Text style={styles.rewardSub}>Towards your next level</Text>
-              </GlassCard>
-              <GlassCard radius={22} padding={14} style={styles.rewardTile}>
-                <View style={styles.rewardIcon}>
-                  <BadgeGlow />
-                  <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                    <Circle cx="12" cy="9" r="6" stroke={ds.purple} strokeWidth={2.2} />
-                    <Path d="M8.5 14L7 22l5-3 5 3-1.5-8" stroke={ds.purple} strokeWidth={2.2} strokeLinejoin="round" />
-                  </Svg>
-                </View>
-                <Text style={styles.rewardValue}>Momentum</Text>
-                <Text style={styles.rewardSub}>A badge for your profile</Text>
-              </GlassCard>
-            </View>
-          </Animated.View>
-
+          {board && (
+            <Animated.View entering={FadeInUp.delay(300).duration(500).easing(Easing.out(Easing.cubic))}>
+              <Text style={styles.section}>When you finish</Text>
+              <View style={styles.rewards}>
+                <GlassCard radius={22} padding={14} style={styles.rewardTile}>
+                  <View style={styles.rewardIcon}>
+                    <Svg width={18} height={18} viewBox="0 0 24 24">
+                      <Path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z" fill={ds.purple} />
+                    </Svg>
+                  </View>
+                  <Text style={styles.rewardValue}>+{xp} XP</Text>
+                  <Text style={styles.rewardSub}>Towards your next level</Text>
+                </GlassCard>
+                <GlassCard radius={22} padding={14} style={styles.rewardTile}>
+                  <View style={styles.rewardIcon}>
+                    <BadgeGlow />
+                    <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                      <Circle cx="12" cy="9" r="6" stroke={ds.purple} strokeWidth={2.2} />
+                      <Path d="M8.5 14L7 22l5-3 5 3-1.5-8" stroke={ds.purple} strokeWidth={2.2} strokeLinejoin="round" />
+                    </Svg>
+                  </View>
+                  <Text style={styles.rewardValue}>Level {board.level}</Text>
+                  <Text style={styles.rewardSub}>
+                    {board.xpPerLevel - board.xpIntoLevel} XP to level {board.level + 1}
+                  </Text>
+                </GlassCard>
+              </View>
+            </Animated.View>
+          )}
         </ScrollView>
       </SafeAreaView>
 
       <FloatingTabBar activeTab="quests" onTabPress={(t) => onNavigateTab?.(t)} />
 
-      <UserProfileModal
-        visible={showProfile}
-        onClose={() => setShowProfile(false)}
-        onLogout={onLogout}
-        initialProfile={userProfile}
-        onSaveProfile={onSaveProfile}
-      />
+      <UserProfileModal visible={showProfile} onClose={() => setShowProfile(false)} onLogout={onLogout} initialProfile={userProfile} onSaveProfile={onSaveProfile} />
     </View>
   );
 };
@@ -354,13 +335,14 @@ const styles = StyleSheet.create({
   eyebrowText: { fontSize: 11, fontWeight: '800', letterSpacing: 0.8, color: ds.purple },
   heroTitle: { fontWeight: '800', letterSpacing: -0.7, color: ds.ink },
   accent: { color: ds.purple },
-  ring: { width: 70, height: 70, alignItems: 'center', justifyContent: 'center' },
+  ring: { width: 76, height: 76, alignItems: 'center', justifyContent: 'center' },
   ringCenter: { position: 'absolute', alignItems: 'center' },
   ringXp: { fontSize: 16, fontWeight: '800', color: ds.purple },
   ringLabel: { fontSize: 10, fontWeight: '800', color: ds.text3, marginTop: -2 },
   heroBody: { fontSize: 14.5, lineHeight: 21, color: ds.text2, marginTop: 10 },
   segments: { flexDirection: 'row', gap: 6, marginTop: 14 },
   segment: { flex: 1, height: 6, borderRadius: 3, backgroundColor: ds.lavender },
+  segmentDone: { backgroundColor: ds.greenFill },
   segmentsLabel: { fontSize: 12, fontWeight: '700', color: ds.text3, marginTop: 6 },
 
   section: { fontSize: 17, fontWeight: '800', color: ds.ink, letterSpacing: -0.2, marginTop: 24, marginBottom: 12 },
@@ -375,6 +357,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.35,
     shadowRadius: 10,
   },
+  stepCircleDone: { backgroundColor: ds.greenFill },
   railLine: { flex: 1, width: 2, minHeight: 12, marginVertical: 4, borderRadius: 1, backgroundColor: ds.lavender },
   stepBody: { flex: 1, padding: 12, borderRadius: 18, marginBottom: 8, borderWidth: 1, borderColor: 'transparent' },
   stepBodyHover: { backgroundColor: 'rgba(245, 243, 255, 0.6)' },
@@ -389,12 +372,10 @@ const styles = StyleSheet.create({
   stepText: { fontSize: 13.5, lineHeight: 19, color: ds.text2, marginTop: 4 },
   stepAction: { marginTop: 12 },
 
-
   rewards: { flexDirection: 'row', gap: 10 },
   rewardTile: { flex: 1 },
   rewardIcon: { width: 36, height: 36, borderRadius: 12, backgroundColor: ds.lavender, alignItems: 'center', justifyContent: 'center', marginBottom: 10 },
   badgeGlow: { position: 'absolute', width: 36, height: 36, borderRadius: 12, backgroundColor: '#C4B5FD' },
   rewardValue: { fontSize: 16, fontWeight: '800', color: ds.ink },
   rewardSub: { fontSize: 12.5, lineHeight: 17, color: ds.text2, marginTop: 2 },
-
 });

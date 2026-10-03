@@ -214,8 +214,7 @@ export const RepurposeScreen: React.FC<RepurposeScreenProps> = ({
   const pageWidth = usePageWidth();
   const isPro = tier === 'pro';
   const persona = (userPersona || userProfile?.userPersona) === 'returning' ? 'returning' : 'new';
-  useSyncExternalStore(subscribeToRepurposes, () => getRepurposeAllowance(persona, 'free').usedThisWeek);
-  const allowance = getRepurposeAllowance(persona, 'free');
+  const allowance = useSyncExternalStore(subscribeToRepurposes, getRepurposeAllowance, getRepurposeAllowance);
   const limit = allowance.weeklyLimit ?? 0;
   const left = isPro ? Infinity : Math.max(0, limit - allowance.usedThisWeek);
   const [scheduled, setScheduled] = useState(false);
@@ -247,7 +246,7 @@ export const RepurposeScreen: React.FC<RepurposeScreenProps> = ({
       showToast('Pick at least one platform');
       return;
     }
-    if (!opts?.spent && !spendRepurpose(persona, isPro ? 'pro' : 'free')) {
+    if (!opts?.spent && !spendRepurpose()) {
       onOpenJarvisPro?.();
       return;
     }
@@ -293,7 +292,7 @@ export const RepurposeScreen: React.FC<RepurposeScreenProps> = ({
       showToast('Pick at least one platform');
       return;
     }
-    if (!spendRepurpose(persona, isPro ? 'pro' : 'free')) {
+    if (!spendRepurpose()) {
       onOpenJarvisPro?.();
       return;
     }
@@ -356,7 +355,7 @@ export const RepurposeScreen: React.FC<RepurposeScreenProps> = ({
       showToast('Pick at least one platform');
       return;
     }
-    if (!spendRepurpose(persona, isPro ? 'pro' : 'free')) {
+    if (!spendRepurpose()) {
       onOpenJarvisPro?.();
       return;
     }

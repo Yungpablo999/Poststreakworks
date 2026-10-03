@@ -538,16 +538,11 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
           backgroundColor="transparent"
           onBack={onBack}
           onOpenJarvisPro={onOpenJarvisPro}
-          onOpenNotifications={() => {
-            triggerModalAnim();
-            setShowNotificationModal(true);
-          }}
           onOpenProfile={() => {
             triggerModalAnim();
             setShowProfileModal(true);
           }}
           userProfile={userProfile}
-          unreadCount={unreadNotifCount}
           isDark={isDark}
         />
 

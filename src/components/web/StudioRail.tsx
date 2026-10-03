@@ -1,11 +1,10 @@
 import React, { useEffect, useState, useSyncExternalStore } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import Animated, { Easing, FadeIn, FadeInUp, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
+import Animated, { Easing, FadeIn, FadeInUp, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
 import { Text } from '../ui/AppText';
 import { GlassCard } from '../glass/GlassCard';
 import { PlatformLogo, type PlatformLogoType } from '../onboarding/PlatformLogo';
-import { VOICES, VoiceAvatar } from '../voice/VoiceSheets';
 import { TipsCard, RAIL_W } from './TodayRail';
 import { openComposer } from './webActions';
 import {
@@ -15,15 +14,14 @@ import {
   subscribeToRepurposes,
   subscribeToSavedHooks,
 } from '../../data';
-import { ds, goldTokens } from '../../theme/colors';
+import { ds } from '../../theme/colors';
 
 // Desktop web app: the panel beside each studio, with things that help with
 // that tool, so the studio pages use the screen instead of leaving it empty.
 //   Repurpose: this week's free use, and what each platform gets
-//   Hook Studio: your saved hooks (live), and openings that work
-//   Voice Studio: voices to try (tap to hear a sample), and your minutes
+//   Hook Studio: your saved hooks (live), and kinds of opening to try
 
-export type StudioKind = 'repurpose' | 'hook' | 'voice';
+export type StudioKind = 'repurpose' | 'hook';
 
 const pointer = Platform.OS === 'web' ? ({ cursor: 'pointer' } as object) : null;
 const ease = Easing.out(Easing.cubic);
@@ -31,10 +29,9 @@ const ease = Easing.out(Easing.cubic);
 const PLATFORM_NAMES: Record<string, string> = { tiktok: 'TikTok', instagram: 'Instagram', youtube: 'YouTube', threads: 'Threads', facebook: 'Facebook' };
 
 // ─── Repurpose ──────────────────────────────────────────────────────────────
-function Allowance({ persona, tier }: { persona: 'new' | 'returning'; tier: 'free' | 'pro' }) {
-  // Read just the number used (a fresh object each read would re-render forever)
-  const used = useSyncExternalStore(subscribeToRepurposes, () => getRepurposeAllowance(persona, tier).usedThisWeek, () => getRepurposeAllowance(persona, tier).usedThisWeek);
-  const a = { usedThisWeek: used, weeklyLimit: getRepurposeAllowance(persona, tier).weeklyLimit };
+function Allowance() {
+  // The server's count and the plan's limit (read as one value so the store can compare it)
+  const a = useSyncExternalStore(subscribeToRepurposes, getRepurposeAllowance, getRepurposeAllowance);
   const left = a.weeklyLimit === null ? null : Math.max(0, a.weeklyLimit - a.usedThisWeek);
   const w = useSharedValue(0);
   useEffect(() => {
@@ -140,69 +137,6 @@ function Openings() {
   );
 }
 
-// ─── Voice Studio ───────────────────────────────────────────────────────────
-function Bars({ playing }: { playing: boolean }) {
-  return (
-    <View style={styles.bars}>
-      {[0, 1, 2, 3, 4].map((i) => (
-        <Bar key={i} i={i} playing={playing} />
-      ))}
-    </View>
-  );
-}
-function Bar({ i, playing }: { i: number; playing: boolean }) {
-  const h = useSharedValue(0.3);
-  useEffect(() => {
-    h.value = playing ? withRepeat(withTiming(1, { duration: 300 + i * 70, easing: Easing.inOut(Easing.ease) }), -1, true) : withTiming(0.3, { duration: 200 });
-  }, [playing, i, h]);
-  const style = useAnimatedStyle(() => ({ transform: [{ scaleY: h.value }] }));
-  return <Animated.View style={[styles.bar, playing && { backgroundColor: ds.purple }, style]} />;
-}
-
-function VoicesToTry() {
-  const [playing, setPlaying] = useState<string | null>(null);
-  useEffect(() => {
-    if (!playing) return;
-    const id = setTimeout(() => setPlaying(null), 2400);
-    return () => clearTimeout(id);
-  }, [playing]);
-  return (
-    <GlassCard strong radius={22} padding={16}>
-      <Text style={styles.title}>Voices to try</Text>
-      <Text style={styles.muted}>Tap one to hear a short sample.</Text>
-      <View style={styles.list}>
-        {VOICES.slice(0, 5).map((v, i) => (
-          <Animated.View key={v.id} entering={FadeInUp.delay(i * 60).duration(380).easing(ease)}>
-            <Pressable onPress={() => setPlaying(playing === v.id ? null : v.id)} accessibilityRole="button" accessibilityLabel={`Hear ${v.name}`} style={({ pressed }) => [styles.voice, playing === v.id && styles.voiceOn, pointer, pressed && { transform: [{ scale: 0.98 }] }]}>
-              <VoiceAvatar voice={v} size={36} />
-              <View style={styles.flex}>
-                <Text style={styles.platName}>{v.name}</Text>
-                <Text style={styles.muted}>{v.feel}</Text>
-              </View>
-              <Bars playing={playing === v.id} />
-            </Pressable>
-          </Animated.View>
-        ))}
-      </View>
-    </GlassCard>
-  );
-}
-
-function Minutes({ tier }: { tier: 'free' | 'pro' }) {
-  return (
-    <GlassCard strong radius={22} padding={16}>
-      <Text style={styles.eyebrow}>VOICE MINUTES</Text>
-      <Text style={styles.big}>{tier === 'pro' ? '150 minutes a month' : 'Included with Pro'}</Text>
-      <Text style={styles.muted}>{tier === 'pro' ? 'That’s about 150 one-minute videos. You can add more any time.' : 'Pro includes 150 minutes of voiceovers a month in your own voice.'}</Text>
-      {tier !== 'pro' && (
-        <View style={styles.proTag}>
-          <Text style={styles.proTagText}>PRO</Text>
-        </View>
-      )}
-    </GlassCard>
-  );
-}
-
 const STUDIO_TIPS: Record<StudioKind, string[]> = {
   repurpose: [
     'Paste a link to someone else’s post and I’ll give you new ideas in the same style. I never copy it.',
@@ -212,22 +146,17 @@ const STUDIO_TIPS: Record<StudioKind, string[]> = {
   hook: [
     'Dance and trend videos open with the move itself. The text on screen does the hook.',
     'Save a few hooks now and you’ll have them ready on a busy day.',
-    'Openings with a mistake kept people watching longest for many creators.',
-  ],
-  voice: [
-    'Record somewhere quiet and read naturally. One minute is enough.',
-    'Steady suits tutorials; Lively suits stories and reactions.',
-    'You can keep a few voices and switch per video.',
+    'A mistake you made is a strong opening: people stay to hear how it ended.',
   ],
 };
 
-export function StudioRail({ kind, persona, tier }: { kind: StudioKind; persona: 'new' | 'returning'; tier: 'free' | 'pro' }) {
+export function StudioRail({ kind }: { kind: StudioKind }) {
   return (
     <View style={styles.rail}>
       <ScrollView contentContainerStyle={styles.railScroll} showsVerticalScrollIndicator={false}>
         {kind === 'repurpose' && (
           <>
-            <Animated.View entering={FadeInUp.duration(450).easing(ease)}><Allowance persona={persona} tier={tier} /></Animated.View>
+            <Animated.View entering={FadeInUp.duration(450).easing(ease)}><Allowance /></Animated.View>
             <Animated.View entering={FadeInUp.delay(80).duration(450).easing(ease)}><WhatYouGet /></Animated.View>
           </>
         )}
@@ -235,12 +164,6 @@ export function StudioRail({ kind, persona, tier }: { kind: StudioKind; persona:
           <>
             <Animated.View entering={FadeInUp.duration(450).easing(ease)}><SavedHooks /></Animated.View>
             <Animated.View entering={FadeInUp.delay(80).duration(450).easing(ease)}><Openings /></Animated.View>
-          </>
-        )}
-        {kind === 'voice' && (
-          <>
-            <Animated.View entering={FadeInUp.duration(450).easing(ease)}><VoicesToTry /></Animated.View>
-            <Animated.View entering={FadeInUp.delay(80).duration(450).easing(ease)}><Minutes tier={tier} /></Animated.View>
           </>
         )}
         <Animated.View entering={FadeInUp.delay(160).duration(450).easing(ease)}>
@@ -276,10 +199,4 @@ const styles = StyleSheet.create({
   openingOn: { backgroundColor: 'rgba(245, 243, 255, 0.98)', borderWidth: 1, borderColor: ds.lavender },
   openingKind: { fontSize: 13, fontWeight: '800', color: ds.text2 },
   openingLine: { fontSize: 13.5, fontWeight: '700', color: ds.ink, marginTop: 4 },
-  voice: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 8, borderRadius: 14, backgroundColor: 'rgba(255, 255, 255, 0.7)', borderWidth: 1, borderColor: 'transparent' },
-  voiceOn: { borderColor: ds.purple, backgroundColor: '#FFFFFF' },
-  bars: { flexDirection: 'row', alignItems: 'center', gap: 3, height: 22 },
-  bar: { width: 3, height: 20, borderRadius: 2, backgroundColor: '#C9BEFA' },
-  proTag: { alignSelf: 'flex-start', marginTop: 10, paddingHorizontal: 8, height: 22, borderRadius: 999, justifyContent: 'center', backgroundColor: goldTokens.light, borderWidth: 1, borderColor: goldTokens.border },
-  proTagText: { fontSize: 10.5, fontWeight: '800', letterSpacing: 0.6, color: goldTokens.dark },
 });

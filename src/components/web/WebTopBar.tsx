@@ -42,7 +42,7 @@ export function WebTopBar({
 }) {
   const [notesOpen, setNotesOpen] = useState(false);
   const [backHover, setBackHover] = useState(false);
-  const unread = useUnreadNotifications(persona, tier);
+  const unread = useUnreadNotifications();
   const firstName = (profile?.name || '').trim().split(' ')[0];
   const date = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
 
@@ -96,7 +96,7 @@ export function WebTopBar({
         )}
       </View>
 
-      <NotificationsSheet visible={notesOpen} onClose={() => setNotesOpen(false)} persona={persona} tier={tier} />
+      <NotificationsSheet visible={notesOpen} onClose={() => setNotesOpen(false)} />
     </View>
   );
 }

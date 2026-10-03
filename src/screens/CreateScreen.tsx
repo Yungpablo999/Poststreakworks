@@ -14,7 +14,7 @@ import {
   Modal,
 } from 'react-native';
 import { Text, TextInput } from '../components/ui/AppText';
-import { getVoiceCloneSummary, getRepurposeAllowance, getScheduleSummary, getDrafts, subscribeToDrafts, draftAgo } from '../data';
+import { getRepurposeAllowance, getScheduleSummary, getDrafts, subscribeToDrafts, draftAgo } from '../data';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
@@ -27,7 +27,7 @@ import Reanimated, { FadeInUp } from 'react-native-reanimated';
 import { GlassBackdrop } from '../components/glass/GlassBackdrop';
 import { FitLines } from '../components/ui/FitLines';
 import { IdeaHeroCard } from '../components/create/IdeaHeroCard';
-import { ToolTile, GlassRow, AllowanceMeter, DraftRow, DraftsEmpty, VoiceStudioProCard, VoiceStudioCard, UnlimitedChip, ProTag } from '../components/create/CreateBlocks';
+import { ToolTile, GlassRow, AllowanceMeter, DraftRow, DraftsEmpty, UnlimitedChip, ProTag } from '../components/create/CreateBlocks';
 import { ds } from '../theme/colors';
 
 const SCHEDULE_DATE_OPTIONS = (() => {
@@ -120,7 +120,6 @@ interface CreateScreenProps {
   userPersona?: UserPersona;
   /** Pro members: Voice Studio unlocked, Hook Studio, unlimited Repurpose. */
   tier?: 'free' | 'pro';
-  onOpenVoiceStudio?: () => void;
   onOpenHookStudio?: () => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
@@ -220,7 +219,6 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
   onOpenMessages,
   userPersona,
   tier = 'free',
-  onOpenVoiceStudio,
   onOpenHookStudio,
   userProfile,
   onSaveProfile,
@@ -229,10 +227,9 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
   const tourScroll = useTourScroll();
   const isDark = false;
   const isNewUser = (userPersona || userProfile?.userPersona || 'new') === 'new';
-  const schedule = getScheduleSummary(isNewUser ? 'new' : 'returning');
+  const schedule = getScheduleSummary();
   const isPro = tier === 'pro';
-  const repurpose = getRepurposeAllowance(isNewUser ? 'new' : 'returning', 'free');
-  const voice = getVoiceCloneSummary(isNewUser ? 'new' : 'returning');
+  const repurpose = getRepurposeAllowance();
   const repurposesLeft = Math.max(0, (repurpose.weeklyLimit ?? 0) - repurpose.usedThisWeek);
   const [activeTab, setActiveTab] = useState<TabType>('create');
   const [drafts, setDrafts] = useState<DraftItem[]>(INITIAL_DRAFTS);
@@ -443,17 +440,6 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
     }
   };
 
-  const handleOpenVoiceStudioPro = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    }
-    if (onOpenJarvisPro) {
-      onOpenJarvisPro();
-    } else if (onNavigateTab) {
-      onNavigateTab('growth');
-    }
-  };
-
   const unreadNotifCount = notificationsList.filter((n) => n.unread).length;
 
   return (
@@ -466,10 +452,8 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
           backgroundColor="transparent"
           userPersona={userPersona || userProfile?.userPersona}
           onOpenJarvisPro={onOpenJarvisPro}
-          onOpenNotifications={openNotifications}
           onOpenProfile={openProfile}
           userProfile={userProfile}
-          unreadCount={unreadNotifCount}
           isDark={isDark}
         />
 
@@ -633,20 +617,6 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
             </View>
           </Reanimated.View>
 
-          {/* 5. VOICE STUDIO (Pro only) */}
-          <Reanimated.View entering={FadeInUp.delay(500).duration(550)} style={styles.voiceStudio}>
-            {isPro ? (
-              <VoiceStudioCard
-                isNew={isNewUser}
-                voiceName={voice.voiceName}
-                minutesUsed={voice.minutesUsed}
-                minutesIncluded={voice.minutesIncluded}
-                onOpen={() => onOpenVoiceStudio?.()}
-              />
-            ) : (
-              <VoiceStudioProCard onUnlock={handleOpenVoiceStudioPro} />
-            )}
-          </Reanimated.View>
 
           </ResponsiveColumns>
           {/* Bottom Space for Floating Tab Bar */}

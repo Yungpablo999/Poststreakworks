@@ -19,7 +19,7 @@ export type GhostEmotion =
 /** Pages Ghost can take the creator to. Same list as `GhostPlace` in src/jarvis/chat.ts. */
 export type GhostPlace =
   | 'create' | 'schedule' | 'growth' | 'repurpose' | 'hook-studio'
-  | 'voice-studio' | 'quests' | 'challenge' | 'jarvis-pro' | 'accounts';
+  | 'quests' | 'challenge' | 'jarvis-pro' | 'accounts';
 
 // ─── Check-ins ──────────────────────────────────────────────────────────────
 
@@ -295,6 +295,12 @@ export interface FeedIdea {
   why: string;
 }
 
+/** What the idea endpoints return. `source` says who wrote them: the idea library, or Jarvis (AI). */
+export interface IdeaList {
+  source: 'library' | 'ai';
+  ideas: FeedIdea[];
+}
+
 /** POST /api/v1/jarvis/chat body. */
 export interface JarvisChatRequest {
   message: string;
@@ -322,6 +328,152 @@ export interface JarvisChatReply {
   chips?: string[];
   emotion?: GhostEmotion;
   degraded: boolean;
+}
+
+// ─── Notifications (the bell) ───────────────────────────────────────────────
+
+/** The icon the bell draws. */
+export type NoteKind = 'jarvis' | 'growth' | 'star' | 'clock' | 'flag' | 'link' | 'mic' | 'calendar' | 'pro';
+
+/** Where a note's button takes the creator. */
+export type NoteTarget =
+  | 'create'
+  | 'accounts'
+  | 'challenge'
+  | 'jarvis-pro'
+  | 'platform-growth'
+  | 'post-performance'
+  | 'schedule'
+  | 'quests'
+  | 'home';
+
+export interface NotificationItem {
+  id: string;
+  kind: NoteKind;
+  title: string;
+  body: string;
+  /** ISO time. */
+  createdAt: string;
+  read: boolean;
+  action: { label: string; target: NoteTarget } | null;
+}
+
+/** GET /api/v1/notifications */
+export interface NotificationFeed {
+  items: NotificationItem[];
+  unread: number;
+}
+
+// ─── Quests ─────────────────────────────────────────────────────────────────
+
+/** Where tapping a quest takes the creator. */
+export type QuestPlace = 'create' | 'ideas' | 'script' | 'composer' | 'schedule' | 'growth' | 'repurpose' | 'hook-studio' | 'accounts' | 'challenge';
+
+export type QuestIcon = 'idea' | 'audience' | 'calendar' | 'hook' | 'repurpose';
+
+export interface TodayStep {
+  id: 'idea' | 'make' | 'post';
+  title: string;
+  body: string;
+  /** A button for the step; none = ticked off by doing the thing. */
+  action?: { label: string; place: QuestPlace };
+  done: boolean;
+}
+
+export interface QuestItem {
+  key: string;
+  title: string;
+  xp: number;
+  cadence: 'Daily' | 'Weekly' | 'One time';
+  place: QuestPlace;
+  action: string;
+  icon: QuestIcon;
+  pro: boolean;
+  done: boolean;
+  progress: { done: number; of: number };
+}
+
+export interface ChallengeState {
+  title: string;
+  /** The Monday of the creator's week, YYYY-MM-DD. */
+  weekStart: string;
+  goal: number;
+  /** Posts counted this week, capped at the goal. */
+  done: number;
+  xp: number;
+  joined: boolean;
+  completed: boolean;
+  /** Other creators in this week's challenge. */
+  others: number;
+  /** The creator's posts this week, earliest first. */
+  posts: { platform: AppPlatform; at: string }[];
+  /** Days (0 = Monday) they asked to be reminded on, or null. */
+  reminderDays: number[] | null;
+}
+
+/** GET /api/v1/quests */
+export interface QuestBoard {
+  level: number;
+  xp: number;
+  xpIntoLevel: number;
+  xpPerLevel: number;
+  active: number;
+  today: { key: string; xp: number; done: boolean; steps: TodayStep[] };
+  list: QuestItem[];
+  pro: QuestItem[] | null;
+  challenge: ChallengeState;
+  /** Quests this very call finished and paid. Show each once. */
+  justCompleted: { key: string; title: string; xp: number }[];
+}
+
+// ─── Home ───────────────────────────────────────────────────────────────────
+
+export interface BriefStep {
+  id: 'hook' | 'film' | 'post';
+  title: string;
+  body: string;
+  action: { label: string; place: QuestPlace } | null;
+  /** Ticked by what the creator has really done today. */
+  done: boolean;
+}
+
+/** Pro: today's brief, worked out from the creator's own posts. */
+export interface Brief {
+  lead: string;
+  steps: BriefStep[];
+}
+
+/** GET /api/v1/home */
+export interface HomeSummary {
+  nextPost: { id: string; at: string; platforms: AppPlatform[]; title: string } | null;
+  /** Posts that were due and wait for the creator to confirm they went out. */
+  waiting: number;
+  weekPlanned: number;
+  /** null until an account is connected and read. */
+  audience: { followers: number; delta7d: number | null; platforms: number } | null;
+  brief: Brief | null;
+  level: { level: number; xp: number; xpIntoLevel: number; xpPerLevel: number };
+  today: { xp: number; done: boolean; stepsDone: number; stepsTotal: number };
+  challenge: { done: number; goal: number; joined: boolean };
+  justCompleted: { key: string; title: string; xp: number }[];
+}
+
+// ─── Calendar ───────────────────────────────────────────────────────────────
+
+/** "ready" = it is time and the creator needs to post it and confirm. */
+export type CalendarStatus = 'draft' | 'scheduled' | 'ready' | 'posted';
+
+export interface CalendarItem {
+  id: string;
+  /** Planned in PostStreak, or read from the creator's account. */
+  kind: 'scheduled' | 'synced';
+  title: string;
+  platform: AppPlatform;
+  /** ISO time it goes (or went) out. */
+  at: string;
+  status: CalendarStatus;
+  /** A link to the live post, when the platform gave one. */
+  url?: string;
 }
 
 // ─── Errors ─────────────────────────────────────────────────────────────────

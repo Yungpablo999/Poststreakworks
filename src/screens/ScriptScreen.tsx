@@ -46,7 +46,6 @@ interface ScriptScreenProps {
   onSaveProfile?: (updated: UserProfileData) => void;
   /** Pro members: unlimited rewrites and "Make a voiceover". */
   tier?: 'free' | 'pro';
-  onOpenVoiceStudio?: (script: string, title: string) => void;
 }
 
 export const getFormatDurationLabel = (format?: string, title?: string): string => {
@@ -258,7 +257,6 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
   userProfile,
   onSaveProfile,
   tier = 'free',
-  onOpenVoiceStudio,
 }) => {
   const isDark = false;
   const [activeTab, setActiveTab] = useState<TabType>('create');
@@ -635,16 +633,11 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
             backgroundColor="transparent"
             onBack={onBack}
             onOpenJarvisPro={onOpenJarvisPro}
-            onOpenNotifications={() => {
-              triggerModalAnim();
-              setShowNotificationModal(true);
-            }}
             onOpenProfile={() => {
               triggerModalAnim();
               setShowProfileModal(true);
             }}
             userProfile={userProfile}
-            unreadCount={unreadNotifCount}
             isDark={isDark}
           />
 
@@ -786,21 +779,6 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
                   </Svg>
                 }
               />
-              {isPro && (
-                <AppButton
-                  title="Make a voiceover"
-                  variant="glass"
-                  onPress={() =>
-                    onOpenVoiceStudio?.([selectedHook, bodyText, takeawayText, selectedCtaText].filter(Boolean).join(' '), ideaTitle ?? '')
-                  }
-                  iconRight={
-                    <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-                      <Rect x="9" y="2" width="6" height="12" rx="3" stroke={ds.purple} strokeWidth={2.2} />
-                      <Path d="M5 11a7 7 0 0014 0M12 18v4" stroke={ds.purple} strokeWidth={2.2} strokeLinecap="round" />
-                    </Svg>
-                  }
-                />
-              )}
               <AppButton
                 title={justSaved ? 'Saved to drafts' : 'Save draft'}
                 variant="glass"
