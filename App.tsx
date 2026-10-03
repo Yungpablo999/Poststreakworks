@@ -53,7 +53,7 @@ import { closeJarvis, resetJarvis, setGhostHands, setJarvisContext, type GhostPl
 import { IS_WEB_APP, useBreakpoint, useWebSidebar } from './src/hooks/useBreakpoint';
 import { MobileWebBar } from './src/components/web/MobileWebBar';
 import { GlassBackdrop } from './src/components/glass/GlassBackdrop';
-import { UserPersona } from './src/components/HeaderDualModePills';
+import type { UserPersona } from './src/types/account';
 import { BrandToast } from './src/components/BrandToast';
 import { BackendBootScreen } from './src/screens/BackendBootScreen';
 // The backend connection: inert unless the app is given the backend's address (src/config/backend.ts).
@@ -94,13 +94,14 @@ import {
   type TikTokReturn,
 } from './src/backend/accounts';
 import { notify, useNotice } from './src/backend/notice';
+import { listTestAccounts, signInAsTestAccount } from './src/backend/testAccounts';
+import type { TestAccount } from './frontend/shared/types/phase1';
 
 type Screen =
   | 'welcome'
   | 'signup'
   | 'signin'
   | 'verify-code'
-  | 'reset-password'
   | 'niche'
   | 'platforms'
   | 'plan'
@@ -124,24 +125,7 @@ type Screen =
   | 'voice-studio'
   | 'hook-studio';
 
-// The sample creator the app shows when it isn't connected to a backend.
-const SAMPLE_PROFILE: UserProfileData = {
-  name: 'Pablo',
-  handle: '@pablocreates',
-  bio: 'Consistency is my superpower. Building my creator streak with Jarvis AI.',
-  niche: 'Tech & Lifestyle Creator • Lagos',
-  tier: 'free',
-  userPersona: 'new',
-  streakCount: 1,
-  level: 1,
-  xp: 0,
-  postsCount: 0,
-  connectedPlatforms: [],
-  niches: ['Lifestyle', 'Tech & AI', 'Storytelling'],
-};
-
-// Connected to the backend, nothing of the sample creator shows: this is what the
-// app holds before sign-in and after sign-out, until the creator's own profile loads.
+// What the app holds before sign-in and after sign-out, until the creator's own profile loads.
 const BLANK_PROFILE: UserProfileData = {
   name: '',
   handle: '',
@@ -255,35 +239,15 @@ export default function App() {
     }
     navigateTo('composer');
   };
-  const [userPersona, setUserPersona] = useState<UserPersona>('new');
-
-  const handleTogglePersona = () => {
-    // A signed-in account has one real history; the sample "returning" view is only for the preview build
-    if (BACKEND.enabled) return;
-    setUserPersona((prev) => {
-      const nextPersona = prev === 'returning' ? 'new' : 'returning';
-      setUserProfile((profile) => ({
-        ...profile,
-        userPersona: nextPersona,
-        streakCount: nextPersona === 'new' ? 1 : 17,
-        level: nextPersona === 'new' ? 1 : 5,
-        xp: nextPersona === 'new' ? 0 : 3450,
-        postsCount: nextPersona === 'new' ? 0 : 24,
-        connectedPlatforms: nextPersona === 'new' ? [] : ['tiktok', 'instagram', 'youtube'],
-      }));
-      return nextPersona;
-    });
-  };
-
-  const [userProfile, setUserProfileRaw] = useState<UserProfileData>(BACKEND.enabled ? BLANK_PROFILE : SAMPLE_PROFILE);
-  // Every place in the app that edits the profile goes through this. Connected to the
-  // backend, the plan (tier) and the New/Returning view are the server's to decide, so
-  // no screen can change them locally (the many "switch to Pro" handlers become no-ops).
+  const [userProfile, setUserProfileRaw] = useState<UserProfileData>(BLANK_PROFILE);
+  // The plan (tier) and the New/Returning view are the server's to decide: every place that
+  // edits the profile goes through this, and none of them can change those two.
   const setUserProfile: typeof setUserProfileRaw = (action) =>
     setUserProfileRaw((prev) => {
       const next = typeof action === 'function' ? action(prev) : action;
-      return BACKEND.enabled ? { ...next, tier: prev.tier, userPersona: prev.userPersona } : next;
+      return { ...next, tier: prev.tier, userPersona: prev.userPersona };
     });
+  const userPersona: UserPersona = userProfile.userPersona;
 
   // ─── Backend state ────────────────────────────────────────────────────────
   // Whether we're still restoring the saved sign-in at launch (a holding page shows meanwhile)
@@ -292,6 +256,8 @@ export default function App() {
   // Sending a code / why it couldn't be sent, for the sign-up and sign-in forms
   const [authBusy, setAuthBusy] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  // Local testing: the seeded accounts offered on the sign-in screen (none anywhere else)
+  const [testAccounts, setTestAccounts] = useState<TestAccount[]>([]);
   // Phone creators approve TikTok in a browser; this page then hands them back to the app
   const [phoneHandoff, setPhoneHandoff] = useState<TikTokReturn | null>(null);
   const notice = useNotice();
@@ -358,7 +324,6 @@ export default function App() {
         const profile = profileFromBootstrap(b, BLANK_PROFILE, authRef.current.username);
         savedProfile.current = profile;
         setUserProfileRaw(profile);
-        setUserPersona('new');
         void syncTimezone(b);
         // Ghost's welcome tour is once per account
         justSignedUp.current = !b.tour.done;
@@ -440,6 +405,14 @@ export default function App() {
       alive = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  React.useEffect(() => {
+    let alive = true;
+    void listTestAccounts().then((list) => alive && setTestAccounts(list));
+    return () => {
+      alive = false;
+    };
   }, []);
 
   // Signed out (here, or from another tab): forget the last creator's data and go back to sign-in
@@ -613,43 +586,31 @@ export default function App() {
   };
 
   const handleSignUpSubmit = async (_username: string, _email: string) => {
-    if (BACKEND.enabled) {
-      // The backend emails a 6-digit code
-      if (authBusy) return;
-      setAuthBusy(true);
-      setAuthError(null);
-      const sent = await sendCode(_email, true);
-      setAuthBusy(false);
-      if (!sent.ok) {
-        setAuthError(sent.message);
-        return;
-      }
+    // The backend emails a 6-digit code
+    if (authBusy) return;
+    setAuthBusy(true);
+    setAuthError(null);
+    const sent = await sendCode(_email, true);
+    setAuthBusy(false);
+    if (!sent.ok) {
+      setAuthError(sent.message);
+      return;
     }
     authRef.current = { email: _email, username: _username, niches: selectedNiches, signingUp: true };
     setAuthUsername(_username);
     setAuthEmail(_email);
     setVerifyMode('signup');
-    if (!BACKEND.enabled) setUserProfile(prev => ({ ...prev, name: _username || prev.name, tier: 'free' }));
     navigateTo('verify-code');
   };
 
-  // One-tap Apple / Google sign-up. Sample build: the provider has already verified
-  // the person, so skip the email code and go straight to Home. Connected: hands off
-  // to the provider (the web page leaves and comes back signed in; on a phone the
-  // session arrives through an app link).
+  // One-tap Apple / Google sign-up: hands off to the provider (the web page leaves and
+  // comes back signed in; on a phone the session arrives through an app link).
   const handleSocialSignUp = async (_provider: 'apple' | 'google') => {
-    if (BACKEND.enabled) {
-      setAuthError(null);
-      authRef.current = { email: '', username: '', niches: selectedNiches, signingUp: true };
-      rememberOnboarding(selectedNiches);
-      const r = await signInWithProvider(_provider);
-      if (!r.ok) setAuthError(r.message);
-      return;
-    }
-    justSignedUp.current = true;
-    setVerifyMode('signup');
-    setUserProfile(prev => ({ ...prev, tier: 'free' }));
-    navigateTo('dashboard');
+    setAuthError(null);
+    authRef.current = { email: '', username: '', niches: selectedNiches, signingUp: true };
+    rememberOnboarding(selectedNiches);
+    const r = await signInWithProvider(_provider);
+    if (!r.ok) setAuthError(r.message);
   };
 
   // Sign In Screen actions
@@ -663,33 +624,43 @@ export default function App() {
   };
 
   const handleSignInSubmit = async (_email: string) => {
-    if (BACKEND.enabled) {
-      if (authBusy) return;
-      setAuthBusy(true);
-      setAuthError(null);
-      const sent = await sendCode(_email, false);
-      setAuthBusy(false);
-      if (!sent.ok) {
-        setAuthError(sent.message);
-        return;
-      }
+    if (authBusy) return;
+    setAuthBusy(true);
+    setAuthError(null);
+    const sent = await sendCode(_email, false);
+    setAuthBusy(false);
+    if (!sent.ok) {
+      setAuthError(sent.message);
+      return;
     }
     authRef.current = { email: _email, username: '', niches: [], signingUp: false };
     setAuthEmail(_email);
     setVerifyMode('signin');
-    if (!BACKEND.enabled) setUserProfile(prev => ({ ...prev, tier: 'free' }));
     navigateTo('verify-code');
   };
 
   const handleSocialSignIn = async (provider: 'apple' | 'google') => {
-    if (BACKEND.enabled) {
-      setAuthError(null);
-      authRef.current = { email: '', username: '', niches: [], signingUp: false };
-      const r = await signInWithProvider(provider);
-      if (!r.ok) setAuthError(r.message);
+    setAuthError(null);
+    authRef.current = { email: '', username: '', niches: [], signingUp: false };
+    const r = await signInWithProvider(provider);
+    if (!r.ok) setAuthError(r.message);
+  };
+
+  // Local testing: one tap signs in as a seeded account (a real session, no emailed code)
+  const handleTestAccount = async (email: string) => {
+    if (authBusy) return;
+    setAuthBusy(true);
+    setAuthError(null);
+    const r = await signInAsTestAccount(email);
+    if (!r.ok) {
+      setAuthBusy(false);
+      setAuthError(r.message);
       return;
     }
-    setUserProfile(prev => ({ ...prev, tier: 'free' }));
+    authRef.current = { email, username: '', niches: [], signingUp: false };
+    const loaded = await enterApp();
+    setAuthBusy(false);
+    if (!loaded) notify('We couldn’t load that account. Is the local stack running?');
     navigateTo('dashboard');
   };
 
@@ -710,7 +681,7 @@ export default function App() {
     }
   };
 
-  // Connected: checks the 6-digit code with the backend. null = it was right, otherwise
+  // Checks the 6-digit code with the backend. null = it was right, otherwise
   // the message to show. The creator's account starts loading straight away, so the
   // "You're verified" celebration covers the wait.
   const verifyCode = async (code: string): Promise<string | null> => {
@@ -726,22 +697,16 @@ export default function App() {
   };
 
   const handleVerifyCodeSuccess = async (_email: string) => {
-    if (BACKEND.enabled) {
-      const loaded = (await enteringApp.current) ?? false;
-      enteringApp.current = null;
-      if (!loaded) notify('We couldn’t load your account yet. Check your connection.');
-      navigateTo('dashboard');
-      return;
-    }
-    if (verifyMode === 'signup') justSignedUp.current = true;
-    setUserProfile(prev => ({ ...prev, tier: 'free' }));
+    const loaded = (await enteringApp.current) ?? false;
+    enteringApp.current = null;
+    if (!loaded) notify('We couldn’t load your account yet. Check your connection.');
     // Sign-up and sign-in both land on Home; Home's day-0 welcome greets new creators
     navigateTo('dashboard');
   };
 
   const handleLogout = () => {
     // The session-lost listener below clears the account's data from memory
-    if (BACKEND.enabled) void signOut();
+    void signOut();
     navigateTo(Platform.OS === 'web' ? 'signin' : 'welcome');
   };
 
@@ -841,7 +806,7 @@ export default function App() {
   const AUTH_STEP: Partial<Record<Screen, number | null>> = {
     niche: 0, platforms: 1, plan: 2, signup: 3,
     'verify-code': verifyMode === 'signup' ? 4 : null,
-    signin: null, 'reset-password': null,
+    signin: null,
   };
   const showAuthHeader = (IS_WEB_APP || breakpoint === 'desktop') && currentScreen in AUTH_STEP;
   const authStep = AUTH_STEP[currentScreen] ?? null;
@@ -891,9 +856,6 @@ export default function App() {
       onNavigate={(id) => { close?.(); navigateTo(SCREEN_FOR[id]); }}
       onOpenProfile={() => { close?.(); setShowProfileFromMenu(true); }}
       onOpenPro={() => { close?.(); navigateTo('jarvis-pro'); }}
-      persona={desktopPersona}
-      onToggleTier={() => setUserProfile((prev) => ({ ...prev, tier: prev.tier === 'pro' || prev.tier === 'founding' ? 'free' : 'pro' }))}
-      onTogglePersona={handleTogglePersona}
     />
   );
 
@@ -969,9 +931,25 @@ export default function App() {
     return <View style={styles.container} />;
   }
 
-  // Connected to the backend: a holding page while the saved sign-in is restored, and
+  // Without the backend's address there is nothing to show: say so rather than look real.
+  if (!BACKEND.enabled) {
+    return (
+      <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+        <View style={styles.container}>
+          <StatusBar style="dark" />
+          <BackendBootScreen
+            busy={false}
+            message="This copy of PostStreak isn’t connected to a PostStreak server."
+            detail="Set EXPO_PUBLIC_API_URL, EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY and start it again. On your own computer, npm run local does all of that."
+          />
+        </View>
+      </SafeAreaProvider>
+    );
+  }
+
+  // A holding page while the saved sign-in is restored, and
   // the page that hands a phone creator back to the app after TikTok's "allow".
-  if (BACKEND.enabled && (booting || phoneHandoff)) {
+  if (booting || phoneHandoff) {
     return (
       <SafeAreaProvider initialMetrics={initialWindowMetrics}>
         <View style={styles.container}>
@@ -1073,7 +1051,7 @@ export default function App() {
             savedIdeaTitle={selectedIdeaTitle}
             busy={authBusy}
             error={authError}
-            providers={BACKEND.enabled ? [...BACKEND.socialProviders] : undefined}
+            providers={[...BACKEND.socialProviders]}
           />
         )}
 
@@ -1085,7 +1063,9 @@ export default function App() {
             onSocialSignIn={handleSocialSignIn}
             busy={authBusy}
             error={authError}
-            providers={BACKEND.enabled ? [...BACKEND.socialProviders] : undefined}
+            providers={[...BACKEND.socialProviders]}
+            testAccounts={testAccounts}
+            onTestAccount={handleTestAccount}
           />
         )}
 
@@ -1097,8 +1077,8 @@ export default function App() {
             onBack={handleBackFromVerifyCode}
             onEditEmail={handleEditEmailFromVerifyCode}
             onSuccess={handleVerifyCodeSuccess}
-            onVerify={BACKEND.enabled ? verifyCode : undefined}
-            onResend={BACKEND.enabled ? resendCode : undefined}
+            onVerify={verifyCode}
+            onResend={resendCode}
           />
         )}
 
@@ -1122,7 +1102,6 @@ export default function App() {
           (
             <DashboardScreen
               tier={userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free'}
-              onSwitchToFree={() => setUserProfile(prev => ({ ...prev, tier: 'free' }))}
               onOpenVoiceStudio={() => {
                 setVoiceScript(undefined);
                 navigateTo('voice-studio');
@@ -1132,11 +1111,7 @@ export default function App() {
               onStartMission={() => navigateTo('mission-detail')}
               onOpenQuest={() => navigateTo('quests')}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-              onSwitchToPro={() => {
-                setUserProfile(prev => ({ ...prev, tier: 'pro' }));
-              }}
               userPersona={userPersona}
-              onTogglePersona={handleTogglePersona}
               onOpenSchedule={() => navigateTo('schedule')}
               onNavigateTab={handleTabNavigation}
               userProfile={userProfile}
@@ -1149,11 +1124,8 @@ export default function App() {
           (
             <MissionDetailScreen
               onBack={() => navigateTo(previousScreen ? previousScreen : 'quests')}
-              onSwitchToFree={() => setUserProfile(prev => ({ ...prev, tier: 'free' }))}
               userPersona={userPersona}
-              onTogglePersona={handleTogglePersona}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-              onSwitchToPro={() => setUserProfile(prev => ({ ...prev, tier: 'pro' }))}
               onLogout={handleLogout}
               onOpenCreateIdea={() => navigateTo('create')}
               onOpenScript={(title) => {
@@ -1212,13 +1184,6 @@ export default function App() {
               }}
               onNavigateTab={handleTabNavigation}
               userPersona={userPersona}
-              onTogglePersona={handleTogglePersona}
-              onSwitchToPro={() => {
-                setUserProfile(prev => ({ ...prev, tier: 'pro' }));
-              }}
-              onSwitchToFree={() => {
-                setUserProfile(prev => ({ ...prev, tier: 'free' }));
-              }}
               userProfile={userProfile}
               onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
             />
@@ -1229,10 +1194,7 @@ export default function App() {
           (
             <ScheduleScreen
               tier={userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free'}
-              onSwitchToPro={() => setUserProfile(prev => ({ ...prev, tier: 'pro' }))}
-              onSwitchToFree={() => setUserProfile(prev => ({ ...prev, tier: 'free' }))}
               userPersona={userPersona}
-              onTogglePersona={handleTogglePersona}
               onBack={() => navigateTo(previousScreen ? previousScreen : 'dashboard')}
               onLogout={handleLogout}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
@@ -1254,15 +1216,10 @@ export default function App() {
           (
             <GrowthScreen
               tier={userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free'}
-              onSwitchToFree={() => setUserProfile(prev => ({ ...prev, tier: 'free' }))}
               onBackToDashboard={() => navigateTo('dashboard')}
               onLogout={handleLogout}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-              onSwitchToPro={() => {
-                setUserProfile(prev => ({ ...prev, tier: 'pro' }));
-              }}
               userPersona={userPersona}
-              onTogglePersona={handleTogglePersona}
               onOpenAudienceBreakdown={() => navigateTo('audience-breakdown')}
               onOpenPostPerformance={() => navigateTo('post-performance')}
               onOpenPlatformGrowth={() => navigateTo('platform-growth')}
@@ -1304,18 +1261,13 @@ export default function App() {
                 navigateTo('voice-studio');
               }}
               onOpenHookStudio={() => navigateTo('hook-studio')}
-              onSwitchToFree={() => setUserProfile(prev => ({ ...prev, tier: 'free' }))}
               onBackToDashboard={() => navigateTo('dashboard')}
               onLogout={handleLogout}
               onOpenMissionDetail={() => navigateTo('mission-detail')}
               onOpenCommunityChallenge={() => navigateTo('challenge-detail')}
               onOpenSchedule={() => navigateTo('schedule')}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-              onSwitchToPro={() => {
-                setUserProfile(prev => ({ ...prev, tier: 'pro' }));
-              }}
               userPersona={userPersona}
-              onTogglePersona={handleTogglePersona}
               onNavigateTab={handleTabNavigation}
               userProfile={userProfile}
               onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
@@ -1327,9 +1279,7 @@ export default function App() {
           <ChallengeDetailScreen
             onBackToDashboard={() => navigateTo('quests')}
             userPersona={userPersona}
-            onTogglePersona={handleTogglePersona}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-            onSwitchToPro={() => setUserProfile(prev => ({ ...prev, tier: 'pro' }))}
             onLogout={handleLogout}
             onOpenComposer={(idea?: string, platform?: string, questDraft?: any) => {
               if (idea) setComposerIdeaTitle(idea);
@@ -1392,7 +1342,6 @@ export default function App() {
           (
             <ContentAngleScreen
               tier={userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free'}
-              onSwitchToFree={() => setUserProfile(prev => ({ ...prev, tier: 'free' }))}
               onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
               onLogout={handleLogout}
               onOpenSchedule={() => navigateTo('schedule')}
@@ -1409,7 +1358,6 @@ export default function App() {
           (
             <ScriptScreen
               tier={userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free'}
-              onSwitchToFree={() => setUserProfile(prev => ({ ...prev, tier: 'free' }))}
               onOpenVoiceStudio={(script) => {
                 setVoiceScript(script);
                 navigateTo('voice-studio');
@@ -1437,7 +1385,6 @@ export default function App() {
           (
             <CaptionScreen
               tier={userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free'}
-              onSwitchToFree={() => setUserProfile(prev => ({ ...prev, tier: 'free' }))}
               ideaTitle={selectedIdeaTitle}
               onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
               onLogout={handleLogout}
@@ -1464,12 +1411,9 @@ export default function App() {
             // Free and Pro share the glass Repurpose studio (Pro: unlimited + plan the order)
             <RepurposeScreen
               tier={userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free'}
-              onSwitchToFree={() => setUserProfile(prev => ({ ...prev, tier: 'free' }))}
               ideaTitle={selectedIdeaTitle}
               userProfile={userProfile}
               userPersona={userPersona}
-              onTogglePersona={handleTogglePersona}
-              onSwitchToPro={() => setUserProfile(prev => ({ ...prev, tier: 'pro' }))}
               onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
               onNavigateTab={handleTabNavigation}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
@@ -1492,7 +1436,6 @@ export default function App() {
           <VoiceStudioScreen
             initialScript={voiceScript}
             userPersona={userPersona}
-            onTogglePersona={handleTogglePersona}
             onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
             onLogout={handleLogout}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
@@ -1502,11 +1445,6 @@ export default function App() {
                 setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
               if (attachedAudio) setComposerAttachedAudio(attachedAudio);
               navigateTo('composer');
-            }}
-            onSwitchToFree={() => {
-              if (userProfile) {
-                setUserProfile({ ...userProfile, tier: 'free' });
-              }
             }}
             onNavigateTab={handleTabNavigation}
             userProfile={userProfile}
@@ -1520,7 +1458,6 @@ export default function App() {
             onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
             onLogout={handleLogout}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-            onSwitchToFree={() => setUserProfile(prev => ({ ...prev, tier: 'free' }))}
             onUseHook={(title, hook, style) => {
               setComposerQuestDraft(null);
               setComposerIdeaTitle(title);
@@ -1668,7 +1605,7 @@ export default function App() {
         {inApp && <GhostTour />}
 
         {/* Messages from the backend connection ("Couldn't save that…", "TikTok connected") */}
-        {BACKEND.enabled && <BrandToast message={notice} />}
+        <BrandToast message={notice} />
 
         {showSplash && (
           <SplashScreen onFinish={() => setShowSplash(false)} />

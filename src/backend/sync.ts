@@ -31,6 +31,7 @@ import type { UserProfileData } from '../components/UserProfileModal';
 import { BACKEND } from '../config/backend';
 import { api, backendReady, type ApiResult } from './api';
 import { setAccounts } from './accounts';
+import { capabilitiesStore, NO_CAPABILITIES, planStore, unreadStore } from './account';
 import { notify } from './notice';
 
 // The glue between the app's in-memory stores (src/data, the tour, the mascot's
@@ -96,6 +97,9 @@ export function applyBootstrap(b: Bootstrap): void {
   hydrateCheckIn(toStreak(b.checkIn));
   hydrateRepurposeUsed(b.repurpose.usedThisWeek);
   setAccounts(b.accounts);
+  capabilitiesStore.set(b.capabilities);
+  planStore.set(b.plan);
+  unreadStore.set(b.unreadNotifications);
   seedTipsSeen(b.tipsSeen, true);
   setTourFinished(b.tour.done);
   loaded = true;
@@ -111,6 +115,9 @@ export async function reloadSavedWork(): Promise<void> {
 export function clearAccountData(): void {
   resetUserData();
   setAccounts([]);
+  capabilitiesStore.set(NO_CAPABILITIES);
+  planStore.set(null);
+  unreadStore.set(0);
   seedTipsSeen([], true);
   setTourFinished(false);
   loaded = false;
@@ -146,7 +153,7 @@ export function connectionsPatch(accounts: ConnectedAccount[]): Pick<UserProfile
   };
 }
 
-/** The profile the app shows, from the creator's account. A signed-in account always shows as "new": the "returning" view is still sample content. */
+/** The profile the app shows, from the creator's account. */
 export function profileFromBootstrap(b: Bootstrap, prev: UserProfileData, fallbackName?: string): UserProfileData {
   const p = b.profile;
   const name = p.name || fallbackName || p.email.split('@')[0] || prev.name;
@@ -158,11 +165,11 @@ export function profileFromBootstrap(b: Bootstrap, prev: UserProfileData, fallba
     niche: p.niche,
     niches: p.niches.map(labelForNiche),
     tier: p.tier,
-    userPersona: 'new',
+    userPersona: b.persona,
     streakCount: b.checkIn.currentDays,
     level: p.level,
     xp: p.xp,
-    postsCount: 0,
+    postsCount: p.postsCount,
     customAvatarUri: p.avatarUrl ?? undefined,
     ...connectionsPatch(b.accounts),
   };

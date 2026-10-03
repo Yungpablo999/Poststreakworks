@@ -26,7 +26,7 @@ import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { FreeAppHeader } from '../components/FreeAppHeader';
-import { UserPersona } from '../components/HeaderDualModePills';
+import type { UserPersona } from '../types/account';
 import { sFont, isNarrowScreen } from '../utils/responsive';
 import Reanimated, { FadeInUp } from 'react-native-reanimated';
 import { GlassBackdrop } from '../components/glass/GlassBackdrop';
@@ -198,7 +198,6 @@ interface GrowthScreenProps {
   onOpenSchedule?: () => void;
   /** Pro members: no upgrade card, Pro rows in "What you'll see here". */
   tier?: 'free' | 'pro';
-  onSwitchToFree?: () => void;
   onOpenIdeas?: () => void;
   onOpenChallenge?: () => void;
   /** Send this post into the Repurpose video studio. */
@@ -206,9 +205,7 @@ interface GrowthScreenProps {
   onLogout?: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onOpenJarvisPro?: () => void;
-  onSwitchToPro?: () => void;
   userPersona?: UserPersona;
-  onTogglePersona?: () => void;
   onOpenAudienceBreakdown?: () => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
@@ -238,15 +235,12 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
   onMakeMoreLikeThis,
   onOpenSchedule,
   tier = 'free',
-  onSwitchToFree,
   onOpenIdeas,
   onOpenChallenge,
   onLogout,
   onNavigateTab,
   onOpenJarvisPro,
-  onSwitchToPro,
   userPersona,
-  onTogglePersona,
   onOpenAudienceBreakdown,
   userProfile,
   onSaveProfile,
@@ -454,10 +448,7 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
         {/* 1. TOP AIRY HEADER BAR */}
         <FreeAppHeader
           backgroundColor="transparent"
-          onSwitchToPro={onSwitchToPro || onOpenJarvisPro}
-          onSwitchToFree={onSwitchToFree}
           onOpenJarvisPro={onOpenJarvisPro}
-          onTogglePersona={onTogglePersona}
           userPersona={userPersona || userProfile?.userPersona}
           onOpenNotifications={() => {
             triggerModalPop();

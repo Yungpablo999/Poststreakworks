@@ -46,7 +46,6 @@ interface ScriptScreenProps {
   onSaveProfile?: (updated: UserProfileData) => void;
   /** Pro members: unlimited rewrites and "Make a voiceover". */
   tier?: 'free' | 'pro';
-  onSwitchToFree?: () => void;
   onOpenVoiceStudio?: (script: string, title: string) => void;
 }
 
@@ -259,7 +258,6 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
   userProfile,
   onSaveProfile,
   tier = 'free',
-  onSwitchToFree,
   onOpenVoiceStudio,
 }) => {
   const isDark = false;
@@ -637,7 +635,6 @@ export const ScriptScreen: React.FC<ScriptScreenProps> = ({
             backgroundColor="transparent"
             onBack={onBack}
             onOpenJarvisPro={onOpenJarvisPro}
-            onSwitchToFree={onSwitchToFree}
             onOpenNotifications={() => {
               triggerModalAnim();
               setShowNotificationModal(true);

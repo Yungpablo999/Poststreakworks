@@ -194,6 +194,8 @@ export interface BootstrapProfile {
   level: number;
   xp: number;
   nextLevelXp: number;
+  /** Posts made: published through PostStreak, or read from a connected account. */
+  postsCount: number;
   /** IANA zone; decides when the creator's day and week start. */
   timezone: string;
   createdAt: string;
@@ -221,6 +223,16 @@ export interface Capabilities {
   autoPost: boolean;
   /** Age / place / online-time breakdowns of an audience. */
   audienceDemographics: boolean;
+}
+
+/** GET /api/v1/dev/login (local stack only): the seeded accounts the sign-in screen offers. */
+export interface TestAccount {
+  email: string;
+  label: string;
+  plan: 'free' | 'pro';
+  stage: 'new' | 'existing';
+  displayName: string;
+  blurb: string;
 }
 
 /** The paid plan, when there is one. `Bootstrap.profile.tier` is what to gate on. */

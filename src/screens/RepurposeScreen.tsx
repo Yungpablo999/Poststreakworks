@@ -20,7 +20,7 @@ import { PlatformChip } from '../components/composer/ComposerBlocks';
 import { AllowanceMeter, UnlimitedChip } from '../components/create/CreateBlocks';
 import { PlatformLogo, type PlatformLogoType } from '../components/onboarding/PlatformLogo';
 import type { UserProfileData } from '../components/UserProfileModal';
-import type { UserPersona } from '../components/HeaderDualModePills';
+import type { UserPersona } from '../types/account';
 import {
   SourceSwitch,
   VideoPicker,
@@ -76,13 +76,10 @@ interface RepurposeScreenProps {
   onUseVersion?: (caption: string, platform: string, idea: string) => void;
   userProfile?: UserProfileData;
   userPersona?: UserPersona;
-  onTogglePersona?: () => void;
-  onSwitchToPro?: () => void;
   /** Open on the video side with this video already added (e.g. from Growth). */
   initialVideo?: StudioVideo;
   /** Pro members: unlimited runs and "Plan the order" scheduling. */
   tier?: 'free' | 'pro';
-  onSwitchToFree?: () => void;
   onFilmIdea?: (title: string, style: FilmStyle) => void;
 }
 
@@ -210,12 +207,9 @@ export const RepurposeScreen: React.FC<RepurposeScreenProps> = ({
   onUseVersion,
   userProfile,
   userPersona,
-  onTogglePersona,
-  onSwitchToPro,
   initialVideo,
   onFilmIdea,
   tier = 'free',
-  onSwitchToFree,
 }) => {
   const pageWidth = usePageWidth();
   const isPro = tier === 'pro';
@@ -429,9 +423,6 @@ export const RepurposeScreen: React.FC<RepurposeScreenProps> = ({
           backgroundColor="transparent"
           onBack={onBack}
           onOpenJarvisPro={onOpenJarvisPro}
-          onSwitchToPro={onSwitchToPro}
-          onSwitchToFree={onSwitchToFree}
-          onTogglePersona={onTogglePersona}
           userPersona={userPersona}
           userProfile={userProfile}
         />

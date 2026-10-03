@@ -427,6 +427,8 @@ export const accountsRouter = createTRPCRouter({
         level,
         xp,
         nextLevelXp,
+        // Posts they have made: the ones they published through PostStreak, or the posts read from a connected account
+        postsCount: Math.max(publishedRes.count ?? 0, syncedRes.count ?? 0),
         timezone: user.timezone as string,
         createdAt: user.created_at as string,
       },

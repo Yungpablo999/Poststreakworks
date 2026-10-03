@@ -14,7 +14,7 @@ import { JarvisOrb } from '../components/JarvisOrb';
 import { FreeAppHeader } from '../components/FreeAppHeader';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
-import type { UserPersona } from '../components/HeaderDualModePills';
+import type { UserPersona } from '../types/account';
 import { ChallengeCard, JarvisPickCard, type PickIdea } from '../components/quests/QuestBlocks';
 import { getStarterIdeas } from '../data';
 import { ds } from '../theme/colors';
@@ -46,8 +46,6 @@ interface ChallengeDetailScreenProps {
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
   userPersona?: UserPersona;
-  onTogglePersona?: () => void;
-  onSwitchToPro?: () => void;
 }
 
 const listDays = (days: number[]) => {
@@ -126,8 +124,6 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
   userProfile,
   onSaveProfile,
   userPersona,
-  onTogglePersona,
-  onSwitchToPro,
 }) => {
   const pageWidth = usePageWidth();
   const isNew = (userPersona || userProfile?.userPersona || 'new') === 'new';
@@ -199,8 +195,6 @@ export const ChallengeDetailScreen: React.FC<ChallengeDetailScreenProps> = ({
           backgroundColor="transparent"
           onBack={onBackToDashboard}
           onOpenJarvisPro={onOpenJarvisPro}
-          onSwitchToPro={onSwitchToPro}
-          onTogglePersona={onTogglePersona}
           onOpenProfile={() => setShowProfile(true)}
           userPersona={userPersona}
           userProfile={userProfile}

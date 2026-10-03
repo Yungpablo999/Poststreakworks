@@ -1,9 +1,8 @@
 // The connection to the PostStreak backend (src/backend).
 //
-// The app only talks to the backend when it is given all three addresses below.
-// With any of them missing it runs exactly as it always has, on its built-in
-// sample data. That is what makes merging this code safe: nothing changes for
-// anyone until these are set on a deployment, and removing them switches it back.
+// The app is its backend's front door: it needs all three addresses below. With any
+// of them missing it says so (src/screens/BackendBootScreen.tsx) instead of showing
+// anything that looks real.
 //
 // Every value ships inside the app, so none of them may be a secret. The Supabase
 // "anon" key is public by design (row-level security is the real boundary); the
@@ -28,6 +27,10 @@ const providers = rawProviders
   .map((p) => p.trim().toLowerCase())
   .filter((p): p is SocialProvider => p === 'apple' || p === 'google');
 
+// Local testing: the sign-in screen offers the seeded test accounts (the server must agree: it
+// only answers on a stack running on the same machine).
+const testAccounts = (process.env.EXPO_PUBLIC_DEV_LOGIN ?? '').trim() === 'true';
+
 export const BACKEND = {
   /** true once the API, Supabase URL and anon key are all set. */
   enabled: Boolean(apiUrl && supabaseUrl && supabaseAnonKey),
@@ -35,6 +38,7 @@ export const BACKEND = {
   supabaseUrl,
   supabaseAnonKey,
   socialProviders: providers,
+  testAccounts,
   /** Where TikTok sends the creator back to; the app's own address plus this path. */
   tiktokCallbackPath: '/auth/tiktok/callback',
   /** The phone app's link scheme (app.json "scheme"). */

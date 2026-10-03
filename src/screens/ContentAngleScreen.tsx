@@ -40,7 +40,6 @@ interface ContentAngleScreenProps {
   onSaveProfile?: (updated: UserProfileData) => void;
   /** Pro members: unlimited ideas and ideas about their own topic. */
   tier?: 'free' | 'pro';
-  onSwitchToFree?: () => void;
 }
 
 interface NotificationItem {
@@ -190,8 +189,7 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
 
   userProfile,
   onSaveProfile,
-  tier = 'free',
-  onSwitchToFree,}) => {
+  tier = 'free',}) => {
   const isDark = false;
   const [activeTab, setActiveTab] = useState<TabType>('create');
 
@@ -540,7 +538,6 @@ export const ContentAngleScreen: React.FC<ContentAngleScreenProps> = ({
           backgroundColor="transparent"
           onBack={onBack}
           onOpenJarvisPro={onOpenJarvisPro}
-          onSwitchToFree={onSwitchToFree}
           onOpenNotifications={() => {
             triggerModalAnim();
             setShowNotificationModal(true);

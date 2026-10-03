@@ -23,7 +23,7 @@ import { JarvisOrb } from '../components/JarvisOrb';
 import { FreeAppHeader } from '../components/FreeAppHeader';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
-import type { UserPersona } from '../components/HeaderDualModePills';
+import type { UserPersona } from '../types/account';
 import { JarvisPickCard, ProgressRing, PulsingTarget, type PickIdea } from '../components/quests/QuestBlocks';
 import { getStarterIdeas } from '../data';
 import { ds } from '../theme/colors';
@@ -51,9 +51,6 @@ interface MissionDetailScreenProps {
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
   userPersona?: UserPersona;
-  onTogglePersona?: () => void;
-  onSwitchToPro?: () => void;
-  onSwitchToFree?: () => void;
 }
 
 type StepIcon = 'idea' | 'make' | 'post';
@@ -178,9 +175,6 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
   userProfile,
   onSaveProfile,
   userPersona,
-  onTogglePersona,
-  onSwitchToPro,
-  onSwitchToFree,
 }) => {
   const pageWidth = usePageWidth();
   const isNew = (userPersona || userProfile?.userPersona || 'new') === 'new';
@@ -225,9 +219,6 @@ export const MissionDetailScreen: React.FC<MissionDetailScreenProps> = ({
           backgroundColor="transparent"
           onBack={onBack}
           onOpenJarvisPro={onOpenJarvisPro}
-          onSwitchToPro={onSwitchToPro}
-          onSwitchToFree={onSwitchToFree}
-          onTogglePersona={onTogglePersona}
           onOpenProfile={() => setShowProfile(true)}
           userPersona={userPersona}
           userProfile={userProfile}

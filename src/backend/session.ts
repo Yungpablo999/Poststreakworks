@@ -247,6 +247,20 @@ export async function handleAuthLink(url: string): Promise<boolean> {
   return true;
 }
 
+// ─── Test accounts (local stack only) ───────────────────────────────────────
+
+/** Starts the session the server's test sign-in handed back (see src/backend/testAccounts.ts). */
+export async function startSessionFromTokens(tokens: { access_token: string; refresh_token: string }): Promise<AuthOutcome> {
+  try {
+    const { data, error } = await supabase().auth.setSession(tokens);
+    if (error || !data.session) return fail('other');
+    apply(data.session);
+    return { ok: true };
+  } catch {
+    return fail('offline');
+  }
+}
+
 // ─── Sign out ───────────────────────────────────────────────────────────────
 
 /** Signs out of this device only (Supabase's default would sign the creator out everywhere). */

@@ -23,7 +23,7 @@ import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { FreeAppHeader } from '../components/FreeAppHeader';
 import { sFont, isNarrowScreen, isSmallScreen, sPadding } from '../utils/responsive';
 
-import { UserPersona } from '../components/HeaderDualModePills';
+import type { UserPersona } from '../types/account';
 import Reanimated, { FadeInUp } from 'react-native-reanimated';
 import { GlassBackdrop } from '../components/glass/GlassBackdrop';
 import { FitLines } from '../components/ui/FitLines';
@@ -41,13 +41,10 @@ interface QuestsScreenProps {
   onOpenCommunityChallenge?: () => void;
   onOpenSchedule?: () => void;
   onOpenJarvisPro?: () => void;
-  onSwitchToPro?: () => void;
-  onSwitchToFree?: () => void;
   /** Pro members: Pro quests instead of the upgrade card. */
   tier?: 'free' | 'pro';
   onOpenVoiceStudio?: () => void;
   onOpenHookStudio?: () => void;
-  onTogglePersona?: () => void;
   userPersona?: UserPersona;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
@@ -61,12 +58,9 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
   onOpenCommunityChallenge,
   onOpenSchedule,
   onOpenJarvisPro,
-  onSwitchToPro,
-  onSwitchToFree,
   tier = 'free',
   onOpenVoiceStudio,
   onOpenHookStudio,
-  onTogglePersona,
   userPersona,
   userProfile,
   onSaveProfile,
@@ -179,10 +173,7 @@ export const QuestsScreen: React.FC<QuestsScreenProps> = ({
         {/* 1. TOP AIRY HEADER BAR */}
         <FreeAppHeader
           backgroundColor="transparent"
-          onSwitchToPro={onSwitchToPro}
-          onSwitchToFree={onSwitchToFree}
           onOpenJarvisPro={onOpenJarvisPro}
-          onTogglePersona={onTogglePersona}
           userPersona={userPersona}
           onOpenNotifications={() => {
             triggerModalPop();

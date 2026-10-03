@@ -23,6 +23,7 @@ import { PlatformRow } from './onboarding/PlatformRow';
 import { PlatformLogo, type PlatformLogoType } from './onboarding/PlatformLogo';
 import { ds, goldTokens } from '../theme/colors';
 import { STAGE_2_ENABLED } from '../config/features';
+import type { UserPersona, UserTier } from '../types/account';
 
 // "Your profile": one glass sheet for every creator (free or Pro, new or
 // returning). Tabs: Profile (photo, name, what you make, topics), Accounts
@@ -35,8 +36,8 @@ export interface UserProfileData {
   handle: string;
   bio: string;
   niche: string;
-  tier?: 'free' | 'pro' | 'founding';
-  userPersona?: 'returning' | 'new';
+  tier: UserTier;
+  userPersona: UserPersona;
   avatarId?: string;
   avatarSource?: any;
   customAvatarUri?: string;

@@ -49,7 +49,6 @@ interface CaptionScreenProps {
   onSaveProfile?: (updated: UserProfileData) => void;
   /** Pro members: the caption reshaped for each platform. */
   tier?: 'free' | 'pro';
-  onSwitchToFree?: () => void;
 }
 
 interface NotificationItem {
@@ -162,7 +161,6 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
   userProfile,
   onSaveProfile,
   tier = 'free',
-  onSwitchToFree,
 }) => {
   const onDesktop = useBreakpoint() === 'desktop';
   const isDark = false;
@@ -444,7 +442,6 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
             backgroundColor="transparent"
             onBack={onBack}
             onOpenJarvisPro={onOpenJarvisPro}
-            onSwitchToFree={onSwitchToFree}
             onOpenNotifications={() => {
               triggerModalAnim();
               setShowNotificationModal(true);

@@ -30,7 +30,7 @@ import { JarvisOrb } from '../components/JarvisOrb';
 import { CalendarSheet } from '../components/home/CalendarSheet';
 import { TodayCard, WeekStrip, PostRow, EmptyDay, PlatformMixCard, BestTimeCard, AutoPostCard } from '../components/schedule/ScheduleBlocks';
 import { getWeekSchedule } from '../data';
-import type { UserPersona } from '../components/HeaderDualModePills';
+import type { UserPersona } from '../types/account';
 import { ds } from '../theme/colors';
 
 interface ScheduleScreenProps {
@@ -43,11 +43,8 @@ interface ScheduleScreenProps {
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
   userPersona?: UserPersona;
-  onTogglePersona?: () => void;
   /** Pro members: auto-post card instead of the Pro note. */
   tier?: 'free' | 'pro';
-  onSwitchToPro?: () => void;
-  onSwitchToFree?: () => void;
 }
 
 interface ScheduledPost {
@@ -215,10 +212,7 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
   userProfile,
   onSaveProfile,
   userPersona,
-  onTogglePersona,
   tier = 'free',
-  onSwitchToPro,
-  onSwitchToFree,
 }) => {
   // Lets Ghost's tour scroll this page
   const tourScroll = useTourScroll();
@@ -385,9 +379,6 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
         <FreeAppHeader
           backgroundColor="transparent"
           userPersona={userPersona}
-          onTogglePersona={onTogglePersona}
-          onSwitchToPro={onSwitchToPro}
-          onSwitchToFree={onSwitchToFree}
           onBack={onBack}
           onOpenJarvisPro={onOpenJarvisPro}
           onOpenNotifications={() => {

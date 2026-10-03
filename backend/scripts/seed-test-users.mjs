@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Creates the four local test accounts (see frontend/shared/constants/devAccounts.json):
+// Creates the four local test accounts (see packages/api/lib/dev-accounts.json):
 //
 //   Free · New        just signed up, nothing done yet
 //   Free · Existing   weeks of history: streak, drafts, hooks, posts, a connected TikTok
@@ -21,7 +21,7 @@ import { CREATORS, followersToday, videosFor } from './mocks/creators.mjs';
 import { sealToken } from '../packages/integrations/token-vault.ts';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const ACCOUNTS = JSON.parse(readFileSync(path.join(here, '../../frontend/shared/constants/devAccounts.json'), 'utf8')).accounts;
+const ACCOUNTS = JSON.parse(readFileSync(path.join(here, '../packages/api/lib/dev-accounts.json'), 'utf8')).accounts;
 
 // ─── Settings ───────────────────────────────────────────────────────────────
 function readEnvFile(file) {

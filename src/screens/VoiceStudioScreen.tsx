@@ -27,7 +27,7 @@ import { JarvisOrb } from '../components/JarvisOrb';
 import { FreeAppHeader } from '../components/FreeAppHeader';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
-import type { UserPersona } from '../components/HeaderDualModePills';
+import type { UserPersona } from '../types/account';
 import { getVoiceCloneSummary } from '../data';
 import { BuyMinutesSheet, VoiceAvatar, VoiceLibrarySheet, VOICES } from '../components/voice/VoiceSheets';
 import { ds, goldTokens } from '../theme/colors';
@@ -317,8 +317,6 @@ interface VoiceStudioScreenProps {
   onNavigateTab?: (tab: TabType) => void;
   onOpenJarvisPro?: () => void;
   onOpenPostComposer?: (prefillTitle?: string, attachedAudio?: AttachedVoiceoverData) => void;
-  onSwitchToFree?: () => void;
-  onTogglePersona?: () => void;
   userPersona?: UserPersona;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
@@ -331,8 +329,6 @@ export const VoiceStudioScreen: React.FC<VoiceStudioScreenProps> = ({
   onNavigateTab,
   onOpenJarvisPro,
   onOpenPostComposer,
-  onSwitchToFree,
-  onTogglePersona,
   userPersona,
   userProfile,
   onSaveProfile,
@@ -399,8 +395,6 @@ export const VoiceStudioScreen: React.FC<VoiceStudioScreenProps> = ({
           backgroundColor="transparent"
           onBack={onBack}
           onOpenJarvisPro={onOpenJarvisPro}
-          onSwitchToFree={onSwitchToFree}
-          onTogglePersona={onTogglePersona}
           userPersona={userPersona}
           onOpenProfile={() => setShowProfile(true)}
           userProfile={userProfile}

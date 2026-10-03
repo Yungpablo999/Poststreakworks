@@ -14,6 +14,7 @@ import { GlassBackdrop } from '../components/glass/GlassBackdrop';
 import { GlassCard } from '../components/glass/GlassCard';
 import { SocialButton, type SocialProvider } from '../components/auth/SocialButton';
 import { ds } from '../theme/colors';
+import type { TestAccount } from '../../frontend/shared/types/phase1';
 
 // Sign in: one-tap Apple / Google first (same as sign-up), or an email code.
 // The email path goes to the Verify screen (without the sign-up progress card).
@@ -33,9 +34,12 @@ interface SignInScreenProps {
   error?: string | null;
   /** Which one-tap buttons to show. Leave out for both; an empty list hides them (and "or use your email"). */
   providers?: SocialProvider[];
+  /** Local testing: the seeded accounts to sign in as with one tap (empty everywhere else). */
+  testAccounts?: TestAccount[];
+  onTestAccount?: (email: string) => void;
 }
 
-export const SignInScreen: React.FC<SignInScreenProps> = ({ onBack, onCreateAccount, onSubmit, onSocialSignIn, busy = false, error, providers }) => {
+export const SignInScreen: React.FC<SignInScreenProps> = ({ onBack, onCreateAccount, onSubmit, onSocialSignIn, busy = false, error, providers, testAccounts = [], onTestAccount }) => {
   const showApple = !providers || providers.includes('apple');
   const showGoogle = !providers || providers.includes('google');
   const showSocial = showApple || showGoogle;
@@ -168,6 +172,33 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({ onBack, onCreateAcco
               </GlassCard>
             </Animated.View>
 
+            {testAccounts.length > 0 && (
+              <Animated.View entering={FadeIn.delay(560).duration(400)} style={styles.testWrap}>
+                <GlassCard radius={24} padding={16}>
+                  <Text style={styles.testTitle}>Test accounts</Text>
+                  <Text style={styles.testNote}>This computer only. Real accounts with real data in the local database, signed in with one tap.</Text>
+                  {testAccounts.map((a) => (
+                    <Pressable
+                      key={a.email}
+                      onPress={() => !busy && onTestAccount?.(a.email)}
+                      disabled={busy}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Sign in as ${a.label}`}
+                      style={({ pressed }) => [styles.testRow, pressed && { opacity: 0.8 }, busy && { opacity: 0.5 }]}
+                    >
+                      <View style={styles.flex}>
+                        <Text style={styles.testLabel}>{a.label}</Text>
+                        <Text style={styles.testBlurb}>{a.displayName}. {a.blurb}</Text>
+                      </View>
+                      <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                        <Path d="M9 6l6 6-6 6" stroke={ds.purple} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
+                      </Svg>
+                    </Pressable>
+                  ))}
+                </GlassCard>
+              </Animated.View>
+            )}
+
             {/* Desktop web shows this switch in the header, so it isn't repeated */}
             {!webFrame && (
               <Animated.View entering={FadeIn.delay(620).duration(400)} style={styles.switchRow}>
@@ -249,6 +280,12 @@ const styles = StyleSheet.create({
   hint: { fontSize: 12.5, lineHeight: 17, color: ds.purple, marginTop: 8, fontWeight: '600' },
   error: { fontSize: 13, lineHeight: 18, color: '#B3261E', marginTop: 10, fontWeight: '600' },
   sendBtn: { marginTop: 14 },
+  testWrap: { marginTop: 18 },
+  testTitle: { fontSize: 13, fontWeight: '800', color: ds.ink },
+  testNote: { fontSize: 12, lineHeight: 17, color: ds.text3, marginTop: 4, marginBottom: 6 },
+  testRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 10, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: 'rgba(23, 20, 32, 0.12)' },
+  testLabel: { fontSize: 14.5, fontWeight: '800', color: ds.ink },
+  testBlurb: { fontSize: 12, lineHeight: 17, color: ds.text2, marginTop: 2 },
   switchRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 20 },
   switchText: { fontSize: 14, color: ds.text2 },
   switchLink: { fontSize: 14, fontWeight: '800', color: ds.purple },

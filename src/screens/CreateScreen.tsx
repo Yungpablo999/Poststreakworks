@@ -21,7 +21,7 @@ import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { FreeAppHeader } from '../components/FreeAppHeader';
-import { UserPersona } from '../components/HeaderDualModePills';
+import type { UserPersona } from '../types/account';
 import { sFont, sPadding, moderateScale, isNarrowScreen } from '../utils/responsive';
 import Reanimated, { FadeInUp } from 'react-native-reanimated';
 import { GlassBackdrop } from '../components/glass/GlassBackdrop';
@@ -118,9 +118,6 @@ interface CreateScreenProps {
   onOpenRepurpose?: (ideaTitle?: string) => void;
   onOpenMessages?: () => void;
   userPersona?: UserPersona;
-  onTogglePersona?: () => void;
-  onSwitchToPro?: () => void;
-  onSwitchToFree?: () => void;
   /** Pro members: Voice Studio unlocked, Hook Studio, unlimited Repurpose. */
   tier?: 'free' | 'pro';
   onOpenVoiceStudio?: () => void;
@@ -222,9 +219,6 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
   onOpenRepurpose,
   onOpenMessages,
   userPersona,
-  onTogglePersona,
-  onSwitchToPro,
-  onSwitchToFree,
   tier = 'free',
   onOpenVoiceStudio,
   onOpenHookStudio,
@@ -470,9 +464,6 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
         {/* 1. TOP AIRY HEADER BAR */}
         <FreeAppHeader
           backgroundColor="transparent"
-          onSwitchToPro={onSwitchToPro}
-          onSwitchToFree={onSwitchToFree}
-          onTogglePersona={onTogglePersona}
           userPersona={userPersona || userProfile?.userPersona}
           onOpenJarvisPro={onOpenJarvisPro}
           onOpenNotifications={openNotifications}

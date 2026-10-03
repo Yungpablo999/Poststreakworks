@@ -19,13 +19,11 @@ import { sFont, sPadding, isNarrowScreen } from '../utils/responsive';
 import { UserProfileData } from './UserProfileModal';
 import { NotificationsSheet, useUnreadNotifications } from './notifications/NotificationsSheet';
 
-import { HeaderDualModePills, UserPersona, UserTier } from './HeaderDualModePills';
+import { PlanBadge } from './PlanBadge';
+import type { UserPersona, UserTier } from '../types/account';
 
 export interface FreeAppHeaderProps {
   onBack?: () => void;
-  onSwitchToPro?: () => void;
-  onSwitchToFree?: () => void;
-  onTogglePersona?: () => void;
   userPersona?: UserPersona;
   onOpenJarvisPro?: () => void;
   /** @deprecated The bell now opens the shared notifications sheet itself. */
@@ -40,9 +38,6 @@ export interface FreeAppHeaderProps {
 
 export const FreeAppHeader: React.FC<FreeAppHeaderProps> = ({
   onBack,
-  onSwitchToPro,
-  onSwitchToFree,
-  onTogglePersona,
   userPersona,
   onOpenJarvisPro,
   onOpenProfile,
@@ -71,20 +66,6 @@ export const FreeAppHeader: React.FC<FreeAppHeaderProps> = ({
     floatLoop.start();
     return () => floatLoop.stop();
   }, [ghostFloatY]);
-
-  const handleToggleTier = () => {
-    if (userProfile?.tier === 'pro' || userProfile?.tier === 'founding') {
-      if (onSwitchToFree) {
-        onSwitchToFree();
-      }
-    } else {
-      if (onSwitchToPro) {
-        onSwitchToPro();
-      } else if (onOpenJarvisPro) {
-        onOpenJarvisPro();
-      }
-    }
-  };
 
   const handleNotifPress = () => {
     if (Platform.OS !== 'web') {
@@ -141,13 +122,7 @@ export const FreeAppHeader: React.FC<FreeAppHeaderProps> = ({
         <View style={styles.headerBrandStack}>
           {!onDesktop && <BrandLogo size="sm" isDark={isDark} />}
 
-          <HeaderDualModePills
-            tier={currentTier}
-            persona={currentPersona}
-            onToggleTier={handleToggleTier}
-            onTogglePersona={onTogglePersona}
-            isDark={isDark}
-          />
+          <PlanBadge tier={currentTier} onPress={onOpenJarvisPro} />
         </View>
       </View>
 

@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { getServiceClient } from "@poststreak/workflows";
 import { devLoginEnabled } from "./capabilities";
+import { isDevAccount } from "./dev-accounts";
 
 // One-tap sign-in for the local test accounts (backend/scripts/seed-test-users.mjs).
 //
@@ -10,7 +11,8 @@ import { devLoginEnabled } from "./capabilities";
 // real thing; only the "open your email" step is skipped.
 //
 // devLoginEnabled() is the lock: it is off unless DEV_LOGIN=true, off in production builds
-// and off for any Supabase that isn't on this machine.
+// and off for any Supabase that isn't on this machine. Even then it only signs in the four
+// test accounts, never anyone else who happens to be in the local database.
 
 export class DevLoginDisabledError extends Error {}
 export class DevLoginFailedError extends Error {}
@@ -19,6 +21,7 @@ export type DevSession = { access_token: string; refresh_token: string };
 
 export async function devLogin(email: string, env: Record<string, string | undefined> = process.env): Promise<DevSession> {
   if (!devLoginEnabled(env)) throw new DevLoginDisabledError();
+  if (!isDevAccount(email)) throw new DevLoginFailedError("Not a test account");
 
   const { data, error } = await getServiceClient().auth.admin.generateLink({ type: "magiclink", email });
   const otp = data?.properties?.email_otp;

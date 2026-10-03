@@ -189,7 +189,6 @@ interface HookStudioScreenProps {
   onBack: () => void;
   onNavigateTab?: (tab: TabType) => void;
   onOpenJarvisPro?: () => void;
-  onSwitchToFree?: () => void;
   onUseHook?: (title: string, hook: string, style: FilmStyle) => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
@@ -201,7 +200,6 @@ export const HookStudioScreen: React.FC<HookStudioScreenProps> = ({
   onBack,
   onNavigateTab,
   onOpenJarvisPro,
-  onSwitchToFree,
   onUseHook,
   userProfile,
   onSaveProfile,
@@ -252,7 +250,7 @@ export const HookStudioScreen: React.FC<HookStudioScreenProps> = ({
     <View style={styles.root}>
       <GlassBackdrop />
       <SafeAreaView style={styles.flex} edges={['top']}>
-        <FreeAppHeader backgroundColor="transparent" onBack={onBack} onOpenJarvisPro={onOpenJarvisPro} onSwitchToFree={onSwitchToFree} onOpenProfile={() => setShowProfile(true)} userProfile={userProfile} />
+        <FreeAppHeader backgroundColor="transparent" onBack={onBack} onOpenJarvisPro={onOpenJarvisPro} onOpenProfile={() => setShowProfile(true)} userProfile={userProfile} />
         <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <ScrollView contentContainerStyle={[styles.scroll, pageWidth]} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
             <Animated.View entering={enter(0)} style={styles.headline}>

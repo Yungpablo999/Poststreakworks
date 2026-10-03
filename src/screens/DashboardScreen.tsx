@@ -34,7 +34,8 @@ import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { BrandToast } from '../components/BrandToast';
 import { sFont, sPadding, moderateScale, isNarrowScreen } from '../utils/responsive';
-import { HeaderDualModePills, UserPersona } from '../components/HeaderDualModePills';
+import { PlanBadge } from '../components/PlanBadge';
+import type { UserPersona } from '../types/account';
 import { NotificationsSheet, useUnreadNotifications } from '../components/notifications/NotificationsSheet';
 
 interface DashboardScreenProps {
@@ -43,15 +44,12 @@ interface DashboardScreenProps {
   onOpenQuest?: (questId?: string) => void;
   onNavigateTab?: (tab: TabType) => void;
   onOpenJarvisPro?: () => void;
-  onSwitchToPro?: () => void;
-  onTogglePersona?: () => void;
   userPersona?: UserPersona;
   onOpenSchedule?: () => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
   /** Pro members: Pro home (brief, Voice Studio), no upgrade card. */
   tier?: 'free' | 'pro';
-  onSwitchToFree?: () => void;
   onOpenVoiceStudio?: () => void;
   onOpenHookStudio?: () => void;
 }
@@ -553,14 +551,11 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
   onOpenQuest,
   onNavigateTab,
   onOpenJarvisPro,
-  onSwitchToPro,
-  onTogglePersona,
   userPersona,
   onOpenSchedule,
   userProfile,
   onSaveProfile,
   tier = 'free',
-  onSwitchToFree,
   onOpenVoiceStudio,
   onOpenHookStudio,
 }) => {
@@ -957,13 +952,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
             <View style={styles.headerLeftGroup}>
               {!onDesktop && <BrandLogo size="sm" isDark={isDark} />}
 
-              <HeaderDualModePills
-                tier={tier === 'pro' ? 'pro' : 'free'}
-                persona={isNewUser ? 'new' : 'returning'}
-                onToggleTier={tier === 'pro' ? onSwitchToFree : onSwitchToPro || onOpenJarvisPro}
-                onTogglePersona={onTogglePersona}
-                isDark={isDark}
-              />
+              <PlanBadge tier={tier === 'pro' ? 'pro' : 'free'} onPress={onOpenJarvisPro} />
             </View>
 
             {/* Right: Notification & Person Profile Photo Upload */}

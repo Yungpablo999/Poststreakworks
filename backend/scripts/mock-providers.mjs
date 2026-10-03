@@ -13,11 +13,13 @@ import { json, text } from './mocks/http.mjs';
 import * as tiktok from './mocks/tiktok.mjs';
 
 const PORT = Number(process.env.MOCK_PROVIDERS_PORT ?? 4010);
-const HOST = '127.0.0.1';
+const HOST = process.env.MOCK_PROVIDERS_HOST ?? '127.0.0.1';
+// The address links in the stand-ins' pages must use (a phone needs this computer's address, not 127.0.0.1)
+const PUBLIC = (process.env.MOCK_PROVIDERS_PUBLIC ?? `http://127.0.0.1:${PORT}`).replace(/\/+$/, '');
 const PLATFORMS = { tiktok };
 
 const server = http.createServer(async (req, res) => {
-  const url = new URL(req.url ?? '/', `http://${HOST}:${PORT}`);
+  const url = new URL(req.url ?? '/', PUBLIC);
   if (req.method === 'OPTIONS') {
     res.writeHead(204, { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*', 'access-control-allow-methods': '*' });
     return res.end();
@@ -30,7 +32,7 @@ const server = http.createServer(async (req, res) => {
   const inner = new URL(url);
   inner.pathname = '/' + rest.join('/');
   try {
-    await platform.handle(req, res, inner, `http://${HOST}:${PORT}/${name}`);
+    await platform.handle(req, res, inner, `${PUBLIC}/${name}`);
   } catch (err) {
     console.error(`[${name}]`, err);
     if (!res.headersSent) text(res, 500, 'stand-in error');
