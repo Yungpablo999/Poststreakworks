@@ -191,9 +191,13 @@ export function takeOnboarding(): { niches: string[] } | null {
   }
 }
 
+// The device's IANA zone ("Africa/Lagos"). Some devices report an offset such as "GMT+01:00"
+// instead, which the server would refuse (and refuse the rest of the request with it), so only
+// a proper zone name is sent.
 const deviceTimezone = (): string | undefined => {
   try {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone || undefined;
+    const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return zone && (zone === 'UTC' || /^[A-Za-z]+(?:[/_+-][A-Za-z0-9_+-]+)+$/.test(zone)) ? zone : undefined;
   } catch {
     return undefined;
   }
