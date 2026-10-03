@@ -262,19 +262,19 @@ function PulsingUpload() {
 export function MediaZone({
   isText,
   hasMedia,
-  hasThumbnail,
+  summary,
   label,
   sub,
   addLabel,
   onAdd,
   onCamera,
   cameraLabel,
-  onThumbnail,
   onRemove,
 }: {
   isText: boolean;
   hasMedia: boolean;
-  hasThumbnail: boolean;
+  /** What was picked, e.g. "Video, 0:32. It stays on your phone." */
+  summary: string;
   label: string;
   sub: string;
   addLabel: string;
@@ -282,7 +282,6 @@ export function MediaZone({
   /** Take a photo / record with the phone camera instead of uploading */
   onCamera?: () => void;
   cameraLabel?: string;
-  onThumbnail: () => void;
   onRemove: () => void;
 }) {
   if (hasMedia) {
@@ -297,8 +296,8 @@ export function MediaZone({
             </View>
             <View style={styles.flex}>
               <Text style={styles.mediaTitle}>Media added</Text>
-              <Text style={styles.mediaSub} numberOfLines={1}>
-                {hasThumbnail ? 'Thumbnail added' : 'No thumbnail yet'}
+              <Text style={styles.mediaSub} numberOfLines={2}>
+                {summary}
               </Text>
             </View>
             <View style={styles.readyChip}>
@@ -308,7 +307,6 @@ export function MediaZone({
           </View>
           <View style={styles.mediaActions}>
             <SmallAction label="Replace" onPress={onAdd} />
-            <SmallAction label={hasThumbnail ? 'Thumbnail ✓' : 'Thumbnail'} onPress={onThumbnail} />
             <SmallAction label="Remove" onPress={onRemove} subtle />
           </View>
         </GlassCard>
@@ -371,33 +369,6 @@ function SmallAction({ label, onPress, subtle }: { label: string; onPress: () =>
 }
 
 // ─── Caption helpers ────────────────────────────────────────────────────────
-export function CyclePill({ label, value, onPress }: { label: string; value: string; onPress: () => void }) {
-  return (
-    <Pressable
-      onPress={() => {
-        tick();
-        onPress();
-      }}
-      style={({ pressed }) => [styles.cyclePill, pressed && { transform: [{ scale: 0.97 }] }]}
-      accessibilityRole="button"
-      accessibilityLabel={`${label}: ${value}. Tap to change`}
-    >
-      {/* Small label above the value keeps both pills side by side on 320 */}
-      <View style={styles.flex}>
-        <Text style={styles.cycleLabel}>{label}</Text>
-        <Animated.View key={value} entering={FadeIn.duration(200)}>
-          <Text style={styles.cycleValue} numberOfLines={1}>
-            {value}
-          </Text>
-        </Animated.View>
-      </View>
-      <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
-        <Path d="M7 10l5 5 5-5" stroke={ds.text3} strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round" />
-      </Svg>
-    </Pressable>
-  );
-}
-
 export function AiAction({ label, onPress, disabled }: { label: string; onPress: () => void; disabled: boolean }) {
   return (
     <Pressable
@@ -410,17 +381,6 @@ export function AiAction({ label, onPress, disabled }: { label: string; onPress:
         {label}
       </Text>
     </Pressable>
-  );
-}
-
-export function EditsMeter({ left, total }: { left: number; total: number }) {
-  return (
-    <View style={styles.editsRow} accessibilityLabel={`${left} of ${total} AI edits left`}>
-      {Array.from({ length: total }).map((_, i) => (
-        <View key={i} style={[styles.editsDot, i < left && styles.editsDotOn]} />
-      ))}
-      <Text style={styles.editsText}>{left} AI edits left</Text>
-    </View>
   );
 }
 
@@ -728,18 +688,6 @@ const styles = StyleSheet.create({
   smallAction: { flex: 1, height: 36, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: ds.lavender, paddingHorizontal: 6 },
   smallActionSubtle: { backgroundColor: 'rgba(23, 20, 32, 0.05)' },
   smallActionText: { fontSize: 12.5, fontWeight: '800', color: ds.purple },
-  cyclePill: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    height: 44,
-    paddingHorizontal: 12,
-    borderRadius: 14,
-    backgroundColor: 'rgba(23, 20, 32, 0.05)',
-  },
-  cycleLabel: { fontSize: 10, fontWeight: '800', color: ds.text3, letterSpacing: 0.6 },
-  cycleValue: { fontSize: 13.5, fontWeight: '800', color: ds.ink, marginTop: 1 },
   // Buttons size to their word so "Ask viewers" fits on 320
   aiAction: {
     flexGrow: 1,
@@ -752,10 +700,6 @@ const styles = StyleSheet.create({
     backgroundColor: ds.lavender,
   },
   aiActionText: { fontSize: 12.5, fontWeight: '800', color: ds.purple },
-  editsRow: { flexDirection: 'row', alignItems: 'center', gap: 3 },
-  editsDot: { width: 12, height: 5, borderRadius: 3, backgroundColor: 'rgba(91, 62, 232, 0.15)' },
-  editsDotOn: { backgroundColor: ds.purple },
-  editsText: { fontSize: 11.5, fontWeight: '700', color: ds.text3, marginLeft: 5 },
   // One tag per row, all the same width: a tidy list instead of ragged,
   // scattered chips (and long hashtags never get cut off).
   tag: {

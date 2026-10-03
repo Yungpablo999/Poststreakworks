@@ -17,7 +17,8 @@ import { GlassCard } from '../glass/GlassCard';
 import { PressableCard } from '../ui/PressableCard';
 import { PlatformLogo, type PlatformLogoType } from '../onboarding/PlatformLogo';
 import { ds, goldTokens } from '../../theme/colors';
-import type { CalendarDay, CalendarPost } from '../../data';
+import { whenLabel, type CalendarDay, type CalendarPost } from '../../data';
+import type { Post } from '../../../frontend/shared/types/phase1';
 
 // Building blocks for the Schedule screen. Calm by design: no streak-protection
 // warnings, drafts are neutral (not alarm-coloured), empty days are fine.
@@ -260,9 +261,47 @@ export function PlatformMixCard({ mix }: { mix: { platform: string; count: numbe
   );
 }
 
-// ─── Jarvis best time ───────────────────────────────────────────────────────
+// ─── Ready to post ──────────────────────────────────────────────────────────
+// Posts whose time has come. They stay here, whatever week it is, until the creator posts them.
+export function ReadyCard({ posts, onOpen }: { posts: Post[]; onOpen: (id: string) => void }) {
+  const shown = posts.slice(0, 4);
+  return (
+    <GlassCard strong radius={26} padding={18}>
+      <Text style={[styles.eyebrow, { color: goldTokens.dark }]}>READY TO POST</Text>
+      <Text style={styles.cardTitle}>
+        {posts.length === 1 ? '1 post is waiting for you' : `${posts.length} posts are waiting for you`}
+      </Text>
+      <Text style={styles.readySub}>Open the app, post it, then tap “I posted it” so it counts.</Text>
+      <View style={styles.readyList}>
+        {shown.map((p) => (
+          <Pressable key={p.id} onPress={() => onOpen(p.id)} style={({ pressed }) => [styles.readyRow, pressed && { transform: [{ scale: 0.98 }] }]} accessibilityRole="button" accessibilityLabel={`${p.caption.split('\n')[0]}. Ready to post`}>
+            <View style={styles.readyLogos}>
+              {p.platforms.slice(0, 3).map((s, i) => (
+                <View key={s.platform} style={[styles.readyLogo, i > 0 && { marginLeft: -8 }]}>
+                  <PlatformLogo type={s.platform as PlatformLogoType} size={28} />
+                </View>
+              ))}
+            </View>
+            <View style={styles.flex}>
+              <Text style={styles.readyTitle} numberOfLines={1}>
+                {p.caption.split('\n')[0]}
+              </Text>
+              <Text style={styles.readyWhen}>Due {whenLabel(Date.parse(p.at))}</Text>
+            </View>
+            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+              <Path d="M9 6l6 6-6 6" stroke={ds.text3} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
+            </Svg>
+          </Pressable>
+        ))}
+      </View>
+      {posts.length > shown.length ? <Text style={styles.readyMore}>and {posts.length - shown.length} more</Text> : null}
+    </GlassCard>
+  );
+}
+
+// ─── Best time ──────────────────────────────────────────────────────────────
 // Only shown once the creator's own posts say when they do best (never a guess).
-export function BestTimeCard({ orb, time, platform, onUse }: { orb: React.ReactNode; time: string; platform: string; onUse: () => void }) {
+export function BestTimeCard({ orb, time, onUse }: { orb: React.ReactNode; time: string; onUse: () => void }) {
   return (
     <GlassCard strong radius={26} padding={20}>
       <View style={styles.row}>
@@ -278,7 +317,7 @@ export function BestTimeCard({ orb, time, platform, onUse }: { orb: React.ReactN
           <Path d="M12 7v5l3 2" stroke={ds.purple} strokeWidth={2.2} strokeLinecap="round" />
         </Svg>
         <Text style={styles.timeBig}>{time}</Text>
-        <Text style={styles.timeSub}>When your posts on {platform} have done best</Text>
+        <Text style={styles.timeSub}>When your recent posts have done best</Text>
       </View>
       <AppButton title="Plan a post" variant="quiet" onPress={onUse} />
     </GlassCard>
@@ -287,6 +326,14 @@ export function BestTimeCard({ orb, time, platform, onUse }: { orb: React.ReactN
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
+  readySub: { fontSize: 13, lineHeight: 19, color: ds.text2, marginTop: 4 },
+  readyList: { gap: 8, marginTop: 14 },
+  readyRow: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 10, borderRadius: 16, backgroundColor: 'rgba(255, 255, 255, 0.8)' },
+  readyLogos: { flexDirection: 'row', alignItems: 'center' },
+  readyLogo: { borderRadius: 14, borderWidth: 2, borderColor: '#FFFFFF', overflow: 'hidden' },
+  readyTitle: { fontSize: 14.5, fontWeight: '800', color: ds.ink },
+  readyWhen: { fontSize: 12.5, fontWeight: '600', color: ds.text3, marginTop: 1 },
+  readyMore: { fontSize: 12.5, fontWeight: '700', color: ds.text3, marginTop: 10, textAlign: 'center' },
   eyebrow: { fontSize: 11, fontWeight: '800', letterSpacing: 1, color: ds.purple },
   heroTitle: { fontSize: 28, lineHeight: 34, fontWeight: '800', color: ds.ink, letterSpacing: -0.8, marginTop: 8 },
   heroBody: { fontSize: 14.5, lineHeight: 21, color: ds.text2, marginTop: 4 },

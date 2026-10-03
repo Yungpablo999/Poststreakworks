@@ -9,6 +9,7 @@ import {
   cleanPostUrl,
   cleanTags,
   cleanTime,
+  isKept,
   planUpdate,
   toPost,
   validateNewPost,
@@ -208,6 +209,19 @@ describe("the link to a post", () => {
 
   it("names the platform in the message", () => {
     expect(refusal(() => cleanPostUrl("youtube", "https://www.tiktok.com/@a/video/1")).message).toBe("That isn't a YouTube link.");
+  });
+});
+
+describe("which posts stay", () => {
+  it("keeps a post once any platform of it has been posted", () => {
+    expect(isKept(row())).toBe(false);
+    expect(isKept(row({ status: "pending_confirmation", platform_post_ids: { tiktok: { status: "pending_confirmation" } } }))).toBe(false);
+    expect(isKept(row({ status: "published" }))).toBe(true);
+    expect(
+      isKept(row({ status: "pending_confirmation", target_platforms: ["tiktok", "instagram"], platform_post_ids: { tiktok: { status: "published" }, instagram: { status: "pending_confirmation" } } })),
+    ).toBe(true);
+    // posted early, before its time
+    expect(isKept(row({ platform_post_ids: { tiktok: { status: "published" } } }))).toBe(true);
   });
 });
 

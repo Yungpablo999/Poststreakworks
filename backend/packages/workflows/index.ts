@@ -45,6 +45,7 @@ export {
   createPost,
   deletePost,
   getPost,
+  isKept,
   listReadyPosts,
   markPosted,
   planUpdate,

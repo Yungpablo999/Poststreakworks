@@ -255,6 +255,8 @@ section('a post for several platforms is posted when all of them are');
 
   const widen = await A('PATCH', `/api/v1/posts/${id}`, { platforms: ['tiktok'] });
   check('platforms can’t be taken away once one is posted (409)', widen.status === 409, widen);
+  const keep = await A('DELETE', `/api/v1/posts/${id}`);
+  check('and a post with one platform posted can’t be removed: it is part of their history (409)', keep.status === 409 && /history/.test(keep.body?.message ?? ''), keep);
 
   await A('POST', `/api/v1/posts/${id}/posted`, { platform: 'instagram' });
   const last = await A('POST', `/api/v1/posts/${id}/posted`, { platform: 'youtube', url: 'https://youtu.be/abc123' });

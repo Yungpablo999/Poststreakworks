@@ -25,6 +25,7 @@ import { ds } from '../../theme/colors';
 import { getCalendarMonth, subscribeToCheckIns, type CalendarDay } from '../../data';
 import { loadCheckInMonth } from '../../backend/sync';
 import { loadCalendarMonth } from '../../backend/calendar';
+import { openPost } from '../schedule/postSheetBus';
 
 // The calendar behind the Home check-in card: a glass sheet that slides up.
 // Month by month (swipe or arrows), each day shows check-ins, posts and
@@ -100,7 +101,7 @@ function DayCell({ day, selected, onPress }: { day: CalendarDay; selected: boole
   );
 }
 
-function DayDetails({ day, label, onPlanPost }: { day: CalendarDay; label: string; onPlanPost?: () => void }) {
+function DayDetails({ day, label, onPlanPost, onOpenPost }: { day: CalendarDay; label: string; onPlanPost?: () => void; onOpenPost: (postId: string) => void }) {
   return (
     <Animated.View key={day.key} entering={FadeInUp.duration(280)} style={styles.details}>
       <View style={styles.detailsHeader}>
@@ -117,7 +118,14 @@ function DayDetails({ day, label, onPlanPost }: { day: CalendarDay; label: strin
 
       {day.posts.length > 0 ? (
         day.posts.map((p, i) => (
-          <Animated.View key={p.id} entering={FadeInUp.delay(60 * i).duration(260)} style={styles.postRow}>
+          <Animated.View key={p.id} entering={FadeInUp.delay(60 * i).duration(260)}>
+            <Pressable
+              disabled={!p.postId}
+              onPress={() => p.postId && onOpenPost(p.postId)}
+              style={styles.postRow}
+              accessibilityRole={p.postId ? 'button' : undefined}
+              accessibilityLabel={p.postId ? `${p.title}. ${PLATFORM_NAMES[p.platform]} at ${p.time}. Open` : undefined}
+            >
             <PlatformLogo type={p.platform} size={30} />
             <View style={styles.postText}>
               <Text style={styles.postTitle} numberOfLines={2}>
@@ -137,6 +145,7 @@ function DayDetails({ day, label, onPlanPost }: { day: CalendarDay; label: strin
                 {p.status === 'posted' ? 'Posted' : p.status === 'draft' ? 'Draft' : p.status === 'ready' ? 'Ready to post' : 'Scheduled'}
               </Text>
             </View>
+            </Pressable>
           </Animated.View>
         ))
       ) : day.isPast ? (
@@ -389,6 +398,10 @@ export function CalendarSheet({ visible, onClose, onPlanPost }: CalendarSheetPro
                       }
                     : undefined
                 }
+                onOpenPost={(postId) => {
+                  onClose();
+                  setTimeout(() => openPost(postId), 220); // let this sheet glide away first
+                }}
               />
             )}
           </ScrollView>

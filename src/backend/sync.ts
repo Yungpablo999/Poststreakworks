@@ -94,6 +94,7 @@ export function applyBootstrap(b: Bootstrap): void {
       kind: d.kind,
       format: d.format,
       platform: d.platform,
+      payload: d.payload,
       savedAt: d.savedAt,
     })),
   );
@@ -113,6 +114,21 @@ export function applyBootstrap(b: Bootstrap): void {
 export async function reloadSavedWork(): Promise<void> {
   const res = await loadBootstrap();
   if (res.ok) applyBootstrap(res.data);
+}
+
+// Something the creator did (their first post, say) changes what the server says about them: their
+// streak, level and whether they are a new or a returning creator. The app registers how to take that in.
+let accountRefreshed: ((b: Bootstrap) => void) | null = null;
+export function onAccountRefreshed(fn: ((b: Bootstrap) => void) | null): void {
+  accountRefreshed = fn;
+}
+
+/** Reads the account again and tells the app. */
+export async function refreshAccount(): Promise<void> {
+  const res = await loadBootstrap();
+  if (!res.ok) return;
+  applyBootstrap(res.data);
+  accountRefreshed?.(res.data);
 }
 
 /** Signed out: wipe the last creator's data from memory. */
@@ -284,6 +300,7 @@ function writeThrough() {
           kind: d.kind,
           format: d.format.slice(0, 80),
           ...(isAppPlatform(d.platform) ? { platform: d.platform } : {}),
+          ...(d.payload ? { payload: d.payload } : {}),
         });
         if (!res.ok) await saveFailed(res.status === 400 ? 'Couldn’t save that draft.' : SAVE_FAILED);
       });

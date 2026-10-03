@@ -8,12 +8,12 @@ import { AppButton } from '../ui/AppButton';
 import { GlassCard } from '../glass/GlassCard';
 import { PlatformLogo } from '../onboarding/PlatformLogo';
 import { ds } from '../../theme/colors';
-import { FILM_STYLES, type FilmPlan, type FilmStyle, type SoundIdea, type TrendStage } from '../../data';
+import { FILM_STYLES, type FilmPlan, type FilmStyle } from '../../data';
 import { HANDOFF_NAMES, type HandoffPlatform } from '../../utils/handoff';
 
-// Short video only: film inside TikTok / Reels / Shorts (for trending sounds
-// and filters) or upload a finished video. The "film it" path keeps PostStreak
-// as the plan before and the tracker after.
+// Short video only: film inside TikTok / Reels / Shorts (for their sounds and filters)
+// or upload a finished video. The "film it" path keeps PostStreak as the plan before
+// and the tracker after.
 
 export type FilmMethod = 'native' | 'camera' | 'upload';
 
@@ -101,26 +101,6 @@ export function FilmMethodPicker({ method, onChange }: { method: FilmMethod; onC
   );
 }
 
-const STAGES: Record<TrendStage, { label: string; bg: string; fg: string }> = {
-  rising: { label: 'Rising', bg: ds.greenBg, fg: ds.greenFill },
-  peaking: { label: 'Peaking', bg: ds.lavender, fg: ds.purple },
-  fading: { label: 'Fading', bg: 'rgba(23, 20, 32, 0.06)', fg: ds.text3 },
-};
-
-function StageChip({ stage }: { stage: TrendStage }) {
-  const c = STAGES[stage];
-  return (
-    <View style={[styles.stage, { backgroundColor: c.bg }]}>
-      {stage === 'rising' && (
-        <Svg width={9} height={9} viewBox="0 0 24 24" fill="none">
-          <Path d="M4 16l6-6 4 4 6-6M20 8v5M20 8h-5" stroke={c.fg} strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
-        </Svg>
-      )}
-      <Text style={[styles.stageText, { color: c.fg }]}>{c.label}</Text>
-    </View>
-  );
-}
-
 // What kind of video is it? Most TikToks aren't talking to camera.
 function StylePicker({ style, onChange }: { style: FilmStyle; onChange: (s: FilmStyle) => void }) {
   return (
@@ -158,7 +138,6 @@ function StylePicker({ style, onChange }: { style: FilmStyle; onChange: (s: Film
 
 export function FilmPlanCard({
   plan,
-  sounds,
   platforms,
   onOpen,
   onStyleChange,
@@ -170,7 +149,6 @@ export function FilmPlanCard({
   onRemoveRecording,
 }: {
   plan: FilmPlan;
-  sounds: SoundIdea[];
   platforms: HandoffPlatform[];
   onOpen: (p: HandoffPlatform) => void;
   onStyleChange: (s: FilmStyle) => void;
@@ -202,34 +180,13 @@ export function FilmPlanCard({
         <Text style={styles.hookText}>{plan.hook}</Text>
       </View>
     );
+  // PostStreak has no list of what is trending on a platform (that data isn't open to us), so it doesn't
+  // name sounds. It says how to choose one, and the creator finds it in the app.
   const soundBlock = (
     <>
-      <View style={styles.soundHead}>
-        <Text style={[styles.subLabel, styles.flex]}>{plan.style === 'dance' ? 'The sound' : plan.soundFirst ? 'Pick the sound first' : 'Sound ideas'}</Text>
-        <Text style={styles.sample}>Sample</Text>
-      </View>
+      <Text style={styles.subLabel}>{plan.style === 'dance' ? 'The sound' : plan.soundFirst ? 'Pick the sound first' : 'The sound'}</Text>
       <Text style={[styles.soundTip, plan.soundFirst && styles.soundTipStrong]}>{plan.soundTip}</Text>
-      <View style={styles.sounds}>
-        {sounds.map((s) => (
-          <View key={s.id} style={styles.sound}>
-            <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
-              <Path d="M9 18V5l12-2v13" stroke={ds.purple} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
-              <Circle cx="6" cy="18" r="3" stroke={ds.purple} strokeWidth={2.2} />
-              <Circle cx="18" cy="16" r="3" stroke={ds.purple} strokeWidth={2.2} />
-            </Svg>
-            <View style={styles.flex}>
-              <Text style={styles.soundName} numberOfLines={1}>
-                {s.name}
-              </Text>
-              <Text style={styles.soundVibe} numberOfLines={1}>
-                {s.vibe}
-              </Text>
-            </View>
-            {s.stage && <StageChip stage={s.stage} />}
-          </View>
-        ))}
-      </View>
-      <Text style={styles.soundNote}>Search the sound in the app. Some trending sounds aren't available to business accounts.</Text>
+      <Text style={styles.soundNote}>Search for it in the app. Some trending sounds aren't available to business accounts.</Text>
     </>
   );
   return (
@@ -340,7 +297,7 @@ export function FilmPlanCard({
               ))}
             </View>
           ) : (
-            <Text style={styles.soundNote}>Pick TikTok, Instagram or YouTube above to film there.</Text>
+            <Text style={styles.soundNote}>Pick a platform above to film there.</Text>
           )}
           </>
         )}
@@ -453,8 +410,6 @@ const styles = StyleSheet.create({
   styleChipOn: { borderColor: ds.purple, backgroundColor: ds.purple },
   styleChipText: { fontSize: 12.5, fontWeight: '800', color: ds.text2 },
   styleChipTextOn: { color: '#FFFFFF' },
-  stage: { flexDirection: 'row', alignItems: 'center', gap: 3, paddingHorizontal: 7, height: 20, borderRadius: 999 },
-  stageText: { fontSize: 10.5, fontWeight: '800' },
   soundTip: { fontSize: 12.5, lineHeight: 17, color: ds.text2, marginBottom: 8 },
   soundTipStrong: { color: ds.purple, fontWeight: '700' },
   danceText: { marginTop: 14 },
@@ -467,20 +422,6 @@ const styles = StyleSheet.create({
   ideaDot: { width: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center', backgroundColor: ds.lavender },
   shotNumText: { fontSize: 11, fontWeight: '800', color: '#FFFFFF' },
   shotText: { flex: 1, fontSize: 13.5, lineHeight: 19, color: ds.ink },
-  soundHead: { flexDirection: 'row', alignItems: 'center' },
-  sample: { fontSize: 10.5, fontWeight: '700', color: ds.text3, marginTop: 6 },
-  sounds: { gap: 6 },
-  sound: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-    backgroundColor: 'rgba(23, 20, 32, 0.04)',
-  },
-  soundName: { fontSize: 13, fontWeight: '800', color: ds.ink },
-  soundVibe: { fontSize: 12, color: ds.text3, marginTop: 1 },
   soundNote: { fontSize: 12, lineHeight: 17, color: ds.text3, marginTop: 8 },
   openList: { gap: 8, marginTop: 8 },
   openBtn: {

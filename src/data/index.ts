@@ -309,6 +309,8 @@ export type CalendarPlatform = 'tiktok' | 'instagram' | 'youtube' | 'threads' | 
 
 export interface CalendarPost {
   id: string;
+  /** The id of the creator's own post (GET /posts/{id}), when PostStreak planned it; absent for one read from an account. */
+  postId?: string;
   title: string;
   platform: CalendarPlatform;
   /** When it goes (or went) out, in milliseconds. */
@@ -461,9 +463,9 @@ export function getWeekSchedule(): WeekSchedule {
 // ---------------------------------------------------------------------------
 // Film-it plan (short video filmed inside TikTok / Reels / Shorts)
 // Trending sounds and filters only exist inside those apps, so PostStreak
-// plans the post and hands off. Sound ideas are SAMPLE data: official trend
-// data needs TikTok's Discovery/Research API approval, and organic trending
-// sounds aren't always licensed for business accounts.
+// plans the post and hands off. PostStreak doesn't name sounds: what is trending on
+// a platform isn't open data, and some trending sounds aren't licensed for
+// business accounts, so the plan says how to choose and the creator searches in the app.
 // ---------------------------------------------------------------------------
 
 // Most short video isn't talking to camera: dance and trend videos, skits and
@@ -492,17 +494,6 @@ export interface FilmPlan {
   soundFirst: boolean;
 }
 
-export type TrendStage = 'rising' | 'peaking' | 'fading';
-
-export interface SoundIdea {
-  id: string;
-  name: string;
-  vibe: string;
-  /** Where the sound is in its trend life (sample until real trend data). */
-  stage?: TrendStage;
-  isSample: true;
-}
-
 export function getDefaultFilmStyle(niches: string[] = []): FilmStyle {
   const n = niches[0];
   if (n === 'music') return 'dance';
@@ -523,7 +514,7 @@ export function getFilmPlan(ideaTitle: string, style: FilmStyle = 'talking'): Fi
         hook: `${topic}`,
         listLabel: '',
         shots: [],
-        soundTip: 'Post while it’s rising. Rising sounds are best used in the next 2–3 days.',
+        soundTip: 'Choose one that is still climbing. A sound reaches the most people in its first days.',
         soundFirst: true,
       };
     case 'skit':
@@ -569,32 +560,6 @@ export function getFilmPlan(ideaTitle: string, style: FilmStyle = 'talking'): Fi
         soundFirst: false,
       };
   }
-}
-
-const SOUND_IDEAS: Record<FilmStyle, Omit<SoundIdea, 'isSample'>[]> = {
-  talking: [
-    { id: 't1', name: 'Soft lo-fi beat', vibe: 'Quiet under your voice' },
-    { id: 't2', name: 'Light acoustic loop', vibe: 'Warm, calm tips' },
-  ],
-  dance: [
-    { id: 'd1', name: 'Afrobeats drop', vibe: 'Picking up this week', stage: 'rising' },
-    { id: 'd2', name: 'Sped-up pop remix', vibe: 'Everyone is on it', stage: 'peaking' },
-    { id: 'd3', name: 'Old challenge sound', vibe: 'Late now, skip it', stage: 'fading' },
-  ],
-  skit: [
-    { id: 'k1', name: 'Trending comedy audio', vibe: 'Lip-sync the joke', stage: 'rising' },
-    { id: 'k2', name: 'Dramatic reveal sound', vibe: 'For the punchline', stage: 'peaking' },
-    { id: 'k3', name: 'Your own voice', vibe: 'Original audio' },
-  ],
-  text: [
-    { id: 'x1', name: 'Aesthetic trending song', vibe: 'Slow, satisfying clips', stage: 'rising' },
-    { id: 'x2', name: 'Upbeat build-up', vibe: 'Quick cuts to the beat' },
-    { id: 'x3', name: 'Calm acoustic', vibe: 'Routines and recipes' },
-  ],
-};
-
-export function getSoundIdeas(style: FilmStyle = 'talking'): SoundIdea[] {
-  return SOUND_IDEAS[style].map((s) => ({ ...s, isSample: true as const }));
 }
 
 // ---------------------------------------------------------------------------
@@ -751,6 +716,8 @@ export interface SavedDraft {
   format: string;
   /** Platform id when known ('tiktok' | 'instagram' | …) */
   platform?: string;
+  /** What the composer (or Script) saved, so the draft opens the way it was left. */
+  payload?: Record<string, unknown>;
   savedAt: number;
 }
 

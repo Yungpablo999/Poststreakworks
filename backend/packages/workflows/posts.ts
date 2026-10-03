@@ -387,7 +387,15 @@ export async function updatePost(userId: string, id: string, patch: PostPatch, d
   return toPost(data as PostRow);
 }
 
+/** A post is kept once any platform of it has been posted: it is part of the creator's history (and counts as a post made). */
+export function isKept(row: PostRow): boolean {
+  const steps = row.platform_post_ids ?? {};
+  return row.status === "published" || row.target_platforms.some((p) => steps[p]?.status === "published");
+}
+
 export async function deletePost(userId: string, id: string, db: SupabaseClient = getServiceClient()): Promise<void> {
+  const row = await loadRow(userId, id, db); // not_found if it was never theirs
+  if (isKept(row)) throw new PostError("conflict", "A post that's been posted stays in your history.");
   const { data, error } = await db
     .from("scheduled_posts")
     .delete()
@@ -396,10 +404,7 @@ export async function deletePost(userId: string, id: string, db: SupabaseClient 
     .in("status", ["draft", "scheduled", "pending_confirmation", "failed"])
     .select("id");
   if (error) throw new Error(`deletePost: ${error.message}`);
-  if (!data?.length) {
-    const row = await loadRow(userId, id, db); // not_found if it was never theirs
-    throw new PostError("conflict", row.status === "published" ? "A post that's been posted stays in your history." : "This post can't be removed right now.");
-  }
+  if (!data?.length) throw new PostError("conflict", "This post can't be removed right now.");
   // Its "time to post" notes go with it
   const { error: noteError } = await db.from("notifications").delete().eq("user_id", userId).like("key", `post-ready:${id}:%`);
   if (noteError) console.error("deletePost: could not remove its notes:", noteError.message);

@@ -13,7 +13,7 @@ import { VerifyCodeScreen } from './src/screens/VerifyCodeScreen';
 import { NicheSelectionScreen } from './src/screens/NicheSelectionScreen';
 import { PlatformConnectScreen } from './src/screens/PlatformConnectScreen';
 import { PlanPreviewScreen } from './src/screens/PlanPreviewScreen';
-import type { FilmStyle, IdeaGoal, StudioVideo } from './src/data';
+import type { FilmStyle, IdeaGoal, SavedDraft, StudioVideo } from './src/data';
 import { DashboardScreen } from './src/screens/DashboardScreen';
 import { RepurposeScreen } from './src/screens/RepurposeScreen';
 import { MissionDetailScreen } from './src/screens/MissionDetailScreen';
@@ -37,6 +37,8 @@ import { EdgeSwipeBackWrapper } from './src/components/EdgeSwipeBackWrapper';
 import { TabType } from './src/components/FloatingTabBar';
 import { UserProfileData, UserProfileModal } from './src/components/UserProfileModal';
 import { setNotificationHandler, type NoteTarget } from './src/components/notifications/NotificationsSheet';
+import { PostSheet } from './src/components/schedule/PostSheet';
+import { setPostOpener } from './src/components/schedule/postSheetBus';
 import { AppSidebar, type SidebarId } from './src/components/web/AppSidebar';
 import { WebAuthHeader } from './src/components/web/WebAuthHeader';
 import { WebTopBar } from './src/components/web/WebTopBar';
@@ -74,6 +76,7 @@ import {
   connectionsPatch,
   isDataLoaded,
   loadBootstrap,
+  onAccountRefreshed,
   profileFromBootstrap,
   rememberOnboarding,
   saveOnboarding,
@@ -186,7 +189,7 @@ export default function App() {
     Platform.OS === 'web' && typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('tour') === '1'
   );
   const [selectedIdeaTitle, setSelectedIdeaTitle] = useState('One thing I wish I knew before I started creating');
-  const [composerIdeaTitle, setComposerIdeaTitle] = useState('One thing I wish I knew before I started creating');
+  const [composerIdeaTitle, setComposerIdeaTitle] = useState('');
   // Goal picked on the Ideas page shapes the composer's caption
   // Also carries a ready caption + tags from the Caption writer
   // Platform to pre-select in the composer (e.g. from Repurpose)
@@ -200,19 +203,16 @@ export default function App() {
   const capabilities = useCapabilities();
   const [composerIdeaGoal, setComposerIdeaGoal] = useState<{ goal?: IdeaGoal; hook?: string; caption?: string; tags?: string[] } | null>(null);
   const [composerIdeaFormat, setComposerIdeaFormat] = useState<'short_video' | 'carousel' | 'image' | 'long_video' | 'text' | undefined>(undefined);
-  const [composerQuestDraft, setComposerQuestDraft] = useState<{
-    title: string;
-    hook: string;
-    story: string;
-    lesson: string;
-    cta: string;
-    badgeLabel?: string;
-    requirements?: string[];
-    xpReward?: number;
-  } | null>(null);
+  // The post whose sheet is open (any page can open one: Schedule, the calendar, Home…)
+  const [openPostId, setOpenPostId] = useState<string | null>(null);
+  React.useEffect(() => {
+    setPostOpener(setOpenPostId);
+    return () => setPostOpener(null);
+  }, []);
+  // A saved draft the composer carries on from (set when one is opened; forgotten when the composer is left)
+  const [composerDraft, setComposerDraft] = useState<SavedDraft | null>(null);
 
   const handleUseIdea = (title: string, format?: string, goal?: IdeaGoal, hook?: string) => {
-    setComposerQuestDraft(null);
     setComposerIdeaGoal(goal ? { goal, hook } : null);
     setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
     if (title) setComposerIdeaTitle(title);
@@ -282,7 +282,7 @@ export default function App() {
   // in place when they actually generate something.)
   const navigateTo = (nextScreen: Screen) => {
     if (nextScreen !== 'composer') {
-      setComposerQuestDraft(null);
+      setComposerDraft(null);
     }
     if (nextScreen === currentScreen) return;
     setAuthError(null);
@@ -427,6 +427,16 @@ export default function App() {
       setShowProfileFromMenu(false);
       setCurrentScreen(Platform.OS === 'web' ? 'signin' : 'welcome');
     });
+  }, []);
+
+  // Something the creator did (their first post, say) changed what the server says about them
+  React.useEffect(() => {
+    if (!BACKEND.enabled) return;
+    onAccountRefreshed((b) => {
+      const fresh = profileFromBootstrap(b, BLANK_PROFILE);
+      setUserProfileRaw((prev) => ({ ...prev, userPersona: fresh.userPersona, streakCount: fresh.streakCount, level: fresh.level, xp: fresh.xp, postsCount: fresh.postsCount }));
+    });
+    return () => onAccountRefreshed(null);
   }, []);
 
   // A real connection changed (connected, disconnected, needs reconnecting): update the profile's list
@@ -831,16 +841,26 @@ export default function App() {
   const desktopTier: 'free' | 'pro' = userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free';
   const desktopPersona: 'new' | 'returning' = (userPersona || userProfile?.userPersona) === 'returning' ? 'returning' : 'new';
   const openBlankComposer = (title?: string) => {
-    setComposerQuestDraft(null);
+    setComposerDraft(null);
     setComposerIdeaGoal(null);
     setComposerIdeaPlatform(undefined);
     setComposerFilmStyle(undefined);
     setComposerIdeaFormat(undefined);
-    // A blank post still starts from a friendly idea Jarvis can reshape
-    setComposerIdeaTitle(title || 'One thing I wish I knew before I started creating');
+    setComposerIdeaTitle(title ?? '');
     navigateTo('composer');
   };
   setComposerOpener(openBlankComposer);
+
+  // A saved post draft opens in the composer the way it was left
+  const openComposerDraft = (draft: SavedDraft) => {
+    setComposerIdeaGoal(null);
+    setComposerIdeaPlatform(undefined);
+    setComposerFilmStyle(undefined);
+    setComposerIdeaFormat(undefined);
+    setComposerIdeaTitle('');
+    setComposerDraft(draft);
+    navigateTo('composer');
+  };
 
   // "Make more like this" on a post: ideas on the same topic (only offered when the server can write ideas)
   const makeMoreLikeThis = (post: GrowthPost) => {
@@ -1293,7 +1313,6 @@ export default function App() {
               if (title) setComposerIdeaTitle(title);
               setComposerIdeaGoal(null);
                 setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
-              setComposerQuestDraft(null);
               navigateTo('composer');
             }}
             onNavigateTab={handleTabNavigation}
@@ -1304,12 +1323,13 @@ export default function App() {
 
         {currentScreen === 'composer' && (
           <PostComposerScreen
+            key={composerDraft?.id ?? 'new'}
             ideaTitle={composerIdeaTitle}
             ideaGoal={composerIdeaGoal}
             initialPlatform={composerIdeaPlatform}
             initialFilmStyle={composerFilmStyle}
-            questDraft={composerQuestDraft}
             initialFormat={composerIdeaFormat}
+            draft={composerDraft}
             onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
             onLogout={handleLogout}
             onOpenSchedule={() => navigateTo('schedule')}
@@ -1417,7 +1437,6 @@ export default function App() {
             onLogout={handleLogout}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onUseHook={(title, hook, style) => {
-              setComposerQuestDraft(null);
               setComposerIdeaTitle(title);
               setComposerIdeaGoal({ hook });
               setComposerIdeaPlatform(undefined);
@@ -1507,6 +1526,9 @@ export default function App() {
           initialProfile={userProfile}
           onSaveProfile={editProfile}
         />
+
+        {/* One of the creator's posts, opened from Schedule, the calendar, Home or the bell */}
+        <PostSheet postId={openPostId} onClose={() => setOpenPostId(null)} />
 
         {/* Ask Jarvis from anywhere in the app; Ghost does the jobs */}
         {showJarvisButton && <JarvisLauncher compact={breakpoint === 'phone'} bottom={jarvisBottom} />}

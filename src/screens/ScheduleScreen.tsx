@@ -1,4 +1,4 @@
-import React, { useState, useSyncExternalStore } from 'react';
+import React, { useEffect, useState, useSyncExternalStore } from 'react';
 import { Linking, Platform, Pressable, SafeAreaView, ScrollView, StatusBar, StyleSheet, View } from 'react-native';
 import Reanimated, { FadeIn, FadeInUp } from 'react-native-reanimated';
 import Svg, { Path, Rect } from 'react-native-svg';
@@ -12,18 +12,20 @@ import { UserProfileModal, UserProfileData } from '../components/UserProfileModa
 import { GlassBackdrop } from '../components/glass/GlassBackdrop';
 import { JarvisOrb } from '../components/JarvisOrb';
 import { CalendarSheet } from '../components/home/CalendarSheet';
-import { TodayCard, WeekStrip, PostRow, EmptyDay, PlatformMixCard, BestTimeCard } from '../components/schedule/ScheduleBlocks';
+import { TodayCard, WeekStrip, PostRow, EmptyDay, PlatformMixCard, BestTimeCard, ReadyCard } from '../components/schedule/ScheduleBlocks';
+import { openPost as openPostSheet } from '../components/schedule/postSheetBus';
 import { getWeekSchedule, subscribeToCheckIns, type CalendarPost } from '../data';
 import { loadCalendarWeek } from '../backend/calendar';
-import { loadBestTime } from '../backend/growth';
+import { growthStore, loadGrowth, useGrowth } from '../backend/growth';
+import { loadReadyPosts, usePostsVersion } from '../backend/posts';
 import { useAsync } from '../hooks/useAsync';
 import { ds } from '../theme/colors';
 import { sPadding } from '../utils/responsive';
 
 // Schedule: this week at a glance, day by day, from the creator's real calendar (what they planned
-// in PostStreak and what they posted on their connected accounts). Posts go out on their own only
-// on platforms that allow it; everywhere else PostStreak reminds them at the time and they confirm
-// it went out (the composer explains this when they plan a post).
+// in PostStreak and what they posted on their connected accounts). PostStreak doesn't post for the
+// creator: at the planned time it tells them the post is ready, they post it in the app and confirm
+// it. Posts waiting for that are at the top, whatever week they were due. Tapping a post opens it.
 
 interface ScheduleScreenProps {
   onBack?: () => void;
@@ -56,7 +58,14 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
   const loaded = useAsync(() => loadCalendarWeek().then((ok) => (ok ? true : null)), []);
   useSyncExternalStore(subscribeToCheckIns, () => getWeekSchedule().plannedCount, () => 0);
   const week = getWeekSchedule();
-  const bestTime = useAsync(loadBestTime, []).data;
+  // Read again whenever a post is planned, changed, posted or removed (here, in the composer, anywhere)
+  const version = usePostsVersion();
+  const ready = useAsync(loadReadyPosts, [version]);
+  const growth = useGrowth();
+  useEffect(() => {
+    if (!growthStore.get()) void loadGrowth();
+  }, []);
+  const bestTime = growth?.bestTime ?? null;
 
   const [dayIndex, setDayIndex] = useState(week.todayIndex);
   const selectedDay = week.days[dayIndex];
@@ -67,12 +76,14 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
     onOpenPostComposer?.(title, platform);
   };
   const openPost = (post: CalendarPost) => {
-    if (post.status === 'posted' && post.url) {
-      void Linking.openURL(post.url).catch(() => undefined);
+    if (post.postId) {
+      openPostSheet(post.postId);
       return;
     }
-    if (post.status !== 'posted') openComposer(post.title, post.platform);
+    // A post read from the creator's own account: its link, if the platform gave one
+    if (post.url) void Linking.openURL(post.url).catch(() => undefined);
   };
+
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -92,6 +103,13 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
               accessibilityLabel="Your posts, planned clearly"
             />
           </Reanimated.View>
+
+          {/* 0. READY TO POST: due, and waiting for the creator */}
+          {ready.data && ready.data.length > 0 && (
+            <Reanimated.View entering={FadeInUp.delay(60).duration(450)} style={styles.readyWrap}>
+              <ReadyCard posts={ready.data} onOpen={openPostSheet} />
+            </Reanimated.View>
+          )}
 
           {/* 1. TODAY */}
           <Reanimated.View entering={FadeInUp.delay(100).duration(550)}>
@@ -150,7 +168,7 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
           {/* 5. JARVIS BEST TIME: only once their posts say when they do best */}
           {bestTime && (
             <Reanimated.View entering={FadeInUp.delay(400).duration(550)} style={styles.section}>
-              <BestTimeCard orb={<JarvisOrb size={32} />} time={bestTime.time} platform={bestTime.platformName} onUse={() => openComposer()} />
+              <BestTimeCard orb={<JarvisOrb size={32} />} time={bestTime.label} onUse={() => openComposer()} />
             </Reanimated.View>
           )}
 
@@ -184,6 +202,7 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   scrollContent: { paddingHorizontal: sPadding(18), paddingTop: 8 },
   headline: { marginTop: 4, marginBottom: 16 },
+  readyWrap: { marginBottom: 16 },
   headlineText: { fontWeight: '800', letterSpacing: -0.8, color: ds.ink },
   headlineAccent: { color: ds.purple },
   sectionLabel: { fontSize: 17, fontWeight: '800', color: ds.ink, letterSpacing: -0.2 },

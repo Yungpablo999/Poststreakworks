@@ -12,18 +12,21 @@ import { AppButton } from '../ui/AppButton';
 import { JarvisOrb } from '../JarvisOrb';
 import { ds } from '../../theme/colors';
 
-// Pick when a post goes out (or when to be reminded to film it).
-// One glass sheet: Jarvis's best times first, then any day in the next two
-// weeks and a time. Real dates; past times today are unavailable.
+// Pick when a post is due (or when to be reminded). One glass sheet: the creator's own best time first
+// when their posts say what it is, then any day in the next two weeks and a time. Real dates; times that
+// have passed today are unavailable. The sheet returns the day and time as a Date.
 // Calm motion: glides up with an ease, no spring overshoot.
 
-type Slot = { minutes: number; label: string; best?: boolean };
+export type BestTime = { hour: number; label: string; postsAtBestTime: number };
 
+type Slot = { minutes: number; label: string };
+
+// Common times of day, named for when they are. They are not claims about anyone's audience.
 const TIMES: Slot[] = [
   { minutes: 9 * 60, label: 'Morning' },
   { minutes: 12 * 60 + 30, label: 'Lunch' },
-  { minutes: 18 * 60, label: 'Evening' },
-  { minutes: 19 * 60 + 30, label: 'Best time', best: true },
+  { minutes: 16 * 60, label: 'Afternoon' },
+  { minutes: 18 * 60 + 30, label: 'Evening' },
   { minutes: 20 * 60 + 30, label: 'Night' },
 ];
 const DAYS_AHEAD = 14;
@@ -74,13 +77,19 @@ const dayName = (d: Date, today: Date) => {
 interface ScheduleSheetProps {
   visible: boolean;
   onClose: () => void;
-  /** Receives a readable label like "Today, 7:30 PM" or "Fri 2 Oct, 6:00 PM". */
-  onConfirm: (label: string) => void;
+  /** The day and time the creator chose. */
+  onConfirm: (at: Date) => void;
   /** 'remind' when the creator will film in TikTok etc. */
   mode?: 'schedule' | 'remind';
+  /** The hour their posts do best, once their posts say so. Without it there is no "best time" to offer. */
+  bestTime?: BestTime | null;
+  /** The time already chosen: it is where the sheet starts. */
+  initial?: Date | null;
+  title?: string;
+  confirmLabel?: string;
 }
 
-export function ScheduleSheet({ visible, onClose, onConfirm, mode = 'schedule' }: ScheduleSheetProps) {
+export function ScheduleSheet({ visible, onClose, onConfirm, mode = 'schedule', bestTime = null, initial = null, title, confirmLabel }: ScheduleSheetProps) {
   const insets = useSafeAreaInsets();
   const { height: screenH } = useWindowDimensions();
   const [mounted, setMounted] = useState(visible);
@@ -91,22 +100,33 @@ export function ScheduleSheet({ visible, onClose, onConfirm, mode = 'schedule' }
   const days = useMemo(() => Array.from({ length: DAYS_AHEAD }, (_, i) => addDays(today, i)), [today.getTime()]);
   const isPast = (dayIndex: number, minutes: number) => dayIndex === 0 && minutes <= nowMinutes + 5;
 
-  // Jarvis's picks: the next three "best" slots that haven't passed
+  // The creator's best time on the next few days it hasn't passed
   const picks = useMemo(() => {
-    const out: { dayIndex: number; minutes: number; why: string }[] = [];
-    for (let d = 0; d < 3 && out.length < 3; d++) {
-      for (const m of [19 * 60 + 30, 11 * 60 + 30]) {
-        if (!isPast(d, m) && out.length < 3) out.push({ dayIndex: d, minutes: m, why: m === 19 * 60 + 30 ? 'Your audience is most active' : 'Strong lunchtime scroll' });
-      }
-    }
-    return out.sort((a, b) => a.dayIndex * 1440 + a.minutes - (b.dayIndex * 1440 + b.minutes));
+    if (!bestTime) return [];
+    const minutes = bestTime.hour * 60;
+    const out: { dayIndex: number; minutes: number }[] = [];
+    for (let d = 0; d < DAYS_AHEAD && out.length < 3; d++) if (!isPast(d, minutes)) out.push({ dayIndex: d, minutes });
+    return out;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nowMinutes, today.getTime()]);
+  }, [bestTime?.hour, nowMinutes, today.getTime()]);
 
-  // Pre-select the audience's best time (7:30 PM), not simply the earliest slot
-  const defaultPick = picks.find((p) => p.minutes === 19 * 60 + 30) ?? picks[0];
-  const [dayIndex, setDayIndex] = useState(defaultPick?.dayIndex ?? 0);
-  const [minutes, setMinutes] = useState(defaultPick?.minutes ?? 19 * 60 + 30);
+  // Where to start: the time already chosen, else their best time, else the next common time of day
+  const start = (): { dayIndex: number; minutes: number } => {
+    if (initial && initial.getTime() > now.getTime()) {
+      const dayIndex = Math.round((startOfDay(initial).getTime() - today.getTime()) / 86400000);
+      const minutes = initial.getHours() * 60 + initial.getMinutes();
+      if (dayIndex >= 0 && dayIndex < DAYS_AHEAD && !isPast(dayIndex, minutes)) return { dayIndex, minutes };
+    }
+    if (picks[0]) return picks[0];
+    for (let d = 0; d < DAYS_AHEAD; d++) {
+      const t = TIMES.find((x) => !isPast(d, x.minutes));
+      if (t) return { dayIndex: d, minutes: t.minutes };
+    }
+    return { dayIndex: 1, minutes: TIMES[0]!.minutes };
+  };
+
+  const [dayIndex, setDayIndex] = useState(() => start().dayIndex);
+  const [minutes, setMinutes] = useState(() => start().minutes);
   // Custom time: any hour, 5-minute steps, AM / PM
   const [customOpen, setCustomOpen] = useState(false);
   const setCustom = (m: number) => setMinutes(((m % 1440) + 1440) % 1440);
@@ -119,10 +139,9 @@ export function ScheduleSheet({ visible, onClose, onConfirm, mode = 'schedule' }
     if (visible) {
       setMounted(true);
       setCustomOpen(false);
-      if (defaultPick) {
-        setDayIndex(defaultPick.dayIndex);
-        setMinutes(defaultPick.minutes);
-      }
+      const s = start();
+      setDayIndex(s.dayIndex);
+      setMinutes(s.minutes);
       progress.value = withTiming(1, { duration: 300, easing: Easing.out(Easing.cubic) });
     } else if (mounted) {
       progress.value = withTiming(0, { duration: 220, easing: Easing.in(Easing.cubic) }, (done) => {
@@ -142,7 +161,7 @@ export function ScheduleSheet({ visible, onClose, onConfirm, mode = 'schedule' }
   const tick = () => {
     if (Platform.OS !== 'web') Haptics.selectionAsync();
   };
-  const chosenLabel = `${dayName(days[dayIndex], today)}, ${timeLabel(minutes)}`;
+  const chosenLabel = `${dayName(days[dayIndex]!, today)}, ${timeLabel(minutes)}`;
   const selectedPast = isPast(dayIndex, minutes);
 
   if (!mounted) return null;
@@ -161,8 +180,8 @@ export function ScheduleSheet({ visible, onClose, onConfirm, mode = 'schedule' }
 
           <View style={styles.header}>
             <View style={styles.flex}>
-              <Text style={styles.title}>{mode === 'remind' ? 'When should we remind you?' : 'When should it go out?'}</Text>
-              <Text style={styles.subtitle}>Jarvis’s best times, or your own</Text>
+              <Text style={styles.title}>{title ?? (mode === 'remind' ? 'When should we remind you?' : 'When is it due?')}</Text>
+              <Text style={styles.subtitle}>{bestTime ? 'Your best time, or your own' : 'Pick a day and a time'}</Text>
             </View>
             <Pressable onPress={onClose} hitSlop={10} style={styles.closeBtn} accessibilityRole="button" accessibilityLabel="Close">
               <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
@@ -172,45 +191,51 @@ export function ScheduleSheet({ visible, onClose, onConfirm, mode = 'schedule' }
           </View>
 
           <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false} bounces={false}>
-            {/* Jarvis's picks */}
-            <View style={styles.pickHead}>
-              <JarvisOrb size={22} />
-              <Text style={styles.sectionLabel}>Jarvis picks</Text>
-            </View>
-            <View style={styles.picks}>
-              {picks.map((p) => {
-                const on = p.dayIndex === dayIndex && p.minutes === minutes;
-                return (
-                  <Pressable
-                    key={`${p.dayIndex}-${p.minutes}`}
-                    onPress={() => {
-                      tick();
-                      setDayIndex(p.dayIndex);
-                      setMinutes(p.minutes);
-                      setCustomOpen(false);
-                    }}
-                    accessibilityRole="radio"
-                    accessibilityState={{ checked: on }}
-                    style={({ pressed }) => [styles.pick, on && styles.pickOn, pressed && { transform: [{ scale: 0.98 }] }]}
-                  >
-                    <View style={styles.flex}>
-                      <Text style={[styles.pickTime, on && { color: ds.purple }]}>
-                        {dayName(days[p.dayIndex], today)}, {timeLabel(p.minutes)}
-                      </Text>
-                      <Text style={styles.pickWhy}>{p.why}</Text>
-                    </View>
-                    <View style={[styles.radio, on && styles.radioOn]}>{on && <View style={styles.radioDot} />}</View>
-                  </Pressable>
-                );
-              })}
-            </View>
+            {/* Their best time: only once their own posts say what it is */}
+            {picks.length > 0 && bestTime ? (
+              <>
+                <View style={styles.pickHead}>
+                  <JarvisOrb size={22} />
+                  <Text style={styles.sectionLabel}>Your best time</Text>
+                </View>
+                <View style={styles.picks}>
+                  {picks.map((p) => {
+                    const on = p.dayIndex === dayIndex && p.minutes === minutes;
+                    return (
+                      <Pressable
+                        key={`${p.dayIndex}-${p.minutes}`}
+                        onPress={() => {
+                          tick();
+                          setDayIndex(p.dayIndex);
+                          setMinutes(p.minutes);
+                          setCustomOpen(false);
+                        }}
+                        accessibilityRole="radio"
+                        accessibilityState={{ checked: on }}
+                        style={({ pressed }) => [styles.pick, on && styles.pickOn, pressed && { transform: [{ scale: 0.98 }] }]}
+                      >
+                        <View style={styles.flex}>
+                          <Text style={[styles.pickTime, on && { color: ds.purple }]}>
+                            {dayName(days[p.dayIndex]!, today)}, {timeLabel(p.minutes)}
+                          </Text>
+                          <Text style={styles.pickWhy}>
+                            Your posts do best around {bestTime.label} ({bestTime.postsAtBestTime} of your recent {bestTime.postsAtBestTime === 1 ? 'post' : 'posts'})
+                          </Text>
+                        </View>
+                        <View style={[styles.radio, on && styles.radioOn]}>{on && <View style={styles.radioDot} />}</View>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              </>
+            ) : null}
 
             {/* Any day in the next two weeks */}
-            <Text style={[styles.sectionLabel, styles.ownLabel]}>Or pick a day</Text>
+            <Text style={[styles.sectionLabel, picks.length > 0 ? styles.ownLabel : styles.firstLabel]}>{picks.length > 0 ? 'Or pick a day' : 'Pick a day'}</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.days}>
               {days.map((d, i) => {
                 const on = i === dayIndex;
-                const allPast = TIMES.every((t) => isPast(i, t.minutes));
+                const allPast = TIMES.every((t) => isPast(i, t.minutes)) && isPast(i, 23 * 60 + 55);
                 return (
                   <Pressable
                     key={i}
@@ -228,9 +253,7 @@ export function ScheduleSheet({ visible, onClose, onConfirm, mode = 'schedule' }
                     accessibilityLabel={d.toDateString()}
                     style={[styles.day, on && styles.dayOn, allPast && { opacity: 0.35 }]}
                   >
-                    <Text style={[styles.dayTop, on && styles.dayTextOn]}>
-                      {i === 0 ? 'Today' : d.toLocaleDateString('en-GB', { weekday: 'short' })}
-                    </Text>
+                    <Text style={[styles.dayTop, on && styles.dayTextOn]}>{i === 0 ? 'Today' : d.toLocaleDateString('en-GB', { weekday: 'short' })}</Text>
                     <Text style={[styles.dayNum, on && styles.dayTextOn]}>{d.getDate()}</Text>
                     <Text style={[styles.dayMonth, on && styles.dayTextOn]}>{d.toLocaleDateString('en-GB', { month: 'short' })}</Text>
                   </Pressable>
@@ -257,7 +280,7 @@ export function ScheduleSheet({ visible, onClose, onConfirm, mode = 'schedule' }
                     style={[styles.time, on && styles.timeOn, past && { opacity: 0.35 }]}
                   >
                     <Text style={[styles.timeText, on && { color: ds.purple }]}>{timeLabel(t.minutes)}</Text>
-                    <Text style={[styles.timeSub, t.best && styles.timeSubBest]}>{t.label}</Text>
+                    <Text style={styles.timeSub}>{t.label}</Text>
                   </Pressable>
                 );
               })}
@@ -279,12 +302,7 @@ export function ScheduleSheet({ visible, onClose, onConfirm, mode = 'schedule' }
 
             {customOpen && (
               <Animated.View entering={FadeInUp.duration(220)} style={styles.custom}>
-                <Stepper
-                  label="Hour"
-                  value={String(hour12)}
-                  onMinus={() => setCustom(minutes - 60)}
-                  onPlus={() => setCustom(minutes + 60)}
-                />
+                <Stepper label="Hour" value={String(hour12)} onMinus={() => setCustom(minutes - 60)} onPlus={() => setCustom(minutes + 60)} />
                 <Stepper
                   label="Minutes"
                   value={String(minutes % 60).padStart(2, '0')}
@@ -321,17 +339,18 @@ export function ScheduleSheet({ visible, onClose, onConfirm, mode = 'schedule' }
           <View style={styles.footer}>
             <Animated.View key={chosenLabel} entering={FadeIn.duration(180)}>
               <Text style={styles.summary}>
-                {mode === 'remind' ? 'Reminder: ' : 'Goes out: '}
+                {mode === 'remind' ? 'Reminder: ' : 'Due: '}
                 <Text style={styles.summaryBold}>{chosenLabel}</Text>
               </Text>
             </Animated.View>
             <AppButton
-              title={mode === 'remind' ? 'Set reminder' : 'Use this time'}
+              title={confirmLabel ?? (mode === 'remind' ? 'Set reminder' : 'Use this time')}
               size="lg"
               disabled={selectedPast}
               onPress={() => {
                 if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                onConfirm(chosenLabel);
+                const day = days[dayIndex]!;
+                onConfirm(new Date(day.getFullYear(), day.getMonth(), day.getDate(), Math.floor(minutes / 60), minutes % 60));
                 react('scheduled');
               }}
             />
@@ -374,6 +393,7 @@ const styles = StyleSheet.create({
   body: { paddingHorizontal: 20, paddingTop: 14, paddingBottom: 8 },
   pickHead: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },
   sectionLabel: { fontSize: 14, fontWeight: '800', color: ds.ink },
+  firstLabel: { marginBottom: 10 },
   ownLabel: { marginTop: 20, marginBottom: 10 },
   picks: { gap: 8 },
   pick: {
