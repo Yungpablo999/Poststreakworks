@@ -1,10 +1,9 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { MascotSays } from '../components/mascot/MascotSays';
-import { useMascotThinking } from '../mascot/mascot';
 import { useWebFrame, useWideFrame } from '../components/web/WebAuthHeader';
 import { StyleSheet, View, ScrollView, Pressable, Platform, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Animated, { FadeIn, FadeInUp, useAnimatedStyle, useSharedValue, withTiming, Easing } from 'react-native-reanimated';
+import Animated, { FadeInUp, useAnimatedStyle, useSharedValue, withTiming, Easing } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { BlurView } from 'expo-blur';
 import Svg, { Path, Circle } from 'react-native-svg';
@@ -14,54 +13,44 @@ import { FitLines } from '../components/ui/FitLines';
 import { GlassBackdrop } from '../components/glass/GlassBackdrop';
 import { GlassCard } from '../components/glass/GlassCard';
 import { OnboardingProgress } from '../components/onboarding/OnboardingProgress';
-import { AccountSnapshotCard } from '../components/onboarding/AccountSnapshotCard';
 import { JarvisOrb } from '../components/JarvisOrb';
-import { getAccountSnapshots, getStarterIdeas, type StarterIdea } from '../data';
+import type { FeedIdea } from '../../frontend/shared/types/phase1';
+import { loadStarterIdeas } from '../backend/ideas';
+import { useAsync } from '../hooks/useAsync';
 import { ds } from '../theme/colors';
 
-// Onboarding step 3: value before sign-up, built to be scanned in seconds —
-// (1) where their account is and what they're missing, (2) their first post.
-
-const THINK_MS = 600;
+// Onboarding step 3: value before sign-up, built to be scanned in seconds: their first post, from the
+// PostStreak idea library for the topics they picked. (Their account numbers wait until they have
+// connected a real account; nothing is shown here that isn't theirs.)
 
 interface PlanPreviewScreenProps {
   niches: string[];
   platforms: string[];
   onBack: () => void;
-  onContinue: (idea: StarterIdea) => void;
+  onContinue: (idea: FeedIdea) => void;
 }
 
 export const PlanPreviewScreen: React.FC<PlanPreviewScreenProps> = ({ niches, platforms, onBack, onContinue }) => {
   const webFrame = useWebFrame();
   const wideFrame = useWideFrame();
-  const ideas = useMemo(() => getStarterIdeas(niches, platforms), [niches, platforms]);
-  const snapshots = useMemo(() => getAccountSnapshots(platforms), [platforms]);
+  const loaded = useAsync(() => loadStarterIdeas(niches, platforms), [niches.join('|'), platforms.join('|')]);
+  const ideas = loaded.data ?? [];
   const [index, setIndex] = useState(0);
-  const [thinking, setThinking] = useState(false);
-  useMascotThinking(thinking);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const idea = ideas[index % ideas.length];
+  const idea: FeedIdea | undefined = ideas.length ? ideas[index % ideas.length] : undefined;
 
   // Shuffle icon spins a full turn on each tap
   const spin = useSharedValue(0);
   const spinStyle = useAnimatedStyle(() => ({ transform: [{ rotate: `${spin.value * 360}deg` }] }));
 
   const shuffle = () => {
-    if (thinking) return;
+    if (ideas.length < 2) return;
     if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     spin.value = withTiming(spin.value + 1, { duration: 500, easing: Easing.out(Easing.cubic) });
-    setThinking(true);
-    timer.current = setTimeout(() => {
-      setIndex((i) => i + 1);
-      setThinking(false);
-    }, THINK_MS);
+    setIndex((i) => i + 1);
   };
 
-  React.useEffect(() => () => {
-    if (timer.current) clearTimeout(timer.current);
-  }, []);
-
   const handleSave = () => {
+    if (!idea) return;
     if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     onContinue(idea);
   };
@@ -71,6 +60,7 @@ export const PlanPreviewScreen: React.FC<PlanPreviewScreenProps> = ({ niches, pl
     <AppButton
       title="Save my plan"
       size="lg"
+      disabled={!idea}
       onPress={handleSave}
       iconRight={
         <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
@@ -113,14 +103,7 @@ export const PlanPreviewScreen: React.FC<PlanPreviewScreenProps> = ({ niches, pl
             />
           </Animated.View>
 
-          {/* 1. Where they are + what they're missing */}
-          {snapshots.length > 0 && (
-            <Animated.View entering={FadeInUp.delay(240).duration(600)} style={styles.section}>
-              <AccountSnapshotCard snapshots={snapshots} />
-            </Animated.View>
-          )}
-
-          {/* 2. Their first post */}
+          {/* Their first post */}
           <Animated.View entering={FadeInUp.delay(380).duration(600)} style={styles.section}>
             <GlassCard strong radius={26} padding={20}>
               <View style={styles.ideaHeader}>
@@ -142,10 +125,19 @@ export const PlanPreviewScreen: React.FC<PlanPreviewScreenProps> = ({ niches, pl
                 </Pressable>
               </View>
 
-              {thinking ? (
-                <Animated.View entering={FadeIn.duration(120)} style={styles.thinking}>
-                  <ActivityIndicator color={ds.purple} />
-                </Animated.View>
+              {!idea ? (
+                <View style={styles.thinking}>
+                  {loaded.failed ? (
+                    <>
+                      <Text style={styles.meta}>Couldn’t load your ideas.</Text>
+                      <Text style={[styles.meta, { color: ds.purple }]} onPress={loaded.reload} accessibilityRole="button">
+                        Try again
+                      </Text>
+                    </>
+                  ) : (
+                    <ActivityIndicator color={ds.purple} />
+                  )}
+                </View>
               ) : (
                 <Animated.View key={idea.id} entering={FadeInUp.duration(350)} style={styles.ideaBody}>
                   <Text style={styles.ideaTitle}>{idea.title}</Text>
@@ -157,12 +149,12 @@ export const PlanPreviewScreen: React.FC<PlanPreviewScreenProps> = ({ niches, pl
                       <Circle cx="12" cy="12" r="9" stroke={ds.text2} strokeWidth={2.2} />
                       <Path d="M12 7v5l3 2" stroke={ds.text2} strokeWidth={2.2} strokeLinecap="round" />
                     </Svg>
-                    <Text style={styles.meta}>{idea.bestTime}</Text>
+                    <Text style={styles.meta}>Try posting around {idea.bestTime}</Text>
                   </View>
                 </Animated.View>
               )}
             </GlassCard>
-            <Text style={styles.nextSteps}>Then a quick check-in on day 2, and idea #2 on day 3.</Text>
+            <Text style={styles.nextSteps}>You can pick a different idea any time from Create.</Text>
           </Animated.View>
           {wideFrame && <View style={webStyles.cta}>{cta}</View>}
         </ScrollView>
@@ -212,7 +204,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(237, 233, 254, 0.9)',
   },
   shuffleText: { fontSize: 12.5, fontWeight: '800', color: ds.purple },
-  thinking: { height: 104, alignItems: 'center', justifyContent: 'center' },
+  thinking: { height: 104, alignItems: 'center', justifyContent: 'center', gap: 6 },
   ideaBody: { minHeight: 104, marginTop: 12 },
   ideaTitle: { fontSize: 20, lineHeight: 26, fontWeight: '800', color: ds.ink, letterSpacing: -0.3 },
   hook: { fontSize: 14.5, lineHeight: 21, color: ds.text2, marginTop: 6 },
