@@ -2,18 +2,18 @@ export { recordStreakEvent, getCheckInSummary, levelForXp, awardXp, getXpBalance
 export type { StreakEventType, RecordStreakEventResult, CheckInSummary } from "./streak-engine";
 export { getServiceClient } from "./service-client";
 export {
-  TikTokConnectError,
-  completeTikTokConnect,
-  createTikTokApi,
-  disconnectTikTok,
+  AccountInUseError,
+  SocialConnectError,
+  completeConnect,
+  disconnectAccount,
   envTokenVault,
-  startTikTokConnect,
-  syncDueTikTokAccounts,
-  syncTikTok,
-} from "./tiktok-connect";
-export type { ClientKind, ConnectedAccount, SyncBatchResult, SyncResult, TikTokDeps } from "./tiktok-connect";
-export { createSupabaseTikTokStore, listConnectedAccounts, loadAccountSnapshots } from "./tiktok-store";
-export type { ConnectedAccountSummary } from "./tiktok-store";
+  startConnect,
+  syncAccount,
+  syncDueAccounts,
+} from "./social-connect";
+export type { ClientKind, ConnectedAccount, SocialDeps, SocialStore, SyncBatchResult, SyncResult, TokenVault } from "./social-connect";
+export { createSupabaseSocialStore, listConnectedAccounts, loadAccountSnapshots } from "./social-store";
+export type { ConnectedAccountSummary } from "./social-store";
 export { buildAccountSnapshot } from "./growth";
 export type { AccountSnapshot } from "./growth";
 export { notify } from "./notify";

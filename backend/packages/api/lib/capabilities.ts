@@ -1,4 +1,5 @@
-import { sealToken, tiktokConfigFromEnv } from "@poststreak/integrations";
+import { PROVIDER_IDS, type ProviderId } from "@poststreak/integrations";
+import { providerSetup } from "./provider-setup";
 
 // What this server can really do, decided by what it has been given (keys,
 // approvals). The app asks once (GET /me/bootstrap -> capabilities) and shows
@@ -8,7 +9,9 @@ import { sealToken, tiktokConfigFromEnv } from "@poststreak/integrations";
 export type Capabilities = {
   /** Ideas, hooks, scripts, captions, Repurpose and Ask Jarvis are written by a real model. */
   ai: boolean;
-  /** Connecting a TikTok account (client keys + token key present and valid). */
+  /** Which platforms can really be connected here (their app keys, redirect address and the token key are present and valid). */
+  platforms: Record<ProviderId, boolean>;
+  /** Same as platforms.tiktok. Kept for the app on the main branch, which asks for it by this name. */
   tiktok: boolean;
   /** A purchase can really unlock Pro (Stripe or Paystack configured). */
   payments: boolean;
@@ -16,8 +19,6 @@ export type Capabilities = {
   voice: boolean;
   /** Local testing only: the sign-in screen offers one-tap test accounts. */
   devLogin: boolean;
-  /** Connections for Instagram, YouTube, Facebook, Threads. Their approvals and OAuth aren't built yet. */
-  otherPlatforms: boolean;
   /** Posting for the creator at the best time. Needs each platform's posting approval. */
   autoPost: boolean;
   /** Age / place / online-time breakdowns of an audience. No connected platform's API gives them to us yet. */
@@ -47,26 +48,17 @@ export function devLoginEnabled(env: Env = process.env): boolean {
   return env.DEV_LOGIN === "true" && env.NODE_ENV !== "production" && usesLocalSupabase(env);
 }
 
-function tiktokReady(env: Env): boolean {
-  try {
-    if (!tiktokConfigFromEnv(env)) return false;
-    sealToken("probe", "probe", env); // TOKEN_ENCRYPTION_KEY present and valid
-    return true;
-  } catch {
-    return false; // misconfigured counts as not available (the connect route says so to the creator)
-  }
-}
-
 export function capabilitiesFromEnv(env: Env = process.env): Capabilities {
+  const platforms = Object.fromEntries(PROVIDER_IDS.map((id) => [id, providerSetup(id, env) !== null])) as Record<ProviderId, boolean>;
   return {
     ai: Boolean(env.GROQ_API_KEY?.trim() || env.GEMINI_API_KEY?.trim()),
-    tiktok: tiktokReady(env),
+    platforms,
+    tiktok: platforms.tiktok,
     payments: Boolean(
       (env.STRIPE_SECRET_KEY?.trim() && env.STRIPE_WEBHOOK_SECRET?.trim()) || env.PAYSTACK_SECRET_KEY?.trim(),
     ),
     voice: Boolean(env.FISH_AUDIO_API_KEY?.trim()),
     devLogin: devLoginEnabled(env),
-    otherPlatforms: false,
     autoPost: false,
     audienceDemographics: false,
   };

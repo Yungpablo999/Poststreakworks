@@ -15,7 +15,7 @@ export function rng(seed) {
   };
 }
 
-const TITLES = {
+export const TITLES = {
   lifestyle: ['My 5-minute morning reset', 'A slow Sunday in Lagos', 'Small habits that changed my week', 'What I eat in a day (honestly)', 'Reset your room with me', 'Three things I stopped buying', 'Evening routine that actually works', 'Packing my bag for the week'],
   food: ['Jollof in twenty minutes', 'Budget meal prep for the week', 'Street food tour: Surulere', 'The one pan breakfast', 'Plantain three ways', 'Cooking for one, no waste', 'Pepper soup for a cold evening', 'Lunchbox ideas that last'],
   tech: ['3 apps that save me an hour a day', 'Stop using these shortcuts', 'How I plan my week in one note', 'Phone settings you should change today', 'Build a habit tracker in ten minutes', 'The laptop mistake everyone makes', 'Free tools for creators', 'Automate your inbox'],
@@ -38,7 +38,7 @@ export function creatorForKey(key) {
   return CREATORS[key] ?? null;
 }
 
-const DAY = 86_400_000;
+export const DAY = 86_400_000;
 const EPOCH = Date.UTC(2026, 0, 1);
 
 export const dayNumber = (now = Date.now()) => Math.floor((now - EPOCH) / DAY);

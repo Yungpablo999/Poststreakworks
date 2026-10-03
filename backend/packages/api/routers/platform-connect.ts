@@ -1,26 +1,30 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
+import { PROVIDER_NAMES, type ProviderId } from "@poststreak/integrations";
 import {
-  TikTokConnectError,
-  completeTikTokConnect,
-  disconnectTikTok,
+  SocialConnectError,
+  completeConnect,
+  disconnectAccount,
   listConnectedAccounts,
   loadAccountSnapshots,
   notify,
-  startTikTokConnect,
-  syncTikTok,
+  startConnect,
+  syncAccount,
 } from "@poststreak/workflows";
 import { createTRPCRouter, protectedProcedure, TIER_LIMITS, type Context, type User } from "../context";
 import { enforceRateLimit } from "../rate-limit";
 import { toAppPlatform } from "../lib/platforms";
-import { tiktokDeps } from "../lib/tiktok-deps";
+import { socialDeps } from "../lib/social-deps";
 
-// Connecting a creator's real social accounts. TikTok first; each platform
-// joins this router as its OAuth goes live. See backend/PHASE1_CONTRACT.md and
-// packages/workflows/tiktok-connect.ts for how the flow works.
+// Connecting a creator's real social accounts: TikTok, Instagram, Threads, Facebook, YouTube.
+// The flow is the same for each (packages/workflows/social-connect.ts); what differs is in the
+// platform's adapter (packages/integrations/providers). See backend/PHASE1_CONTRACT.md.
 
-/** Free plans connect up to TIER_LIMITS.free.maxConnectedPlatforms; reconnecting TikTok never counts against it. */
-async function assertCanConnectAnother(ctx: Context & { user: User }): Promise<void> {
+/** Must list exactly the platforms in packages/integrations/providers/types.ts. */
+const providerSchema = z.enum(["tiktok", "instagram", "threads", "facebook", "youtube"]) satisfies z.ZodType<ProviderId>;
+
+/** Free plans connect up to TIER_LIMITS.free.maxConnectedPlatforms; reconnecting a platform never counts against it. */
+async function assertCanConnectAnother(ctx: Context & { user: User }, provider: ProviderId): Promise<void> {
   const max = TIER_LIMITS[ctx.user.tier].maxConnectedPlatforms;
   if (max === Infinity) return;
 
@@ -30,7 +34,7 @@ async function assertCanConnectAnother(ctx: Context & { user: User }): Promise<v
     .eq("user_id", ctx.user.id)
     .is("disconnected_at", null);
   const active = data ?? [];
-  if (active.some((c) => c.platform === "tiktok") || active.length < max) return;
+  if (active.some((c) => c.platform === provider) || active.length < max) return;
 
   throw new TRPCError({
     code: "FORBIDDEN",
@@ -47,11 +51,12 @@ async function assertCanConnectAnother(ctx: Context & { user: User }): Promise<v
 }
 
 function connectErrorToTrpc(err: unknown): never {
-  if (err instanceof TikTokConnectError) {
+  if (err instanceof SocialConnectError) {
     const code = {
       invalid_state: "BAD_REQUEST",
       provider_rejected: "BAD_GATEWAY",
       missing_scope: "BAD_REQUEST",
+      no_account: "BAD_REQUEST",
       account_in_use: "CONFLICT",
     }[err.reason] as TRPCError["code"];
     throw new TRPCError({ code, message: err.message });
@@ -61,36 +66,36 @@ function connectErrorToTrpc(err: unknown): never {
 
 export const platformConnectRouter = createTRPCRouter({
   /**
-   * Step 1. Returns the TikTok page to send the creator to. `client` says
-   * whether the creator is in the web app or the phone app; the callback page
-   * uses it to decide where to hand the code back.
+   * Step 1. Returns the platform's page to send the creator to. `client` says whether the creator
+   * is in the web app or the phone app; the callback page uses it to decide where to hand the
+   * code back.
    */
-  tiktokAuthorize: protectedProcedure
-    .input(z.object({ client: z.enum(["web", "mobile"]).default("web") }))
+  authorize: protectedProcedure
+    .input(z.object({ provider: providerSchema, client: z.enum(["web", "mobile"]).default("web") }))
     .mutation(async ({ ctx, input }) => {
-      await enforceRateLimit(`tiktok:authorize:${ctx.user.id}`, 10, 60 * 60);
-      const deps = tiktokDeps();
-      await assertCanConnectAnother(ctx);
-      return startTikTokConnect(deps, ctx.user.id, input.client);
+      await enforceRateLimit(`${input.provider}:authorize:${ctx.user.id}`, 10, 60 * 60);
+      const deps = socialDeps(input.provider);
+      await assertCanConnectAnother(ctx, input.provider);
+      return startConnect(deps, ctx.user.id, input.client);
     }),
 
   /**
-   * Step 3. The app posts the `code` and `state` TikTok sent back to the
-   * callback page. Must come from the same signed-in creator who started it.
+   * Step 3. The app posts the `code` and `state` the platform sent back to the callback page.
+   * Must come from the same signed-in creator who started it.
    */
-  tiktokCallback: protectedProcedure
-    .input(z.object({ code: z.string().min(1).max(2048), state: z.string().min(20).max(200) }))
+  callback: protectedProcedure
+    .input(z.object({ provider: providerSchema, code: z.string().min(1).max(2048), state: z.string().min(20).max(200) }))
     .mutation(async ({ ctx, input }) => {
-      await enforceRateLimit(`tiktok:callback:${ctx.user.id}`, 20, 60 * 60);
-      const deps = tiktokDeps();
+      await enforceRateLimit(`${input.provider}:callback:${ctx.user.id}`, 20, 60 * 60);
+      const deps = socialDeps(input.provider);
       try {
-        const account = await completeTikTokConnect(deps, { userId: ctx.user.id, code: input.code, state: input.state });
-        await ctx.track("platform_connected", { platform: "tiktok", status: account.status });
+        const account = await completeConnect(deps, { userId: ctx.user.id, code: input.code, state: input.state });
+        await ctx.track("platform_connected", { platform: input.provider, status: account.status });
         await notify(ctx.user.id, {
-          key: "connected:tiktok",
+          key: `connected:${input.provider}`,
           type: "system",
           kind: "link",
-          title: "Your TikTok is connected",
+          title: `Your ${PROVIDER_NAMES[input.provider]} is connected`,
           body: "PostStreak reads your numbers once a day.",
           action: { label: "See your growth", target: "platform-growth" },
         });
@@ -101,14 +106,14 @@ export const platformConnectRouter = createTRPCRouter({
     }),
 
   /** Refresh the numbers now (the nightly job does it too). */
-  tiktokSync: protectedProcedure.mutation(async ({ ctx }) => {
-    await enforceRateLimit(`tiktok:sync:${ctx.user.id}`, 6, 60 * 60);
-    return syncTikTok(tiktokDeps(), ctx.user.id);
+  sync: protectedProcedure.input(z.object({ provider: providerSchema })).mutation(async ({ ctx, input }) => {
+    await enforceRateLimit(`${input.provider}:sync:${ctx.user.id}`, 6, 60 * 60);
+    return syncAccount(socialDeps(input.provider), ctx.user.id);
   }),
 
-  tiktokDisconnect: protectedProcedure.mutation(async ({ ctx }) => {
-    await disconnectTikTok(tiktokDeps(), ctx.user.id);
-    await ctx.track("platform_disconnected", { platform: "tiktok" });
+  disconnect: protectedProcedure.input(z.object({ provider: providerSchema })).mutation(async ({ ctx, input }) => {
+    await disconnectAccount(socialDeps(input.provider), ctx.user.id);
+    await ctx.track("platform_disconnected", { platform: input.provider });
     return { disconnected: true as const };
   }),
 

@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import {
   TIKTOK_SCOPES,
   TikTokApiError,
-  TikTokConfigError,
   buildAuthorizeUrl,
   exchangeCode,
   fetchForConfig,
@@ -10,7 +9,6 @@ import {
   listVideos,
   refreshTokens,
   revokeToken,
-  tiktokConfigFromEnv,
   userFieldsForScopes,
   type TikTokConfig,
 } from "./tiktok";
@@ -47,75 +45,16 @@ const goodTokens = {
   token_type: "Bearer",
 };
 
-describe("configuration", () => {
-  const env = {
-    TIKTOK_CLIENT_KEY: "k",
-    TIKTOK_CLIENT_SECRET: "s",
-    TIKTOK_REDIRECT_URI: "https://app.example.test/auth/tiktok/callback",
-  };
-
-  it("reads the three settings", () => {
-    expect(tiktokConfigFromEnv(env)).toEqual({ clientKey: "k", clientSecret: "s", redirectUri: env.TIKTOK_REDIRECT_URI });
-  });
-
-  it("is null (not an error) when TikTok isn't set up on this server", () => {
-    expect(tiktokConfigFromEnv({})).toBeNull();
-    expect(tiktokConfigFromEnv({ ...env, TIKTOK_CLIENT_SECRET: "" })).toBeNull();
-    expect(tiktokConfigFromEnv({ ...env, TIKTOK_CLIENT_KEY: "   " })).toBeNull();
-  });
-
-  it("refuses a redirect URI TikTok would reject", () => {
-    for (const bad of [
-      "http://app.example.test/cb",
-      "https://app.example.test/cb?x=1",
-      "https://app.example.test/cb#frag",
-      "not a url",
-      "https://app.example.test/" + "x".repeat(520),
-    ]) {
-      expect(() => tiktokConfigFromEnv({ ...env, TIKTOK_REDIRECT_URI: bad }), bad.slice(0, 40)).toThrow(TikTokConfigError);
-    }
-  });
-});
-
 describe("the local stand-in for TikTok (testing on one machine)", () => {
-  const env = {
-    TIKTOK_CLIENT_KEY: "k",
-    TIKTOK_CLIENT_SECRET: "s",
-    TIKTOK_REDIRECT_URI: "http://localhost:8081/auth/tiktok/callback",
-    TIKTOK_MOCK_ORIGIN: "http://127.0.0.1:4010",
-  };
-
-  it("lets the redirect be http://localhost, but only together with the stand-in", () => {
-    expect(tiktokConfigFromEnv(env)).toMatchObject({ mockOrigin: "http://127.0.0.1:4010", redirectUri: env.TIKTOK_REDIRECT_URI });
-    expect(() => tiktokConfigFromEnv({ ...env, TIKTOK_MOCK_ORIGIN: undefined })).toThrow(TikTokConfigError);
-  });
-
-  it("never lets the stand-in point anywhere but this machine", () => {
-    for (const bad of ["https://evil.example", "http://evil.example:4010", "http://10.0.0.5:4010", "https://127.0.0.1:4010", "ftp://localhost", "nope"]) {
-      expect(() => tiktokConfigFromEnv({ ...env, TIKTOK_MOCK_ORIGIN: bad }), bad).toThrow(TikTokConfigError);
-    }
-  });
-
-  it("accepts a path prefix (one stand-in server serves every platform) but nothing sneakier", () => {
-    expect(tiktokConfigFromEnv({ ...env, TIKTOK_MOCK_ORIGIN: "http://127.0.0.1:4010/tiktok/" })!.mockOrigin).toBe("http://127.0.0.1:4010/tiktok");
-    for (const bad of ["http://user:pw@127.0.0.1:4010", "http://127.0.0.1:4010/tiktok?x=1", "http://127.0.0.1:4010/#frag"]) {
-      expect(() => tiktokConfigFromEnv({ ...env, TIKTOK_MOCK_ORIGIN: bad }), bad).toThrow(TikTokConfigError);
-    }
-  });
-
-  it("still refuses a non-local http redirect, stand-in or not", () => {
-    expect(() => tiktokConfigFromEnv({ ...env, TIKTOK_REDIRECT_URI: "http://evil.example/cb" })).toThrow(TikTokConfigError);
-  });
+  const local: TikTokConfig = { ...config, redirectUri: "http://localhost:8081/auth/tiktok/callback", mockOrigin: "http://127.0.0.1:4010" };
 
   it("sends the creator to the stand-in's sign-in page instead of TikTok's", () => {
-    const local = tiktokConfigFromEnv(env)!;
     const url = new URL(buildAuthorizeUrl(local, "w.abc"));
     expect(`${url.origin}${url.pathname}`).toBe("http://127.0.0.1:4010/v2/auth/authorize/");
-    expect(url.searchParams.get("client_key")).toBe("k");
+    expect(url.searchParams.get("client_key")).toBe(config.clientKey);
   });
 
   it("redirects every API call to the stand-in, and leaves other addresses alone", async () => {
-    const local = tiktokConfigFromEnv(env)!;
     const seen: string[] = [];
     const base = (async (url: unknown) => {
       seen.push(String(url));

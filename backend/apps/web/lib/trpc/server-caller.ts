@@ -1,6 +1,7 @@
 import { appRouter } from "@poststreak/api/root";
 import { createContext } from "@poststreak/api/context";
 import { TRPCError } from "@trpc/server";
+import { isProviderId, type ProviderId } from "@poststreak/integrations";
 import { NextResponse, type NextRequest } from "next/server";
 
 // REST route handlers under app/api/v1/* are thin wrappers over the same
@@ -70,4 +71,10 @@ export async function withErrorHandling<T>(fn: () => Promise<T>): Promise<NextRe
 
     return NextResponse.json({ message }, { status });
   }
+}
+
+/** The platform named in a route address (/platforms/instagram/…), or a 404 for one PostStreak doesn't connect. */
+export function providerFromParam(id: string): ProviderId {
+  if (!isProviderId(id)) throw new TRPCError({ code: "NOT_FOUND", message: `Unknown platform '${id}'` });
+  return id;
 }

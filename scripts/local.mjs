@@ -3,8 +3,8 @@
 //
 //   database + sign-in  → a Supabase stack in Docker (migrations applied)
 //   the four test users → free/Pro × new/existing, real rows in that database
-//   stand-in providers  → TikTok and friends, on this machine, because the real ones
-//                         can only call back to an https address
+//   stand-in providers  → TikTok, Instagram, Threads, Facebook and YouTube, on this machine,
+//                         because the real ones can only call back to an https address
 //   the API             → backend/apps/web (Next.js) on :3000
 //   the app             → Expo web on :8081 (phone: see --lan)
 //
@@ -13,7 +13,10 @@
 //   --no-seed       never touch the test users
 //   --no-app        start everything except the app (run `npx expo start` yourself)
 //   --lan           make the app reachable from a phone on the same Wi-Fi
-//   --real-providers   skip the stand-ins (needs https callback addresses: use staging instead)
+//   --real-providers   skip the stand-ins: connect to the real platforms with the keys in .env.local
+//   --public-url=URL   with --real-providers: the https address that reaches this computer's app
+//                      (an ngrok or Cloudflare tunnel to port 8081): Instagram, Threads, TikTok and
+//                      Facebook only send people back to https addresses registered in their apps
 //   --stop          stop the Docker stack and exit
 //   --help
 //
@@ -39,8 +42,23 @@ const EXCLUDE = 'studio,imgproxy,vector,logflare,edge-runtime,storage-api,realti
 const PORT = { api: 3000, web: 8081, mocks: 4010 };
 
 const args = new Set(process.argv.slice(2));
+const publicUrl = process.argv.slice(2).find((a) => a.startsWith('--public-url='))?.slice('--public-url='.length).replace(/\/+$/, '');
+if (publicUrl && !args.has('--real-providers')) {
+  console.error('\n\x1b[31m✗ --public-url goes with --real-providers (the stand-ins don\u2019t need a public address).\x1b[0m\n');
+  process.exit(1);
+}
+if (publicUrl && !/^https:\/\/[^/]+$/.test(publicUrl)) {
+  console.error('\n\x1b[31m✗ --public-url must look like https://something.example (no path).\x1b[0m\n');
+  process.exit(1);
+}
 if (args.has('--help')) {
-  console.log(readFileSync(fileURLToPath(import.meta.url), 'utf8').split('\n').slice(1, 23).map((l) => l.replace(/^\/\/ ?/, '')).join('\n'));
+  // the comment block at the top of this file
+  const help = [];
+  for (const line of readFileSync(fileURLToPath(import.meta.url), 'utf8').split('\n').slice(1)) {
+    if (!line.startsWith('//')) break;
+    help.push(line.replace(/^\/\/ ?/, ''));
+  }
+  console.log(help.join('\n'));
   process.exit(0);
 }
 
@@ -175,7 +193,14 @@ const parseEnv = (file) => {
 };
 
 const env = parseEnv(envFile);
-const webOrigins = [`http://localhost:${PORT.web}`, `http://127.0.0.1:${PORT.web}`, ...(lanIp ? [`http://${lanIp}:${PORT.web}`] : [])];
+const webOrigins = [
+  `http://localhost:${PORT.web}`,
+  `http://127.0.0.1:${PORT.web}`,
+  ...(lanIp ? [`http://${lanIp}:${PORT.web}`] : []),
+  ...(publicUrl ? [publicUrl] : []),
+];
+// Where the platforms send a creator back to: <this>/auth/<platform>/callback
+const appOrigin = publicUrl ?? (lanIp ? `http://${lanIp}:${PORT.web}` : webOrigins[0]);
 const mocksHost = lanIp ?? '127.0.0.1';
 
 // Always follow the running stack (its keys change if the stack is recreated)
@@ -186,6 +211,7 @@ const managed = {
   NEXT_PUBLIC_APP_URL: `http://localhost:${PORT.api}`,
   CORS_ALLOWED_ORIGINS: webOrigins.join(','),
   DEV_LOGIN: 'true',
+  APP_WEB_URL: appOrigin,
 };
 // Generated once and then kept: sealed tokens in the database can only be opened with the same key
 const generated = {
@@ -196,15 +222,40 @@ const tokenKeyBefore = env.get('TOKEN_ENCRYPTION_KEY');
 for (const [k, v] of Object.entries(managed)) env.set(k, v);
 for (const [k, make] of Object.entries(generated)) if (!env.get(k)) env.set(k, make());
 
+// The five platforms, by the settings the API reads for each (packages/integrations/providers/index.ts)
+const PROVIDERS = [
+  { id: 'tiktok', keyVar: 'TIKTOK_CLIENT_KEY', secretVar: 'TIKTOK_CLIENT_SECRET', mockVar: 'TIKTOK_MOCK_ORIGIN', redirectVar: 'TIKTOK_REDIRECT_URI' },
+  { id: 'instagram', keyVar: 'INSTAGRAM_APP_ID', secretVar: 'INSTAGRAM_APP_SECRET', mockVar: 'INSTAGRAM_MOCK_ORIGIN', redirectVar: 'INSTAGRAM_REDIRECT_URI' },
+  { id: 'threads', keyVar: 'THREADS_APP_ID', secretVar: 'THREADS_APP_SECRET', mockVar: 'THREADS_MOCK_ORIGIN', redirectVar: 'THREADS_REDIRECT_URI' },
+  { id: 'facebook', keyVar: 'FACEBOOK_APP_ID', secretVar: 'FACEBOOK_APP_SECRET', mockVar: 'FACEBOOK_MOCK_ORIGIN', redirectVar: 'FACEBOOK_REDIRECT_URI' },
+  { id: 'youtube', keyVar: 'GOOGLE_CLIENT_ID', secretVar: 'GOOGLE_CLIENT_SECRET', mockVar: 'YOUTUBE_MOCK_ORIGIN', redirectVar: 'YOUTUBE_REDIRECT_URI' },
+];
+const STAND_IN_PREFIX = 'local-stand-in';
+
+// Settings the API process gets on top of the file: throwaway keys for platforms you haven't pasted real keys for.
+const standInEnv = {};
+
 if (!args.has('--real-providers')) {
-  // Stand-ins for the platforms, on this machine (backend/scripts/mock-providers.mjs).
-  env.set('TIKTOK_MOCK_ORIGIN', `http://${mocksHost}:${PORT.mocks}/tiktok`);
-  env.set('TIKTOK_REDIRECT_URI', `${webOrigins[0]}/auth/tiktok/callback`);
-  for (const [k, v] of Object.entries({ TIKTOK_CLIENT_KEY: 'local-stand-in-key', TIKTOK_CLIENT_SECRET: 'local-stand-in-secret' })) {
-    if (!env.get(k)) env.set(k, v);
+  // Stand-ins for the platforms, on this machine (backend/scripts/mock-providers.mjs). Real keys you
+  // pasted stay as they are (and are only ever sent to the stand-ins, on this computer); a platform
+  // without keys gets throwaway ones for this run only, and they are not written down.
+  for (const p of PROVIDERS) {
+    env.set(p.mockVar, `http://${mocksHost}:${PORT.mocks}/${p.id}`);
+    env.delete(p.redirectVar); // follows APP_WEB_URL
+    if (!env.get(p.keyVar) || String(env.get(p.keyVar)).startsWith(STAND_IN_PREFIX)) {
+      env.delete(p.keyVar);
+      env.delete(p.secretVar);
+      standInEnv[p.keyVar] = `${STAND_IN_PREFIX}-${p.id}-key`;
+      standInEnv[p.secretVar] = `${STAND_IN_PREFIX}-${p.id}-secret`;
+    }
   }
 } else {
-  env.delete('TIKTOK_MOCK_ORIGIN');
+  // The real platforms: nothing of the stand-ins stays behind, and throwaway keys from earlier runs go
+  for (const p of PROVIDERS) {
+    env.delete(p.mockVar);
+    env.delete(p.redirectVar);
+    for (const v of [p.keyVar, p.secretVar]) if (String(env.get(v) ?? '').startsWith(STAND_IN_PREFIX)) env.delete(v);
+  }
 }
 
 writeFileSync(
@@ -299,7 +350,7 @@ if (!args.has('--real-providers')) {
 }
 
 say('Starting the API');
-start('api', `node node_modules/next/dist/bin/next dev -p ${PORT.api}${lanIp ? ' -H 0.0.0.0' : ''}`, 'next', { cwd: apiDir });
+start('api', `node node_modules/next/dist/bin/next dev -p ${PORT.api}${lanIp ? ' -H 0.0.0.0' : ''}`, 'next', { cwd: apiDir, env: standInEnv });
 await waitFor(`http://localhost:${PORT.api}/api/v1/dev/login`, 'The API', 300_000);
 note(`API ready at http://localhost:${PORT.api}`);
 

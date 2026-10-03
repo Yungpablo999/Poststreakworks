@@ -1,5 +1,6 @@
 import { type NextRequest } from "next/server";
 import { TRPCError } from "@trpc/server";
+import { isProviderId } from "@poststreak/integrations";
 import { createContext } from "@poststreak/api/context";
 import { getCaller, withErrorHandling } from "@/lib/trpc/server-caller";
 
@@ -11,6 +12,13 @@ export async function POST(
 ) {
   return withErrorHandling(async () => {
     const { id } = await params;
+
+    // TikTok, Instagram, Threads, Facebook and YouTube: revokes the token and deletes what we pulled.
+    if (isProviderId(id)) {
+      const caller = await getCaller(request);
+      return caller.platformConnect.disconnect({ provider: id });
+    }
+
     const ctx = await createContext({ req: request, resHeaders: new Headers() });
     if (!ctx.user) throw new TRPCError({ code: "UNAUTHORIZED", message: "Unauthorized" });
 

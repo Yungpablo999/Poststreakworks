@@ -10,8 +10,8 @@ import { z } from "zod";
 //     only). The anti-CSRF protection is a single-use `state` bound to the
 //     signed-in user server-side — see packages/workflows/tiktok-connect.ts.
 //   - Redirect URIs must be https, static (no query string), no fragment, and
-//     registered in the TikTok app. We take ours from TIKTOK_REDIRECT_URI and
-//     never from the request.
+//     registered in the TikTok app. We take ours from our own settings
+//     (providers/index.ts: providerConfigFromEnv) and never from the request.
 //   - Access tokens last 24 h; refresh tokens 365 days.
 //   - `username` (the @handle) needs the user.info.profile scope, which is not
 //     among the three we request, so only display_name is available for now.
@@ -42,61 +42,6 @@ export type TikTokConfig = {
    */
   mockOrigin?: string;
 };
-
-export class TikTokConfigError extends Error {}
-
-const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
-
-/**
- * A `http://localhost:PORT[/prefix]` address (no trailing slash), or a TikTokConfigError. Anything
- * else could send tokens somewhere they shouldn't go.
- */
-export function assertLocalOrigin(raw: string): string {
-  let url: URL;
-  try {
-    url = new URL(raw);
-  } catch {
-    throw new TikTokConfigError("TIKTOK_MOCK_ORIGIN is not a valid URL");
-  }
-  if (url.protocol !== "http:" || !LOCAL_HOSTS.has(url.hostname)) {
-    throw new TikTokConfigError("TIKTOK_MOCK_ORIGIN must be an http://localhost address");
-  }
-  if (url.username || url.password || url.search || url.hash) {
-    throw new TikTokConfigError("TIKTOK_MOCK_ORIGIN must be a plain address");
-  }
-  return url.origin + url.pathname.replace(/\/+$/, "");
-}
-
-export function assertValidRedirectUri(uri: string, opts: { allowLocalHttp?: boolean } = {}): void {
-  let url: URL;
-  try {
-    url = new URL(uri);
-  } catch {
-    throw new TikTokConfigError("TIKTOK_REDIRECT_URI is not a valid URL");
-  }
-  const localHttp = opts.allowLocalHttp === true && url.protocol === "http:" && LOCAL_HOSTS.has(url.hostname);
-  if (url.protocol !== "https:" && !localHttp) throw new TikTokConfigError("TIKTOK_REDIRECT_URI must be https");
-  if (uri.includes("?")) throw new TikTokConfigError("TIKTOK_REDIRECT_URI must not contain query parameters");
-  if (uri.includes("#")) throw new TikTokConfigError("TIKTOK_REDIRECT_URI must not contain a fragment");
-  if (uri.length > 512) throw new TikTokConfigError("TIKTOK_REDIRECT_URI must be under 512 characters");
-}
-
-/**
- * Reads the TikTok app settings from the environment. Returns null when TikTok
- * isn't configured on this server (so the app can say so, rather than crash);
- * throws TikTokConfigError when it is configured wrongly.
- */
-export function tiktokConfigFromEnv(env: Record<string, string | undefined> = process.env): TikTokConfig | null {
-  const clientKey = env.TIKTOK_CLIENT_KEY?.trim();
-  const clientSecret = env.TIKTOK_CLIENT_SECRET?.trim();
-  const redirectUri = env.TIKTOK_REDIRECT_URI?.trim();
-  if (!clientKey || !clientSecret || !redirectUri) return null;
-  const mockRaw = env.TIKTOK_MOCK_ORIGIN?.trim();
-  const mockOrigin = mockRaw ? assertLocalOrigin(mockRaw) : undefined;
-  // A stand-in TikTok on this machine can't use https, so its redirect may be http://localhost too.
-  assertValidRedirectUri(redirectUri, { allowLocalHttp: mockOrigin !== undefined });
-  return { clientKey, clientSecret, redirectUri, ...(mockOrigin && { mockOrigin }) };
-}
 
 const REAL_API_ORIGIN = "https://open.tiktokapis.com";
 

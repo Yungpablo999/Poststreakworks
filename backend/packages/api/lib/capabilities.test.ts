@@ -28,11 +28,11 @@ describe("capabilities", () => {
   it("claims nothing a bare server can't do", () => {
     expect(capabilitiesFromEnv({})).toEqual({
       ai: false,
+      platforms: { tiktok: false, instagram: false, threads: false, facebook: false, youtube: false },
       tiktok: false,
       payments: false,
       voice: false,
       devLogin: false,
-      otherPlatforms: false,
       autoPost: false,
       audienceDemographics: false,
     });
@@ -56,9 +56,39 @@ describe("capabilities", () => {
     expect(capabilitiesFromEnv({ ...tiktok, TIKTOK_REDIRECT_URI: "http://evil.example/cb" }).tiktok).toBe(false); // misconfigured
   });
 
+  describe("connecting each platform", () => {
+    const web = { APP_WEB_URL: "https://app.example.test", TOKEN_ENCRYPTION_KEY: key };
+    const keys = {
+      instagram: { INSTAGRAM_APP_ID: "i", INSTAGRAM_APP_SECRET: "s" },
+      threads: { THREADS_APP_ID: "t", THREADS_APP_SECRET: "s" },
+      facebook: { FACEBOOK_APP_ID: "f", FACEBOOK_APP_SECRET: "s" },
+      youtube: { GOOGLE_CLIENT_ID: "g", GOOGLE_CLIENT_SECRET: "s" },
+    } as const;
+
+    it("turns on exactly the platforms whose keys are present", () => {
+      const caps = capabilitiesFromEnv({ ...web, ...keys.instagram, ...keys.youtube });
+      expect(caps.platforms).toEqual({ tiktok: false, instagram: true, threads: false, facebook: false, youtube: true });
+    });
+
+    it("needs the web address (or the platform's own redirect address) to know where the platform sends the creator back", () => {
+      const { APP_WEB_URL: _unused, ...noWeb } = web;
+      expect(capabilitiesFromEnv({ ...noWeb, ...keys.threads }).platforms.threads).toBe(false);
+      expect(capabilitiesFromEnv({ ...noWeb, ...keys.threads, THREADS_REDIRECT_URI: "https://app.example.test/auth/threads/callback" }).platforms.threads).toBe(true);
+    });
+
+    it("needs the token key, so a connection can be stored sealed", () => {
+      expect(capabilitiesFromEnv({ ...web, TOKEN_ENCRYPTION_KEY: undefined, ...keys.facebook }).platforms.facebook).toBe(false);
+      expect(capabilitiesFromEnv({ ...web, ...keys.facebook }).platforms.facebook).toBe(true);
+    });
+
+    it("keeps saying so for TikTok under the name the app on the main branch reads", () => {
+      expect(capabilitiesFromEnv(tiktok).platforms.tiktok).toBe(true);
+      expect(capabilitiesFromEnv(tiktok).tiktok).toBe(true);
+    });
+  });
+
   it("never claims the things that aren't built", () => {
     const everything = capabilitiesFromEnv({ ...tiktok, GROQ_API_KEY: "g", FISH_AUDIO_API_KEY: "f", PAYSTACK_SECRET_KEY: "p" });
-    expect(everything.otherPlatforms).toBe(false);
     expect(everything.autoPost).toBe(false);
     expect(everything.audienceDemographics).toBe(false);
   });

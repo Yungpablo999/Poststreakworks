@@ -66,7 +66,6 @@ const PLACE_NAME: Record<GhostPlace, string> = {
   growth: "Growth",
   repurpose: "Repurpose",
   "hook-studio": "Hook Studio",
-  "voice-studio": "Voice Studio",
   quests: "Quests",
   challenge: "this week’s challenge",
   "jarvis-pro": "Pro",

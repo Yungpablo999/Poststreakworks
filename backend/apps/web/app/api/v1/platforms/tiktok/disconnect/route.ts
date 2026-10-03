@@ -3,10 +3,10 @@ import { getCaller, withErrorHandling } from "@/lib/trpc/server-caller";
 
 export const runtime = "nodejs";
 
-// Disconnect TikTok: revokes the token and deletes what we pulled from TikTok.
+// The address the app on the main branch uses; /platforms/<platform>/disconnect serves every platform.
 export async function POST(request: NextRequest) {
   return withErrorHandling(async () => {
     const caller = await getCaller(request);
-    return caller.platformConnect.tiktokDisconnect();
+    return caller.platformConnect.disconnect({ provider: "tiktok" });
   });
 }
