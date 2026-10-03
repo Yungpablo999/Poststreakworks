@@ -36,3 +36,21 @@ export { audienceSummary, getBrief, getHomeSummary } from "./home";
 export type { AudienceSummary, Brief, BriefStep, HomeSummary, NextPost } from "./home";
 export { ensureEverydayNotes, refreshEverydayNotes, viewsMilestone } from "./everyday-notes";
 export { countPosts, personaFor } from "./persona";
+export {
+  MAX_OPEN_POSTS,
+  POST_FORMATS,
+  POST_PLATFORMS,
+  PostError,
+  cleanPostUrl,
+  createPost,
+  deletePost,
+  getPost,
+  listReadyPosts,
+  markPosted,
+  planUpdate,
+  releaseDuePosts,
+  toPost,
+  updatePost,
+  validateNewPost,
+} from "./posts";
+export type { MarkPostedResult, NewPostInput, Post, PostFormat, PostPatch, PostPlatform, PostRow, PostState, PostStep, PostStepState } from "./posts";

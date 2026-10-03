@@ -461,6 +461,73 @@ export interface NotificationFeed {
   unread: number;
 }
 
+// ─── Posts ──────────────────────────────────────────────────────────────────
+// PostStreak doesn't publish to TikTok, Instagram, YouTube, Threads or Facebook for the creator.
+// A post is planned for a time, becomes "ready" at that time (the bell tells them), and is
+// "posted" when the creator says they posted it, one platform at a time.
+
+export type PostState = 'draft' | 'scheduled' | 'ready' | 'posted' | 'failed';
+export type PostStepState = 'waiting' | 'ready' | 'posted' | 'failed';
+export type PostFormat = 'short_video' | 'carousel' | 'image' | 'text' | 'long_video';
+
+/** One platform of a post. */
+export interface PostStep {
+  platform: AppPlatform;
+  state: PostStepState;
+  /** The link to the live post, when the creator gave one or a sync found it. */
+  url?: string;
+  /** ISO time the creator said they posted it. */
+  postedAt?: string;
+}
+
+export interface Post {
+  id: string;
+  caption: string;
+  tags: string[];
+  format: PostFormat | null;
+  /** ISO time it is (or was) due. */
+  at: string;
+  state: PostState;
+  platforms: PostStep[];
+  postedAt: string | null;
+  error: string | null;
+  createdAt: string;
+}
+
+/** POST /api/v1/posts */
+export interface NewPostBody {
+  caption: string;
+  tags?: string[];
+  platforms: AppPlatform[];
+  format?: PostFormat | null;
+  /** "now": ready this moment. "schedule": at `at`. */
+  when: 'now' | 'schedule';
+  /** ISO time, in the future, within a year. */
+  at?: string;
+  /** The draft this post came from; the server removes it. */
+  fromDraft?: string;
+}
+
+/** PATCH /api/v1/posts/{id}: only what changes. A new `at` makes a ready post wait for it. */
+export interface PostPatchBody {
+  caption?: string;
+  tags?: string[];
+  platforms?: AppPlatform[];
+  format?: PostFormat | null;
+  at?: string;
+}
+
+/** The creator's streak after a post, as the server counted it. */
+export type PostStreak =
+  | { qualified: false; reason: 'already_qualified_today' | 'error' }
+  | { qualified: true; newStreak: number; longestStreak: number; isMilestone: boolean };
+
+/** POST /api/v1/posts/{id}/posted. `streak` is null when that platform was already marked. */
+export interface MarkPostedResult {
+  post: Post;
+  streak: PostStreak | null;
+}
+
 // ─── Quests ─────────────────────────────────────────────────────────────────
 
 /** Where tapping a quest takes the creator. */

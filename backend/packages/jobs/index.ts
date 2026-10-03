@@ -4,8 +4,9 @@ import {
   refreshLinkedInToken,
   PlatformAuthError,
   groqChat,
+  isProviderId,
 } from "@poststreak/integrations";
-import { recordStreakEvent } from "@poststreak/workflows";
+import { recordStreakEvent, releaseDuePosts } from "@poststreak/workflows";
 
 // NEXT_PUBLIC_SUPABASE_URL, not SUPABASE_URL — matches .env.example and
 // every other server-side client in this codebase (context.ts, integrations).
@@ -41,6 +42,10 @@ async function dispatchToPlatform(
   platform: string,
   content: string,
 ): Promise<PlatformResult> {
+  // TikTok, Instagram, YouTube, Threads and Facebook posts are never posted by the server: the
+  // creator posts them and says so (workflows/posts.ts). They need no connection to be planned.
+  if (isProviderId(platform)) return { status: "pending_confirmation" };
+
   const { data: connection } = await supabase
     .from("platform_connections")
     .select("publish_mode, access_token, refresh_token, token_expires_at")
@@ -101,6 +106,11 @@ async function dispatchToPlatform(
 }
 
 export async function dispatchScheduledPosts() {
+  // Posts for TikTok, Instagram, YouTube, Threads and Facebook become "ready to post" and their
+  // creators are told (one atomic database function). What is left below is the older platforms,
+  // which the server can post to.
+  const released = await releaseDuePosts(supabase);
+
   const now = new Date().toISOString();
   // Stale lock threshold: 5 minutes — releases locks left by a crashed/killed
   // cron invocation so posts don't get stuck unclaimed forever.
@@ -124,9 +134,9 @@ export async function dispatchScheduledPosts() {
     .limit(50);
 
   if (error) throw error;
-  if (!duePosts?.length) return { processed: 0, failed: 0 };
+  if (!duePosts?.length) return { processed: released, failed: 0 };
 
-  let processed = 0;
+  let processed = released;
   let failed = 0;
 
   for (const post of duePosts) {
@@ -191,7 +201,7 @@ export async function dispatchScheduledPosts() {
     }
   }
 
-  console.log(`Cron dispatch: processed=${processed} failed=${failed}`);
+  console.log(`Cron dispatch: processed=${processed} (ready to post: ${released}) failed=${failed}`);
   return { processed, failed };
 }
 

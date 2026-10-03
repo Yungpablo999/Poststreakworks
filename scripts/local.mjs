@@ -354,6 +354,15 @@ start('api', `node node_modules/next/dist/bin/next dev -p ${PORT.api}${lanIp ? '
 await waitFor(`http://localhost:${PORT.api}/api/v1/dev/login`, 'The API', 300_000);
 note(`API ready at http://localhost:${PORT.api}`);
 
+// On Vercel the cron wakes every 15 minutes. Here it is poked every 30 seconds, so a post planned a minute
+// ahead can be tried without waiting (it becomes "ready to post" and the bell gets its note).
+const cronUrl = `http://localhost:${PORT.api}/api/cron/dispatch`;
+setInterval(() => {
+  fetch(cronUrl, { headers: { Authorization: `Bearer ${env.get('CRON_SECRET')}` } }).catch(() => {
+    // the API is restarting; the next poke will do
+  });
+}, 30_000);
+
 // ─── The app ─────────────────────────────────────────────────────────────────
 
 const appHost = lanIp ?? 'localhost';
@@ -387,6 +396,7 @@ console.log(`
   Stand-ins      http://${mocksHost}:${PORT.mocks}   (TikTok and the other platforms, for connecting accounts)
 
   Test accounts  Free · New    Free · Existing    Pro · New    Pro · Existing
+  Planned posts  become "ready to post" within 30 seconds of their time here (every 15 minutes on Vercel)
   Stop           Ctrl+C (the database keeps running; npm run local -- --stop stops it)
 ${lanIp ? `\n  Phone          open the app's dev build and enter http://${lanIp}:${PORT.web} (see backend/STAGING_RUNBOOK.md → Phone testing)\n` : ''}`);
 

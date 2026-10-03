@@ -347,7 +347,8 @@ describe("profile and onboarding state", () => {
 
   it("accepts the platforms the app connects", async () => {
     const id = await createUser(db);
-    await asUser(db, id, () =>
+    // The server writes posts (migration …25); a creator can only read them
+    await asService(db, () =>
       db.query(
         `insert into scheduled_posts (user_id, content, target_platforms, scheduled_at, status)
          values ($1, 'hello', '{instagram,threads,youtube,facebook}', now() + interval '1 day', 'scheduled')`,

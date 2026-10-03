@@ -117,11 +117,10 @@ export const API_ROUTES = {
     RATE_CARD: '/api/v1/jarvis/rate-card',
     CHAT: '/api/v1/jarvis/chat', // "Ask Jarvis" — see frontend/shared/types/phase1.ts
   },
-  // Scheduling & Calendar
-  SCHEDULE: {
-    POSTS: '/api/v1/schedule/posts', // GET ?from=&to=&status=&limit=&offset=
-    CREATE_POST: '/api/v1/schedule/posts',
-    UPDATE_POST: (id: string) => `/api/v1/schedule/posts/${id}`,
-    DELETE_POST: (id: string) => `/api/v1/schedule/posts/${id}`,
+  // A creator's posts: planned, ready, posted. Creators can't write them any other way.
+  POSTS: {
+    LIST: '/api/v1/posts', // GET ?state=ready -> { posts: Post[] } · POST NewPostBody -> Post
+    ITEM: (id: string) => `/api/v1/posts/${id}`, // GET -> Post · PATCH PostPatchBody -> Post · DELETE -> { removed: true }
+    POSTED: (id: string) => `/api/v1/posts/${id}/posted`, // POST { platform, url? } -> MarkPostedResult ("I posted it")
   },
 } as const;
