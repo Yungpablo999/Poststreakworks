@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { capabilitiesFromEnv, devLoginEnabled, usesLocalSupabase } from "./capabilities";
 
 const local = { NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:54321" };
@@ -28,6 +28,7 @@ describe("capabilities", () => {
   it("claims nothing a bare server can't do", () => {
     expect(capabilitiesFromEnv({})).toEqual({
       ai: false,
+      aiStandIn: false,
       platforms: { tiktok: false, instagram: false, threads: false, facebook: false, youtube: false },
       tiktok: false,
       payments: false,
@@ -46,6 +47,27 @@ describe("capabilities", () => {
     expect(capabilitiesFromEnv({ STRIPE_SECRET_KEY: "s" }).payments).toBe(false); // can't verify its webhooks
     expect(capabilitiesFromEnv({ PAYSTACK_SECRET_KEY: "p" }).payments).toBe(true);
     expect(capabilitiesFromEnv({ GROQ_API_KEY: "  " }).ai).toBe(false);
+  });
+
+  describe("the writing tools", () => {
+    it("are live with a real key, and say they are not a stand-in", () => {
+      expect(capabilitiesFromEnv({ GROQ_API_KEY: "g" })).toMatchObject({ ai: true, aiStandIn: false });
+    });
+
+    it("can run on a stand-in model on this machine, and the app is told so", () => {
+      expect(capabilitiesFromEnv({ AI_MOCK_ORIGIN: "http://127.0.0.1:4010/ai" })).toMatchObject({ ai: true, aiStandIn: true });
+      // (a real key set as well doesn't change that: the stand-in is what is asked)
+      expect(capabilitiesFromEnv({ AI_MOCK_ORIGIN: "http://localhost:4010/ai", GROQ_API_KEY: "g" })).toMatchObject({ ai: true, aiStandIn: true });
+    });
+
+    it("never accept a stand-in that is not on this machine: creators' text would be sent to someone else's server", () => {
+      const spy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+      for (const origin of ["https://api.evil.example/ai", "http://evil.example/ai", "http://8.8.8.8/ai", "not a url"]) {
+        expect(capabilitiesFromEnv({ AI_MOCK_ORIGIN: origin })).toMatchObject({ ai: false, aiStandIn: false });
+        expect(capabilitiesFromEnv({ AI_MOCK_ORIGIN: origin, GROQ_API_KEY: "g" })).toMatchObject({ ai: true, aiStandIn: false });
+      }
+      spy.mockRestore();
+    });
   });
 
   it("needs both the TikTok app settings and a valid token key for TikTok", () => {

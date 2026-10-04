@@ -10,7 +10,7 @@ import { analyticsRouter } from "./routers/analytics";
 import { missionsRouter } from "./routers/missions";
 import { duelsRouter } from "./routers/duels";
 import { adminRouter } from "./routers/admin";
-import { contentStudioRouter } from "./routers/content-studio";
+import { studioRouter } from "./routers/studio";
 import { referralsRouter } from "./routers/referrals";
 import { autopilotRouter } from "./routers/autopilot";
 import { agentRouter } from "./routers/agent";
@@ -41,7 +41,8 @@ export const appRouter = createTRPCRouter({
   missions: missionsRouter,
   duels: duelsRouter,
   admin: adminRouter,
-  contentStudio: contentStudioRouter,
+  // The writing tools: script, hooks, captions — see routers/studio.ts
+  studio: studioRouter,
   // Carried-over v1 domains — see supabase/migrations/20260814000013
   referrals: referralsRouter,
   autopilot: autopilotRouter,

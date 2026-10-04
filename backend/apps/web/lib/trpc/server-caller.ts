@@ -3,6 +3,7 @@ import { createContext } from "@poststreak/api/context";
 import { TRPCError } from "@trpc/server";
 import { isProviderId, type ProviderId } from "@poststreak/integrations";
 import { NextResponse, type NextRequest } from "next/server";
+import { ZodError } from "zod";
 
 // REST route handlers under app/api/v1/* are thin wrappers over the same
 // tRPC routers used internally — this builds a server-side caller so those
@@ -55,16 +56,24 @@ export async function withErrorHandling<T>(fn: () => Promise<T>): Promise<NextRe
       code === "BAD_REQUEST" ? 400 :
       500;
 
-    const message = err instanceof Error ? err.message : "Request failed";
+    // A request that doesn't fit the procedure's input is the client's mistake (400). tRPC's own message for it
+    // is a dump of every zod issue; the first issue, in the words the procedure gave it, is what a person can read.
+    const cause = (err as { cause?: unknown })?.cause;
+    const message =
+      cause instanceof ZodError
+        ? (cause.issues[0]?.message ?? "That doesn't look right.")
+        : err instanceof Error
+          ? err.message
+          : "Request failed";
 
     // requirePro() (context.ts) carries an upsell payload on TRPCError.cause —
     // surface it so a 403 from a Pro-gated route matches
     // architecture/SUBSCRIPTION_AND_DUAL_TIER_ROUTING.md §3.B's exact shape
     // instead of just a bare message.
-    const cause = (err as { cause?: { upgradeRequired?: boolean; upsell?: unknown } })?.cause;
-    if (cause?.upgradeRequired) {
+    const upsell = (err as { cause?: { upgradeRequired?: boolean; upsell?: unknown } })?.cause;
+    if (upsell?.upgradeRequired) {
       return NextResponse.json(
-        { message, code: "UPGRADE_REQUIRED", upsell: cause.upsell },
+        { message, code: "UPGRADE_REQUIRED", upsell: upsell.upsell },
         { status },
       );
     }

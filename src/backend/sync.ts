@@ -7,7 +7,6 @@ import type {
   CheckInSummary,
   ConnectedAccount,
   JarvisChatReply,
-  SpendRepurposeResult,
   ToggleHookResult,
 } from '../../frontend/shared/types/phase1';
 import {
@@ -336,14 +335,6 @@ function writeThrough() {
         } else {
           await saveFailed();
         }
-      });
-    },
-    repurposeSpent: () => {
-      if (!backendReady()) return;
-      void enqueue(async () => {
-        const res = await api.post<SpendRepurposeResult>(API_ROUTES.REPURPOSE.SPEND);
-        if (res.ok) hydrateRepurpose({ usedThisWeek: res.data.usedThisWeek, weeklyLimit: res.data.weeklyLimit }); // the server enforces the limit
-        else await saveFailed();
       });
     },
   });

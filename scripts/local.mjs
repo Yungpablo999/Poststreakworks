@@ -258,6 +258,13 @@ if (!args.has('--real-providers')) {
   }
 }
 
+// The model behind Jarvis (scripts, captions, hooks, Repurpose, chat). A real key you pasted is used as it is.
+// Without one, a stand-in on this machine answers (placeholder text tagged "[stand-in]", and the app says so),
+// so every tool can be walked through; it is never used once a real key is there, or with --real-providers.
+const hasKey = ['GROQ_API_KEY', 'GEMINI_API_KEY'].some((v) => String(env.get(v) ?? '').trim() !== '');
+if (!args.has('--real-providers') && !hasKey) env.set('AI_MOCK_ORIGIN', `http://${mocksHost}:${PORT.mocks}/ai`);
+else env.delete('AI_MOCK_ORIGIN');
+
 writeFileSync(
   envFile,
   [

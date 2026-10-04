@@ -1,7 +1,6 @@
 // The PostStreak idea library: hand-written post ideas for each topic, and the templates that turn a
 // creator's own topic into ideas for the goal they picked. It needs no AI and no keys, so a creator
-// always has something real to start from; when an AI key is set, Jarvis writes fresh ideas on top
-// (content-studio.ts) and these remain the fallback.
+// always has something real to start from, whether or not Jarvis (the writing tools in studio.ts) is on.
 //
 // Pure functions: the same inputs give the same ideas, so they are tested without a database.
 

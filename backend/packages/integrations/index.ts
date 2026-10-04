@@ -1,4 +1,5 @@
-export { groqChat, groqChatStream } from "./groq";
+export { aiMode, groqChat, groqChatStream } from "./groq";
+export type { AiMode } from "./groq";
 export { fishAudioPreview, fishAudioFullRender } from "./fish-audio";
 export { postToLinkedIn, refreshLinkedInToken, PlatformAuthError } from "./linkedin";
 export { postToX, postXThread, refreshXToken } from "./x";

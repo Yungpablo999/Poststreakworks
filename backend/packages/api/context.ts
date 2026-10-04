@@ -262,6 +262,10 @@ export const TIER_LIMITS = {
   free: {
     maxConnectedPlatforms: 2,
     aiGenerationsPerDay: 3,
+    // Small changes to something already written (rewrite one part of a script, shorten a caption,
+    // suggest tags) are counted apart from new writing, so tidying a script doesn't use up the day.
+    // A PLACEHOLDER like jarvisChatPerDay until product sets the real number.
+    aiEditsPerDay: 10,
     passportBoostPct: 0,
     repurposesPerWeek: 1 as number | null,
     jarvisChatPerDay: 30,
@@ -269,6 +273,7 @@ export const TIER_LIMITS = {
   pro: {
     maxConnectedPlatforms: Infinity,
     aiGenerationsPerDay: Infinity,
+    aiEditsPerDay: Infinity,
     passportBoostPct: 15,
     repurposesPerWeek: null as number | null,
     jarvisChatPerDay: 300,
@@ -276,6 +281,7 @@ export const TIER_LIMITS = {
   founding: {
     maxConnectedPlatforms: Infinity,
     aiGenerationsPerDay: Infinity,
+    aiEditsPerDay: Infinity,
     passportBoostPct: 15,
     repurposesPerWeek: null as number | null,
     jarvisChatPerDay: 300,

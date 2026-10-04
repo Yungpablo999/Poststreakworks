@@ -27,7 +27,6 @@ export interface DataBackend {
   /** `nowSaved` is the new state: false = the hook was just removed. */
   hookToggled?: (hook: SavedHook, nowSaved: boolean) => void;
   checkedIn?: () => void;
-  repurposeSpent?: () => void;
 }
 
 let dataBackend: DataBackend | null = null;
@@ -123,7 +122,6 @@ export function spendRepurpose(): boolean {
   repurpose = { ...repurpose, usedThisWeek: repurpose.usedThisWeek + 1 };
   repurposeListeners.forEach((l) => l());
   react('repurposed');
-  dataBackend?.repurposeSpent?.();
   return true;
 }
 

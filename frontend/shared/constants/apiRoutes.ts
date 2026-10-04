@@ -41,8 +41,8 @@ export const API_ROUTES = {
   },
   // Weekly Repurpose allowance
   REPURPOSE: {
-    ALLOWANCE: '/api/v1/repurpose',
-    SPEND: '/api/v1/repurpose/spend',
+    ALLOWANCE: '/api/v1/repurpose', // GET -> { usedThisWeek, weeklyLimit }
+    GENERATE: '/api/v1/repurpose/generate', // POST RepurposeBody -> RepurposeResult (uses one of the week's repurposes)
   },
   // Event tracking (recorded as "client.<eventName>")
   ANALYTICS: {
@@ -108,14 +108,20 @@ export const API_ROUTES = {
     CONVERSATIONS: '/api/v1/messages/conversations',
     SEND_MESSAGE: '/api/v1/messages/send',
   },
-  // Jarvis AI Content Engine
+  // Jarvis: the chat, and the rate card
   JARVIS: {
-    GENERATE_IDEAS: '/api/v1/jarvis/ideas',
-    GENERATE_SCRIPT: '/api/v1/jarvis/script',
-    GENERATE_CAPTION: '/api/v1/jarvis/caption',
-    OPTIMIZE_HOOK: '/api/v1/jarvis/optimize-hook',
     RATE_CARD: '/api/v1/jarvis/rate-card',
     CHAT: '/api/v1/jarvis/chat', // "Ask Jarvis" — see frontend/shared/types/phase1.ts
+  },
+  // The writing tools. Hidden in the app when capabilities.ai is false. Each reply says how much of the
+  // day's allowance is used (`usage`); a free plan over its limit gets a 429 with code UPGRADE_REQUIRED.
+  STUDIO: {
+    USAGE: '/api/v1/studio/usage', // GET -> StudioUsage
+    SCRIPT: '/api/v1/studio/script', // POST ScriptBody -> ScriptResult
+    SCRIPT_PART: '/api/v1/studio/script/part', // POST ScriptPartBody -> ScriptPartResult
+    HOOKS: '/api/v1/studio/hooks', // POST HooksBody -> HooksResult (Pro)
+    CAPTIONS: '/api/v1/studio/captions', // POST CaptionsBody -> CaptionsResult
+    CAPTION_EDIT: '/api/v1/studio/captions/edit', // POST CaptionEditBody -> CaptionEditResult
   },
   // A creator's posts: planned, ready, posted. Creators can't write them any other way.
   POSTS: {

@@ -304,8 +304,10 @@ export interface BootstrapProfile {
  * itself once the server is set up for it.
  */
 export interface Capabilities {
-  /** Ideas, hooks, scripts, captions, Repurpose and Ask Jarvis are written by a real model. */
+  /** Scripts, hooks, captions, Repurpose and Ask Jarvis are written by a model. Hidden when false. */
   ai: boolean;
+  /** Local testing only: the model is a stand-in on this machine whose words are placeholders. The app says so. */
+  aiStandIn: boolean;
   /** Which platforms can really be connected here. The app lists only these. */
   platforms: Record<ConnectablePlatform, boolean>;
   /** Same as `platforms.tiktok` (the app on the main branch reads this name). */
@@ -459,6 +461,121 @@ export interface NotificationItem {
 export interface NotificationFeed {
   items: NotificationItem[];
   unread: number;
+}
+
+// ─── The writing tools ──────────────────────────────────────────────────────
+// Scripts, hooks, captions and Repurpose, written by Jarvis. What a creator may have each day (or week,
+// for Repurpose) is counted by the server, and shown back as `usage`.
+
+/** limit is null when the plan has none (Pro). */
+export interface AiUsage {
+  used: number;
+  limit: number | null;
+}
+
+/** GET /api/v1/studio/usage: new writing, and small changes to writing that exists, used today. */
+export interface StudioUsage {
+  generate: AiUsage;
+  edit: AiUsage;
+}
+
+export type FilmStyle = 'talking' | 'dance' | 'skit' | 'text';
+export type ScriptPartKey = 'hook' | 'story' | 'lesson' | 'cta';
+export type HookAngle = 'question' | 'mistake' | 'story' | 'bold' | 'result';
+export type CaptionTone = 'Helpful' | 'Honest' | 'Motivational' | 'Funny' | 'Professional';
+export type CaptionGoal = 'followers' | 'saves' | 'comments' | 'often';
+export type CaptionEditAction = 'rewrite' | 'shorten' | 'ask' | 'tags';
+
+export interface ScriptParts {
+  hook: string;
+  story: string;
+  lesson: string;
+  cta: string;
+}
+export interface ScriptBody {
+  idea: string;
+  /** Seconds. */
+  length?: 15 | 30 | 60;
+  style?: FilmStyle;
+}
+export interface ScriptResult {
+  script: ScriptParts;
+  usage: AiUsage;
+}
+export interface ScriptPartBody {
+  idea: string;
+  part: ScriptPartKey;
+  script: ScriptParts;
+  length?: 15 | 30 | 60;
+  style?: FilmStyle;
+  direction?: 'different' | 'shorter' | 'punchier';
+}
+export interface ScriptPartResult {
+  text: string;
+  usage: AiUsage;
+}
+
+export interface HooksBody {
+  idea: string;
+  style?: FilmStyle;
+  angle?: HookAngle;
+  /** Lines already shown, so another round gives new ones (at most 9). */
+  avoid?: string[];
+}
+export interface HooksResult {
+  hooks: string[];
+  usage: AiUsage;
+}
+
+export interface CaptionsBody {
+  topic: string;
+  goal?: CaptionGoal;
+  tones?: CaptionTone[];
+  platform?: AppPlatform;
+  /** Openings already shown, so another round gives new ones (at most 9). */
+  avoid?: string[];
+}
+export interface CaptionOptionDto {
+  id: string;
+  /** Two or three words naming its angle. */
+  label: string;
+  /** The whole caption, ready to post. */
+  caption: string;
+  hashtags: string[];
+}
+export interface CaptionsResult {
+  options: CaptionOptionDto[];
+  usage: AiUsage;
+}
+
+export interface CaptionEditBody {
+  caption: string;
+  action: CaptionEditAction;
+  platform?: AppPlatform;
+  idea?: string;
+}
+export type CaptionEditResult = ({ caption: string } | { tags: string[] }) & { usage: AiUsage };
+
+export type RepurposePrefer = 'video' | 'carousel' | 'text';
+export interface RepurposeBody {
+  text: string;
+  platforms: AppPlatform[];
+  prefer?: RepurposePrefer;
+}
+export interface RepurposeVersionDto {
+  platform: AppPlatform;
+  format: string;
+  /** e.g. "Photo carousel". */
+  formatLabel: string;
+  title: string;
+  body: string;
+  slides?: string[];
+  posts?: string[];
+}
+export interface RepurposeResult {
+  versions: RepurposeVersionDto[];
+  usedThisWeek: number;
+  weeklyLimit: number | null;
 }
 
 // ─── Posts ──────────────────────────────────────────────────────────────────

@@ -1,11 +1,11 @@
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../context";
+import { createTRPCRouter, protectedProcedure, publicProcedure, requirePro } from "../context";
 import { TRPCError } from "@trpc/server";
 import { IDEA_GOALS, ideaFeed, normalizeNiches, starterIdeas, topicIdeas } from "@poststreak/ai/idea-library";
 
-// Post ideas from the PostStreak idea library (packages/ai/idea-library.ts): real, hand-written
-// ideas for each topic, needing no AI. When an AI key is set, Jarvis writes fresh ones on top
-// (content-studio) and this stays the starting point and the fallback.
+// Post ideas from the PostStreak idea library (packages/ai/idea-library.ts): hand-written ideas for
+// each topic, and the templates that turn a topic into ideas for a goal. They need no AI, so a creator
+// always has something real to start from.
 
 const goal = z.enum(IDEA_GOALS as [string, ...string[]]);
 type Goal = (typeof IDEA_GOALS)[number];
@@ -28,8 +28,11 @@ export const ideasRouter = createTRPCRouter({
     return { source: "library" as const, ideas: ideaFeed(niches, input.goal as Goal, platforms) };
   }),
 
-  /** Three ideas about a topic the creator typed. `round` moves on to the next three. */
+  /** Three ideas about a topic the creator typed (a Pro tool). `round` moves on to the next three. */
   topic: protectedProcedure
     .input(z.object({ topic: z.string().trim().min(1).max(200), goal: goal.default("followers"), format: z.string().max(60).optional(), round: z.number().int().min(0).max(50).default(0) }))
-    .query(({ input }) => ({ source: "library" as const, ideas: topicIdeas(input.topic, input.goal as Goal, input.format, input.round) })),
+    .query(({ ctx, input }) => {
+      requirePro(ctx.user, ["Ideas about your own topic"]);
+      return { source: "library" as const, ideas: topicIdeas(input.topic, input.goal as Goal, input.format, input.round) };
+    }),
 });

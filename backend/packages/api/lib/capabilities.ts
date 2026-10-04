@@ -1,4 +1,4 @@
-import { PROVIDER_IDS, type ProviderId } from "@poststreak/integrations";
+import { PROVIDER_IDS, aiMode, type ProviderId } from "@poststreak/integrations";
 import { providerSetup } from "./provider-setup";
 
 // What this server can really do, decided by what it has been given (keys,
@@ -7,8 +7,10 @@ import { providerSetup } from "./provider-setup";
 // with sample data, and it appears by itself once the keys are set.
 
 export type Capabilities = {
-  /** Ideas, hooks, scripts, captions, Repurpose and Ask Jarvis are written by a real model. */
+  /** Scripts, hooks, captions, Repurpose and Ask Jarvis are written by a model. Hidden in the app when false. */
   ai: boolean;
+  /** Local testing only: the model is a stand-in on this machine whose words are placeholders, and the app says so. */
+  aiStandIn: boolean;
   /** Which platforms can really be connected here (their app keys, redirect address and the token key are present and valid). */
   platforms: Record<ProviderId, boolean>;
   /** Same as platforms.tiktok. Kept for the app on the main branch, which asks for it by this name. */
@@ -51,7 +53,8 @@ export function devLoginEnabled(env: Env = process.env): boolean {
 export function capabilitiesFromEnv(env: Env = process.env): Capabilities {
   const platforms = Object.fromEntries(PROVIDER_IDS.map((id) => [id, providerSetup(id, env) !== null])) as Record<ProviderId, boolean>;
   return {
-    ai: Boolean(env.GROQ_API_KEY?.trim() || env.GEMINI_API_KEY?.trim()),
+    ai: aiMode(env) !== "off",
+    aiStandIn: aiMode(env) === "stand-in",
     platforms,
     tiktok: platforms.tiktok,
     payments: Boolean(
