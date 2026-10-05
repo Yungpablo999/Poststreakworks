@@ -12,7 +12,7 @@ Branch `live/real-backend` (local, cut from `master`; not pushed yet) runs the w
 backend: five platform connections, Growth from synced stats, posts planned → ready → posted by the server, the writing tools
 counted and checked on the server, and **Pro bought at Stripe** (granted only by its signed webhook, cancelled at Stripe, over
 when the paid month is: migration `…27`). Everything the server can't do is hidden, not faked. `npm run local` starts it all
-on one machine with stand-ins for the platforms, Stripe and the model. **Read `LIVE_PLAN.md` first** (status log, hand-over,
+on one machine with stand-ins for the platforms, Stripe and the model. **Read `NEXT_SESSION.md`, then `LIVE_PLAN.md`** (status log, hand-over,
 what only the owner can switch on) and `backend/STAGING_RUNBOOK.md` (settings, payments, migrations `…19`–`…27` for prod).
 
 ### Direction update (2026-10-02) — read before anything else in this file
