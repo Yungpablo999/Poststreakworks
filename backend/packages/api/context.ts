@@ -299,7 +299,8 @@ export function requirePro(user: User, features: string[]): void {
   if (user.tier !== "free") return;
   throw new TRPCError({
     code: "FORBIDDEN",
-    message: "Pro subscription required to access this feature.",
+    // Shown to the creator as it is: name the tool ("Hook Studio is part of Pro.")
+    message: features[0] ? `${(features[0].split(":")[0] ?? features[0]).trim()} is part of Pro.` : "This is part of Pro.",
     cause: {
       upgradeRequired: true,
       upsell: {

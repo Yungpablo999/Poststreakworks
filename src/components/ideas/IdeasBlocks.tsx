@@ -17,7 +17,7 @@ import { PressableCard } from '../ui/PressableCard';
 import { JarvisOrb } from '../JarvisOrb';
 import { ds, goldTokens } from '../../theme/colors';
 import { TextInput } from '../ui/AppText';
-import type { FeedIdea } from '../../data';
+import type { FeedIdea } from '../../../frontend/shared/types/phase1';
 
 // Building blocks for the Ideas page. Calm motion (eased, no bounce), no
 // streak language, gold only for the Pro upgrade line.
@@ -98,16 +98,15 @@ export function SaveButton({ saved, onPress, size = 40 }: { saved: boolean; onPr
 // ─── Top pick ───────────────────────────────────────────────────────────────
 export function TopPickCard({
   idea,
-  thinking,
   saved,
   onAnother,
   onUse,
   onSave,
 }: {
   idea: FeedIdea;
-  thinking: boolean;
   saved: boolean;
-  onAnother: () => void;
+  /** Absent when there is no other idea to show. */
+  onAnother?: () => void;
   onUse: () => void;
   onSave: () => void;
 }) {
@@ -118,6 +117,7 @@ export function TopPickCard({
       <View style={styles.topRow}>
         <JarvisOrb size={26} />
         <Text style={styles.eyebrow} numberOfLines={1}>TOP PICK</Text>
+        {onAnother && (
         <Pressable
           onPress={() => {
             tick();
@@ -136,15 +136,10 @@ export function TopPickCard({
           </Animated.View>
           <Text style={styles.anotherText}>Another</Text>
         </Pressable>
+        )}
       </View>
 
-      {thinking ? (
-        <Animated.View entering={FadeIn.duration(120)} style={styles.thinking}>
-          <ActivityIndicator color={ds.purple} />
-          <Text style={styles.thinkingText}>Jarvis is picking…</Text>
-        </Animated.View>
-      ) : (
-        <Animated.View key={idea.id} entering={FadeInUp.duration(320)} style={styles.pickBody}>
+      <Animated.View key={idea.id} entering={FadeInUp.duration(320)} style={styles.pickBody}>
           <Text style={styles.pickTitle}>“{idea.title}”</Text>
           <Text style={styles.pickHook}>{idea.hook}</Text>
           <View style={styles.why}>
@@ -155,12 +150,8 @@ export function TopPickCard({
             <View style={styles.metaChip}>
               <Text style={styles.metaText}>{idea.format}</Text>
             </View>
-            <View style={styles.metaChip}>
-              <Text style={styles.metaText}>Best at {idea.bestTime}</Text>
-            </View>
           </View>
         </Animated.View>
-      )}
 
       <View style={styles.pickActions}>
         <View style={styles.flex}>
@@ -168,7 +159,6 @@ export function TopPickCard({
             title="Use this idea"
             size="lg"
             onPress={onUse}
-            disabled={thinking}
             iconRight={
               <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
                 <Path d="M5 12h14M13 6l6 6-6 6" stroke="#FFFFFF" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
@@ -184,25 +174,32 @@ export function TopPickCard({
 
 // ─── Idea row ───────────────────────────────────────────────────────────────
 export function IdeaRow({ idea, saved, onUse, onSave }: { idea: FeedIdea; saved: boolean; onUse: () => void; onSave: () => void }) {
+  // The save button sits over the card rather than inside it: a button can't hold another button on the web
   return (
-    <PressableCard onPress={onUse} accessibilityLabel={`${idea.title}. ${idea.format}. Use this idea`}>
-      {(hover) => <IdeaRowInner idea={idea} saved={saved} onSave={onSave} hover={hover} />}
-    </PressableCard>
+    <View>
+      <PressableCard onPress={onUse} accessibilityLabel={`${idea.title}. ${idea.format}. Use this idea`}>
+        {(hover) => <IdeaRowInner idea={idea} hover={hover} />}
+      </PressableCard>
+      <View style={styles.saveTopRight}>
+        <SaveButton saved={saved} onPress={onSave} />
+      </View>
+    </View>
   );
 }
 
-function IdeaRowInner({ idea, saved, onSave, hover }: { idea: FeedIdea; saved: boolean; onSave: () => void; hover: { value: number } }) {
+function IdeaRowInner({ idea, hover }: { idea: FeedIdea; hover: { value: number } }) {
   const arrow = useAnimatedStyle(() => ({ transform: [{ translateX: 3 * hover.value }] }));
   return (
     <GlassCard strong radius={20} padding={14}>
-      <View style={styles.row}>
+      <View style={[styles.row, styles.rowTop]}>
         <View style={styles.flex}>
           <Text style={styles.rowTitle}>{idea.title}</Text>
           <Text style={styles.rowMeta} numberOfLines={1}>
-            {idea.format} · {idea.bestTime}
+            {idea.format}
           </Text>
         </View>
-        <SaveButton saved={saved} onPress={onSave} />
+        {/* room for the save button laid over this corner */}
+        <View style={styles.saveRoom} />
       </View>
       <View style={styles.useRow}>
         <Text style={styles.useText}>Use this idea</Text>
@@ -383,11 +380,12 @@ export function UnlimitedIdeasCard({ generating, onGenerate }: { generating: boo
 // ─── Saved row ──────────────────────────────────────────────────────────────
 export function SavedRow({ title, meta, onPress, onUnsave }: { title: string; meta: string; onPress: () => void; onUnsave: () => void }) {
   return (
+    <View>
     <PressableCard onPress={onPress} accessibilityLabel={`${title}. ${meta}`}>
       <GlassCard strong radius={18} padding={12}>
         <View style={styles.row}>
-          {/* Filled bookmark: tap to unsave */}
-          <SaveButton saved onPress={onUnsave} size={36} />
+          {/* room for the bookmark laid over this side (a button can't hold another button on the web) */}
+          <View style={styles.savedRoom} />
           <View style={styles.flex}>
             <Text style={styles.savedTitle} numberOfLines={2}>
               {title}
@@ -402,11 +400,20 @@ export function SavedRow({ title, meta, onPress, onUnsave }: { title: string; me
         </View>
       </GlassCard>
     </PressableCard>
+      {/* Filled bookmark: tap to unsave */}
+      <View style={styles.saveLeft}>
+        <SaveButton saved onPress={onUnsave} size={36} />
+      </View>
+    </View>
   );
 }
 
-
 const styles = StyleSheet.create({
+  rowTop: { alignItems: 'flex-start' },
+  saveRoom: { width: 40, height: 40 },
+  saveTopRight: { position: 'absolute', top: 14, right: 14 },
+  savedRoom: { width: 36, height: 36 },
+  saveLeft: { position: 'absolute', top: 0, bottom: 0, left: 12, justifyContent: 'center' },
   proTag: { paddingHorizontal: 7, height: 20, borderRadius: 999, justifyContent: 'center', backgroundColor: goldTokens.light, borderWidth: 1, borderColor: goldTokens.border },
   proTagText: { fontSize: 10.5, fontWeight: '800', letterSpacing: 0.6, color: goldTokens.dark },
   topicHead: { flexDirection: 'row', alignItems: 'center', gap: 8 },

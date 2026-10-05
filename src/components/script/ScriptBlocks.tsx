@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Pressable, ScrollView, StyleSheet, Platform } from 'react-native';
+import { View, Pressable, StyleSheet, Platform } from 'react-native';
 import Animated, { Easing, FadeIn, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import Svg, { Path, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
@@ -9,10 +9,10 @@ import { JarvisOrb } from '../JarvisOrb';
 import { ds } from '../../theme/colors';
 
 // Building blocks for the Script page: a timeline of how long each part takes
-// to say, one card per part (edit, free swaps, Jarvis rewrite) and a
+// to say, one card per part (edit it yourself, or have Jarvis write it again) and a
 // read-through. Calm, eased motion; no emoji.
 
-export type PartKey = 'hook' | 'body' | 'lesson' | 'cta';
+export type PartKey = 'hook' | 'story' | 'lesson' | 'cta';
 
 /** Roughly how long a line takes to say out loud (about 2.6 words a second). */
 export const secondsFor = (text: string) => {
@@ -22,7 +22,7 @@ export const secondsFor = (text: string) => {
 
 const PART_COLORS: Record<PartKey, string> = {
   hook: ds.purple,
-  body: '#8B72F5',
+  story: '#8B72F5',
   lesson: '#B7A7FB',
   cta: '#D9D0FD',
 };
@@ -89,11 +89,9 @@ export function PartCard({
   optional,
   value,
   onChange,
-  options,
-  onPickOption,
   rewriting,
-  editsLeft,
   onRewrite,
+  busy,
   viewRef,
 }: {
   n: number;
@@ -103,11 +101,11 @@ export function PartCard({
   optional?: boolean;
   value: string;
   onChange: (t: string) => void;
-  options: { label: string; text: string }[];
-  onPickOption: (text: string) => void;
+  /** Jarvis is writing this part right now. */
   rewriting: boolean;
-  editsLeft: number;
   onRewrite: () => void;
+  /** Jarvis is busy with something else on the page: no second request at the same time. */
+  busy?: boolean;
   viewRef?: (v: View | null) => void;
 }) {
   const [focused, setFocused] = React.useState(false);
@@ -165,45 +163,23 @@ export function PartCard({
         </View>
 
         <View style={styles.swapHead}>
-          <Text style={styles.swapLabel}>Swap in, free</Text>
+          <Text style={styles.swapLabel}>Not quite right?</Text>
           <Pressable
             onPress={() => {
               tick();
               onRewrite();
             }}
-            disabled={rewriting}
+            disabled={rewriting || busy}
             accessibilityRole="button"
-            accessibilityLabel={editsLeft === Infinity ? 'Rewrite with Jarvis' : editsLeft > 0 ? `Rewrite with Jarvis. ${editsLeft} ${editsLeft === 1 ? "edit" : "edits"} left` : 'Out of Jarvis edits. See Pro'}
-            style={({ pressed }) => [styles.rewrite, pressed && { transform: [{ scale: 0.96 }] }, Platform.OS === 'web' && ({ cursor: 'pointer' } as object)]}
+            accessibilityLabel={`Have Jarvis write the ${title.toLowerCase()} again`}
+            style={({ pressed }) => [styles.rewrite, (rewriting || busy) && { opacity: 0.5 }, pressed && { transform: [{ scale: 0.96 }] }, Platform.OS === 'web' && ({ cursor: 'pointer' } as object)]}
           >
             <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
               <Path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z" fill={ds.purple} />
             </Svg>
-            <Text style={styles.rewriteText}>{editsLeft === Infinity ? 'Rewrite' : editsLeft > 0 ? `Rewrite · ${editsLeft} left` : 'More with Pro'}</Text>
+            <Text style={styles.rewriteText}>Write it again</Text>
           </Pressable>
         </View>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.options}>
-          {options.map((o) => {
-            const on = o.text === value;
-            return (
-              <Pressable
-                key={o.label}
-                onPress={() => {
-                  tick();
-                  onPickOption(o.text);
-                }}
-                accessibilityRole="button"
-                accessibilityLabel={`${o.label}: ${o.text}`}
-                style={({ pressed }) => [styles.option, on && styles.optionOn, pressed && { transform: [{ scale: 0.97 }] }]}
-              >
-                <Text style={[styles.optionLabel, on && { color: ds.purple }]}>{o.label}</Text>
-                <Text style={styles.optionText} numberOfLines={3}>
-                  {o.text}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
       </GlassCard>
     </View>
   );
@@ -297,22 +273,10 @@ const styles = StyleSheet.create({
   },
   rewriting: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 50 },
   rewritingText: { fontSize: 13.5, fontWeight: '700', color: ds.purple },
-  swapHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 14, marginBottom: 8 },
+  swapHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 14 },
   swapLabel: { fontSize: 12.5, fontWeight: '800', color: ds.text2 },
   rewrite: { flexDirection: 'row', alignItems: 'center', gap: 5, height: 28, paddingHorizontal: 10, borderRadius: 999, backgroundColor: ds.lavender },
   rewriteText: { fontSize: 12, fontWeight: '800', color: ds.purple },
-  options: { gap: 8, paddingRight: 8 },
-  option: {
-    width: 190,
-    padding: 12,
-    borderRadius: 16,
-    borderWidth: 1.5,
-    borderColor: 'rgba(255, 255, 255, 0.95)',
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
-  },
-  optionOn: { borderColor: ds.purple, backgroundColor: 'rgba(237, 233, 254, 0.9)' },
-  optionLabel: { fontSize: 11, fontWeight: '800', letterSpacing: 0.4, color: ds.text3, marginBottom: 4 },
-  optionText: { fontSize: 13, lineHeight: 18, color: ds.ink, fontWeight: '600' },
   copy: { flexDirection: 'row', alignItems: 'center', gap: 5, height: 30, paddingHorizontal: 10, borderRadius: 999, backgroundColor: ds.lavender },
   copyText: { fontSize: 12.5, fontWeight: '800', color: ds.purple },
   read: { marginTop: 12, gap: 10, padding: 14, borderRadius: 16, backgroundColor: 'rgba(255, 255, 255, 0.85)' },

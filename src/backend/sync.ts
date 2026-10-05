@@ -36,6 +36,7 @@ import { notify } from './notice';
 import { clearNotifications } from './notifications';
 import { clearQuests } from './quests';
 import { clearHome } from './home';
+import { clearStudioUsage, loadStudioUsage } from './studio';
 
 // The glue between the app's in-memory stores (src/data, the tour, the mascot's
 // tips, Jarvis's chat) and the API. Screens never call the API themselves: they
@@ -107,6 +108,9 @@ export function applyBootstrap(b: Bootstrap): void {
   seedTipsSeen(b.tipsSeen, true);
   setTourFinished(b.tour.done);
   loaded = true;
+  // What the writing tools allow each day depends on the plan, so read it again whenever the account is
+  if (b.capabilities.ai) void loadStudioUsage();
+  else clearStudioUsage();
 }
 
 /** Re-reads the lists after a failed save (or on coming back online). */
@@ -141,6 +145,7 @@ export function clearAccountData(): void {
   clearQuests();
   clearHome();
   clearGrowth();
+  clearStudioUsage();
   seedTipsSeen([], true);
   setTourFinished(false);
   loaded = false;
@@ -365,9 +370,7 @@ function jarvisBrain() {
       },
     });
     if (res.ok) {
-      // The server's own AI was unavailable and it sent a stand-in ("having trouble…"): the
-      // built-in replies are more useful than an apology, so let them answer instead.
-      if (res.data.degraded) return null;
+      // When the server's AI is unavailable it says so in its own words ("having trouble…"): shown as it is
       const { text, ideas, caption, list, tasks, chips } = res.data;
       return { text, ideas, caption, list, tasks, chips };
     }
@@ -375,7 +378,7 @@ function jarvisBrain() {
     if (res.status === 402 || res.code === 'UPGRADE_REQUIRED') {
       return { text: 'You’ve used today’s chats with me. They come back tomorrow, or Pro gives you more.', chips: ['Show me Pro'] };
     }
-    return null; // can't reach the server: the built-in brain answers
+    return null; // can't reach the server: the chat says so
   });
 }
 

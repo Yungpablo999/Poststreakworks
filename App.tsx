@@ -13,7 +13,7 @@ import { VerifyCodeScreen } from './src/screens/VerifyCodeScreen';
 import { NicheSelectionScreen } from './src/screens/NicheSelectionScreen';
 import { PlatformConnectScreen } from './src/screens/PlatformConnectScreen';
 import { PlanPreviewScreen } from './src/screens/PlanPreviewScreen';
-import type { FilmStyle, IdeaGoal, SavedDraft, StudioVideo } from './src/data';
+import type { FilmStyle, IdeaGoal, SavedDraft } from './src/data';
 import { DashboardScreen } from './src/screens/DashboardScreen';
 import { RepurposeScreen } from './src/screens/RepurposeScreen';
 import { MissionDetailScreen } from './src/screens/MissionDetailScreen';
@@ -23,7 +23,6 @@ import { CreateScreen } from './src/screens/CreateScreen';
 import { ScheduleScreen } from './src/screens/ScheduleScreen';
 import { JarvisProScreen } from './src/screens/JarvisProScreen';
 import { GrowthScreen } from './src/screens/GrowthScreen';
-import { IdeaDetailScreen } from './src/screens/IdeaDetailScreen';
 import { PostComposerScreen } from './src/screens/PostComposerScreen';
 import { ContentAngleScreen } from './src/screens/ContentAngleScreen';
 import { ScriptScreen } from './src/screens/ScriptScreen';
@@ -116,7 +115,6 @@ type Screen =
   | 'quests'
   | 'schedule'
   | 'challenge-detail'
-  | 'idea-detail'
   | 'composer'
   | 'content-angle'
   | 'script'
@@ -188,15 +186,14 @@ export default function App() {
   const justSignedUp = React.useRef(
     Platform.OS === 'web' && typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('tour') === '1'
   );
-  const [selectedIdeaTitle, setSelectedIdeaTitle] = useState('One thing I wish I knew before I started creating');
+  // The idea the writing tools (Script, Caption, Hook Studio, Repurpose) open on. Empty: the creator types one there.
+  const [selectedIdeaTitle, setSelectedIdeaTitle] = useState('');
   const [composerIdeaTitle, setComposerIdeaTitle] = useState('');
   // Goal picked on the Ideas page shapes the composer's caption
   // Also carries a ready caption + tags from the Caption writer
   // Platform to pre-select in the composer (e.g. from Repurpose)
   const [composerIdeaPlatform, setComposerIdeaPlatform] = useState<string | undefined>(undefined);
   const [composerFilmStyle, setComposerFilmStyle] = useState<FilmStyle | undefined>(undefined);
-  // A post sent from Growth into the Repurpose video studio
-  const [studioVideo, setStudioVideo] = useState<StudioVideo | undefined>(undefined);
   // Growth: which post and which account the detail pages open on
   const [growthPostKey, setGrowthPostKey] = useState<string | null>(null);
   const [growthPlatform, setGrowthPlatform] = useState<ConnectablePlatform | null>(null);
@@ -211,6 +208,8 @@ export default function App() {
   }, []);
   // A saved draft the composer carries on from (set when one is opened; forgotten when the composer is left)
   const [composerDraft, setComposerDraft] = useState<SavedDraft | null>(null);
+  // A saved script the Script page carries on from (forgotten when the page is left)
+  const [scriptDraft, setScriptDraft] = useState<SavedDraft | null>(null);
 
   const handleUseIdea = (title: string, format?: string, goal?: IdeaGoal, hook?: string) => {
     setComposerIdeaGoal(goal ? { goal, hook } : null);
@@ -283,6 +282,9 @@ export default function App() {
   const navigateTo = (nextScreen: Screen) => {
     if (nextScreen !== 'composer') {
       setComposerDraft(null);
+    }
+    if (nextScreen !== 'script') {
+      setScriptDraft(null);
     }
     if (nextScreen === currentScreen) return;
     setAuthError(null);
@@ -759,8 +761,6 @@ export default function App() {
         return 'dashboard';
       case 'challenge-detail':
         return 'quests';
-      case 'idea-detail':
-        return 'create';
       case 'composer':
         return previousScreen && previousScreen !== 'composer' ? previousScreen : 'create';
       case 'content-angle':
@@ -792,7 +792,7 @@ export default function App() {
   const breakpoint = useBreakpoint();
   const SIDEBAR_FOR: Partial<Record<Screen, SidebarId>> = {
     dashboard: 'home', 'mission-detail': 'home', 'jarvis-pro': 'home',
-    create: 'create', 'idea-detail': 'create', composer: 'create', 'content-angle': 'create', script: 'create', caption: 'create',
+    create: 'create', composer: 'create', 'content-angle': 'create', script: 'create', caption: 'create',
     quests: 'quests', 'challenge-detail': 'quests',
     growth: 'growth', 'audience-breakdown': 'growth', 'post-performance': 'growth', 'platform-growth': 'growth',
     schedule: 'schedule', repurpose: 'repurpose', 'hook-studio': 'hook-studio',
@@ -825,7 +825,7 @@ export default function App() {
   // Every signed-in page except the studios (they have their own panel) gets the Today panel
   const RAIL_PAGES: Screen[] = [
     'dashboard', 'create', 'quests', 'growth', 'schedule',
-    'composer', 'idea-detail', 'content-angle', 'script', 'caption', 'mission-detail', 'challenge-detail',
+    'composer', 'content-angle', 'script', 'caption', 'mission-detail', 'challenge-detail',
     'jarvis-pro', 'audience-breakdown', 'post-performance', 'platform-growth',
   ];
   const wideEnough = windowW >= 1360;
@@ -833,7 +833,7 @@ export default function App() {
   const STUDIO_FOR: Partial<Record<Screen, StudioKind>> = { repurpose: 'repurpose', 'hook-studio': 'hook' };
   const studioRail = showSidebar && wideEnough ? STUDIO_FOR[currentScreen] : undefined;
   const PAGE_TITLE: Partial<Record<Screen, string>> = {
-    composer: 'New post', 'idea-detail': 'Idea', 'content-angle': 'Ideas', script: 'Script', caption: 'Caption',
+    composer: 'New post', 'content-angle': 'Ideas', script: 'Script', caption: 'Caption',
     'mission-detail': 'Today’s quest', 'challenge-detail': 'Weekly challenge', 'jarvis-pro': 'Jarvis Pro',
     'audience-breakdown': 'Your audience', 'post-performance': 'Post performance', 'platform-growth': 'Platform growth',
   };
@@ -862,6 +862,23 @@ export default function App() {
     navigateTo('composer');
   };
 
+  // The Script page, on an idea (or none: the creator types one there)
+  const openScript = (title?: string) => {
+    setSelectedIdeaTitle(title ?? '');
+    navigateTo('script');
+  };
+
+  // Any saved draft: a script opens on Script, anything else in the composer
+  const openDraft = (draft: SavedDraft) => {
+    if (draft.kind === 'script') {
+      setSelectedIdeaTitle(draft.title);
+      setScriptDraft(draft);
+      navigateTo('script');
+    } else {
+      openComposerDraft(draft);
+    }
+  };
+
   // "Make more like this" on a post: ideas on the same topic (only offered when the server can write ideas)
   const makeMoreLikeThis = (post: GrowthPost) => {
     setSelectedIdeaTitle(post.title);
@@ -876,7 +893,7 @@ export default function App() {
       case 'ideas':
         return navigateTo('content-angle');
       case 'script':
-        return navigateTo('script');
+        return openScript();
       case 'composer':
         return openBlankComposer();
       case 'schedule':
@@ -884,7 +901,7 @@ export default function App() {
       case 'growth':
         return navigateTo('growth');
       case 'repurpose':
-        setStudioVideo(undefined);
+        setSelectedIdeaTitle('');
         return navigateTo('repurpose');
       case 'hook-studio':
         return navigateTo('hook-studio');
@@ -910,7 +927,7 @@ export default function App() {
   // The mascot's resting mood follows where you are, and it says hello when you
   // arrive (welcome back for returning creators). Never guilt, only warmth.
   const MASCOT_MOOD: Partial<Record<Screen, Emotion>> = {
-    dashboard: 'calm', create: 'idea', 'idea-detail': 'idea', 'content-angle': 'thinking',
+    dashboard: 'calm', create: 'idea', 'content-angle': 'thinking',
     composer: 'working', script: 'working', caption: 'working',
     quests: 'determined', 'mission-detail': 'determined', 'challenge-detail': 'determined',
     growth: 'happy', 'audience-breakdown': 'happy', 'post-performance': 'love', 'platform-growth': 'happy',
@@ -919,7 +936,8 @@ export default function App() {
   // Jarvis chat: the button shows on every signed-in page on wide screens, and
   // on the main pages on phones (inner pages have their own bottom buttons).
   // Not where the right panel already has its Ask Jarvis card (no doubles).
-  const showJarvisButton = inApp && !showRail && (webSidebar || MAIN_PAGES.includes(currentScreen));
+  // Jarvis answers on the server: no launcher when the server has no AI switched on
+  const showJarvisButton = capabilities.ai && inApp && !showRail && (webSidebar || MAIN_PAGES.includes(currentScreen));
   const phoneTabBar = !IS_WEB_APP && !webSidebar;
   const jarvisBottom = (initialWindowMetrics?.insets.bottom ?? 0) + (phoneTabBar ? 104 : 20);
   React.useEffect(() => {
@@ -1167,10 +1185,7 @@ export default function App() {
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onLogout={handleLogout}
             onOpenPlace={openQuestPlace}
-            onOpenScript={(title) => {
-              setSelectedIdeaTitle(title);
-              navigateTo('script');
-            }}
+            onOpenScript={openScript}
             onOpenPostComposer={(title) => openBlankComposer(title)}
             onNavigateTab={handleTabNavigation}
             userProfile={userProfile}
@@ -1186,30 +1201,19 @@ export default function App() {
               onLogout={handleLogout}
               onOpenSchedule={() => navigateTo('schedule')}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-              onOpenIdeaDetail={(title) => {
-                if (title) setSelectedIdeaTitle(title);
-                navigateTo('idea-detail');
-              }}
-              onOpenPostComposer={(title, platform) => {
-                if (title) setComposerIdeaTitle(title);
-                setComposerIdeaGoal(null);
-                setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
-                navigateTo('composer');
-              }}
+              onOpenPostComposer={(title) => openBlankComposer(title)}
+              onUseIdea={(idea) => handleUseIdea(idea.title, idea.format, 'followers', idea.hook)}
               onOpenIdeaAngle={() => navigateTo('content-angle')}
-              onOpenScript={(title) => {
-                if (title) setSelectedIdeaTitle(title);
-                navigateTo('script');
-              }}
-              onOpenCaption={(title) => {
-                if (title) setSelectedIdeaTitle(title);
+              onOpenScript={() => openScript()}
+              onOpenCaption={() => {
+                setSelectedIdeaTitle('');
                 navigateTo('caption');
               }}
-              onOpenRepurpose={(title?: string) => {
-                if (title) setSelectedIdeaTitle(title);
-                setStudioVideo(undefined);
+              onOpenRepurpose={() => {
+                setSelectedIdeaTitle('');
                 navigateTo('repurpose');
               }}
+              onOpenDraft={openDraft}
               onNavigateTab={handleTabNavigation}
               userPersona={userPersona}
               userProfile={userProfile}
@@ -1302,25 +1306,6 @@ export default function App() {
           />
         )}
 
-        {currentScreen === 'idea-detail' && (
-          <IdeaDetailScreen
-            ideaTitle={selectedIdeaTitle}
-            onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
-            onLogout={handleLogout}
-            onOpenSchedule={() => navigateTo('schedule')}
-            onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-            onOpenPostComposer={(title) => {
-              if (title) setComposerIdeaTitle(title);
-              setComposerIdeaGoal(null);
-                setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
-              navigateTo('composer');
-            }}
-            onNavigateTab={handleTabNavigation}
-            userProfile={userProfile}
-            onSaveProfile={editProfile}
-          />
-        )}
-
         {currentScreen === 'composer' && (
           <PostComposerScreen
             key={composerDraft?.id ?? 'new'}
@@ -1346,7 +1331,6 @@ export default function App() {
               tier={desktopTier}
               onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
               onLogout={handleLogout}
-              onOpenSchedule={() => navigateTo('schedule')}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onUseIdea={handleUseIdea}
               onNavigateTab={handleTabNavigation}
@@ -1359,17 +1343,19 @@ export default function App() {
         {currentScreen === 'script' && (
           (
             <ScriptScreen
-              tier={desktopTier}
+              key={scriptDraft?.id ?? 'new'}
               ideaTitle={selectedIdeaTitle}
-              format={composerIdeaFormat}
+              draft={scriptDraft}
               onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
               onLogout={handleLogout}
-              onOpenSchedule={() => navigateTo('schedule')}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-              onUseAsPost={(scriptData) => {
-                if (scriptData.hook) setComposerIdeaTitle(scriptData.hook);
-                setComposerIdeaGoal(null);
-                setComposerIdeaPlatform(undefined); setComposerFilmStyle(undefined);
+              onUseAsPost={({ idea, hook, style }) => {
+                setComposerDraft(null);
+                setComposerIdeaTitle(idea);
+                setComposerIdeaGoal(hook ? { hook } : null);
+                setComposerIdeaPlatform(undefined);
+                setComposerFilmStyle(style);
+                setComposerIdeaFormat('short_video');
                 navigateTo('composer');
               }}
               onNavigateTab={handleTabNavigation}
@@ -1386,15 +1372,14 @@ export default function App() {
               ideaTitle={selectedIdeaTitle}
               onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
               onLogout={handleLogout}
-              onOpenSchedule={() => navigateTo('schedule')}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-              onAddToPost={(captionText, hashtags, topic) => {
+              onAddToPost={(captionText, tags, topic) => {
                 // The caption goes into the composer's caption box (not the idea title)
-                if (topic) setComposerIdeaTitle(topic);
-                setComposerIdeaGoal({
-                  caption: captionText,
-                  tags: (hashtags || '').split(/\s+/).filter((t) => t.startsWith('#')),
-                });
+                setComposerDraft(null);
+                setComposerIdeaTitle(topic);
+                setComposerIdeaGoal({ caption: captionText, tags });
+                setComposerIdeaPlatform(undefined);
+                setComposerFilmStyle(undefined);
                 navigateTo('composer');
               }}
               onNavigateTab={handleTabNavigation}
@@ -1404,31 +1389,25 @@ export default function App() {
           )
         )}
 
-        {currentScreen === 'repurpose' &&
-          ((
-            // Free and Pro share the glass Repurpose studio (Pro: unlimited + plan the order)
-            <RepurposeScreen
-              tier={desktopTier}
-              ideaTitle={selectedIdeaTitle}
-              userProfile={userProfile}
-              userPersona={userPersona}
-              onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
-              onNavigateTab={handleTabNavigation}
-              onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-              initialVideo={studioVideo}
-              onFilmIdea={(title, style) => {
-                handleUseIdea(title, 'short video');
-                setComposerFilmStyle(style);
-              }}
-              onUseVersion={(caption, platform, idea) => {
-                setComposerIdeaTitle(idea);
-                setComposerIdeaGoal({ caption });
-                setComposerIdeaPlatform(platform);
-                setComposerFilmStyle(undefined);
-                navigateTo('composer');
-              }}
-            />
-          ))}
+        {currentScreen === 'repurpose' && (
+          <RepurposeScreen
+            ideaTitle={selectedIdeaTitle}
+            userProfile={userProfile}
+            onSaveProfile={editProfile}
+            onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
+            onLogout={handleLogout}
+            onNavigateTab={handleTabNavigation}
+            onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+            onUseVersion={(caption, platform, idea) => {
+              setComposerDraft(null);
+              setComposerIdeaTitle(idea);
+              setComposerIdeaGoal({ caption });
+              setComposerIdeaPlatform(platform);
+              setComposerFilmStyle(undefined);
+              navigateTo('composer');
+            }}
+          />
+        )}
 
         {currentScreen === 'hook-studio' && (
           <HookStudioScreen
@@ -1500,8 +1479,6 @@ export default function App() {
             {studioRail && <StudioRail kind={studioRail} />}
             {showRail && (
               <TodayRail
-                persona={desktopPersona}
-                onUseIdea={(title) => openBlankComposer(title)}
                 onPlan={() => navigateTo('schedule')}
                 onOpenChallenge={() => navigateTo('challenge-detail')}
               />

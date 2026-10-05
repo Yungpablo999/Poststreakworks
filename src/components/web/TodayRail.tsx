@@ -1,20 +1,25 @@
-import { react } from '../../mascot/mascot';
 import { TourTarget } from '../tour/GhostTour';
 import React, { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { Easing, FadeIn, FadeInUp } from 'react-native-reanimated';
 import Svg, { Circle, Path } from 'react-native-svg';
 import { Text, TextInput } from '../ui/AppText';
 import { GlassCard } from '../glass/GlassCard';
 import { JarvisOrb } from '../JarvisOrb';
 import { PlatformLogo, type PlatformLogoType } from '../onboarding/PlatformLogo';
-import { getCalendarMonth, getTopicIdeas, type FeedIdea } from '../../data';
+import { getCalendarMonth } from '../../data';
+import { openJarvis } from '../../jarvis/chat';
+import { useCapabilities } from '../../backend/account';
+import { loadCalendarWeek } from '../../backend/calendar';
+import { loadHome, useHomeSummary } from '../../backend/home';
+import { usePostsVersion } from '../../backend/posts';
+import { useAsync } from '../../hooks/useAsync';
 import { ds } from '../../theme/colors';
 
 // Desktop web app: the panel on the right of the main pages, so wide screens
-// get useful things instead of empty space. Ask Jarvis for an idea (it
-// appears right here), see the week and tap a day, follow the weekly
-// challenge, and read Jarvis's tips. Smooth, non-bouncy motion throughout.
+// get useful things instead of empty space. Ask Jarvis for an idea (the chat
+// answers, on the server), see the week and tap a day, follow the weekly
+// challenge, and read a few tips. Smooth, non-bouncy motion throughout.
 
 export const RAIL_W = 340;
 
@@ -24,32 +29,17 @@ const ease = Easing.out(Easing.cubic);
 // ─── Ask Jarvis ─────────────────────────────────────────────────────────────
 const QUICK = ['Morning routine', 'A day in my life', 'Quick tip', 'Behind the scenes'];
 
-function AskJarvis({ onUseIdea }: { onUseIdea: (title: string) => void }) {
+function AskJarvis() {
   const [topic, setTopic] = useState('');
-  const [asked, setAsked] = useState<string | null>(null);
-  const [round, setRound] = useState(0);
-  const [thinking, setThinking] = useState(false);
   const [focus, setFocus] = useState(false);
 
+  // The question goes to the Jarvis chat, which answers on the server
   const ask = (t: string) => {
     const q = t.trim();
     if (!q) return;
-    setTopic(q);
-    setAsked(q);
-    setRound(0);
-    setThinking(true);
-    react('thinking');
+    openJarvis(`Give me post ideas about ${q}`);
+    setTopic('');
   };
-  useEffect(() => {
-    if (!thinking) return;
-    const id = setTimeout(() => {
-      setThinking(false);
-      react('ideaReady');
-    }, 700);
-    return () => clearTimeout(id);
-  }, [thinking]);
-
-  const idea: FeedIdea | null = useMemo(() => (asked ? getTopicIdeas(asked, 'often', '30-second Reel', round)[0] ?? null : null), [asked, round]);
 
   return (
     <TourTarget id="ask-jarvis">
@@ -69,50 +59,23 @@ function AskJarvis({ onUseIdea }: { onUseIdea: (title: string) => void }) {
           placeholderTextColor={ds.text3}
           selectionColor={ds.purple}
           returnKeyType="go"
+          maxLength={200}
           accessibilityLabel="Topic for an idea"
           style={styles.input}
         />
-        <Pressable onPress={() => ask(topic)} disabled={!topic.trim()} accessibilityRole="button" accessibilityLabel="Get an idea" style={[styles.askBtn, pointer, !topic.trim() && { opacity: 0.4 }]}>
+        <Pressable onPress={() => ask(topic)} disabled={!topic.trim()} accessibilityRole="button" accessibilityLabel="Ask Jarvis" style={[styles.askBtn, pointer, !topic.trim() && { opacity: 0.4 }]}>
           <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
             <Path d="M5 12h14M13 6l6 6-6 6" stroke="#FFFFFF" strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round" />
           </Svg>
         </Pressable>
       </View>
-      {!asked && (
-        <View style={styles.chips}>
-          {QUICK.map((q) => (
-            <Pressable key={q} onPress={() => ask(q)} accessibilityRole="button" style={({ pressed }) => [styles.chip, pointer, pressed && { transform: [{ scale: 0.96 }] }]}>
-              <Text style={styles.chipText}>{q}</Text>
-            </Pressable>
-          ))}
-        </View>
-      )}
-      {asked && (
-        <View style={styles.ideaWrap}>
-          {thinking ? (
-            <View style={styles.thinking}>
-              <ActivityIndicator color={ds.purple} />
-              <Text style={styles.muted}>Jarvis is thinking…</Text>
-            </View>
-          ) : idea ? (
-            <Animated.View key={`${asked}-${round}`} entering={FadeInUp.duration(320).easing(ease)} style={styles.idea}>
-              <Text style={styles.ideaTitle}>{idea.title}</Text>
-              <Text style={styles.ideaHook}>“{idea.hook}”</Text>
-              <Text style={styles.ideaMeta}>
-                {idea.format} · best at {idea.bestTime}
-              </Text>
-              <View style={styles.ideaActions}>
-                <Pressable onPress={() => onUseIdea(idea.title)} accessibilityRole="button" style={({ pressed }) => [styles.useBtn, pointer, pressed && { transform: [{ translateY: 2 }] }]}>
-                  <Text style={styles.useText}>Use this idea</Text>
-                </Pressable>
-                <Pressable onPress={() => { setRound((r) => r + 1); setThinking(true); }} accessibilityRole="button" style={[styles.anotherBtn, pointer]}>
-                  <Text style={styles.anotherText}>Another</Text>
-                </Pressable>
-              </View>
-            </Animated.View>
-          ) : null}
-        </View>
-      )}
+      <View style={styles.chips}>
+        {QUICK.map((q) => (
+          <Pressable key={q} onPress={() => ask(q)} accessibilityRole="button" style={({ pressed }) => [styles.chip, pointer, pressed && { transform: [{ scale: 0.96 }] }]}>
+            <Text style={styles.chipText}>{q}</Text>
+          </Pressable>
+        ))}
+      </View>
     </GlassCard>
     </TourTarget>
   );
@@ -121,7 +84,9 @@ function AskJarvis({ onUseIdea }: { onUseIdea: (title: string) => void }) {
 // ─── Your week ──────────────────────────────────────────────────────────────
 const DAY = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-function YourWeek({ persona, onPlan }: { persona: 'new' | 'returning'; onPlan: () => void }) {
+function YourWeek({ onPlan }: { onPlan: () => void }) {
+  const version = usePostsVersion();
+  const loaded = useAsync(() => loadCalendarWeek().then((ok) => (ok ? Date.now() : null)), [version]);
   const now = new Date();
   const week = useMemo(() => {
     // Monday-first week around today, possibly spanning two months
@@ -134,7 +99,7 @@ function YourWeek({ persona, onPlan }: { persona: 'new' | 'returning'; onPlan: (
     }
     return days;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [persona]);
+  }, [loaded.data]);
   const todayIdx = week.findIndex((d) => d.info?.isToday);
   const [sel, setSel] = useState(Math.max(0, todayIdx));
   const picked = week[sel];
@@ -190,7 +155,7 @@ function YourWeek({ persona, onPlan }: { persona: 'new' | 'returning'; onPlan: (
 }
 
 // ─── Weekly challenge ───────────────────────────────────────────────────────
-function Challenge({ posted, onOpen }: { posted: number; onOpen: () => void }) {
+function Challenge({ posted, goal, onOpen }: { posted: number; goal: number; onOpen: () => void }) {
   const r = 26;
   const c = 2 * Math.PI * r;
   const [offset, setOffset] = useState(c);
@@ -199,7 +164,7 @@ function Challenge({ posted, onOpen }: { posted: number; onOpen: () => void }) {
     let raf = 0;
     const start = performance.now();
     const from = offset;
-    const to = c * (1 - posted / 3);
+    const to = c * (1 - Math.min(1, posted / Math.max(1, goal)));
     const tick = (now: number) => {
       const t = Math.min(1, (now - start) / 900);
       const e = 1 - Math.pow(1 - t, 3);
@@ -211,7 +176,7 @@ function Challenge({ posted, onOpen }: { posted: number; onOpen: () => void }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [posted]);
   return (
-    <Pressable onPress={onOpen} accessibilityRole="button" accessibilityLabel={`Weekly challenge: ${posted} of 3 posted`} style={({ pressed }) => [pointer, pressed && { transform: [{ scale: 0.99 }] }]}>
+    <Pressable onPress={onOpen} accessibilityRole="button" accessibilityLabel={`Weekly challenge: ${posted} of ${goal} posted`} style={({ pressed }) => [pointer, pressed && { transform: [{ scale: 0.99 }] }]}>
       <GlassCard strong radius={22} padding={16}>
         <View style={styles.challenge}>
           <View style={styles.ring}>
@@ -219,11 +184,11 @@ function Challenge({ posted, onOpen }: { posted: number; onOpen: () => void }) {
               <Circle cx={32} cy={32} r={r} stroke={ds.lavender} strokeWidth={6} fill="none" />
               <Circle cx={32} cy={32} r={r} stroke={ds.purple} strokeWidth={6} fill="none" strokeLinecap="round" strokeDasharray={`${c}`} strokeDashoffset={offset} transform="rotate(-90 32 32)" />
             </Svg>
-            <Text style={styles.ringText}>{posted}/3</Text>
+            <Text style={styles.ringText}>{posted}/{goal}</Text>
           </View>
           <View style={styles.flex}>
             <Text style={styles.eyebrow}>THIS WEEK’S CHALLENGE</Text>
-            <Text style={styles.title}>Post 3 times this week</Text>
+            <Text style={styles.title}>Post {goal} times this week</Text>
             <Text style={styles.muted}>Any day, any platform. At your own pace.</Text>
           </View>
         </View>
@@ -233,20 +198,13 @@ function Challenge({ posted, onOpen }: { posted: number; onOpen: () => void }) {
 }
 
 // ─── Jarvis tips ────────────────────────────────────────────────────────────
-const TIPS: Record<'new' | 'returning', string[]> = {
-  new: [
-    'Your first week is about finding a rhythm, not going viral. Three posts is a great start.',
-    'Not sure what to post? Ask me above and I’ll shape an idea around something you already do.',
-    'Connect an account and I’ll start learning what works for you.',
-  ],
-  returning: [
-    'Openings that start with a mistake kept people watching longest for you.',
-    'Most of your audience is online between 7 and 9 PM.',
-    'Your carousels got the most saves this month. Worth another one this week.',
-  ],
-};
+const TIPS = [
+  'Your first weeks are about finding a rhythm, not going viral. Three posts a week is a great start.',
+  'Make the first two seconds count: say the point, or put it on screen, before anything else.',
+  'Connect your accounts and Growth shows which of your posts people liked most.',
+];
 
-/** Rotating tips from Jarvis (every 7s, or tap a dot) */
+/** Rotating tips (every 7s, or tap a dot) */
 export function TipsCard({ tips }: { tips: string[] }) {
   const [i, setI] = useState(0);
   useEffect(() => {
@@ -257,7 +215,7 @@ export function TipsCard({ tips }: { tips: string[] }) {
     <GlassCard radius={22} padding={16}>
       <View style={styles.head}>
         <JarvisOrb size={20} />
-        <Text style={styles.eyebrowPurple}>FROM JARVIS</Text>
+        <Text style={styles.eyebrowPurple}>TIPS</Text>
       </View>
       <Animated.View key={i} entering={FadeIn.duration(400)}>
         <Text style={styles.tip}>{tips[i]}</Text>
@@ -273,31 +231,30 @@ export function TipsCard({ tips }: { tips: string[] }) {
   );
 }
 
-export function TodayRail({
-  persona,
-  onUseIdea,
-  onPlan,
-  onOpenChallenge,
-}: {
-  persona: 'new' | 'returning';
-  onUseIdea: (title: string) => void;
-  onPlan: () => void;
-  onOpenChallenge: () => void;
-}) {
+export function TodayRail({ onPlan, onOpenChallenge }: { onPlan: () => void; onOpenChallenge: () => void }) {
+  const { ai } = useCapabilities();
+  const home = useHomeSummary();
+  useEffect(() => {
+    if (!home) void loadHome();
+  }, [home]);
   return (
     <View style={styles.rail}>
       <ScrollView contentContainerStyle={styles.railScroll} showsVerticalScrollIndicator={false}>
-        <Animated.View entering={FadeInUp.duration(450).easing(ease)}>
-          <AskJarvis onUseIdea={onUseIdea} />
-        </Animated.View>
+        {ai && (
+          <Animated.View entering={FadeInUp.duration(450).easing(ease)}>
+            <AskJarvis />
+          </Animated.View>
+        )}
         <Animated.View entering={FadeInUp.delay(80).duration(450).easing(ease)}>
-          <YourWeek persona={persona} onPlan={onPlan} />
+          <YourWeek onPlan={onPlan} />
         </Animated.View>
-        <Animated.View entering={FadeInUp.delay(160).duration(450).easing(ease)}>
-          <Challenge posted={persona === 'new' ? 0 : 2} onOpen={onOpenChallenge} />
-        </Animated.View>
+        {home && (
+          <Animated.View entering={FadeInUp.delay(160).duration(450).easing(ease)}>
+            <Challenge posted={home.challenge.done} goal={home.challenge.goal} onOpen={onOpenChallenge} />
+          </Animated.View>
+        )}
         <Animated.View entering={FadeInUp.delay(240).duration(450).easing(ease)}>
-          <TipsCard tips={TIPS[persona]} />
+          <TipsCard tips={TIPS} />
         </Animated.View>
       </ScrollView>
     </View>

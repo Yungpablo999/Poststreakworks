@@ -4,10 +4,10 @@ import Animated, { FadeInUp } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { Text } from '../ui/AppText';
 import { ds } from '../../theme/colors';
-import type { CaptionOption } from '../../data';
+import type { CaptionOptionDto } from '../../../frontend/shared/types/phase1';
 
 // One of Jarvis's caption options: tap to use it. Selected = purple border.
-export function CaptionOptionCard({ option, index, selected, onPress, fill }: { option: CaptionOption; index: number; selected: boolean; onPress: () => void; /** Desktop: share the row's width instead of a fixed card width */ fill?: boolean }) {
+export function CaptionOptionCard({ option, index, selected, onPress, fill }: { option: CaptionOptionDto; index: number; selected: boolean; onPress: () => void; /** Desktop: share the row's width instead of a fixed card width */ fill?: boolean }) {
   return (
     <Animated.View entering={FadeInUp.delay(70 * index).duration(300)} style={fill ? { flex: 1, minWidth: 0 } : undefined}>
       <Pressable
@@ -17,7 +17,7 @@ export function CaptionOptionCard({ option, index, selected, onPress, fill }: { 
         }}
         accessibilityRole="radio"
         accessibilityState={{ checked: selected }}
-        accessibilityLabel={`${option.label}. ${option.body}`}
+        accessibilityLabel={`${option.label}. ${option.caption}`}
         style={({ pressed }) => [
           styles.card,
           fill && { width: '100%', flex: 1 },
@@ -32,12 +32,14 @@ export function CaptionOptionCard({ option, index, selected, onPress, fill }: { 
           </View>
           <View style={[styles.radio, selected && styles.radioOn]}>{selected && <View style={styles.radioDot} />}</View>
         </View>
-        <Text style={styles.body} numberOfLines={5}>
-          {option.body}
+        <Text style={styles.body} numberOfLines={7}>
+          {option.caption}
         </Text>
-        <Text style={styles.ending} numberOfLines={2}>
-          {option.ending}
-        </Text>
+        {option.hashtags.length > 0 && (
+          <Text style={styles.ending} numberOfLines={2}>
+            {option.hashtags.join(' ')}
+          </Text>
+        )}
       </Pressable>
     </Animated.View>
   );

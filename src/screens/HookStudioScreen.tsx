@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import React, { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { useMascotThinking } from '../mascot/mascot';
 import { usePageWidth } from '../hooks/useBreakpoint';
 import { View, ScrollView, Pressable, StyleSheet, Platform, KeyboardAvoidingView } from 'react-native';
@@ -19,13 +19,16 @@ import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { FILM_STYLES, getDefaultFilmStyle, getSavedHooks, isHookSaved, subscribeToSavedHooks, toggleSavedHook, type FilmStyle } from '../data';
 import { AppToast } from '../components/ui/AppToast';
+import { NeedsJarvis, Problem, StandInNote, UsageLine } from '../components/studio/StudioBits';
+import { useCapabilities } from '../backend/account';
+import { requestHooks, studioProblem } from '../backend/studio';
 import { ds, goldTokens } from '../theme/colors';
 
 // Hook Studio (Pro): the first 3 seconds. Pick the kind of video and the kind
 // of opening, get 3 hooks, preview each one playing out over 3 seconds, and
 // send the one you like to your post. For dance, skits and silent videos the
 // hook is on-screen text (they already know their moves); for talking videos
-// it's the first line said to camera. Mock lines until Jarvis writes them.
+// it's the first line said to camera. Jarvis writes the hooks on the server; Hook Studio is Pro there.
 
 const pointer = Platform.OS === 'web' ? ({ cursor: 'pointer' } as object) : null;
 const tick = () => {
@@ -41,22 +44,6 @@ const ANGLES: { id: Angle; label: string }[] = [
   { id: 'result', label: 'A result' },
 ];
 
-const SPOKEN: Record<Angle, string[]> = {
-  question: ['Why does nobody talk about this?', 'Ever wonder why this feels so hard?', 'What if it’s easier than you think?', 'Can I tell you what finally worked?', 'Why did it take me so long to try this?', 'Is this the thing holding you back?'],
-  mistake: ['Stop doing this. Seriously.', 'The mistake I made for a whole year.', 'You’re doing this wrong, and it’s not your fault.', 'I wish someone had warned me about this.', 'This one habit cost me months.', 'Please don’t make the mistake I made.'],
-  story: ['Six months ago, I almost quit.', 'Here’s what happened when I tried this for a week.', 'Nobody believed me until this happened.', 'This started as a joke.', 'The day everything changed was a Tuesday.', 'I wasn’t going to post this.'],
-  bold: ['This is the only tip you need.', 'Unpopular opinion: you don’t need more ideas.', 'Most advice about this is wrong.', 'I’ll say it: this changed everything.', 'You don’t need better gear. You need this.', 'Hot take, and I’ll stand by it.'],
-  result: ['One change, and here’s the difference.', 'Here’s the before and after.', 'This took five minutes, and it worked.', 'Watch what happens at the end.', 'Same me, completely different results.', 'Here’s what a month of this did.'],
-};
-
-const ON_SCREEN: Record<Angle, string[]> = {
-  question: ['Why didn’t anyone tell me?', 'Is it just me…?', 'Wait, it’s this easy?', 'Okay but why does this work?', 'Who else does this?', 'Am I the only one?'],
-  mistake: ['Stop doing this.', 'My biggest mistake:', 'Don’t do what I did', 'Never again.', 'I did this for a year…', 'Learn from me'],
-  story: ['6 months ago vs now', 'I almost quit. Then this.', 'Day 1 of trying this', 'This was supposed to be a joke', 'Wait for it', 'Didn’t plan to post this'],
-  bold: ['The only tip you need', 'Unpopular opinion:', 'Nobody does this. They should.', 'Trust me on this one', 'Hot take:', 'You’ve been told wrong'],
-  result: ['Before / after', 'One change. Big difference.', '5 minutes. That’s it.', 'Watch till the end', 'A month of this:', 'Same me, new results'],
-};
-
 const CUE: Record<FilmStyle, string> = {
   talking: 'Say it straight to camera in the first second. No hello first.',
   text: 'Put it as big text on the very first frame.',
@@ -68,11 +55,6 @@ interface Hook {
   id: string;
   line: string;
   angle: Angle;
-}
-
-function makeHooks(style: FilmStyle, angle: Angle, round: number): Hook[] {
-  const pool = style === 'talking' ? SPOKEN[angle] : ON_SCREEN[angle];
-  return [0, 1, 2].map((i) => ({ id: `${style}-${angle}-${round}-${i}`, line: pool[(round * 3 + i) % pool.length], angle }));
 }
 
 // ─── 3-second preview: the hook plays out word by word in a phone frame ─────
@@ -196,7 +178,7 @@ interface HookStudioScreenProps {
 }
 
 export const HookStudioScreen: React.FC<HookStudioScreenProps> = ({
-  ideaTitle = '3 mistakes new creators make',
+  ideaTitle = '',
   onBack,
   onNavigateTab,
   onOpenJarvisPro,
@@ -211,8 +193,21 @@ export const HookStudioScreen: React.FC<HookStudioScreenProps> = ({
   const [focused, setFocused] = useState(false);
   const [style, setStyle] = useState<FilmStyle>(() => getDefaultFilmStyle(userProfile?.niches));
   const [angle, setAngle] = useState<Angle>('mistake');
-  const [round, setRound] = useState(0);
+  const { ai } = useCapabilities();
+  const [hooks, setHooks] = useState<Hook[] | null>(null);
+  // The kind of video the hooks on show were written for
+  const [hooksStyle, setHooksStyle] = useState<FilmStyle>(style);
   const [thinking, setThinking] = useState(false);
+  const [problem, setProblem] = useState<{ message: string; upgrade: boolean } | null>(null);
+  // Lines already shown, so "New hooks" brings new ones
+  const shown = useRef<string[]>([]);
+  const mounted = useRef(true);
+  useEffect(
+    () => () => {
+      mounted.current = false;
+    },
+    [],
+  );
   useMascotThinking(thinking);
   const [open, setOpen] = useState<string | null>(null);
   const saved = useSyncExternalStore(subscribeToSavedHooks, getSavedHooks);
@@ -222,28 +217,40 @@ export const HookStudioScreen: React.FC<HookStudioScreenProps> = ({
     setTimeout(() => setToast((t) => (t === m ? null : t)), 2200);
   };
   const toggleSave = (line: string) => {
-    const now = toggleSavedHook({ line, style, idea: idea.trim() || ideaTitle });
+    const now = toggleSavedHook({ line, style, idea: idea.trim() });
     showToast(now ? 'Saved to your hooks' : 'Removed from your hooks');
   };
   const pickHook = (line: string, st: FilmStyle) => {
     if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    onUseHook?.(idea.trim() || ideaTitle, line, st);
+    onUseHook?.(idea.trim(), line, st);
   };
-  const hooks = useMemo(() => makeHooks(style, angle, round), [style, angle, round]);
 
-  // Changing the video type or angle reshapes the hooks, with a short beat
-  const first = useRef(true);
-  useEffect(() => {
-    if (first.current) {
-      first.current = false;
+  const write = async (more: boolean) => {
+    if (thinking) return;
+    if (!idea.trim()) {
+      setProblem({ message: 'Say what the video is about first.', upgrade: false });
       return;
     }
+    tick();
+    setProblem(null);
     setOpen(null);
     setThinking(true);
-    const id = setTimeout(() => setThinking(false), 450);
-    return () => clearTimeout(id);
-  }, [style, angle, round]);
-
+    if (!more) shown.current = [];
+    const res = await requestHooks({ idea: idea.trim(), style, angle, avoid: shown.current.slice(-9) });
+    if (!mounted.current) return;
+    setThinking(false);
+    if (!res.ok) {
+      if (Platform.OS !== 'web') void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      setProblem(studioProblem(res));
+      return;
+    }
+    if (Platform.OS !== 'web') void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    const stamp = Date.now().toString(36);
+    shown.current = [...shown.current, ...res.data.hooks].slice(-9);
+    setHooksStyle(style);
+    setHooksStyle(style);
+    setHooks(res.data.hooks.map((line, i) => ({ id: `${stamp}-${i}`, line, angle })));
+  };
   const enter = (d: number) => FadeInUp.delay(d).duration(500).easing(Easing.out(Easing.cubic));
 
   return (
@@ -258,8 +265,14 @@ export const HookStudioScreen: React.FC<HookStudioScreenProps> = ({
               <Text style={styles.sub}>Openings that make people stop scrolling.</Text>
             </Animated.View>
 
+            {!ai ? (
+              <NeedsJarvis tool="Hook Studio" />
+            ) : (
+            <>
+            <StandInNote />
+
             {/* Idea */}
-            <Animated.View entering={enter(60)}>
+            <Animated.View entering={enter(60)} style={styles.ideaBlock}>
               <GlassCard strong radius={24} padding={16}>
                 <View style={styles.ideaHead}>
                   <JarvisOrb size={24} />
@@ -269,7 +282,7 @@ export const HookStudioScreen: React.FC<HookStudioScreenProps> = ({
                   </View>
                 </View>
                 <View style={[styles.field, focused && styles.fieldOn]}>
-                  <AutoGrowInput value={idea} onChangeText={setIdea} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)} minHeight={26} style={styles.ideaInput} accessibilityLabel="Your idea" />
+                  <AutoGrowInput value={idea} onChangeText={setIdea} maxLength={300} placeholder="e.g. 3 mistakes new creators make" onFocus={() => setFocused(true)} onBlur={() => setFocused(false)} minHeight={26} style={styles.ideaInput} accessibilityLabel="Your idea" />
                 </View>
               </GlassCard>
             </Animated.View>
@@ -299,7 +312,7 @@ export const HookStudioScreen: React.FC<HookStudioScreenProps> = ({
                 {ANGLES.map((a) => {
                   const on = a.id === angle;
                   return (
-                    <Pressable key={a.id} onPress={() => { tick(); setAngle(a.id); setRound(0); }} accessibilityRole="radio" accessibilityState={{ checked: on }} style={({ pressed }) => [styles.chip, on && styles.chipOn, pressed && styles.pressed, pointer]}>
+                    <Pressable key={a.id} onPress={() => { tick(); setAngle(a.id); }} accessibilityRole="radio" accessibilityState={{ checked: on }} style={({ pressed }) => [styles.chip, on && styles.chipOn, pressed && styles.pressed, pointer]}>
                       <Text style={[styles.chipText, on && styles.chipTextOn]}>{a.label}</Text>
                     </Pressable>
                   );
@@ -307,34 +320,51 @@ export const HookStudioScreen: React.FC<HookStudioScreenProps> = ({
               </ScrollView>
             </Animated.View>
 
+            <View style={styles.writeRow}>
+              <AppButton title={thinking ? 'Jarvis is writing…' : 'Write 3 hooks'} size="lg" disabled={thinking || !idea.trim()} onPress={() => void write(false)} />
+              <View style={styles.usage}>
+                <UsageLine kind="generate" />
+              </View>
+            </View>
+
+            {problem && (
+              <Animated.View entering={FadeIn.duration(200)} style={styles.problem}>
+                <Problem message={problem.message} upgrade={problem.upgrade} onUpgrade={onOpenJarvisPro} />
+              </Animated.View>
+            )}
+
             {/* Hooks */}
+            {(hooks || thinking) && (
             <View style={styles.hooksHead}>
               <Text style={[styles.section, styles.sectionInline]}>3 hooks to try</Text>
-              <Pressable onPress={() => { tick(); setRound((r) => r + 1); }} accessibilityRole="button" style={({ pressed }) => [styles.newBtn, pressed && styles.pressed, pointer]}>
-                <Svg width={13} height={13} viewBox="0 0 24 24" fill="none">
-                  <Path d="M4 12a8 8 0 0113.7-5.7L20 8M20 3v5h-5M20 12a8 8 0 01-13.7 5.7L4 16M4 21v-5h5" stroke={ds.purple} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
-                </Svg>
-                <Text style={styles.newText}>New hooks</Text>
-              </Pressable>
+              {hooks && (
+                <Pressable onPress={() => void write(true)} disabled={thinking} accessibilityRole="button" style={({ pressed }) => [styles.newBtn, thinking && { opacity: 0.5 }, pressed && styles.pressed, pointer]}>
+                  <Svg width={13} height={13} viewBox="0 0 24 24" fill="none">
+                    <Path d="M4 12a8 8 0 0113.7-5.7L20 8M20 3v5h-5M20 12a8 8 0 01-13.7 5.7L4 16M4 21v-5h5" stroke={ds.purple} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
+                  </Svg>
+                  <Text style={styles.newText}>New hooks</Text>
+                </Pressable>
+              )}
             </View>
+            )}
             {thinking ? (
               <Animated.View entering={FadeIn.duration(150)} style={styles.thinking}>
                 <JarvisOrb size={26} />
                 <Text style={styles.thinkingText}>Jarvis is writing…</Text>
               </Animated.View>
-            ) : (
-              <View key={`${style}-${angle}-${round}`} style={styles.stack}>
+            ) : hooks && (
+              <View style={styles.stack}>
                 {hooks.map((h, i) => (
                   <HookCard
                     key={h.id}
                     hook={h}
                     index={i}
-                    style={style}
+                    style={hooksStyle}
                     open={open === h.id}
                     liked={saved.some((x) => x.line === h.line)}
                     onToggle={() => setOpen(open === h.id ? null : h.id)}
                     onLike={() => toggleSave(h.line)}
-                    onUse={() => pickHook(h.line, style)}
+                    onUse={() => pickHook(h.line, hooksStyle)}
                   />
                 ))}
               </View>
@@ -366,6 +396,8 @@ export const HookStudioScreen: React.FC<HookStudioScreenProps> = ({
                 </GlassCard>
               </Animated.View>
             )}
+            </>
+            )}
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
@@ -378,6 +410,10 @@ export const HookStudioScreen: React.FC<HookStudioScreenProps> = ({
 };
 
 const styles = StyleSheet.create({
+  ideaBlock: { marginTop: 4 },
+  writeRow: { marginTop: 18, gap: 8 },
+  usage: { alignItems: 'center' },
+  problem: { marginTop: 14 },
   root: { flex: 1, backgroundColor: ds.bg },
   flex: { flex: 1 },
   pressed: { transform: [{ scale: 0.96 }] },

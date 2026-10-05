@@ -182,7 +182,7 @@ export function DraftsEmpty({ onStart }: { onStart: () => void }) {
       <View style={styles.emptyWrap}>
         <LiveMascot size={76} emotion="calm" />
         <Text style={styles.emptyTitle}>No drafts yet</Text>
-        <Text style={styles.emptyText}>Anything you start is saved here automatically.</Text>
+        <Text style={styles.emptyText}>Save a post or a script as a draft and it waits here.</Text>
         <View style={styles.emptyBtn}>
           <AppButton title="Start a draft" variant="quiet" onPress={onStart} />
         </View>

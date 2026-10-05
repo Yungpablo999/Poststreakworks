@@ -95,10 +95,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
 
           {/* Desktop web: ready-to-start ideas across the page */}
           {wideHome && (
-            <IdeasStrip
-              niches={userProfile.niches.length ? userProfile.niches : ['lifestyle']}
-              platforms={userProfile.connectedPlatforms ?? []}
-            />
+            <IdeasStrip niches={userProfile.niches} />
           )}
 
           {/* Unlock Jarvis Pro (gold = Pro only; members don't see it).

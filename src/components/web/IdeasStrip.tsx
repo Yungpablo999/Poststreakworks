@@ -1,17 +1,20 @@
 import React, { useMemo, useState } from 'react';
+import { ActivityIndicator } from 'react-native';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import Animated, { Easing, FadeInUp, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import Svg, { Circle, Path } from 'react-native-svg';
+import Svg, { Path } from 'react-native-svg';
 import { Text } from '../ui/AppText';
 import { GlassCard } from '../glass/GlassCard';
 import { JarvisOrb } from '../JarvisOrb';
-import { getIdeaFeed, type FeedIdea, type IdeaGoal } from '../../data';
+import { loadIdeaList, type IdeaGoal } from '../../backend/ideas';
+import { useAsync } from '../../hooks/useAsync';
+import type { FeedIdea } from '../../../frontend/shared/types/phase1';
 import { ds } from '../../theme/colors';
 import { openComposer } from './webActions';
 
-// Desktop web app: a row of ready-to-start ideas from the creator's topics,
+// Desktop web app: a row of ready-to-start ideas from the creator's topics (the server's ideas),
 // so wide pages have something useful to do instead of empty space.
-// Shuffle brings a fresh set; each card starts a post with it.
+// Shuffle shows the next few; each card starts a post with it.
 
 const pointer = Platform.OS === 'web' ? ({ cursor: 'pointer' } as object) : null;
 const ease = Easing.out(Easing.cubic);
@@ -42,13 +45,6 @@ function IdeaCard({ idea, index }: { idea: FeedIdea; index: number }) {
               <View style={styles.format}>
                 <Text style={styles.formatText}>{idea.format}</Text>
               </View>
-              <View style={styles.time}>
-                <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
-                  <Circle cx="12" cy="12" r="9" stroke={ds.text3} strokeWidth={2.2} />
-                  <Path d="M12 7v5l3 2" stroke={ds.text3} strokeWidth={2.2} strokeLinecap="round" />
-                </Svg>
-                <Text style={styles.timeText}>{idea.bestTime}</Text>
-              </View>
             </View>
             <Text style={styles.ideaTitle} numberOfLines={2}>{idea.title}</Text>
             <Text style={styles.hook} numberOfLines={3}>“{idea.hook}”</Text>
@@ -65,10 +61,12 @@ function IdeaCard({ idea, index }: { idea: FeedIdea; index: number }) {
   );
 }
 
-export function IdeasStrip({ niches, platforms, count = 3 }: { niches: string[]; platforms: string[]; count?: number }) {
+export function IdeasStrip({ niches, count = 3 }: { niches: string[]; count?: number }) {
   const [goal, setGoal] = useState<IdeaGoal>('often');
   const [round, setRound] = useState(0);
-  const all = useMemo(() => getIdeaFeed(niches, goal, platforms), [niches, goal, platforms]);
+  // The server reads the creator's topics itself; they are a dependency so a changed profile reloads them
+  const loaded = useAsync(() => loadIdeaList(goal), [goal, niches.join('|')]);
+  const all = useMemo(() => loaded.data?.ideas ?? [], [loaded.data]);
   const ideas = useMemo(() => {
     if (all.length === 0) return [];
     const start = (round * count) % all.length;
@@ -91,19 +89,31 @@ export function IdeasStrip({ niches, platforms, count = 3 }: { niches: string[];
               <Text style={[styles.goalText, goal === g.id && styles.goalTextOn]}>{g.label}</Text>
             </Pressable>
           ))}
+          {all.length > count && (
           <Pressable onPress={() => setRound((r) => r + 1)} accessibilityRole="button" accessibilityLabel="Show other ideas" style={[styles.shuffle, pointer]}>
             <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
               <Path d="M4 12a8 8 0 0113.7-5.7L20 8M20 3v5h-5M20 12a8 8 0 01-13.7 5.7L4 16M4 21v-5h5" stroke={ds.purple} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
             </Svg>
             <Text style={styles.shuffleText}>Shuffle</Text>
           </Pressable>
+          )}
         </View>
       </View>
-      <View key={`${goal}-${round}`} style={styles.grid}>
-        {ideas.map((idea, i) => (
-          <IdeaCard key={`${idea.id}-${i}`} idea={idea} index={i} />
-        ))}
-      </View>
+      {loaded.loading ? (
+        <View style={styles.state}>
+          <ActivityIndicator color={ds.purple} />
+        </View>
+      ) : loaded.failed ? (
+        <Pressable onPress={loaded.reload} accessibilityRole="button" style={[styles.state, pointer]}>
+          <Text style={styles.sub}>Couldn’t load ideas. Tap to try again.</Text>
+        </Pressable>
+      ) : (
+        <View key={`${goal}-${round}`} style={styles.grid}>
+          {ideas.map((idea, i) => (
+            <IdeaCard key={`${idea.id}-${i}`} idea={idea} index={i} />
+          ))}
+        </View>
+      )}
     </View>
   );
 }
@@ -116,6 +126,7 @@ const styles = StyleSheet.create({
   headRight: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 6 },
   title: { fontSize: 18, fontWeight: '800', color: ds.ink, letterSpacing: -0.3 },
   sub: { fontSize: 13, fontWeight: '600', color: ds.text3, marginTop: 1 },
+  state: { height: 120, alignItems: 'center', justifyContent: 'center' },
   goal: { paddingHorizontal: 11, height: 32, borderRadius: 999, justifyContent: 'center', backgroundColor: 'rgba(255, 255, 255, 0.7)', borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.95)' },
   goalOn: { backgroundColor: ds.purple, borderColor: ds.purple },
   goalText: { fontSize: 12.5, fontWeight: '800', color: ds.text2 },
@@ -127,8 +138,6 @@ const styles = StyleSheet.create({
   cardTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   format: { paddingHorizontal: 8, height: 22, borderRadius: 999, justifyContent: 'center', backgroundColor: ds.lavender },
   formatText: { fontSize: 11, fontWeight: '800', color: ds.purple },
-  time: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  timeText: { fontSize: 11.5, fontWeight: '700', color: ds.text3 },
   ideaTitle: { fontSize: 15.5, fontWeight: '800', color: ds.ink, marginTop: 10 },
   hook: { fontSize: 13, lineHeight: 18, color: ds.text2, marginTop: 4, flex: 1 },
   start: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 12 },

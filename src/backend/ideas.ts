@@ -26,10 +26,15 @@ export async function loadStarterIdeas(niches: string[], platforms: string[]): P
   return res.ok ? res.data.ideas : null;
 }
 
+/** Ideas for the signed-in creator's own topics, shaped by their goal, and who wrote them. null = couldn't be loaded. */
+export async function loadIdeaList(goal: IdeaGoal = 'followers'): Promise<IdeaList | null> {
+  const res = await api.get<IdeaList>(`${API_ROUTES.IDEAS.FEED}?${query({ goal })}`);
+  return res.ok ? res.data : null;
+}
+
 /** Ideas for the signed-in creator's own topics, shaped by their goal. null = couldn't be loaded. */
 export async function loadIdeaFeed(goal: IdeaGoal = 'followers'): Promise<FeedIdea[] | null> {
-  const res = await api.get<IdeaList>(`${API_ROUTES.IDEAS.FEED}?${query({ goal })}`);
-  return res.ok ? res.data.ideas : null;
+  return (await loadIdeaList(goal))?.ideas ?? null;
 }
 
 /** Three ideas about a topic the creator typed. `round` asks for the next three. */
