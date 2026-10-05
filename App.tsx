@@ -988,7 +988,7 @@ export default function App() {
     quests: 'Quests are small goals. Finish one to earn a badge!',
     growth: 'This is how your posts are doing. I’ll point out what works.',
     schedule: 'Plan your posts here and I’ll remind you when it’s time.',
-    repurpose: 'Turn one video into posts for every platform.',
+    repurpose: 'Turn one idea or post into a version for each platform.',
     'hook-studio': 'A strong first line keeps people watching. Let’s find yours.',
   };
   React.useEffect(() => {

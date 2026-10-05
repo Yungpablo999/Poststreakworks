@@ -117,7 +117,7 @@ export const TOUR_STEPS: TourStep[] = [
     targets: ['studios'],
     emotion: 'working',
     title: 'More studios',
-    body: 'Turn one video into posts for every platform with Repurpose, and find strong first lines in Hook Studio.',
+    body: 'Turn one idea or post into a version for each platform with Repurpose, and find strong first lines in Hook Studio.',
   },
   {
     key: 'jarvis',

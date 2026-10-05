@@ -194,6 +194,7 @@ export const HookStudioScreen: React.FC<HookStudioScreenProps> = ({
   const [style, setStyle] = useState<FilmStyle>(() => getDefaultFilmStyle(userProfile?.niches));
   const [angle, setAngle] = useState<Angle>('mistake');
   const { ai } = useCapabilities();
+  const isPro = userProfile?.tier === 'pro' || userProfile?.tier === 'founding';
   const [hooks, setHooks] = useState<Hook[] | null>(null);
   // The kind of video the hooks on show were written for
   const [hooksStyle, setHooksStyle] = useState<FilmStyle>(style);
@@ -320,12 +321,19 @@ export const HookStudioScreen: React.FC<HookStudioScreenProps> = ({
               </ScrollView>
             </Animated.View>
 
+            {!isPro ? (
+              // Hook Studio is Pro on the server: say so before anyone fills it in, not after
+              <View style={styles.writeRow}>
+                <Problem message="Hook Studio is part of Pro. Your saved hooks below are yours to use either way." upgrade onUpgrade={onOpenJarvisPro} />
+              </View>
+            ) : (
             <View style={styles.writeRow}>
               <AppButton title={thinking ? 'Jarvis is writing…' : 'Write 3 hooks'} size="lg" disabled={thinking || !idea.trim()} onPress={() => void write(false)} />
               <View style={styles.usage}>
                 <UsageLine kind="generate" />
               </View>
             </View>
+            )}
 
             {problem && (
               <Animated.View entering={FadeIn.duration(200)} style={styles.problem}>

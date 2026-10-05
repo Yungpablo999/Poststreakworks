@@ -10,10 +10,11 @@ import { ds, goldTokens } from '../../theme/colors';
 // Free tier: a calm glass card for Jarvis Pro (Home, Quests…). Gold is used only here
 // (Pro), as a faint glow, the tick marks and the button.
 
+// Only what Pro really adds on the server (see JarvisProScreen for the full list from /billing/offer)
 const BENEFITS = [
-  'Voiceovers in your own voice',
-  'Unlimited repurposing',
-  'Deeper growth insights',
+  'No daily limit on writing with Jarvis',
+  'Unlimited Repurpose',
+  'Growth month by month',
 ];
 
 export function ProUpsellCard({
