@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { MascotSays } from '../components/mascot/MascotSays';
 import { useWebFrame, useWideFrame } from '../components/web/WebAuthHeader';
-import { StyleSheet, View, ScrollView, Pressable, Platform, KeyboardAvoidingView, Alert } from 'react-native';
+import { StyleSheet, View, ScrollView, Pressable, Platform, KeyboardAvoidingView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
@@ -15,6 +15,7 @@ import { GlassCard } from '../components/glass/GlassCard';
 import { OnboardingProgress } from '../components/onboarding/OnboardingProgress';
 import { ds } from '../theme/colors';
 import { SocialButton, type SocialProvider } from '../components/auth/SocialButton';
+import { LEGAL_URLS, openWebsitePage } from '../config/links';
 
 // Onboarding step 4: create an account to save the plan they just made.
 // One-tap Apple / Google first; email-only as the fallback (name comes later).
@@ -78,11 +79,7 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
     onSubmit?.(handle, trimmed);
   };
 
-  const showLegal = (which: 'Terms' | 'Privacy') => {
-    const msg = `${which} will open here.`;
-    if (Platform.OS === 'web') window.alert(msg);
-    else Alert.alert(which, msg);
-  };
+  const showLegal = (which: 'Terms' | 'Privacy') => openWebsitePage(LEGAL_URLS[which]);
 
   return (
     <View style={styles.root}>
