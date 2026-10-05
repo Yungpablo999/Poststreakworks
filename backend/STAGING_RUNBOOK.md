@@ -78,15 +78,39 @@ Environment variables (Settings → Environment Variables; all in the vault too)
 | `SUPABASE_SERVICE_ROLE_KEY` | staging `service_role` key — **server only, never in the app** |
 | `TOKEN_ENCRYPTION_KEY` | 32 random bytes, base64: `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`. Different per environment. Losing it means every creator must reconnect their accounts |
 | `CRON_SECRET` | any long random string |
+| `APP_WEB_URL` | the app's own address, e.g. `https://staging.poststreak.app`. Platforms and the payment page send creators back here |
 | `TIKTOK_CLIENT_KEY`, `TIKTOK_CLIENT_SECRET` | the TikTok **sandbox** app's (step 6) |
-| `TIKTOK_REDIRECT_URI` | `https://staging.poststreak.app/auth/tiktok/callback` — exactly as registered in TikTok |
-| `GROQ_API_KEY` (and `GEMINI_API_KEY` as fallback) | for Ask Jarvis. Without them Jarvis shows its gentle "having trouble" reply |
+| `INSTAGRAM_APP_ID`/`_SECRET`, `THREADS_APP_ID`/`_SECRET`, `FACEBOOK_APP_ID`/`_SECRET`, `GOOGLE_CLIENT_ID`/`_SECRET` | each platform's app (permissions and redirect addresses: `LIVE_PLAN.md` → Socials). A platform without its keys isn't offered in the app |
+| `<PLATFORM>_REDIRECT_URI` | *(optional)* only if it differs from `APP_WEB_URL/auth/<platform>/callback`, which is the default |
+| `GROQ_API_KEY` (and `GEMINI_API_KEY` as fallback) | the model behind Jarvis: scripts, captions, hooks, Repurpose and Ask Jarvis. **Without one, all of those are hidden in the app** (not faked) |
+| `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | payments for Pro (section 3a). Without both, the Pro page says payments aren't switched on |
+| `PAYSTACK_SECRET_KEY` | *(optional)* naira payments: only offered once the Pro plan has a `price_ngn` |
 | `CORS_ALLOWED_ORIGINS` | the app's address(es) from step 4, comma-separated, no trailing slash, e.g. `https://staging.poststreak.app`. Only these websites can call the API from a browser. **Set it on every deployed environment**; left unset, any website is allowed (local development only) |
 | `AUTH_DEV_AUTOCONFIRM` | **leave unset** (it skips email verification) |
 
-Cron jobs come from `backend/apps/web/vercel.json`: the post dispatcher every 15 minutes and the TikTok stats refresh daily at 04:00 UTC. (Sub-daily crons need Vercel's Pro plan.)
+Cron jobs come from `backend/apps/web/vercel.json`: the dispatcher every 15 minutes (posts whose time has come become "ready to post" and the creator gets a note; paid months that are over stop being Pro) and the platforms' stats refresh daily at 04:00 UTC. (Sub-daily crons need Vercel's Pro plan.)
 
 - **Check:** `https://api-staging.poststreak.app/api/v1/me/bootstrap` (open it in a browser) should answer **401** with a JSON message. A 404 or a build error means the project settings above are off.
+
+## 3a. Payments for Pro (Stripe)
+
+A creator becomes Pro only through Stripe's signed notice to the API; nothing in the app can do it. Use Stripe's
+**test mode** keys on staging.
+
+1. Stripe → Developers → API keys: the **secret key** → `STRIPE_SECRET_KEY` on the API project.
+2. Stripe → Developers → Webhooks → **Add endpoint**: `https://<the API's address>/api/payments/stripe/webhook`, with these events:
+   `checkout.session.completed`, `invoice.paid`, `customer.subscription.updated`, `customer.subscription.deleted`.
+   Its **signing secret** → `STRIPE_WEBHOOK_SECRET`.
+3. The price is the `pro` row of `subscription_plans` (`price_usd` in cents: 999 = $9.99). Change it there; the Pro page
+   and checkout both read it.
+4. **Check:** sign in on staging as a test creator, Pro page → Start Jarvis Pro → pay with Stripe's test card
+   `4242 4242 4242 4242` → back in the app the plan switches to Pro within seconds. Cancel the renewal on the Pro page and
+   check Stripe shows the subscription set to cancel at the period end.
+
+Each event is applied once (a retried delivery changes nothing); a month that is over stops being Pro on the next cron
+run (after a day's grace for a late renewal notice). **The phone apps don't sell Pro**: Apple and Google require their own
+in-app purchase for subscriptions sold inside an app. Creators buy on the web and Pro switches on in the phone app too.
+Selling inside the apps needs App Store / Play billing (or RevenueCat) and is a product decision.
 
 ## 4. Give the app the backend's address — staging
 
@@ -132,8 +156,8 @@ On a browser, then on a phone (open the staging address; the app is responsive, 
 Only after the staging checks pass. In this order:
 
 1. **Back up the live database** (Supabase → Database → Backups, or `pg_dump`). Two of the new migrations change existing data.
-2. **Apply only the new migrations — `20260814000019` to `…22`, in order — to the live project** (SQL editor or `psql -f`). Don't run `supabase db push` there; the earlier files were applied some other way and aren't recorded. `…20` removes duplicate-day rows from `streak_events` and writes check-ins for existing streaks; `…21` removes creator write access to server-owned tables; `…22` retires any placeholder TikTok rows. Re-read the audit queries (`PHASE1_CONTRACT.md` §10) afterwards.
-3. Get a second person to review migration `…21` (the team plan asks for a second pair of eyes on every security change).
+2. **Apply only the new migrations — `20260814000019` to `…27`, in order — to the live project** (SQL editor or `psql -f`), after trying the exact same files on staging. Don't run `supabase db push` there; the earlier files were applied some other way and aren't recorded. `…20` removes duplicate-day rows from `streak_events` and writes check-ins for existing streaks; `…21` removes creator write access to server-owned tables; `…22` retires any placeholder TikTok rows; `…23`–`…26` add the live app's tables and server-only functions (connections, posts, AI allowance); `…27` adds payment-event dedupe and the end of lapsed subscriptions. Re-read the audit queries (`PHASE1_CONTRACT.md` §10) afterwards.
+3. Get a second person to review migrations `…21`, `…25` and `…27` (the team plan asks for a second pair of eyes on every security change). Note: once `…27` is in, the next cron run ends any v1 subscription row whose `current_period_end` is long past; check `select count(*) from subscriptions where status in ('active','trialing') and current_period_end < now() - interval '1 day'` first, so nobody is surprised.
 4. Create the production API project (like step 3, Production Branch `main`) with the **production** Supabase keys, a **new** `TOKEN_ENCRYPTION_KEY`, and the **production** TikTok keys once TikTok approves the app (until then production TikTok connect will only work for Target users).
 5. Merge `master` into `main`. The existing app project redeploys. Nothing changes for users yet.
 6. Set `EXPO_PUBLIC_API_URL`, `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY` on the production app project and redeploy. This is the switch.
@@ -147,26 +171,43 @@ Only after the staging checks pass. In this order:
 
 ## Check it all on your machine (no accounts needed)
 
-Docker Desktop is the only requirement. This runs a real Supabase (database, sign-in, the REST layer and a mail catcher), the real API and the real app, so you can try everything before any of the cloud steps above.
+Docker Desktop is the only requirement. From the repository root:
 
 ```bash
-cd backend
-npx supabase start -x studio,imgproxy,vector,logflare,edge-runtime,storage-api,realtime,postgres-meta,supavisor
-npx supabase status -o env        # the URL and keys to copy below
+npm run local            # database + sign-in, the four test accounts, stand-ins, the API and the app
+npm run local -- --help  # flags: --reseed, --lan (a phone on the same Wi-Fi), --real-providers, --stop
 ```
 
-The first start downloads the images (about 4 GB on disk; on a slow connection that can take an hour or more) and after that it takes a few seconds. It applies all 23 migrations to the empty database itself.
+It starts a real Supabase (database, sign-in, the REST layer and a mail catcher at <http://127.0.0.1:54324>), applies every
+migration, seeds four test accounts (Free/Pro × New/Existing) with real history, and starts stand-ins on this machine for
+everything that can't reach localhost: TikTok, Instagram, Threads, Facebook, YouTube, **Stripe** (checkout and signed
+webhooks; no card is charged) and, when no AI key is set, the **model** (its words are tagged `[stand-in]` and the app says
+so). Real keys pasted into `backend/apps/web/.env.local` are used as they are. Then open <http://localhost:8081> and tap a
+test account, or sign up with an emailed code.
 
-1. **API:** in `backend/apps/web` copy `../../.env.example` to `.env.local` and fill `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` from the status output, plus a `TOKEN_ENCRYPTION_KEY` and `CRON_SECRET`. The TikTok values can be made up locally. Then `node_modules/.bin/next dev -p 3000` (or `pnpm dev`).
-2. **App:** from the repo root, with the same URL and the anon key:
-   `EXPO_PUBLIC_API_URL=http://localhost:3000 EXPO_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321 EXPO_PUBLIC_SUPABASE_ANON_KEY=<anon key> npm run web`
-   (Expo remembers these values between runs: add `--clear` when you change them.)
-3. Sign up in the browser. The 6-digit code arrives in the mail catcher at <http://127.0.0.1:54324>.
-4. **Automated pass:** `ANON=<anon key> SERVICE=<service_role key> node scripts/e2e-local.mjs` in `backend` signs two creators in with real codes and runs 55 checks against the API and the database (their data, the free limits, TikTok's sign-in address, and that one creator cannot reach or forge another's data).
+**Automated passes** (from `backend`, with the stack running):
 
-`npx supabase stop` shuts it down.
+| Script | Checks | What |
+|---|---|---|
+| `node scripts/e2e-local.mjs` | 55 | sign-in with real codes, the free limits, and that one creator can't reach or forge another's data |
+| `node scripts/e2e-social.mjs` | 171 | connect / sync / refresh / disconnect for all five platforms through their stand-ins, the free plan's two-account limit |
+| `node scripts/e2e-posts.mjs` | 89 | plan, ready, "I posted it" per platform, remind me later, edits, and that creators can't write posts directly |
+| `node scripts/e2e-studio.mjs` | 63 | scripts, hooks, captions, edits, Repurpose and Jarvis: the daily allowance, refunds when the model fails, Pro gates |
+| `node scripts/e2e-billing.mjs` | 36 | buy Pro, the webhook, a replayed event, cancel / keep at Stripe, failed and successful renewals, the end, a lapsed month, forged webhooks |
+
+If an e2e run fails because a test account was left changed by hand (say, a platform still connected), `npm run local -- --reseed`
+puts the four accounts back to their starting state. `npm run local -- --stop` shuts everything down.
 
 ## What has and hasn't been verified
+
+**On the live branch (`live/real-backend`, 2026-10-05):** 696 backend tests (every migration on an empty and on a v1-shaped
+database, row-level security as the real roles, the billing rules, Stripe signatures, the API contract); the five e2e scripts
+above (414 checks) on a real local stack; and headless-browser walkthroughs as all four test accounts at desktop and phone width:
+every page, the writing tools, drafts, the post sheet and time picker, buying Pro through the Stripe stand-in, cancelling and
+keeping it. The Android and iOS bundles build. Not verifiable without accounts or a phone: real platform logins, real Stripe,
+a real AI model, real email, and behaviour on a device.
+
+**Earlier, on `master`:**
 
 **Verified by automated tests** (`pnpm test` in `backend`, 253 tests): every migration on an empty database and on a v1-shaped one with data in it; row-level security as the real roles; the attacks that used to work (admin takeover, free Pro, minted XP, reading tokens) now refused; the TikTok flow against a faked TikTok (forged callbacks, expired and reused states, token refresh and rotation, failures); Ask Jarvis's reply handling; the browser-origin rules.
 

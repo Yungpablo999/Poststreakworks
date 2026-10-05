@@ -2,24 +2,33 @@
 // codes), the real Next.js API, real Postgres with row-level security. Two creators sign in,
 // so the isolation checks are real. 55 checks; exits 1 if any fail.
 //
-// What you need running first (see STAGING_RUNBOOK.md, "Check it all on your machine"):
-//   1. cd backend && npx supabase start -x studio,imgproxy,vector,logflare,edge-runtime,storage-api,realtime,postgres-meta,supavisor
-//   2. the API:   cd backend/apps/web && cp ../../.env.example .env.local
-//                 (fill in the Supabase URL and keys from `npx supabase status -o env`, plus a
-//                 TOKEN_ENCRYPTION_KEY and CRON_SECRET; the TikTok values can be made up locally)
-//                 node_modules/.bin/next dev -p 3000
-//   3. then:      ANON=<anon key> SERVICE=<service_role key> node scripts/e2e-local.mjs
+// What you need running first:
+//   1. npm run local              (from the repository root; wait for "PostStreak is running")
+//   2. cd backend && node scripts/e2e-local.mjs
 //
 // It reads the sign-in codes from the local mail catcher (http://127.0.0.1:54324), so it only
 // works against the local stack, never against a hosted project.
 //
-// Usage: ANON=... SERVICE=... node scripts/e2e-local.mjs   (API, SB, MAIL override the addresses)
+// The keys are read from backend/apps/web/.env.local (npm run local writes it); ANON, SERVICE, API, SB and
+// MAIL override them.
+import { existsSync, readFileSync } from 'node:fs';
+
+const envFile = new URL('../apps/web/.env.local', import.meta.url);
+const env = existsSync(envFile)
+  ? Object.fromEntries(
+      readFileSync(envFile, 'utf8')
+        .split(/\r?\n/)
+        .map((l) => l.match(/^([A-Z0-9_]+)=(.*)$/))
+        .filter(Boolean)
+        .map((m) => [m[1], m[2]]),
+    )
+  : {};
 const API = process.env.API ?? 'http://localhost:3000';
-const SB = process.env.SB ?? 'http://127.0.0.1:54321';
+const SB = process.env.SB ?? env.NEXT_PUBLIC_SUPABASE_URL ?? 'http://127.0.0.1:54321';
 const MAIL = process.env.MAIL ?? 'http://127.0.0.1:54324';
-const ANON = process.env.ANON;
-const SERVICE = process.env.SERVICE;
-if (!ANON || !SERVICE) throw new Error('set ANON and SERVICE');
+const ANON = process.env.ANON ?? env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const SERVICE = process.env.SERVICE ?? env.SUPABASE_SERVICE_ROLE_KEY;
+if (!ANON || !SERVICE) throw new Error('No keys: run npm run local first (or set ANON and SERVICE)');
 
 let passed = 0;
 const failures = [];
@@ -186,12 +195,14 @@ console.log('\n== saved hooks');
 
 console.log('\n== repurpose allowance (free: 1 a week)');
 {
-  const one = await A('POST', '/api/v1/repurpose/spend');
-  check('first use allowed', one.status === 200 && one.body?.allowed === true && one.body?.usedThisWeek === 1, one.body);
-  const two = await A('POST', '/api/v1/repurpose/spend');
-  check('second use is a normal "not allowed" with the Pro prompt flag', two.status === 200 && two.body?.allowed === false && two.body?.upgradeRequired === true, two.body);
-  const other = await B('POST', '/api/v1/repurpose/spend');
-  check("B's count is their own", other.body?.allowed === true && other.body?.usedThisWeek === 1, other.body);
+  // Repurpose is written by the model (the stand-in, locally); each run uses the week's one free repurpose
+  const body = { text: 'My 5-minute morning reset', platforms: ['tiktok'] };
+  const one = await A('POST', '/api/v1/repurpose/generate', body);
+  check('first use allowed', one.status === 200 && one.body?.usedThisWeek === 1 && one.body?.weeklyLimit === 1, one.body);
+  const two = await A('POST', '/api/v1/repurpose/generate', body);
+  check('second use is refused with the Pro prompt', two.status === 429 && two.body?.code === 'UPGRADE_REQUIRED', two.body);
+  const other = await B('POST', '/api/v1/repurpose/generate', body);
+  check("B's count is their own", other.status === 200 && other.body?.usedThisWeek === 1, other.body);
 }
 
 console.log('\n== tour and tips');
@@ -219,7 +230,9 @@ console.log('\n== TikTok');
   check('authorize gives TikTok sign-in address (or says it is not set up)', web.status === 200 || web.status === 503, web);
   if (web.status === 200) {
     const url = new URL(web.body.url);
-    check('it points at TikTok', url.hostname === 'www.tiktok.com' && url.pathname.startsWith('/v2/auth/authorize'), web.body.url);
+    // Locally `npm run local` points TikTok at its stand-in (TIKTOK_MOCK_ORIGIN); a real setup at TikTok itself
+    const tiktokAt = env.TIKTOK_MOCK_ORIGIN ? web.body.url.startsWith(env.TIKTOK_MOCK_ORIGIN) : url.hostname === 'www.tiktok.com';
+    check('it points at TikTok', tiktokAt && url.pathname.endsWith('/v2/auth/authorize/'), web.body.url);
     check('with exactly the three scopes', url.searchParams.get('scope') === 'user.info.basic,user.info.stats,video.list', url.searchParams.get('scope'));
     check('and a web-tagged one-time state', (url.searchParams.get('state') ?? '').startsWith('w.'), url.searchParams.get('state'));
     check('and our redirect address', (url.searchParams.get('redirect_uri') ?? '').endsWith('/auth/tiktok/callback'), url.searchParams.get('redirect_uri'));

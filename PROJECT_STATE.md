@@ -4,7 +4,16 @@
 get reset, new chats start cold. This is the actual source of truth for what's been built, what's
 real vs. stub, and what to do next. Keep it updated as work progresses; don't let it go stale.
 
-Last updated: 2026-10-03.
+Last updated: 2026-10-05.
+
+### Update (2026-10-05) — the live branch: the whole app on the real backend, nothing faked
+
+Branch `live/real-backend` (local, cut from `master`; not pushed yet) runs the whole app, web and phone, against the real
+backend: five platform connections, Growth from synced stats, posts planned → ready → posted by the server, the writing tools
+counted and checked on the server, and **Pro bought at Stripe** (granted only by its signed webhook, cancelled at Stripe, over
+when the paid month is: migration `…27`). Everything the server can't do is hidden, not faked. `npm run local` starts it all
+on one machine with stand-ins for the platforms, Stripe and the model. **Read `LIVE_PLAN.md` first** (status log, hand-over,
+what only the owner can switch on) and `backend/STAGING_RUNBOOK.md` (settings, payments, migrations `…19`–`…27` for prod).
 
 ### Direction update (2026-10-02) — read before anything else in this file
 
