@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { ActivityIndicator, Linking, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { Text, TextInput } from '../ui/AppText';
@@ -15,6 +15,9 @@ import { growthStore, loadGrowth, useGrowth } from '../../backend/growth';
 import { notify } from '../../backend/notice';
 import { HANDOFF_NAMES, HANDOFF_PLATFORMS, handOffToPlatform, isHandoffPlatform, postText } from '../../utils/handoff';
 import type { Post, PostStep } from '../../../frontend/shared/types/phase1';
+
+/** How long a sheet takes to slide away (GlassSheet closes in 220 ms). */
+const SWAP_MS = 260;
 
 // One post of the creator's: its caption, its time, and where it stands on each platform. From here a
 // creator opens the platform's app with the caption copied, says they posted it (one platform at a
@@ -50,7 +53,26 @@ export function PostSheet({ postId, onClose }: PostSheetProps) {
   const [caption, setCaption] = useState('');
   const [tags, setTags] = useState('');
   const [platforms, setPlatforms] = useState<string[]>([]);
+  // Changing the time: this sheet steps aside first, then the time picker opens (and the other way round
+  // when it closes). iOS can show only one modal at a time, so the two are never stacked on any platform.
   const [moving, setMoving] = useState(false);
+  const [pickingTime, setPickingTime] = useState(false);
+  const swapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const swap = (fn: () => void) => {
+    if (swapTimer.current) clearTimeout(swapTimer.current);
+    swapTimer.current = setTimeout(fn, SWAP_MS);
+  };
+  useEffect(() => () => {
+    if (swapTimer.current) clearTimeout(swapTimer.current);
+  }, []);
+  const startMove = () => {
+    setMoving(true);
+    swap(() => setPickingTime(true));
+  };
+  const endMove = () => {
+    setPickingTime(false);
+    swap(() => setMoving(false));
+  };
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   // A message for the creator, shown inside the sheet (the app's own toast sits behind it)
   const [message, setMessage] = useState<string | null>(null);
@@ -67,6 +89,7 @@ export function PostSheet({ postId, onClose }: PostSheetProps) {
     setLinkFor(null);
     setEditing(false);
     setMoving(false);
+    setPickingTime(false);
     setConfirmingDelete(false);
     setMessage(null);
     void loadPost(postId).then((res) => {
@@ -129,7 +152,7 @@ export function PostSheet({ postId, onClose }: PostSheetProps) {
 
   const moveTo = async (at: Date) => {
     if (!post) return;
-    setMoving(false);
+    endMove();
     setBusy(true);
     const res = await editPost(post.id, { at: at.toISOString() });
     setBusy(false);
@@ -195,7 +218,7 @@ export function PostSheet({ postId, onClose }: PostSheetProps) {
   return (
     <>
       <GlassSheet
-        visible={!!postId}
+        visible={!!postId && !moving}
         onClose={onClose}
         title={post ? status : state === 'gone' ? 'Not found' : 'Your post'}
         subtitle={post ? sub : undefined}
@@ -328,7 +351,7 @@ export function PostSheet({ postId, onClose }: PostSheetProps) {
               {open_ && !editing && (
                 <View style={styles.row}>
                   <View style={styles.flex}>
-                    <AppButton title={ready ? 'Remind me later' : 'Change time'} variant="glass" onPress={() => setMoving(true)} disabled={busy} />
+                    <AppButton title={ready ? 'Remind me later' : 'Change time'} variant="glass" onPress={startMove} disabled={busy} />
                   </View>
                   <View style={styles.flex}>
                     <AppButton title="Edit" variant="glass" onPress={startEditing} disabled={busy} />
@@ -346,8 +369,8 @@ export function PostSheet({ postId, onClose }: PostSheetProps) {
       </GlassSheet>
 
       <ScheduleSheet
-        visible={moving}
-        onClose={() => setMoving(false)}
+        visible={pickingTime}
+        onClose={endMove}
         onConfirm={(at) => void moveTo(at)}
         mode="remind"
         bestTime={bestTime}

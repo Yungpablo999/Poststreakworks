@@ -1,3 +1,6 @@
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { allowedOrigin, corsHeaders } from "./cors";
 
@@ -31,5 +34,27 @@ describe("corsHeaders", () => {
   it("sends no allow headers to a website that isn't listed", () => {
     const denied = corsHeaders("https://evil.example", "https://app.poststreak.app");
     expect(denied).toEqual({ Vary: "Origin" });
+  });
+});
+
+describe("allowed methods", () => {
+  // A browser refuses any method the preflight doesn't allow, so every method a route exports must be listed
+  // (PATCH was once missing: moving a post worked on the phone and failed on the web).
+  it("lists every method the API's routes answer", () => {
+    const root = fileURLToPath(new URL("../../../apps/web/app/api", import.meta.url));
+    const used = new Set<string>();
+    const walk = (dir: string) => {
+      for (const name of readdirSync(dir)) {
+        const p = path.join(dir, name);
+        if (statSync(p).isDirectory()) walk(p);
+        else if (name === "route.ts") {
+          for (const m of readFileSync(p, "utf8").matchAll(/export (?:async )?function (GET|POST|PUT|PATCH|DELETE)\b/g)) used.add(m[1]!);
+        }
+      }
+    };
+    walk(root);
+    expect(used.size).toBeGreaterThan(0);
+    const allowed = (corsHeaders("https://app.poststreak.app", "https://app.poststreak.app")["Access-Control-Allow-Methods"] ?? "").split(/,\s*/);
+    for (const method of used) expect(allowed).toContain(method);
   });
 });

@@ -26,7 +26,7 @@ export function corsHeaders(origin: string | null, configured: string | undefine
     ...(allow
       ? {
           "Access-Control-Allow-Origin": allow,
-          "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+          "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
           "Access-Control-Allow-Headers": "Content-Type, Authorization, x-trpc-source",
           "Access-Control-Max-Age": "600",
         }

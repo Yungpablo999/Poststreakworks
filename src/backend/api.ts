@@ -19,6 +19,10 @@ export type ApiResult<T> = { ok: true; data: T } | ApiFailure;
 
 const TIMEOUT_MS = 20_000;
 
+/** A reply that said "OK" but whose body never arrived whole (cut off, or the time ran out while reading
+ * it): nothing to show, so it is treated like an unreachable server and the screen says so. */
+const CUT_OFF = { ok: false, status: 0, message: 'Can’t reach PostStreak right now.', offline: true } as const;
+
 async function call<T>(method: string, path: string, body: unknown, canRetry: boolean): Promise<ApiResult<T>> {
   const token = await accessToken();
   if (!token) return { ok: false, status: 401, message: 'Please sign in again.', offline: false };
@@ -38,7 +42,7 @@ async function call<T>(method: string, path: string, body: unknown, canRetry: bo
     });
     const json = (await res.json().catch(() => null)) as (Partial<ApiErrorBody> & Record<string, unknown>) | null;
 
-    if (res.ok) return { ok: true, data: json as T };
+    if (res.ok) return json === null ? CUT_OFF : { ok: true, data: json as T };
 
     // A refused token is usually just an expired one: refresh once and retry.
     if (res.status === 401 && canRetry && (await refreshAccessToken())) {
@@ -66,7 +70,7 @@ export async function publicGet<T>(path: string): Promise<ApiResult<T>> {
   try {
     const res = await fetch(`${BACKEND.apiUrl}${path}`, { signal: controller.signal, headers: { Accept: 'application/json' } });
     const json = (await res.json().catch(() => null)) as (Partial<ApiErrorBody> & Record<string, unknown>) | null;
-    if (res.ok) return { ok: true, data: json as T };
+    if (res.ok) return json === null ? CUT_OFF : { ok: true, data: json as T };
     return { ok: false, status: res.status, message: typeof json?.message === 'string' ? json.message : 'Something went wrong. Please try again.', code: json?.code, upsell: json?.upsell, offline: false };
   } catch {
     return { ok: false, status: 0, message: 'Can’t reach PostStreak right now.', offline: true };
