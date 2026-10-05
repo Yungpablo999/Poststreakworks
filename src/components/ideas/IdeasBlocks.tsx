@@ -1,13 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, Pressable, ScrollView, StyleSheet, Platform, ActivityIndicator } from 'react-native';
-import Animated, {
-  Easing,
-  FadeIn,
-  FadeInUp,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
+import { View, Pressable, ScrollView, StyleSheet, Platform } from 'react-native';
+import Animated, { Easing, FadeInUp, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { Text } from '../ui/AppText';
@@ -231,50 +224,6 @@ export function IdeaRowSkeleton() {
   );
 }
 
-// ─── Daily ideas meter ──────────────────────────────────────────────────────
-export function QuotaCard({
-  used,
-  limit,
-  generating,
-  onGenerate,
-  onPro,
-}: {
-  used: number;
-  limit: number;
-  generating: boolean;
-  onGenerate: () => void;
-  onPro: () => void;
-}) {
-  const left = Math.max(0, limit - used);
-  return (
-    <GlassCard strong radius={22} padding={16}>
-      <View style={styles.quotaHead}>
-        <Text style={styles.quotaTitle}>New ideas today</Text>
-        <Text style={styles.quotaCount}>
-          {used} of {limit}
-        </Text>
-      </View>
-      <View style={styles.quotaBars}>
-        {Array.from({ length: limit }).map((_, i) => (
-          <View key={i} style={[styles.quotaBar, i < used && styles.quotaBarOn]} />
-        ))}
-      </View>
-      <View style={styles.quotaBtn}>
-        {left > 0 ? (
-          <AppButton title={generating ? 'Thinking…' : 'Generate new ideas'} variant="quiet" onPress={onGenerate} disabled={generating} />
-        ) : (
-          <>
-            <Text style={styles.quotaDone}>That's today's free ideas. More tomorrow.</Text>
-            <Pressable onPress={onPro} hitSlop={6} accessibilityRole="button">
-              <Text style={styles.proLink}>Pro gives you unlimited ideas</Text>
-            </Pressable>
-          </>
-        )}
-      </View>
-    </GlassCard>
-  );
-}
-
 // ─── Pro: ideas about your own topic ───────────────────────────────────────
 export function TopicIdeasCard({
   busy,
@@ -360,23 +309,6 @@ export function TopicIdeasCard({
   );
 }
 
-// ─── Pro: no daily limit ────────────────────────────────────────────────────
-export function UnlimitedIdeasCard({ generating, onGenerate }: { generating: boolean; onGenerate: () => void }) {
-  return (
-    <GlassCard strong radius={22} padding={16}>
-      <View style={styles.quotaHead}>
-        <Text style={styles.quotaTitle}>New ideas</Text>
-        <View style={styles.proTag}>
-          <Text style={styles.proTagText}>UNLIMITED</Text>
-        </View>
-      </View>
-      <View style={styles.quotaBtn}>
-        <AppButton title={generating ? 'Thinking…' : 'Generate new ideas'} variant="quiet" onPress={onGenerate} disabled={generating} />
-      </View>
-    </GlassCard>
-  );
-}
-
 // ─── Saved row ──────────────────────────────────────────────────────────────
 export function SavedRow({ title, meta, onPress, onUnsave }: { title: string; meta: string; onPress: () => void; onUnsave: () => void }) {
   return (
@@ -458,7 +390,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(237, 233, 254, 0.9)',
   },
   anotherText: { fontSize: 12.5, fontWeight: '800', color: ds.purple },
-  thinking: { minHeight: 170, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
   thinkingText: { fontSize: 13, fontWeight: '700', color: ds.text3 },
   pickBody: { minHeight: 170, marginTop: 12 },
   pickTitle: { fontSize: 22, lineHeight: 28, fontWeight: '800', color: ds.ink, letterSpacing: -0.5 },
@@ -483,14 +414,5 @@ const styles = StyleSheet.create({
     borderTopColor: 'rgba(23, 20, 32, 0.1)',
   },
   useText: { fontSize: 13.5, fontWeight: '800', color: ds.purple },
-  quotaHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  quotaTitle: { fontSize: 15, fontWeight: '800', color: ds.ink },
-  quotaCount: { fontSize: 13, fontWeight: '800', color: ds.purple },
-  quotaBars: { flexDirection: 'row', gap: 5, marginTop: 10 },
-  quotaBar: { flex: 1, height: 8, borderRadius: 4, backgroundColor: 'rgba(91, 62, 232, 0.14)' },
-  quotaBarOn: { backgroundColor: ds.purple },
-  quotaBtn: { marginTop: 14 },
-  quotaDone: { fontSize: 13, color: ds.text2, textAlign: 'center' },
-  proLink: { fontSize: 13.5, fontWeight: '800', color: ds.goldLedge, textAlign: 'center', marginTop: 6 },
   savedTitle: { fontSize: 14.5, fontWeight: '800', color: ds.ink },
 });

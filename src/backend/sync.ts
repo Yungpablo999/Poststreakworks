@@ -37,6 +37,7 @@ import { clearNotifications } from './notifications';
 import { clearQuests } from './quests';
 import { clearHome } from './home';
 import { clearStudioUsage, loadStudioUsage } from './studio';
+import { clearCalendarWindows } from './calendar';
 
 // The glue between the app's in-memory stores (src/data, the tour, the mascot's
 // tips, Jarvis's chat) and the API. Screens never call the API themselves: they
@@ -146,6 +147,7 @@ export function clearAccountData(): void {
   clearHome();
   clearGrowth();
   clearStudioUsage();
+  clearCalendarWindows();
   seedTipsSeen([], true);
   setTourFinished(false);
   loaded = false;

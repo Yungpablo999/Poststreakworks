@@ -1,19 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Pressable, StyleSheet, Platform, type LayoutChangeEvent } from 'react-native';
-import Animated, {
-  Easing,
-  FadeIn,
-  FadeOut,
-  ZoomIn,
-  ZoomOut,
-  interpolateColor,
-  useAnimatedProps,
-  useAnimatedStyle,
-  useReducedMotion,
-  useSharedValue,
-  withRepeat,
-  withTiming,
-} from 'react-native-reanimated';
+import Animated, { Easing, FadeIn, ZoomIn, ZoomOut, interpolateColor, useAnimatedProps, useAnimatedStyle, useReducedMotion, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
 import Svg, { Path, Rect, Circle } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { Text } from '../ui/AppText';
@@ -368,22 +355,6 @@ function SmallAction({ label, onPress, subtle }: { label: string; onPress: () =>
   );
 }
 
-// ─── Caption helpers ────────────────────────────────────────────────────────
-export function AiAction({ label, onPress, disabled }: { label: string; onPress: () => void; disabled: boolean }) {
-  return (
-    <Pressable
-      onPress={onPress}
-      disabled={disabled}
-      style={({ pressed }) => [styles.aiAction, disabled && { opacity: 0.45 }, pressed && { transform: [{ scale: 0.96 }] }]}
-      accessibilityRole="button"
-    >
-      <Text style={styles.aiActionText} numberOfLines={1}>
-        {label}
-      </Text>
-    </Pressable>
-  );
-}
-
 // ─── Tags ───────────────────────────────────────────────────────────────────
 export function TagChip({ tag, onRemove }: { tag: string; onRemove: () => void }) {
   return (
@@ -689,17 +660,6 @@ const styles = StyleSheet.create({
   smallActionSubtle: { backgroundColor: 'rgba(23, 20, 32, 0.05)' },
   smallActionText: { fontSize: 12.5, fontWeight: '800', color: ds.purple },
   // Buttons size to their word so "Ask viewers" fits on 320
-  aiAction: {
-    flexGrow: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 38,
-    paddingHorizontal: 8,
-    borderRadius: 12,
-    backgroundColor: ds.lavender,
-  },
-  aiActionText: { fontSize: 12.5, fontWeight: '800', color: ds.purple },
   // One tag per row, all the same width: a tidy list instead of ragged,
   // scattered chips (and long hashtags never get cut off).
   tag: {

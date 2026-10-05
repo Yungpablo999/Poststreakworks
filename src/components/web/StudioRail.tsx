@@ -144,7 +144,6 @@ export function StudioRail({ kind }: { kind: StudioKind }) {
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1, minWidth: 0 },
   rail: { width: RAIL_W, borderLeftWidth: 1, borderLeftColor: 'rgba(255, 255, 255, 0.9)' },
   railScroll: { padding: 20, gap: 14, paddingBottom: 40 },
   rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },

@@ -27,7 +27,7 @@ interface SignInScreenProps {
   onBack?: () => void;
   onCreateAccount: () => void;
   onSubmit?: (email: string) => void;
-  /** One-tap sign-in (mock: goes straight in; a real app runs the provider's sign-in). */
+  /** One-tap sign-in with Google or Apple (Supabase runs the provider's sign-in). */
   onSocialSignIn?: (provider: SocialProvider) => void;
   /** The code is being sent. */
   busy?: boolean;

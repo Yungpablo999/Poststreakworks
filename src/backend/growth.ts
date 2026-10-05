@@ -23,13 +23,6 @@ export async function loadSnapshots(): Promise<AccountSnapshotDto[] | null> {
   return res.ok ? res.data : null;
 }
 
-/** The hour their posts do best on the platform they post on most. null = not enough posts yet (or couldn't be loaded). */
-export async function loadBestTime(): Promise<{ time: string; platformName: string } | null> {
-  const snaps = await loadSnapshots();
-  const top = [...(snaps ?? [])].sort((a, b) => b.recentPosts - a.recentPosts)[0];
-  return top ? { time: top.bestTime, platformName: PLATFORM_NAME[top.platform] ?? top.platform } : null;
-}
-
 // ─── The Growth screens ─────────────────────────────────────────────────────
 
 /** What Growth shows, as of the last time it was loaded. null = not loaded yet (or signed out). */

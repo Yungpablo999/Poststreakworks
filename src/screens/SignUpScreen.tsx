@@ -27,7 +27,7 @@ interface SignUpScreenProps {
   onBack: () => void;
   onSignIn?: () => void;
   onSubmit?: (username: string, email: string) => void;
-  /** One-tap sign-up (mock: continues straight on; a real app runs the provider's sign-in). */
+  /** One-tap sign-up with Google or Apple (Supabase runs the provider's sign-in). */
   onSocialSignUp?: (provider: SocialProvider) => void;
   /** The idea they kept on the "Your plan" step, shown as what they're saving. */
   savedIdeaTitle?: string;

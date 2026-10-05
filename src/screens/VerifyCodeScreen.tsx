@@ -29,13 +29,11 @@ import { ds } from '../theme/colors';
 
 // Email code step (sign-up step 5 of 5, and sign-in). Six glass boxes backed by
 // one hidden input, so paste and one-time-code autofill work. Verifies itself
-// on the 6th digit, then celebrates (boxes turn green in sequence) and moves on.
-// With no backend (onVerify not given) it is a mock: any 6 digits are accepted.
+// on the 6th digit (the server checks it), then celebrates (boxes turn green in sequence) and moves on.
 
 const CODE_LENGTH = 6;
 // Supabase Auth allows one code email per address per minute, so asking sooner would only be refused.
 const RESEND_SECONDS = 60;
-const CHECK_MS = 700;
 const CELEBRATE_MS = 1100;
 
 interface VerifyCodeScreenProps {
@@ -46,9 +44,9 @@ interface VerifyCodeScreenProps {
   onEditEmail: () => void;
   onSuccess: (email: string) => void;
   /** Checks the code for real. Resolves null when it was right, or the message to show when it wasn't. */
-  onVerify?: (code: string) => Promise<string | null>;
+  onVerify: (code: string) => Promise<string | null>;
   /** Sends a fresh code. Resolves null when sent, or the message to show. */
-  onResend?: () => Promise<string | null>;
+  onResend: () => Promise<string | null>;
 }
 
 type Status = 'entering' | 'checking' | 'verified';
@@ -138,23 +136,19 @@ export const VerifyCodeScreen: React.FC<VerifyCodeScreenProps> = ({ mode, email,
     setStatus('checking');
     setError(null);
     inputRef.current?.blur();
-    if (onVerify) {
-      // The real thing: the backend checks the code.
-      onVerify(value).then((problem) => {
-        if (!mounted.current) return;
-        if (problem) {
-          if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-          setError(problem);
-          setCode('');
-          setStatus('entering');
-          setTimeout(() => inputRef.current?.focus(), 50);
-          return;
-        }
-        celebrate();
-      });
-      return;
-    }
-    timers.current.push(setTimeout(celebrate, CHECK_MS));
+    // The server checks the code
+    onVerify(value).then((problem) => {
+      if (!mounted.current) return;
+      if (problem) {
+        if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        setError(problem);
+        setCode('');
+        setStatus('entering');
+        setTimeout(() => inputRef.current?.focus(), 50);
+        return;
+      }
+      celebrate();
+    });
   };
 
   const handleChange = (text: string) => {
@@ -172,15 +166,11 @@ export const VerifyCodeScreen: React.FC<VerifyCodeScreenProps> = ({ mode, email,
     setCode('');
     setError(null);
     setSecondsLeft(RESEND_SECONDS);
-    if (onResend) {
-      onResend().then((problem) => {
-        if (!mounted.current) return;
-        if (problem) setError(problem);
-        else setResentNote(true);
-      });
-    } else {
-      setResentNote(true);
-    }
+    onResend().then((problem) => {
+      if (!mounted.current) return;
+      if (problem) setError(problem);
+      else setResentNote(true);
+    });
     inputRef.current?.focus();
   };
 

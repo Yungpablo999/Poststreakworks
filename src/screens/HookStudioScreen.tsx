@@ -17,7 +17,7 @@ import { JarvisOrb } from '../components/JarvisOrb';
 import { FreeAppHeader } from '../components/FreeAppHeader';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
-import { FILM_STYLES, getDefaultFilmStyle, getSavedHooks, isHookSaved, subscribeToSavedHooks, toggleSavedHook, type FilmStyle } from '../data';
+import { FILM_STYLES, getDefaultFilmStyle, getSavedHooks, subscribeToSavedHooks, toggleSavedHook, type FilmStyle } from '../data';
 import { AppToast } from '../components/ui/AppToast';
 import { NeedsJarvis, Problem, StandInNote, UsageLine } from '../components/studio/StudioBits';
 import { useCapabilities } from '../backend/account';
