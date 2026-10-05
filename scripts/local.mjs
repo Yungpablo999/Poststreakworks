@@ -5,6 +5,8 @@
 //   the four test users → free/Pro × new/existing, real rows in that database
 //   stand-in providers  → TikTok, Instagram, Threads, Facebook and YouTube, on this machine,
 //                         because the real ones can only call back to an https address
+//   stand-in payments   → a Stripe checkout page and its signed webhooks, so Pro can be bought and
+//                         cancelled here (no card is charged; real Stripe keys are used as they are)
 //   the API             → backend/apps/web (Next.js) on :3000
 //   the app             → Expo web on :8081 (phone: see --lan)
 //
@@ -218,6 +220,8 @@ const generated = {
   TOKEN_ENCRYPTION_KEY: () => randomBytes(32).toString('base64'),
   CRON_SECRET: () => randomBytes(16).toString('hex'),
 };
+// The stand-in Stripe signs its webhooks with this, and the API checks them with it (this machine only)
+const STRIPE_STANDIN_SECRET_FILE = path.join(root, '.expo', 'stripe-standin-secret');
 const tokenKeyBefore = env.get('TOKEN_ENCRYPTION_KEY');
 for (const [k, v] of Object.entries(managed)) env.set(k, v);
 for (const [k, make] of Object.entries(generated)) if (!env.get(k)) env.set(k, make());
@@ -256,6 +260,25 @@ if (!args.has('--real-providers')) {
     env.delete(p.redirectVar);
     for (const v of [p.keyVar, p.secretVar]) if (String(env.get(v) ?? '').startsWith(STAND_IN_PREFIX)) env.delete(v);
   }
+}
+
+// Payments for Pro. Real Stripe keys you pasted are used as they are (with --real-providers, or when both are
+// set). Otherwise a stand-in Stripe on this machine takes the "payment" (no card, nothing leaves this
+// computer) and sends the API the same signed webhooks Stripe would, so buying and cancelling Pro work here.
+const realStripe = String(env.get('STRIPE_SECRET_KEY') ?? '').trim() !== '' && !String(env.get('STRIPE_SECRET_KEY')).startsWith(STAND_IN_PREFIX);
+let stripeStandIn = null;
+if (!args.has('--real-providers') && !realStripe) {
+  mkdirSync(path.dirname(STRIPE_STANDIN_SECRET_FILE), { recursive: true });
+  if (!existsSync(STRIPE_STANDIN_SECRET_FILE)) writeFileSync(STRIPE_STANDIN_SECRET_FILE, `whsec_${randomBytes(24).toString('hex')}`);
+  const secret = readFileSync(STRIPE_STANDIN_SECRET_FILE, 'utf8').trim();
+  env.set('STRIPE_MOCK_ORIGIN', `http://${mocksHost}:${PORT.mocks}/stripe`);
+  env.delete('STRIPE_SECRET_KEY');
+  env.delete('STRIPE_WEBHOOK_SECRET');
+  standInEnv.STRIPE_SECRET_KEY = `${STAND_IN_PREFIX}-stripe-key`;
+  standInEnv.STRIPE_WEBHOOK_SECRET = secret;
+  stripeStandIn = { STRIPE_STANDIN_WEBHOOK_URL: `http://127.0.0.1:${PORT.api}/api/payments/stripe/webhook`, STRIPE_STANDIN_WEBHOOK_SECRET: secret };
+} else {
+  env.delete('STRIPE_MOCK_ORIGIN');
 }
 
 // The model behind Jarvis (scripts, captions, hooks, Repurpose, chat). A real key you pasted is used as it is.
@@ -352,7 +375,7 @@ async function waitFor(url, label, ms = 180_000) {
 
 if (!args.has('--real-providers')) {
   say('Starting the stand-in platforms');
-  start('stand-ins', `node scripts/mock-providers.mjs`, 'mock-providers', { cwd: backend, env: { MOCK_PROVIDERS_HOST: lanIp ? '0.0.0.0' : '127.0.0.1', MOCK_PROVIDERS_PORT: String(PORT.mocks), MOCK_PROVIDERS_PUBLIC: `http://${mocksHost}:${PORT.mocks}` } });
+  start('stand-ins', `node scripts/mock-providers.mjs`, 'mock-providers', { cwd: backend, env: { MOCK_PROVIDERS_HOST: lanIp ? '0.0.0.0' : '127.0.0.1', MOCK_PROVIDERS_PORT: String(PORT.mocks), MOCK_PROVIDERS_PUBLIC: `http://${mocksHost}:${PORT.mocks}`, ...(stripeStandIn ?? {}) } });
   await waitFor(`http://127.0.0.1:${PORT.mocks}/`, 'The stand-in platforms', 30_000);
 }
 
@@ -401,6 +424,8 @@ console.log(`
   API            http://localhost:${PORT.api}
   Email codes    http://127.0.0.1:${sb.INBUCKET_URL ? new URL(sb.INBUCKET_URL).port : 54324}   (a sign-up code arrives here, not in a real inbox)
   Stand-ins      http://${mocksHost}:${PORT.mocks}   (TikTok and the other platforms, for connecting accounts)
+  Payments       ${stripeStandIn ? 'a stand-in Stripe: "Upgrade" works here and no card is charged' : 'real Stripe keys from .env.local'}
+  Jarvis         ${env.get('AI_MOCK_ORIGIN') ? 'a stand-in model: placeholder words tagged [stand-in]' : 'the AI key from .env.local'}
 
   Test accounts  Free · New    Free · Existing    Pro · New    Pro · Existing
   Planned posts  become "ready to post" within 30 seconds of their time here (every 15 minutes on Vercel)

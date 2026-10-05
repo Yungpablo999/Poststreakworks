@@ -3,7 +3,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { type NextRequest } from "next/server";
-import { getServiceClient } from "@poststreak/workflows";
+import { entitledAfter, getServiceClient } from "@poststreak/workflows";
 import { enforceRateLimit } from "./rate-limit";
 
 // ============================================================================
@@ -116,12 +116,15 @@ async function resolveUser(
 
   const [{ data: psUser }, { data: subscription }] = await Promise.all([
     supabase.from("users").select("role, account_status").eq("id", user.id).single(),
+    // Pro = a subscription paid for a period that isn't over (plus a day's grace for a late renewal
+    // notice). More than one row may be active (two months paid back to back): any one is enough.
     supabase
       .from("subscriptions")
       .select("id")
       .eq("user_id", user.id)
       .in("status", ["active", "trialing"])
-      .maybeSingle(),
+      .gt("current_period_end", entitledAfter())
+      .limit(1),
   ]);
 
   if (!psUser) return null;
@@ -131,7 +134,7 @@ async function resolveUser(
     email: user.email!,
     role: (psUser.role as "creator" | "staff_admin") ?? "creator",
     accountStatus: psUser.account_status ?? "active",
-    tier: subscription ? "pro" : "free",
+    tier: subscription && subscription.length > 0 ? "pro" : "free",
   };
 }
 
@@ -247,46 +250,9 @@ export const staffProcedure = t.procedure.use(
 // ============================================================================
 // Dual-tier entitlements — architecture/SUBSCRIPTION_AND_DUAL_TIER_ROUTING.md
 // ============================================================================
-// Numbers here are the entitlement matrix from that doc, kept in one place so
-// "what does free vs. pro get" has a single source of truth instead of a
-// magic number re-guessed in every router that needs one.
-
-//
-// freeRepurposesPerWeek / jarvisChatPerDay come from the October 2026 product
-// brief. Repurposes: "1 free per week" (an open decision — keep or change; this
-// is the one place to change it). Jarvis chat is a SEPARATE budget from the
-// four content tools above (ideas/hooks/scripts/captions): chat is open to
-// everyone, so these numbers are abuse/cost guards. They are PLACEHOLDERS until
-// product sets real ones.
-export const TIER_LIMITS = {
-  free: {
-    maxConnectedPlatforms: 2,
-    aiGenerationsPerDay: 3,
-    // Small changes to something already written (rewrite one part of a script, shorten a caption,
-    // suggest tags) are counted apart from new writing, so tidying a script doesn't use up the day.
-    // A PLACEHOLDER like jarvisChatPerDay until product sets the real number.
-    aiEditsPerDay: 10,
-    passportBoostPct: 0,
-    repurposesPerWeek: 1 as number | null,
-    jarvisChatPerDay: 30,
-  },
-  pro: {
-    maxConnectedPlatforms: Infinity,
-    aiGenerationsPerDay: Infinity,
-    aiEditsPerDay: Infinity,
-    passportBoostPct: 15,
-    repurposesPerWeek: null as number | null,
-    jarvisChatPerDay: 300,
-  },
-  founding: {
-    maxConnectedPlatforms: Infinity,
-    aiGenerationsPerDay: Infinity,
-    aiEditsPerDay: Infinity,
-    passportBoostPct: 15,
-    repurposesPerWeek: null as number | null,
-    jarvisChatPerDay: 300,
-  },
-} as const;
+// The numbers (the entitlement matrix from that doc) live in lib/limits.ts, the one place that says
+// "what does free vs. pro get", with no imports so tests and pure helpers can use it too.
+export { TIER_LIMITS } from "./lib/limits";
 
 /**
  * Throws a 403 shaped exactly like architecture/SUBSCRIPTION_AND_DUAL_TIER_ROUTING.md

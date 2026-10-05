@@ -1,4 +1,3 @@
-import { react } from '../mascot/mascot';
 import React, { useEffect, useRef, useState } from 'react';
 import { usePageWidth } from '../hooks/useBreakpoint';
 import { View, ScrollView, Pressable, StyleSheet, Platform } from 'react-native';
@@ -24,69 +23,66 @@ import { JarvisOrb } from '../components/JarvisOrb';
 import { FreeAppHeader } from '../components/FreeAppHeader';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
-import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
+import { Problem } from '../components/studio/StudioBits';
+import { useCapabilities, usePlan } from '../backend/account';
+import { canBuyHere, cancelRenewal, formatPrice, loadOffer, resumeRenewal, startCheckout, useOffer } from '../backend/billing';
+import { studioProblem } from '../backend/studio';
+import type { BillingOffer, Capabilities } from '../../frontend/shared/types/phase1';
 import { ds, goldTokens } from '../theme/colors';
 
-// Jarvis Pro, for free creators. Light glass like the rest of the app; gold
-// only marks Pro. One upgrade button (in the plan card); the hero's button
-// just scrolls to it. Free vs Pro is a switch, not a put-down of the free plan.
-// Stage 1 features only.
+// Jarvis Pro. For free creators: what Pro adds and the way to buy it; for Pro members: their plan, and
+// stopping or resuming its renewal. Everything here is the server's: the price and the limits come from
+// /billing/offer (the numbers the server enforces), and a row appears only for something the server can
+// really do (its capabilities). Light glass like the rest of the app; gold only marks Pro.
 
-const PRICE = '$9.99';
 const pointer = Platform.OS === 'web' ? ({ cursor: 'pointer' } as object) : null;
 const smooth = { duration: 260, easing: Easing.out(Easing.cubic) };
 const tick = () => {
   if (Platform.OS !== 'web') Haptics.selectionAsync();
 };
 
-// ─── Content ────────────────────────────────────────────────────────────────
+// An example of the daily brief Pro creators get on Home (built from their own ideas and plans)
 const BRIEF = [
-  {
-    id: 'hook',
-    title: 'Write the hook',
-    detail: '“3 creator mistakes that quietly slow your growth.” Jarvis drafts it in your style.',
-  },
-  {
-    id: 'time',
-    title: 'Post at 7:30 PM',
-    detail: 'That’s when your audience is most active on TikTok this week.',
-  },
-  {
-    id: 'versions',
-    title: 'Make 3 script versions',
-    detail: 'Try a funny, a calm and a bold take, then keep the one that sounds like you.',
-  },
+  { id: 'hook', title: 'Write the hook', detail: 'Jarvis drafts the opening line for today’s idea, in your words.' },
+  { id: 'film', title: 'Film it', detail: 'A short plan for the video: what to show first, and what to end on.' },
+  { id: 'post', title: 'Post it', detail: 'Plan it for a time that suits you. We remind you, and you tap “I posted it” once it’s up.' },
 ];
 
-const COMPARE: { feature: string; free: string; pro: string }[] = [
-  { feature: 'Jarvis guidance', free: 'A weekly plan', pro: 'A daily brief made for you' },
-  { feature: 'Repurpose', free: '1 a week', pro: 'Unlimited' },
-  { feature: 'Script and caption rewrites', free: 'A few per post', pro: 'Unlimited' },
-  { feature: 'Voice Studio', free: 'Not included', pro: 'Voiceovers in your own voice' },
-  { feature: 'Audience details', free: 'Totals and platforms', pro: 'Ages, places and online times' },
-  { feature: 'Posting', free: 'Get posts ready', pro: 'Post for you at the best time' },
-];
+type Row = { feature: string; free: string; pro: string };
 
-const PLAN = ['Daily brief from Jarvis', 'Unlimited repurposing and rewrites', 'Voice Studio', 'Deeper audience insights', 'Auto-posting at your best times'];
+const per = (n: number | null, unit: string) => (n === null ? 'Unlimited' : `${n} ${unit}`);
+
+/** Free and Pro, side by side: only what this server really does, with the numbers it enforces. */
+function compareRows(offer: BillingOffer, caps: Capabilities): Row[] {
+  const { free, pro } = offer.limits;
+  const rows: Row[] = [];
+  if (caps.ai) {
+    rows.push({ feature: 'Scripts, captions and Repurpose', free: per(free.aiWritesPerDay, 'new pieces a day'), pro: per(pro.aiWritesPerDay, 'new pieces a day') });
+    rows.push({ feature: 'Quick edits (rewrite, shorten…)', free: per(free.aiEditsPerDay, 'a day'), pro: per(pro.aiEditsPerDay, 'a day') });
+    rows.push({ feature: 'Repurpose', free: per(free.repurposesPerWeek, 'a week'), pro: per(pro.repurposesPerWeek, 'a week') });
+    rows.push({ feature: 'Hook Studio', free: 'Not included', pro: 'Three strong openings for any idea' });
+  }
+  rows.push({ feature: 'Ideas about your own topic', free: 'Not included', pro: 'Type a topic, get ideas for it' });
+  rows.push({ feature: 'Daily brief', free: 'Not included', pro: 'What to make today, on your Home' });
+  rows.push({ feature: 'Connected accounts', free: per(free.connectedPlatforms, 'accounts'), pro: pro.connectedPlatforms === null ? 'All of them' : `${pro.connectedPlatforms} accounts` });
+  if (caps.ai) rows.push({ feature: 'Chats with Jarvis', free: per(free.jarvisChatsPerDay, 'a day'), pro: per(pro.jarvisChatsPerDay, 'a day') });
+  // Only when this server can really do them
+  if (caps.voice) rows.push({ feature: 'Voice Studio', free: 'Not included', pro: 'Voiceovers in your own voice' });
+  if (caps.audienceDemographics) rows.push({ feature: 'Audience details', free: 'Totals and platforms', pro: 'Ages, places and online times' });
+  if (caps.autoPost) rows.push({ feature: 'Posting', free: 'We remind you', pro: 'Posted for you at your time' });
+  return rows;
+}
 
 const FAQ = [
   {
     q: 'What is Jarvis Pro?',
-    a: 'Jarvis looks at how your posts do and tells you what to post next, when to post it, and how to open it. Pro gives you that every day, plus the tools to make it faster.',
+    a: 'Jarvis helps you decide what to post and writes the first draft with you. Pro takes the daily limits off, adds Hook Studio and ideas about your own topics, and gives you a brief on Home every day.',
   },
-  {
-    q: 'Do I lose anything on the free plan?',
-    a: 'No. Everything you use now stays free. Pro adds more on top.',
-  },
-  {
-    q: 'Can I cancel any time?',
-    a: 'Yes. Cancel from your profile whenever you like, and you keep Pro until the end of the month you paid for.',
-  },
-  {
-    q: 'Is Voice Studio included?',
-    a: 'Yes. Voice Studio is only in Pro. It makes voiceovers that sound like you.',
-  },
+  { q: 'Do I lose anything on the free plan?', a: 'No. Everything you use now stays free. Pro adds more on top.' },
+  { q: 'Can I cancel any time?', a: 'Yes. Cancel from this page whenever you like. You keep Pro until the end of the month you paid for, and you’re not charged again.' },
 ];
+
+const dateLabel = (iso: string) => new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' });
 
 // ─── Pieces ─────────────────────────────────────────────────────────────────
 function GoldGlow({ size = 240, style }: { size?: number; style?: object }) {
@@ -176,11 +172,9 @@ interface JarvisProScreenProps {
   onBack?: () => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
-  /** Mock checkout: switch this creator to Pro. */
-  onUpgraded?: () => void;
 }
 
-export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({ onLogout, onNavigateTab, onBack, userProfile, onSaveProfile, onUpgraded }) => {
+export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({ onLogout, onNavigateTab, onBack, userProfile, onSaveProfile }) => {
   const pageWidth = usePageWidth();
   const scrollRef = useRef<ScrollView>(null);
   const planY = useRef(0);
@@ -188,13 +182,57 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({ onLogout, onNa
   const [openStep, setOpenStep] = useState<string | null>('hook');
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [view, setView] = useState<'free' | 'pro'>('pro');
-  const [welcome, setWelcome] = useState(false);
+  const caps = useCapabilities();
+  const plan = usePlan(); // the creator's paid plan, or null
+  const offer = useOffer();
+  const isPro = !!plan || userProfile?.tier === 'pro' || userProfile?.tier === 'founding';
+  const [offerFailed, setOfferFailed] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [confirmCancel, setConfirmCancel] = useState(false);
+  const [problem, setProblem] = useState<{ message: string; upgrade: boolean } | null>(null);
+  const mounted = useRef(true);
+
+  useEffect(() => {
+    mounted.current = true;
+    void loadOffer().then((o) => mounted.current && setOfferFailed(!o));
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
 
   const enter = (d: number) => FadeInUp.delay(d).duration(500).easing(Easing.out(Easing.cubic));
+  const price = offer?.plan?.priceUsdCents ? formatPrice(offer.plan.priceUsdCents, 'USD') : null;
+  const rows = offer ? compareRows(offer, caps) : [];
+  const canPay = !!offer && offer.processors.includes('stripe');
 
-  const start = () => {
-    if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    setWelcome(true);
+  const buy = async () => {
+    if (busy) return;
+    if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setProblem(null);
+    setBusy(true);
+    const res = await startCheckout();
+    // On success this page is being replaced by the payment page; stay busy until it is
+    if (!res.ok && mounted.current) {
+      setBusy(false);
+      setProblem(studioProblem(res));
+    }
+  };
+
+  const changeRenewal = async (renew: boolean) => {
+    if (busy) return;
+    if (!renew && !confirmCancel) {
+      tick();
+      setConfirmCancel(true);
+      return;
+    }
+    setProblem(null);
+    setBusy(true);
+    const res = renew ? await resumeRenewal() : await cancelRenewal();
+    if (!mounted.current) return;
+    setBusy(false);
+    setConfirmCancel(false);
+    if (!res.ok) setProblem(studioProblem(res));
+    else if (Platform.OS !== 'web') void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   };
 
   return (
@@ -220,14 +258,18 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({ onLogout, onNa
                 align="left"
                 accessibilityLabel="Meet Jarvis Pro"
               />
-              <Text style={styles.heroBody}>Your partner for what to post, when to post it, and how to start it.</Text>
-              <View style={styles.heroPrice}>
-                <Text style={styles.heroPriceNum}>{PRICE}</Text>
-                <Text style={styles.heroPriceSub}>a month · cancel any time</Text>
-              </View>
+              <Text style={styles.heroBody}>
+                {isPro ? 'You’re on Pro. Here’s your plan, and everything it includes.' : 'Your partner for what to post, and the first draft of it.'}
+              </Text>
+              {price && !isPro && (
+                <View style={styles.heroPrice}>
+                  <Text style={styles.heroPriceNum}>{price}</Text>
+                  <Text style={styles.heroPriceSub}>a month · cancel any time</Text>
+                </View>
+              )}
               <View style={styles.heroCta}>
                 <AppButton
-                  title="See what’s included"
+                  title={isPro ? 'Your plan' : 'See what’s included'}
                   variant="glass"
                   onPress={() => scrollRef.current?.scrollTo({ y: Math.max(0, planY.current - 12), animated: true })}
                 />
@@ -246,7 +288,7 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({ onLogout, onNa
             <GlassCard strong radius={24} padding={16}>
               <View style={styles.briefHead}>
                 <JarvisOrb size={30} />
-                <Text style={styles.briefLead}>Your best move today: one creator-advice Reel, posted this evening.</Text>
+                <Text style={styles.briefLead}>Each morning: one thing worth making today, in three small steps.</Text>
               </View>
               <View style={styles.briefList}>
                 {BRIEF.map((b, i) => {
@@ -281,12 +323,13 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({ onLogout, onNa
           </Animated.View>
 
           {/* Free vs Pro */}
+          {rows.length > 0 && (
           <Animated.View entering={enter(200)}>
             <Text style={styles.section}>Free and Pro, side by side</Text>
             <GlassCard strong radius={24} padding={16}>
               <PlanSwitch value={view} onChange={setView} />
               <View style={styles.compare}>
-                {COMPARE.map((c) => (
+                {rows.map((c) => (
                   <View key={c.feature} style={styles.compareRow}>
                     <Text style={styles.compareFeature}>{c.feature}</Text>
                     <Animated.View key={`${c.feature}-${view}`} entering={FadeIn.duration(220)} style={styles.compareValueWrap}>
@@ -306,41 +349,108 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({ onLogout, onNa
               </View>
             </GlassCard>
           </Animated.View>
+          )}
 
-          {/* Plan (the one upgrade button) */}
+          {/* Plan (the one upgrade button, or the member's own plan) */}
           <Animated.View
             entering={enter(300)}
             onLayout={(e) => {
               planY.current = e.nativeEvent.layout.y;
             }}
           >
-            <Text style={styles.section}>Your plan</Text>
+            <Text style={styles.section}>{isPro ? 'Your plan' : 'Jarvis Pro'}</Text>
             <GlassCard strong radius={26} padding={20}>
               <GoldGlow size={200} style={{ bottom: -90, left: -70 }} />
               <View style={styles.planHead}>
-                <Text style={styles.planName}>Jarvis Pro</Text>
+                <Text style={styles.planName}>{offer?.plan?.name ?? 'Jarvis Pro'}</Text>
                 <View style={styles.proChip}>
-                  <Text style={styles.proChipText}>PRO</Text>
+                  <Text style={styles.proChipText}>{isPro ? 'YOURS' : 'PRO'}</Text>
                 </View>
               </View>
-              <View style={styles.planPriceRow}>
-                <Text style={styles.planPrice}>{PRICE}</Text>
-                <Text style={styles.planPer}>/ month</Text>
-              </View>
-              <View style={styles.planList}>
-                {PLAN.map((p) => (
-                  <View key={p} style={styles.planItem}>
-                    <View style={styles.goldTick}>
-                      <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
-                        <Path d="M20 6L9 17l-5-5" stroke={goldTokens.dark} strokeWidth={3.6} strokeLinecap="round" strokeLinejoin="round" />
-                      </Svg>
+
+              {isPro ? (
+                <>
+                  {plan ? (
+                    <Text style={styles.planStatus}>
+                      {plan.cancelAtPeriodEnd ? `Pro ends on ${dateLabel(plan.renewsAt)}. You won’t be charged again.` : `Renews on ${dateLabel(plan.renewsAt)}.`}
+                    </Text>
+                  ) : (
+                    <Text style={styles.planStatus}>Pro is switched on for your account.</Text>
+                  )}
+                  {plan && plan.processor === 'stripe' && (
+                    <View style={styles.planActions}>
+                      {plan.cancelAtPeriodEnd ? (
+                        <AppButton title={busy ? 'One moment…' : 'Keep Pro'} variant="gold" size="lg" disabled={busy} onPress={() => void changeRenewal(true)} />
+                      ) : (
+                        <AppButton
+                          title={busy ? 'One moment…' : confirmCancel ? 'Tap again to cancel the renewal' : 'Cancel the renewal'}
+                          variant="outline"
+                          disabled={busy}
+                          onPress={() => void changeRenewal(false)}
+                        />
+                      )}
+                      {confirmCancel && !busy && (
+                        <Pressable onPress={() => setConfirmCancel(false)} hitSlop={8} accessibilityRole="button" style={pointer}>
+                          <Text style={styles.planNote}>Never mind</Text>
+                        </Pressable>
+                      )}
                     </View>
-                    <Text style={styles.planItemText}>{p}</Text>
+                  )}
+                </>
+              ) : (
+                <>
+                  {price && (
+                    <View style={styles.planPriceRow}>
+                      <Text style={styles.planPrice}>{price}</Text>
+                      <Text style={styles.planPer}>/ month</Text>
+                    </View>
+                  )}
+                  <View style={styles.planList}>
+                    {rows.map((r) => (
+                      <View key={r.feature} style={styles.planItem}>
+                        <View style={styles.goldTick}>
+                          <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
+                            <Path d="M20 6L9 17l-5-5" stroke={goldTokens.dark} strokeWidth={3.6} strokeLinecap="round" strokeLinejoin="round" />
+                          </Svg>
+                        </View>
+                        <Text style={styles.planItemText}>
+                          <Text style={styles.planItemBold}>{r.feature}: </Text>
+                          {r.pro}
+                        </Text>
+                      </View>
+                    ))}
                   </View>
-                ))}
-              </View>
-              <AppButton title="Start Jarvis Pro" variant="gold" size="lg" onPress={start} />
-              <Text style={styles.planNote}>Cancel any time from your profile.</Text>
+                  {!offer && !offerFailed ? (
+                    <Text style={styles.planNote}>One moment…</Text>
+                  ) : offerFailed ? (
+                    <Text style={styles.planNote}>Couldn’t load Pro’s details just now. Check your connection.</Text>
+                  ) : !offer?.plan ? (
+                    <Text style={styles.planNote}>Pro isn’t on sale right now.</Text>
+                  ) : !canBuyHere ? (
+                    <Text style={styles.planNote}>Pro can be bought on the web, at app.poststreak.app. Sign in there with this account and it switches on here too.</Text>
+                  ) : !canPay ? (
+                    <>
+                      <AppButton title="Start Jarvis Pro" variant="gold" size="lg" disabled />
+                      <Text style={styles.planNote}>Payments aren’t switched on yet. Please check back soon.</Text>
+                    </>
+                  ) : (
+                    <>
+                      {caps.paymentsStandIn && (
+                        <Text style={styles.standIn}>
+                          <Text style={styles.standInBold}>Test mode.</Text> A stand-in on this computer takes the payment. No card is charged.
+                        </Text>
+                      )}
+                      <AppButton title={busy ? 'Opening the payment page…' : 'Start Jarvis Pro'} variant="gold" size="lg" disabled={busy} onPress={() => void buy()} />
+                      <Text style={styles.planNote}>Paid securely through Stripe. Cancel any time from this page.</Text>
+                    </>
+                  )}
+                </>
+              )}
+              {problem && (
+                <View style={styles.problem}>
+                  <Problem message={problem.message} />
+                </View>
+              )}
             </GlassCard>
           </Animated.View>
 
@@ -379,18 +489,6 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({ onLogout, onNa
 
       <FloatingTabBar activeTab="growth" onTabPress={(t) => onNavigateTab?.(t)} />
 
-      <AnimatedCompletionModal
-        visible={welcome}
-        title="Welcome to Jarvis Pro"
-        subtitle="Your daily brief, Voice Studio and unlimited repurposing are ready."
-        badgeText="PRO UNLOCKED"
-        actionText="Start exploring"
-        onDismiss={() => {
-          setWelcome(false);
-          onUpgraded?.();
-          react('pro');
-        }}
-      />
       <UserProfileModal visible={showProfile} onClose={() => setShowProfile(false)} onLogout={onLogout} initialProfile={userProfile} onSaveProfile={onSaveProfile} />
     </View>
   );
@@ -461,7 +559,13 @@ const styles = StyleSheet.create({
   planList: { gap: 10, marginTop: 14, marginBottom: 18 },
   planItem: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   planItemText: { flex: 1, fontSize: 14.5, lineHeight: 20, fontWeight: '600', color: ds.text2 },
-  planNote: { fontSize: 12.5, color: ds.text3, textAlign: 'center', marginTop: 10 },
+  planNote: { fontSize: 12.5, lineHeight: 18, color: ds.text3, textAlign: 'center', marginTop: 10 },
+  planStatus: { fontSize: 15, lineHeight: 22, fontWeight: '700', color: ds.ink, marginTop: 10 },
+  planActions: { marginTop: 16, gap: 4 },
+  planItemBold: { fontWeight: '800', color: ds.ink },
+  problem: { marginTop: 14 },
+  standIn: { fontSize: 12.5, lineHeight: 18, color: goldTokens.dark, backgroundColor: goldTokens.light, borderColor: goldTokens.border, borderWidth: 1, borderRadius: 12, padding: 10, marginBottom: 12 },
+  standInBold: { fontWeight: '800' },
 
   faq: { paddingHorizontal: 12 },
   faqLine: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: 'rgba(23, 20, 32, 0.08)' },

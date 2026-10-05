@@ -17,6 +17,8 @@ export type Capabilities = {
   tiktok: boolean;
   /** A purchase can really unlock Pro (Stripe or Paystack configured). */
   payments: boolean;
+  /** Local testing only: a stand-in on this machine takes the "payment" (no card is charged). The app says so. */
+  paymentsStandIn: boolean;
   /** Voice Studio can really make audio. */
   voice: boolean;
   /** Local testing only: the sign-in screen offers one-tap test accounts. */
@@ -60,6 +62,7 @@ export function capabilitiesFromEnv(env: Env = process.env): Capabilities {
     payments: Boolean(
       (env.STRIPE_SECRET_KEY?.trim() && env.STRIPE_WEBHOOK_SECRET?.trim()) || env.PAYSTACK_SECRET_KEY?.trim(),
     ),
+    paymentsStandIn: Boolean(env.STRIPE_MOCK_ORIGIN?.trim()),
     voice: Boolean(env.FISH_AUDIO_API_KEY?.trim()),
     devLogin: devLoginEnabled(env),
     autoPost: false,

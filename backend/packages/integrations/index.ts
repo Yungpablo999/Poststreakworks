@@ -5,7 +5,7 @@ export { postToLinkedIn, refreshLinkedInToken, PlatformAuthError } from "./linke
 export { postToX, postXThread, refreshXToken } from "./x";
 export { verifyPaystackSignature, initiatePaystackTransaction } from "./paystack";
 export type { PaystackWebhookEvent } from "./paystack";
-export { verifyStripeSignature, createStripeCheckoutSession } from "./stripe";
+export { verifyStripeSignature, createStripeCheckoutSession, setStripeCancelAtPeriodEnd, signStripePayload } from "./stripe";
 export type { StripeWebhookEvent } from "./stripe";
 export {
   TIKTOK_SCOPES,

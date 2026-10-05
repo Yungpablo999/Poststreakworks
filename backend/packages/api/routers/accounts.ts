@@ -7,7 +7,7 @@ import {
   TIER_LIMITS,
 } from "../context";
 import { TRPCError } from "@trpc/server";
-import { countPosts, getCheckInSummary, getXpBalance, levelForXp, listConnectedAccounts, personaFor, refreshEverydayNotes } from "@poststreak/workflows";
+import { countPosts, entitledAfter, getCheckInSummary, getXpBalance, levelForXp, listConnectedAccounts, personaFor, refreshEverydayNotes } from "@poststreak/workflows";
 import { saveOnboardingInput } from "../lib/onboarding";
 import { toAppPlatform } from "../lib/platforms";
 import { capabilitiesFromEnv } from "../lib/capabilities";
@@ -382,6 +382,9 @@ export const accountsRouter = createTRPCRouter({
         .select("status, current_period_end, cancel_at_period_end, processor")
         .eq("user_id", userId)
         .in("status", ["active", "trialing"])
+        .gt("current_period_end", entitledAfter())
+        .order("current_period_end", { ascending: false })
+        .limit(1)
         .maybeSingle(),
     ]);
 

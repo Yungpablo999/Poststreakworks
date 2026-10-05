@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { entitledAfter } from "@poststreak/workflows";
 
 // Assembles frontend/shared/types/user.ts's UserProfile shape from across
 // users/creator_profiles/streak_states/credits — no single table has all of
@@ -8,7 +9,7 @@ export async function assembleUserProfile(supabase: SupabaseClient, userId: stri
     supabase.from("users").select("id, email, display_name, avatar_url, created_at, updated_at").eq("id", userId).single(),
     supabase.from("creator_profiles").select("bio, niche, slug").eq("user_id", userId).maybeSingle(),
     supabase.from("streak_states").select("current_streak, last_qualifying_day, jarvis_emotion").eq("user_id", userId).maybeSingle(),
-    supabase.from("subscriptions").select("id").eq("user_id", userId).in("status", ["active", "trialing"]).maybeSingle(),
+    supabase.from("subscriptions").select("id").eq("user_id", userId).in("status", ["active", "trialing"]).gt("current_period_end", entitledAfter()).limit(1).maybeSingle(),
   ]);
 
   if (userRow.error || !userRow.data) return null;

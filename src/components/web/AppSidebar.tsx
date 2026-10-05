@@ -185,7 +185,15 @@ export function AppSidebar({
               <Text style={styles.proBtnText}>See Pro</Text>
             </View>
           </Pressable>
-        ) : null}
+        ) : (
+          // Members: their plan (renewal date, cancel or keep) is on the same page
+          <Pressable onPress={onOpenPro} accessibilityRole="button" accessibilityLabel="Your Pro plan" style={({ pressed }) => [styles.memberRow, pointer, pressed && { transform: [{ scale: 0.98 }] }]}>
+            <Svg width={14} height={14} viewBox="0 0 24 24">
+              <Path d="M12 3l2.6 5.6 6.1.7-4.5 4.1 1.2 6L12 16.4 6.6 19.4l1.2-6L3.3 9.3l6.1-.7L12 3z" fill={goldTokens.primary} />
+            </Svg>
+            <Text style={styles.memberText}>Your Pro plan</Text>
+          </Pressable>
+        )}
       </ScrollView>
 
       {/* The live mascot keeps you company */}
@@ -267,4 +275,6 @@ const styles = StyleSheet.create({
   planPro: { backgroundColor: goldTokens.light, borderWidth: 1, borderColor: goldTokens.border },
   planText: { fontSize: 10.5, fontWeight: '800', letterSpacing: 0.6, color: ds.purple },
   planTextPro: { color: goldTokens.dark },
+  memberRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 18, marginHorizontal: 4, paddingHorizontal: 12, height: 40, borderRadius: 12, backgroundColor: goldTokens.light, borderWidth: 1, borderColor: goldTokens.border },
+  memberText: { fontSize: 13.5, fontWeight: '800', color: goldTokens.dark },
 });

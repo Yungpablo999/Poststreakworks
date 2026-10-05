@@ -12,6 +12,7 @@ export const NO_CAPABILITIES: Capabilities = {
   platforms: { tiktok: false, instagram: false, threads: false, facebook: false, youtube: false },
   tiktok: false,
   payments: false,
+  paymentsStandIn: false,
   voice: false,
   devLogin: false,
   autoPost: false,

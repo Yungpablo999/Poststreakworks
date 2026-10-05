@@ -98,7 +98,9 @@ import {
 import { notify, useNotice } from './src/backend/notice';
 import { listTestAccounts, signInAsTestAccount } from './src/backend/testAccounts';
 import type { ConnectablePlatform, GrowthPost, QuestPlace, TestAccount } from './frontend/shared/types/phase1';
-import { useCapabilities } from './src/backend/account';
+import { planStore, useCapabilities } from './src/backend/account';
+import { waitForPro } from './src/backend/billing';
+import { clearLanding, readLanding } from './src/utils/landing';
 
 type Screen =
   | 'welcome'
@@ -156,6 +158,8 @@ export default function App() {
     return start === 'signup' ? 'niche' : 'signin';
   })();
   const [showSplash, setShowSplash] = useState(!webStart);
+  // ?plan=pro (the website's "Upgrade") and ?payment=success|cancelled (back from the payment page)
+  const landing = React.useRef(readLanding());
   const [currentScreen, setCurrentScreen] = useState<Screen>(webStart ?? 'welcome');
   const [previousScreen, setPreviousScreen] = useState<Screen>('welcome');
 
@@ -274,6 +278,33 @@ export default function App() {
     return sent;
   };
 
+  // Where a creator lands once signed in: Pro, if the website's "Upgrade to Pro" sent them (once, and
+  // only if they don't have it already); otherwise Home.
+  const landingScreen = (): Screen => {
+    if (landing.current.wantsPro) {
+      landing.current.wantsPro = false;
+      clearLanding();
+      if (!planStore.get()) return 'jarvis-pro';
+    }
+    return 'dashboard';
+  };
+
+  // Back from the payment page: the payment provider tells the server a moment after the creator arrives,
+  // so the plan is read again until it says Pro.
+  const finishPaymentReturn = async () => {
+    const result = landing.current.payment;
+    if (!result) return;
+    landing.current.payment = null;
+    clearLanding();
+    if (result === 'cancelled') {
+      notify('Payment cancelled. Nothing was charged.');
+      return;
+    }
+    notify('Payment received. Switching on Pro…', 6000);
+    const pro = await waitForPro();
+    notify(pro ? 'You’re on Jarvis Pro. Enjoy!' : 'Your payment is being confirmed. Pro switches on as soon as it is; there’s no need to pay again.', 6000);
+  };
+
   // Smart Navigation Handler: Instant (0ms) for bottom tabs & regular screens; Smart AI loader for generation workflows
   // Every page opens straight away. (There used to be a timed "Jarvis is
   // working..." screen before Ideas, Caption, Script and Repurpose; it wasn't
@@ -387,7 +418,8 @@ export default function App() {
         const loaded = await enterApp({ newAccount: remembered !== null, niches: remembered?.niches });
         if (!alive) return;
         if (!loaded) notify('We couldn’t load your account. Check your connection.');
-        setCurrentScreen('dashboard');
+        setCurrentScreen(landingScreen());
+        if (loaded) void finishPaymentReturn();
         if (ret) {
           clearConnectReturn(); // so a refresh can't replay the one-time code
           await finishConnect(ret);
@@ -436,7 +468,7 @@ export default function App() {
     if (!BACKEND.enabled) return;
     onAccountRefreshed((b) => {
       const fresh = profileFromBootstrap(b, BLANK_PROFILE);
-      setUserProfileRaw((prev) => ({ ...prev, userPersona: fresh.userPersona, streakCount: fresh.streakCount, level: fresh.level, xp: fresh.xp, postsCount: fresh.postsCount }));
+      setUserProfileRaw((prev) => ({ ...prev, tier: fresh.tier, userPersona: fresh.userPersona, streakCount: fresh.streakCount, level: fresh.level, xp: fresh.xp, postsCount: fresh.postsCount }));
     });
     return () => onAccountRefreshed(null);
   }, []);
@@ -500,7 +532,7 @@ export default function App() {
         if (getSessionState().status === 'signedIn') {
           const loaded = await enterApp({ newAccount: authRef.current.signingUp });
           if (!loaded) notify('We couldn’t load your account. Check your connection.');
-          setCurrentScreen('dashboard');
+          setCurrentScreen(landingScreen());
         }
         return;
       }
@@ -670,7 +702,7 @@ export default function App() {
     const loaded = await enterApp();
     setAuthBusy(false);
     if (!loaded) notify('We couldn’t load that account. Is the local stack running?');
-    navigateTo('dashboard');
+    navigateTo(landingScreen());
   };
 
   // Verify Code Screen actions
@@ -709,8 +741,9 @@ export default function App() {
     const loaded = (await enteringApp.current) ?? false;
     enteringApp.current = null;
     if (!loaded) notify('We couldn’t load your account yet. Check your connection.');
-    // Sign-up and sign-in both land on Home; Home's day-0 welcome greets new creators
-    navigateTo('dashboard');
+    // Sign-up and sign-in both land on Home (Home's day-0 welcome greets new creators), or on Pro if the
+    // website's "Upgrade to Pro" brought them
+    navigateTo(landingScreen());
   };
 
   const handleLogout = () => {
@@ -1270,10 +1303,6 @@ export default function App() {
         {currentScreen === 'jarvis-pro' && (
           <JarvisProScreen
             onBack={() => navigateTo(previousScreen ? previousScreen : 'growth')}
-            onUpgraded={() => {
-              setUserProfile(prev => ({ ...prev, tier: 'pro' }));
-              navigateTo('dashboard');
-            }}
             onLogout={handleLogout}
             onNavigateTab={handleTabNavigation}
             userProfile={userProfile}

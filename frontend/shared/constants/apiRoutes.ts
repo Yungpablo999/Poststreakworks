@@ -129,4 +129,11 @@ export const API_ROUTES = {
     ITEM: (id: string) => `/api/v1/posts/${id}`, // GET -> Post · PATCH PostPatchBody -> Post · DELETE -> { removed: true }
     POSTED: (id: string) => `/api/v1/posts/${id}/posted`, // POST { platform, url? } -> MarkPostedResult ("I posted it")
   },
+  // Pro. A creator becomes Pro only through a payment provider's verified webhook, never from the app.
+  BILLING: {
+    OFFER: '/api/v1/billing/offer', // GET -> BillingOffer (price, what each plan allows, whether a payment can be taken)
+    CHECKOUT: '/api/v1/billing/checkout', // POST { processor? } -> CheckoutResult (the payment page; back to the app with ?payment=success|cancelled)
+    CANCEL: '/api/v1/billing/cancel', // POST -> RenewalResult (stops the renewal; Pro stays to the end of the paid period)
+    REACTIVATE: '/api/v1/billing/reactivate', // POST -> RenewalResult (turns the renewal back on)
+  },
 } as const;

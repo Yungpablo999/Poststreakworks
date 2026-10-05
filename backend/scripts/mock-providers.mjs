@@ -11,6 +11,7 @@
 //   THREADS_MOCK_ORIGIN=…/threads   FACEBOOK_MOCK_ORIGIN=…/facebook   YOUTUBE_MOCK_ORIGIN=…/youtube
 // (all but TikTok receive each call under the real platform's host name, e.g. /instagram/graph.instagram.com/v25.0/me)
 // The model:   AI_MOCK_ORIGIN=http://127.0.0.1:4010/ai   (Groq's /chat/completions; see mocks/ai.mjs)
+// Payments:    STRIPE_MOCK_ORIGIN=http://127.0.0.1:4010/stripe   (Checkout, subscriptions and signed webhooks; mocks/stripe.mjs)
 // Local testing only. The API refuses any non-localhost value for those settings.
 import http from 'node:http';
 import { pathToFileURL } from 'node:url';
@@ -18,13 +19,14 @@ import { json, text } from './mocks/http.mjs';
 import * as ai from './mocks/ai.mjs';
 import * as facebook from './mocks/facebook.mjs';
 import * as instagram from './mocks/instagram.mjs';
+import * as stripe from './mocks/stripe.mjs';
 import * as threads from './mocks/threads.mjs';
 import * as tiktok from './mocks/tiktok.mjs';
 import * as youtube from './mocks/youtube.mjs';
 
 const PLATFORMS = { tiktok, instagram, threads, facebook, youtube };
-// Everything this server answers for: the five platforms, and the model
-const STAND_INS = { ...PLATFORMS, ai };
+// Everything this server answers for: the five platforms, the model, and Stripe (payments for Pro)
+const STAND_INS = { ...PLATFORMS, ai, stripe };
 
 /**
  * The stand-in server (not yet listening). `publicOrigin` is the address links in its pages must

@@ -55,3 +55,13 @@ export {
   validateNewPost,
 } from "./posts";
 export type { MarkPostedResult, NewPostInput, Post, PostFormat, PostPatch, PostPlatform, PostRow, PostState, PostStep, PostStepState } from "./posts";
+export {
+  ENTITLEMENT_GRACE_HOURS,
+  applyPaystackEvent,
+  applyStripeEvent,
+  createSupabaseBillingStore,
+  currentSubscription,
+  entitledAfter,
+  expireLapsedSubscriptions,
+} from "./billing";
+export type { BillingStore, PaystackEvent, StripeEvent, SubscriptionRow } from "./billing";

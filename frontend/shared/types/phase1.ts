@@ -314,6 +314,8 @@ export interface Capabilities {
   tiktok: boolean;
   /** A purchase can really unlock Pro. */
   payments: boolean;
+  /** Local testing only: a stand-in on this machine takes the "payment" (no card is charged). The app says so. */
+  paymentsStandIn: boolean;
   /** Voice Studio can really make audio. */
   voice: boolean;
   /** Local testing only: the sign-in screen offers one-tap test accounts. */
@@ -555,6 +557,41 @@ export interface CaptionEditBody {
   idea?: string;
 }
 export type CaptionEditResult = ({ caption: string } | { tags: string[] }) & { usage: AiUsage };
+
+// ─── Pro ────────────────────────────────────────────────────────────────────
+
+/** null = no limit. The same numbers the server enforces. */
+export interface PlanLimits {
+  aiWritesPerDay: number | null;
+  aiEditsPerDay: number | null;
+  repurposesPerWeek: number | null;
+  jarvisChatsPerDay: number | null;
+  connectedPlatforms: number | null;
+}
+
+export type PaymentProcessor = 'stripe' | 'paystack';
+
+/** GET /api/v1/billing/offer */
+export interface BillingOffer {
+  /** The Pro plan on sale, or null. Prices in minor units (cents / kobo); null = not sold in that currency. */
+  plan: { name: string; priceUsdCents: number | null; priceNgnKobo: number | null } | null;
+  /** The ways a payment can be taken on this server now. Empty = payments aren't switched on. */
+  processors: PaymentProcessor[];
+  limits: { free: PlanLimits; pro: PlanLimits };
+}
+
+/** POST /api/v1/billing/checkout */
+export interface CheckoutResult {
+  checkoutUrl: string;
+  processor: PaymentProcessor;
+}
+
+/** POST /api/v1/billing/cancel and /reactivate. ISO times. */
+export interface RenewalResult {
+  cancelAtPeriodEnd: boolean;
+  renewsAt: string | null;
+  endsAt: string | null;
+}
 
 export type RepurposePrefer = 'video' | 'carousel' | 'text';
 export interface RepurposeBody {

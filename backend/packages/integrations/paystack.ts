@@ -1,16 +1,19 @@
 import crypto from "crypto";
 
-// Ported as-is from PostIT-web (v1) src/app/api/payments/paystack/{initiate,webhook}/route.ts.
-// This webhook signature check is the exact gap SYSTEM_DESIGN.md and
-// OPEN_QUESTIONS.md flag as unsolved ("Real security gap if left unresolved
-// before billing goes live") — it's already correct in v1, so this is a
-// direct port, not new work.
+// Paystack: a one-off naira payment for a month of Pro. Ported from PostIT-web (v1). The webhook
+// signature is an HMAC-SHA512 of the raw body with the secret key, compared in constant time; the key is
+// read when used, so a server without one refuses webhooks instead of crashing on them.
 
-const PAYSTACK_SECRET = process.env.PAYSTACK_SECRET_KEY!;
+function secretKey(): string | null {
+  return process.env.PAYSTACK_SECRET_KEY?.trim() || null;
+}
 
 export function verifyPaystackSignature(body: string, signature: string): boolean {
-  const hash = crypto.createHmac("sha512", PAYSTACK_SECRET).update(body).digest("hex");
-  return hash === signature;
+  const secret = secretKey();
+  if (!secret || !/^[0-9a-f]+$/i.test(signature)) return false;
+  const expected = Buffer.from(crypto.createHmac("sha512", secret).update(body).digest("hex"));
+  const given = Buffer.from(signature.toLowerCase());
+  return given.length === expected.length && crypto.timingSafeEqual(given, expected);
 }
 
 export async function initiatePaystackTransaction(params: {
@@ -23,7 +26,7 @@ export async function initiatePaystackTransaction(params: {
   const res = await fetch("https://api.paystack.co/transaction/initialize", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${PAYSTACK_SECRET}`,
+      Authorization: `Bearer ${secretKey() ?? ""}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({

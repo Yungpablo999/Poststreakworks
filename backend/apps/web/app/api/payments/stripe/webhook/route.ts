@@ -1,79 +1,33 @@
-import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { verifyStripeSignature } from "@poststreak/integrations";
+import { applyStripeEvent, createSupabaseBillingStore, type StripeEvent } from "@poststreak/workflows";
 
 export const runtime = "nodejs";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-);
-
-async function grantSubscription(
-  userId: string,
-  planId: string,
-  processorSubscriptionId: string | undefined,
-) {
-  const periodEnd = new Date(Date.now() + 31 * 24 * 60 * 60 * 1000).toISOString();
-
-  return supabase
-    .from("subscriptions")
-    .upsert(
-      {
-        user_id: userId,
-        plan_id: planId,
-        status: "active",
-        processor: "stripe",
-        processor_subscription_id: processorSubscriptionId,
-        currency: "USD",
-        current_period_start: new Date().toISOString(),
-        current_period_end: periodEnd,
-      },
-      { onConflict: "user_id" },
-    )
-    .select("id")
-    .single();
-}
-
+// Stripe's notices about Pro subscriptions: a plain route (the signature is over the raw body, and there
+// is no creator session). What each event means is decided in packages/workflows/billing.ts, which also
+// makes sure an event delivered twice is applied once.
+//
+// Answers: 400 bad signature (Stripe stops), 200 applied / not ours / seen before, 500 couldn't apply it
+// right now (Stripe retries later, and the event is free to be applied then).
 export async function POST(request: Request) {
   const body = await request.text();
-  const sigHeader = request.headers.get("stripe-signature") ?? "";
-
-  if (!verifyStripeSignature(body, sigHeader)) {
+  if (!verifyStripeSignature(body, request.headers.get("stripe-signature") ?? "")) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
-  const event = JSON.parse(body);
-
-  if (event.type === "checkout.session.completed") {
-    const obj = event.data?.object ?? {};
-    const userId = obj.metadata?.user_id as string | undefined;
-    const planId = obj.metadata?.plan_id as string | undefined;
-
-    if (userId && planId) {
-      const { data: subscription } = await grantSubscription(userId, planId, obj.subscription);
-
-      await supabase.from("payment_transactions").insert({
-        subscription_id: subscription?.id ?? null,
-        user_id: userId,
-        processor: "stripe",
-        processor_transaction_id: obj.id,
-        amount: obj.amount_total ?? 0,
-        currency: "USD",
-        status: "success",
-        metadata: obj,
-      });
-    }
+  let event: StripeEvent;
+  try {
+    event = JSON.parse(body) as StripeEvent;
+  } catch {
+    return NextResponse.json({ error: "Not JSON" }, { status: 400 });
   }
 
-  if (event.type === "invoice.payment_succeeded") {
-    const obj = event.data?.object ?? {};
-    const userId = obj.metadata?.user_id as string | undefined;
-    const planId = obj.metadata?.plan_id as string | undefined;
-    if (userId && planId) {
-      await grantSubscription(userId, planId, obj.subscription);
-    }
+  try {
+    const result = await applyStripeEvent(createSupabaseBillingStore(), event);
+    return NextResponse.json({ ok: true, ...result });
+  } catch (err) {
+    console.error(`Stripe webhook ${event.type ?? "?"} ${event.id ?? "?"}:`, err instanceof Error ? err.message : err);
+    return NextResponse.json({ error: "Not applied yet" }, { status: 500 });
   }
-
-  return NextResponse.json({ ok: true });
 }

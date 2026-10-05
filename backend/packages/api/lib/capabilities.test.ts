@@ -32,6 +32,7 @@ describe("capabilities", () => {
       platforms: { tiktok: false, instagram: false, threads: false, facebook: false, youtube: false },
       tiktok: false,
       payments: false,
+      paymentsStandIn: false,
       voice: false,
       devLogin: false,
       autoPost: false,
@@ -46,6 +47,7 @@ describe("capabilities", () => {
     expect(capabilitiesFromEnv({ STRIPE_SECRET_KEY: "s", STRIPE_WEBHOOK_SECRET: "w" }).payments).toBe(true);
     expect(capabilitiesFromEnv({ STRIPE_SECRET_KEY: "s" }).payments).toBe(false); // can't verify its webhooks
     expect(capabilitiesFromEnv({ PAYSTACK_SECRET_KEY: "p" }).payments).toBe(true);
+    expect(capabilitiesFromEnv({ STRIPE_MOCK_ORIGIN: "http://127.0.0.1:4010/stripe" }).paymentsStandIn).toBe(true);
     expect(capabilitiesFromEnv({ GROQ_API_KEY: "  " }).ai).toBe(false);
   });
 
