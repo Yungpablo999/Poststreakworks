@@ -1,15 +1,29 @@
-# PostStreak: hand-over for the next session (2026-10-05)
+# PostStreak: hand-over for the next session (updated 2026-10-07)
 
 Read this, then `LIVE_PLAN.md` (status log + hand-over table) and `backend/STAGING_RUNBOOK.md` (settings, payments, prod
 migrations). This file is the short version: where things stand, what's left before real testing, what blocks it, and what to
 improve.
 
+## Pick up here (2026-10-07)
+
+- **Waiting on the team** for Vercel access and the right to create a Supabase project (the owner is already a Supabase org
+  member). When they land: create the staging project, apply migrations, deploy the API and app to two Vercel projects,
+  `staging.poststreak.app` + `api-staging.poststreak.app`, then the owner signs up and connects their own socials. The plan,
+  step by step, is in the team doc "PostStreak: go-live report and access requests" (section "Next: a stable staging").
+- **Platform keys** for all five are in `backend/apps/web/.env.local` (git-ignored); four proven valid, Instagram's only
+  provable on a real sign-in. Details: `LIVE_PLAN.md` → Platform keys check.
+- **The frontend team's work isn't in this repo.** The live landing page `www.poststreak.app` (Next.js, waitlist "Get early
+  access", dark mode) comes from a repo we can't see; `app.poststreak.app` still serves the old sample-data app. Ask the owner
+  for access to that repo before merging or touching the landing page, and reconcile its dark mode with this branch's app.
+- **Team docs:** go-live report https://claude.ai/code/artifact/2b92cee9-1c60-498f-8ba6-ec981d80b17c (offline copies in
+  `Documents\PostStreak team docs`).
+
 ## Where the work is
 
 - **Repo:** `C:\Users\Trucksoft IT\dev\poststreak` (GitHub `Yungpablo999/Poststreakworks`). The OneDrive `Poststreakworks`
   folder is an old scaffold: don't use it.
-- **Branch:** `live/real-backend`, 20 commits ahead of `master`, **local only, not pushed** (ask the owner before pushing).
-  Last commit: `af46de1`. Working tree clean.
+- **Branch:** `live/real-backend` (pushed to GitHub on 2026-10-07 at the owner's request; see `git log` for the latest
+  commit). Open a pull request to `master` only after the security review of the payments and sign-in changes.
 - **Run it:** `npm run local` from the repo root (Docker Desktop must be running). App http://localhost:8081, API :3000,
   mail catcher :54324, stand-ins :4010 (five platforms, Stripe, the model). `npm run local -- --reseed` resets the four test
   accounts; `npm run local -- --stop` stops everything.
@@ -53,6 +67,7 @@ improve.
 | No hosted environment exists | Owner (account owner) | Create the Supabase + Vercel projects (runbook §1–4) |
 | No AI key → writing tools hidden off this machine | Owner | Groq key (Gemini as fallback) in the API settings |
 | Platforms only work for testers until app review | Owner | Add tester accounts now; submit Meta / Google / TikTok reviews with screen recordings from staging |
+| Platform keys (2026-10-06) | Owner | TikTok, Threads, Facebook and Google keys are in `.env.local` and valid; Google's production return address is registered. Instagram's full secret was pasted later the same day (proven only by a real sign-in). Full connections need staging (https): waiting on Vercel access and Supabase project rights; the owner is a Supabase org member. Details: `LIVE_PLAN.md` → Platform keys check |
 | Stripe not set up | Owner | Test keys + webhook (§3a); later live keys |
 | Selling Pro in the phone apps | Owner (product decision) | Keep "buy on the web", or add App Store / Play billing (RevenueCat is the quick route) |
 | Exposed secrets (screenshots, old demo password in git history) | Owner | Reset each at the provider; keep new ones only in the vault / host settings |

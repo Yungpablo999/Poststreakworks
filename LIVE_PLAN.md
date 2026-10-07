@@ -37,7 +37,7 @@ a machine without a phone allows (what isn't testable is listed at the end of ea
 | Instagram | Instagram API with Instagram login (the "PostStreak-IG" app id and secret, **not** the Facebook app's) | `instagram_business_basic`, `instagram_business_manage_insights` | `https://<app>/auth/instagram/callback` |
 | Threads | Threads API | `threads_basic`, `threads_manage_insights` | `https://<app>/auth/threads/callback` |
 | Facebook | Facebook Login (Pages) | `pages_show_list`, `pages_read_engagement`, `read_insights` | `https://<app>/auth/facebook/callback` |
-| YouTube | Google OAuth | `youtube.readonly`, `yt-analytics.readonly` | `https://<app>/auth/youtube/callback` |
+| YouTube | Google OAuth | `youtube.readonly` | `https://<app>/auth/youtube/callback` |
 
 Environment variables (names only; values go in `.env.local` / the host, never in the repo):
 `TIKTOK_CLIENT_KEY`, `TIKTOK_CLIENT_SECRET`, `INSTAGRAM_APP_ID`, `INSTAGRAM_APP_SECRET`, `THREADS_APP_ID`, `THREADS_APP_SECRET`,
@@ -50,6 +50,24 @@ Things the providers require that no code can skip:
   (or through a tunnel such as ngrok).
 - Google apps left in "Testing" issue refresh tokens that expire after 7 days.
 - Going public later: Meta App Review + business verification, Google verification, TikTok production review (each wants a screen recording).
+
+### Platform keys check (2026-10-06)
+
+The owner's keys are in `backend/apps/web/.env.local` (git-ignored). Each was checked against the platform itself, and each
+sign-in page was opened with the production return address `https://app.poststreak.app/auth/<platform>/callback`, next to a
+return address that is surely unregistered and a made-up app, to see whether the platform tells them apart.
+
+| Platform | Key and secret | Production return address | Next step |
+|---|---|---|---|
+| TikTok (Sandbox) | Valid: TikTok issued an app token | Not provable logged out: TikTok sends every request to its login page | Sign in as a Target user on staging |
+| Instagram | **Secret incomplete** (19 of 32 characters, copied from a cut-off screenshot); the token endpoint can't tell a wrong secret from a wrong code | Not checked: `www.instagram.com` didn't answer from this machine | Paste the full secret from the Instagram API page |
+| Threads | Valid: app token issued | Not provable logged out | Sign in as a Threads tester on staging |
+| Facebook | Valid: app token issued | Not provable logged out: Facebook answers every case with the same login error | Sign in as an app tester on staging |
+| YouTube / Google | Valid: Google accepted the client | **Registered**: Google opened its sign-in page for it and refused the unregistered one (`redirect_uri_mismatch`) | Add test users; Google sign-in on staging |
+
+A full connection (sign in on the platform, come back, first sync) can't run from localhost: the API only accepts an https
+return address for the real platforms, and only `app.poststreak.app` is registered. It runs on staging, or through an https
+tunnel whose address is registered in each console. These keys passed through WhatsApp and chat: reset them before real users.
 
 ## Status log
 
