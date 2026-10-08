@@ -12,9 +12,15 @@ improve.
   step by step, is in the team doc "PostStreak: go-live report and access requests" (section "Next: a stable staging").
 - **Platform keys** for all five are in `backend/apps/web/.env.local` (git-ignored); four proven valid, Instagram's only
   provable on a real sign-in. Details: `LIVE_PLAN.md` → Platform keys check.
-- **The frontend team's work isn't in this repo.** The live landing page `www.poststreak.app` (Next.js, waitlist "Get early
-  access", dark mode) comes from a repo we can't see; `app.poststreak.app` still serves the old sample-data app. Ask the owner
-  for access to that repo before merging or touching the landing page, and reconcile its dark mode with this branch's app.
+- **The website is a separate repo:** `tonlover247-pixel/PostIT-web` (private; cloned read-only at `C:\Users\Trucksoft IT\dev\postit-web`).
+  It serves `www.poststreak.app`: landing page, the pre-launch waitlist game (merged 2026-10-06), dark mode with a temporary
+  light/dark switch, and a site lock to the waitlist. Its waitlist adds one table (`waitlist_entries`) and a function
+  (`waitlist_confirm`) to Supabase: no clash with our tables, but keep them when migrating the live DB. Things to reconcile:
+  the website still promises **Voice Studio** (this branch removed voice claims); it still has the old v1 dashboard, Stripe /
+  Paystack webhooks and crons, so when our API takes payments, Stripe's webhook must point at our API, not the website; and the
+  **Expo app has no dark mode yet** (the team's dark mode is website-only; `src/theme/colors.ts` has an unused `darkTheme`
+  and `app.json` forces light) — a module to build to match the website.
+  `app.poststreak.app` still serves the old sample-data app from this repo's `main`.
 - **Team docs:** go-live report https://claude.ai/code/artifact/2b92cee9-1c60-498f-8ba6-ec981d80b17c (offline copies in
   `Documents\PostStreak team docs`).
 
