@@ -1,4 +1,4 @@
-import { ENV } from '../config/env';
+import { getApiUrl } from '../config/env';
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -8,11 +8,12 @@ export interface ApiResponse<T> {
 }
 
 class ApiClient {
-  private baseUrl: string;
   private authToken: string | null = null;
 
-  constructor() {
-    this.baseUrl = ENV.API_URL;
+  // Read on each call (not at import) so a missing EXPO_PUBLIC_API_URL throws
+  // where a request is made instead of crashing every screen at startup.
+  private get baseUrl(): string {
+    return getApiUrl();
   }
 
   setToken(token: string | null) {
@@ -33,8 +34,9 @@ class ApiClient {
       headers['Authorization'] = `Bearer ${this.authToken}`;
     }
 
+    const url = `${this.baseUrl}${endpoint}`; // throws loudly if the API URL is not configured
     try {
-      const response = await fetch(`${this.baseUrl}${endpoint}`, {
+      const response = await fetch(url, {
         ...options,
         headers,
       });
