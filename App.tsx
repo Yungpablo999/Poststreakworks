@@ -11,6 +11,7 @@ import { SignUpScreen } from './src/screens/SignUpScreen';
 import { SignInScreen } from './src/screens/SignInScreen';
 import { VerifyCodeScreen } from './src/screens/VerifyCodeScreen';
 import { signInWithGoogle } from './src/auth/google';
+import { sendEmailOtp, verifyEmailOtp } from './src/auth/email';
 import { getCurrentSession, signOut } from './src/auth/session';
 import { NicheSelectionScreen } from './src/screens/NicheSelectionScreen';
 import { PlatformConnectScreen } from './src/screens/PlatformConnectScreen';
@@ -335,12 +336,36 @@ export default function App() {
     navigateTo('signin');
   };
 
-  const handleSignUpSubmit = (_username: string, _email: string) => {
-    setAuthUsername(_username);
-    setAuthEmail(_email);
-    setVerifyMode('signup');
-    setUserProfile(prev => ({ ...prev, name: _username || prev.name, tier: 'free' }));
-    navigateTo('verify-code');
+  // Email code sign-up / sign-in through Supabase (src/auth/email.ts): the code
+  // is emailed first, and the code screen only opens once it has been sent.
+  const emailBusy = React.useRef(false);
+  const sendEmailCode = async (email: string, username?: string): Promise<boolean> => {
+    try {
+      const result = await sendEmailOtp(email, { username });
+      if (result.status === 'sent') return true;
+      showAuthError(result.message);
+      return false;
+    } catch (err) {
+      // e.g. EXPO_PUBLIC_SUPABASE_URL / _ANON_KEY not set: say so loudly
+      console.error('[auth] email sign-in failed:', err instanceof Error ? err.message : err);
+      showAuthError(err instanceof Error ? err.message : 'Could not send the code.');
+      return false;
+    }
+  };
+
+  const handleSignUpSubmit = async (_username: string, _email: string) => {
+    if (emailBusy.current) return;
+    emailBusy.current = true;
+    try {
+      if (!(await sendEmailCode(_email, _username))) return;
+      setAuthUsername(_username);
+      setAuthEmail(_email);
+      setVerifyMode('signup');
+      setUserProfile(prev => ({ ...prev, name: _username || prev.name, tier: 'free' }));
+      navigateTo('verify-code');
+    } finally {
+      emailBusy.current = false;
+    }
   };
 
   // One-tap sign-up. Google is real (Supabase); Apple is still a mock: the
@@ -394,11 +419,18 @@ export default function App() {
     navigateTo('niche');
   };
 
-  const handleSignInSubmit = (_email: string) => {
-    setAuthEmail(_email);
-    setVerifyMode('signin');
-    setUserProfile(prev => ({ ...prev, tier: 'free' }));
-    navigateTo('verify-code');
+  const handleSignInSubmit = async (_email: string) => {
+    if (emailBusy.current) return;
+    emailBusy.current = true;
+    try {
+      if (!(await sendEmailCode(_email))) return;
+      setAuthEmail(_email);
+      setVerifyMode('signin');
+      setUserProfile(prev => ({ ...prev, tier: 'free' }));
+      navigateTo('verify-code');
+    } finally {
+      emailBusy.current = false;
+    }
   };
 
   // Verify Code Screen actions
@@ -417,6 +449,24 @@ export default function App() {
       setCurrentScreen('signin');
     }
   };
+
+  // Checks the emailed code with Supabase. On true the code screen celebrates and
+  // calls handleVerifyCodeSuccess; the session is already saved, as after Google.
+  const handleVerifyCode = async (code: string): Promise<boolean> => {
+    try {
+      const result = await verifyEmailOtp(authEmail, code);
+      if (result.status === 'signedIn') return true;
+      showAuthError(result.message);
+      return false;
+    } catch (err) {
+      console.error('[auth] email code check failed:', err instanceof Error ? err.message : err);
+      showAuthError(err instanceof Error ? err.message : 'Could not check the code.');
+      return false;
+    }
+  };
+
+  const handleResendCode = () =>
+    sendEmailCode(authEmail, verifyMode === 'signup' ? authUsername : undefined);
 
   const handleVerifyCodeSuccess = (_email: string) => {
     if (verifyMode === 'signup') justSignedUp.current = true;
@@ -778,6 +828,8 @@ export default function App() {
             onBack={handleBackFromVerifyCode}
             onEditEmail={handleEditEmailFromVerifyCode}
             onSuccess={handleVerifyCodeSuccess}
+            onVerify={handleVerifyCode}
+            onResend={handleResendCode}
           />
         )}
 
