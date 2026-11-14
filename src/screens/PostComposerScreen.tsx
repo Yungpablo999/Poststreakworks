@@ -47,6 +47,8 @@ import { FitLines } from '../components/ui/FitLines';
 import { AppButton } from '../components/ui/AppButton';
 import { JarvisOrb } from '../components/JarvisOrb';
 import { STAGE_1_PLATFORMS } from '../config/features';
+import { usePlatforms } from '../hooks/usePlatforms';
+import { describePostError, describeSummary, labelFor, publishNow, schedulePost, type PostSummary } from '../api/posts';
 import {
   StepHeader,
   PlatformChip,
@@ -142,6 +144,7 @@ const NOTIFICATIONS: NotificationItem[] = [
   },
 ];
 
+// TODO(demo): sample ideas are static demo content; see FEATURE_MAP
 const SAMPLE_IDEAS = [
   'One thing I wish I knew before I started creating',
   'The #1 habit that doubled my views in 30 days',
@@ -431,6 +434,11 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   // Scheduling & Publishing State
   const [publishMode, setPublishMode] = useState<'now' | 'schedule' | 'draft'>('schedule');
   const [scheduledTime, setScheduledTime] = useState('Today, 7:30 PM');
+  // The moment picked in ScheduleSheet; null until the creator confirms one
+  const [scheduledAt, setScheduledAt] = useState<Date | null>(null);
+  const publishingRef = useRef(false);
+  // Which platforms are connected comes from the backend
+  const { isConnected, loading: platformsLoading } = usePlatforms();
 
   // Modals
   const [showPlatformsModal, setShowPlatformsModal] = useState(false);
@@ -588,6 +596,13 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   const togglePlatform = (id: string) => {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    // Filming in the platform's own app needs no connection; posting from here does
+    if (!selectedPlatforms.includes(id) && !isConnected(id) && !isNativeFilm) {
+      showToastNotice(
+        platformsLoading ? 'Checking your connected platforms. Try again in a moment.' : `Connect ${labelFor(id)} first to post there.`,
+      );
+      return;
     }
     if (selectedPlatforms.includes(id)) {
       setSelectedPlatforms(selectedPlatforms.filter((p) => p !== id));
@@ -760,8 +775,9 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
     }, 3200);
   };
 
-  const handlePublishOrSchedule = () => {
+  const handlePublishOrSchedule = async () => {
     // 1. Allow saving draft anytime without restriction
+    // TODO(demo): drafts are local; see FEATURE_MAP
     if (publishMode === 'draft') {
       if (Platform.OS !== 'web') {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -804,22 +820,80 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
       else showToastNotice('Pick TikTok, Instagram or YouTube to film there');
       return;
     }
-    if (Platform.OS !== 'web') {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
-    if (publishMode === 'now') {
-      setCelebrationTitle('Published Live!');
-      setCelebrationSubtitle('Your content is live across your connected platforms.');
-      setCelebrationSpeech('Streak preserved! Great consistency today.');
-    } else if (publishMode === 'schedule' && isNativeFilm) {
+    if (publishMode === 'schedule' && isNativeFilm) {
+      // Reminder to film: local, nothing is posted
+      if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setCelebrationTitle('Reminder set!');
       setCelebrationSubtitle(`We'll nudge you at ${scheduledTime} with your hook, shots and caption ready.`);
       setCelebrationSpeech('Your plan is saved. Film it when the time comes.');
-    } else if (publishMode === 'schedule') {
+      setShowCelebrationModal(true);
+      return;
+    }
+
+    // Real publishing (post now / schedule) through the backend
+    if (publishingRef.current) return;
+    const connected = selectedPlatforms.filter((p) => isConnected(p));
+    if (connected.length < selectedPlatforms.length) {
+      const missing = selectedPlatforms.filter((p) => !isConnected(p)).map(labelFor).join(' and ');
+      showToastNotice(`Connect ${missing} first, or remove it from this post.`);
+      navigateToSection('platforms');
+      return;
+    }
+    if (selectedFormat !== 'text' && !pickedMedia) {
+      showToastNotice('Add your media before scheduling');
+      navigateToSection('media');
+      return;
+    }
+    let when: Date | null = null;
+    if (publishMode === 'schedule') {
+      const now = new Date();
+      // Before the creator picks a time the label reads "Today, 7:30 PM"
+      when = scheduledAt ?? new Date(now.getFullYear(), now.getMonth(), now.getDate(), 19, 30);
+      if (when.getTime() < now.getTime() + 30_000) {
+        showToastNotice('Pick a time in the future');
+        navigateToSection('schedule');
+        return;
+      }
+    }
+
+    publishingRef.current = true;
+    showToastNotice(pickedMedia ? 'Uploading your media...' : publishMode === 'now' ? 'Posting...' : 'Scheduling...');
+    let summary: PostSummary;
+    try {
+      const input = {
+        content: [caption.trim(), tags.join(' ')].filter(Boolean).join('\n\n'),
+        platforms: connected,
+        media: pickedMedia
+          ? { uri: pickedMedia.uri, kind: pickedMedia.kind, mimeType: pickedMedia.mimeType, sizeBytes: pickedMedia.sizeBytes }
+          : null,
+      };
+      summary = when ? await schedulePost({ ...input, scheduledAt: when }) : await publishNow(input);
+    } catch (e) {
+      publishingRef.current = false;
+      if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      showToastNotice(describePostError(e));
+      return;
+    }
+    publishingRef.current = false;
+
+    if (!summary.anyOk) {
+      if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      showToastNotice(describeSummary(summary, publishMode === 'now' ? 'Posted' : 'Scheduled'));
+      return;
+    }
+    if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    const where = summary.succeeded.map(labelFor).join(', ');
+    if (publishMode === 'now') {
+      setCelebrationTitle('Published Live!');
+      setCelebrationSubtitle(`Your content is live on ${where}.`);
+      setCelebrationSpeech('Streak preserved! Great consistency today.');
+    } else {
       setCelebrationTitle('Post Scheduled!');
-      setCelebrationSubtitle(`Your post is locked in for ${scheduledTime}.`);
+      setCelebrationSubtitle(`Your post is locked in for ${scheduledTime} on ${where}.`);
       setCelebrationSpeech('Day 1 post scheduled! +50 XP added to your creator level.');
     }
+    // Some platforms failed: say which, and why (the toast sits behind the modal, so it goes in the subtitle)
+    if (!summary.allOk) setCelebrationSubtitle(describeSummary(summary, publishMode === 'now' ? 'Posted' : 'Scheduled'));
     setShowCelebrationModal(true);
   };
 
@@ -877,8 +951,8 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   // Platforms: 25%, Media: 30%, Caption: 20%, Schedule: 15%, Content Format: 10%
   const isFormatReady = Boolean(selectedFormat);
   const isCaptionReady = caption.trim().length >= 10;
-  const isPlatformsReady = selectedPlatforms.length > 0;
   const isNativeFilm = selectedFormat === 'short_video' && filmMethod === 'native';
+  const isPlatformsReady = selectedPlatforms.some((p) => isNativeFilm || isConnected(p));
   const isCameraFilm = selectedFormat === 'short_video' && filmMethod === 'camera';
   const isMediaReady = selectedFormat === 'text' || hasMedia || isNativeFilm;
   const isScheduleReady =
@@ -1630,8 +1704,9 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
           visible={showScheduleSheet}
           onClose={() => setShowScheduleSheet(false)}
           mode={isNativeFilm ? 'remind' : 'schedule'}
-          onConfirm={(label) => {
+          onConfirm={(label, at) => {
             setScheduledTime(label);
+            setScheduledAt(at);
             setPublishMode('schedule');
             setShowScheduleSheet(false);
             showToastNotice(`${isNativeFilm ? 'Reminder set for' : 'Scheduled for'} ${label}`);
