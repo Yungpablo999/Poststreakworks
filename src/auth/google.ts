@@ -7,7 +7,7 @@ import { getSupabase } from './supabase';
 // Google sign-in through Supabase Auth (PKCE).
 //
 // Web:    signInWithOAuth sends the page to Google; Google -> Supabase -> back to
-//         this origin with ?code=, which the Supabase client exchanges on load
+//         <origin>/auth/callback?code=, which the Supabase client exchanges on load
 //         (detectSessionInUrl, src/auth/supabase.ts).
 // Phones: the Google page opens in an in-app browser (expo-web-browser), which
 //         closes when Supabase redirects to poststreak://auth/callback?code=…;
@@ -30,7 +30,10 @@ export type GoogleSignInResult =
 
 /** Where Supabase sends the creator back to. Must be in Supabase's Redirect URLs list. */
 export function googleRedirectUrl(): string {
-  if (Platform.OS === 'web') return `${window.location.origin}/`;
+  // A real path (not the bare "/") so it matches Supabase's allow list entry
+  // https://app.poststreak.app/** (and the exact-path form). If it doesn't match,
+  // Supabase silently falls back to its Site URL, which is the waitlist page.
+  if (Platform.OS === 'web') return `${window.location.origin}/${AUTH_CALLBACK_PATH}`;
   // poststreak://auth/callback in dev-client and store builds (app.json "scheme")
   return Linking.createURL(AUTH_CALLBACK_PATH);
 }
