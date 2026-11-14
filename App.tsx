@@ -15,6 +15,8 @@ import { sendEmailOtp, verifyEmailOtp } from './src/auth/email';
 import { getCurrentSession, signOut } from './src/auth/session';
 import { NicheSelectionScreen } from './src/screens/NicheSelectionScreen';
 import { PlatformConnectScreen } from './src/screens/PlatformConnectScreen';
+import { runWebFinalizeReturnOnce } from './src/api/connect';
+import { platformsStore } from './src/hooks/usePlatforms';
 import { PlanPreviewScreen } from './src/screens/PlanPreviewScreen';
 import type { FilmStyle, IdeaGoal, StudioVideo } from './src/data';
 import { DashboardScreen } from './src/screens/DashboardScreen';
@@ -116,6 +118,12 @@ export default function App() {
   const [showSplash, setShowSplash] = useState(!webStart);
   const [currentScreen, setCurrentScreen] = useState<Screen>(webStart ?? 'welcome');
   const [previousScreen, setPreviousScreen] = useState<Screen>('welcome');
+
+  // Web: the provider sends the browser back to /connect/finalize?platform=&handle=.
+  // Finish the connection, clean the URL, and refresh the connected list. Renders nothing.
+  React.useEffect(() => {
+    void runWebFinalizeReturnOnce(() => platformsStore.refresh());
+  }, []);
 
   // Lock horizontal shift/pan on web/mobile browsers to keep layout fixed and centralized
   React.useEffect(() => {
