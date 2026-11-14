@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { useQueue } from '../hooks/useQueue';
+import { withRealScheduledDays } from '../api/queueMapping';
 import { TourTarget, useTourScroll } from '../components/tour/GhostTour';
 import { IdeasStrip } from '../components/web/IdeasStrip';
 import {
@@ -682,17 +684,15 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
     };
   }, [ghostFloatY, ghostScale, flamePulse]);
 
+  // scheduledDays come from the real queue; completed/freeze days are demo streak history.
+  // TODO(demo): completedDays / freezeDays in CALENDAR_DATA_CHRONOLOGICAL
+  const { posts: queuePosts } = useQueue();
   const calendarMonthsData: MonthData[] = useMemo(() => {
-    if (isNewUser) {
-      return CALENDAR_DATA_CHRONOLOGICAL.map((m) => ({
-        ...m,
-        completedDays: [],
-        scheduledDays: [],
-        freezeDays: [],
-      }));
-    }
-    return CALENDAR_DATA_CHRONOLOGICAL;
-  }, [isNewUser]);
+    const base = isNewUser
+      ? CALENDAR_DATA_CHRONOLOGICAL.map((m) => ({ ...m, completedDays: [], freezeDays: [] }))
+      : CALENDAR_DATA_CHRONOLOGICAL;
+    return withRealScheduledDays(base, queuePosts);
+  }, [isNewUser, queuePosts]);
 
   const selectedMonthIndexRef = useRef(selectedMonthIndex);
   useEffect(() => {

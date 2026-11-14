@@ -15,7 +15,8 @@ import { CheckInCard } from '../CheckInCard';
 import { CalendarSheet } from './CalendarSheet';
 import { FloatingGhost, PreviewRow } from './HomeDayZero';
 import { TodayQuestCard } from '../quests/QuestBlocks';
-import { getScheduleSummary, getVoiceCloneSummary, getWeekSchedule } from '../../data';
+import { getVoiceCloneSummary } from '../../data';
+import { useQueue } from '../../hooks/useQueue';
 import { ds, goldTokens } from '../../theme/colors';
 
 // Home for creators who've been posting: the same glass design as day 0, now
@@ -114,8 +115,9 @@ function DailyBrief({ onHook, onPlan }: { onHook: () => void; onPlan: () => void
 export function HomeReturning({ firstName, onPlanPost, onOpenSchedule, onOpenGrowth, onOpenQuests, onStartQuest, pro = false, onOpenHookStudio, onOpenVoiceStudio }: HomeReturningProps) {
   const voice = getVoiceCloneSummary('returning');
   const [calendarOpen, setCalendarOpen] = useState(false);
-  const week = getWeekSchedule('returning');
-  const next = getScheduleSummary('returning').nextPostLabel;
+  const queue = useQueue('returning');
+  const week = queue.week;
+  const next = queue.summary.nextPostLabel;
   const enter = (d: number) => FadeInUp.delay(d).duration(550).easing(Easing.out(Easing.cubic));
 
   const glance = [

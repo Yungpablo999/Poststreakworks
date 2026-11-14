@@ -286,14 +286,14 @@ export const PLAN_POSTS_PER_WEEK = 3;
 // "Check in" on Home shows up here straight away.
 // ---------------------------------------------------------------------------
 
-export type CalendarPlatform = 'tiktok' | 'instagram' | 'youtube' | 'threads' | 'facebook';
+export type CalendarPlatform = 'tiktok' | 'instagram' | 'youtube' | 'threads' | 'facebook' | 'linkedin';
 
 export interface CalendarPost {
   id: string;
   title: string;
   platform: CalendarPlatform;
   time: string;
-  status: 'posted' | 'scheduled' | 'draft';
+  status: 'posted' | 'scheduled' | 'draft' | 'failed';
 }
 
 export interface CalendarDay {

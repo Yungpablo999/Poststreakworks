@@ -8,7 +8,8 @@ import { Text, TextInput } from '../ui/AppText';
 import { GlassCard } from '../glass/GlassCard';
 import { JarvisOrb } from '../JarvisOrb';
 import { PlatformLogo, type PlatformLogoType } from '../onboarding/PlatformLogo';
-import { getCalendarMonth, getTopicIdeas, type FeedIdea } from '../../data';
+import { getTopicIdeas, type FeedIdea } from '../../data';
+import { useQueue } from '../../hooks/useQueue';
 import { ds } from '../../theme/colors';
 
 // Desktop web app: the panel on the right of the main pages, so wide screens
@@ -123,18 +124,19 @@ const DAY = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 function YourWeek({ persona, onPlan }: { persona: 'new' | 'returning'; onPlan: () => void }) {
   const now = new Date();
+  const queue = useQueue(persona);
   const week = useMemo(() => {
     // Monday-first week around today, possibly spanning two months
     const dow = (now.getDay() + 6) % 7;
     const days = [];
     for (let i = 0; i < 7; i++) {
       const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dow + i);
-      const m = getCalendarMonth(persona, d.getFullYear(), d.getMonth());
+      const m = queue.month(d.getFullYear(), d.getMonth());
       days.push({ date: d, info: m.days.find((x) => x.day === d.getDate()) });
     }
     return days;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [persona]);
+  }, [persona, queue.month]);
   const todayIdx = week.findIndex((d) => d.info?.isToday);
   const [sel, setSel] = useState(Math.max(0, todayIdx));
   const picked = week[sel];
@@ -179,7 +181,7 @@ function YourWeek({ persona, onPlan }: { persona: 'new' | 'returning'; onPlan: (
               <PlatformLogo type={p.platform as PlatformLogoType} size={26} />
               <View style={styles.flex}>
                 <Text style={styles.postTitle} numberOfLines={1}>{p.title}</Text>
-                <Text style={styles.muted}>{p.time} · {p.status === 'posted' ? 'Posted' : p.status === 'scheduled' ? 'Scheduled' : 'Draft'}</Text>
+                <Text style={styles.muted}>{p.time} · {p.status === 'posted' ? 'Posted' : p.status === 'scheduled' ? 'Scheduled' : p.status === 'failed' ? 'Failed' : 'Draft'}</Text>
               </View>
             </View>
           ))

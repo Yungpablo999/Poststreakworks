@@ -22,7 +22,8 @@ import { Text } from '../ui/AppText';
 import { AppButton } from '../ui/AppButton';
 import { PlatformLogo } from '../onboarding/PlatformLogo';
 import { ds } from '../../theme/colors';
-import { getCalendarMonth, subscribeToCheckIns, type CalendarDay, type Persona } from '../../data';
+import { subscribeToCheckIns, type CalendarDay, type Persona } from '../../data';
+import { useQueue } from '../../hooks/useQueue';
 
 // The calendar behind the Home check-in card: a glass sheet that slides up.
 // Month by month (swipe or arrows), each day shows check-ins, posts and
@@ -38,6 +39,7 @@ const PLATFORM_NAMES: Record<string, string> = {
   youtube: 'YouTube',
   threads: 'Threads',
   facebook: 'Facebook',
+  linkedin: 'LinkedIn',
 };
 
 interface CalendarSheetProps {
@@ -129,11 +131,11 @@ function DayDetails({ day, label, onPlanPost }: { day: CalendarDay; label: strin
             <View
               style={[
                 styles.statusChip,
-                p.status === 'posted' ? styles.statusPosted : p.status === 'draft' ? styles.statusDraft : styles.statusScheduled,
+                p.status === 'posted' ? styles.statusPosted : p.status === 'draft' || p.status === 'failed' ? styles.statusDraft : styles.statusScheduled,
               ]}
             >
-              <Text style={[styles.statusText, { color: p.status === 'posted' ? ds.greenFill : p.status === 'draft' ? ds.text2 : ds.purple }]}>
-                {p.status === 'posted' ? 'Posted' : p.status === 'draft' ? 'Draft' : 'Scheduled'}
+              <Text style={[styles.statusText, { color: p.status === 'posted' ? ds.greenFill : p.status === 'draft' || p.status === 'failed' ? ds.text2 : ds.purple }]}>
+                {p.status === 'posted' ? 'Posted' : p.status === 'draft' ? 'Draft' : p.status === 'failed' ? 'Failed' : 'Scheduled'}
               </Text>
             </View>
           </Animated.View>
@@ -174,7 +176,8 @@ export function CalendarSheet({ visible, onClose, persona, onPlanPost }: Calenda
   useEffect(() => subscribeToCheckIns(() => setVersion((v) => v + 1)), []);
 
   const target = new Date(now.getFullYear(), now.getMonth() + offset, 1);
-  const month = getCalendarMonth(persona, target.getFullYear(), target.getMonth());
+  const queue = useQueue(persona);
+  const month = queue.month(target.getFullYear(), target.getMonth());
   const today = month.days.find((d) => d.isToday);
   const selected = month.days.find((d) => d.key === selectedKey) ?? today ?? null;
 

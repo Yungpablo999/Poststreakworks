@@ -19,6 +19,8 @@ import { Text, TextInput } from '../components/ui/AppText';
 import { BrandLogo } from '../components/BrandLogo';
 import { HomeDayZero } from '../components/home/HomeDayZero';
 import { getVoiceCloneSummary } from '../data';
+import { useQueue } from '../hooks/useQueue';
+import { withRealScheduledDays } from '../api/queueMapping';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -412,17 +414,15 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
     }
   };
 
+  // scheduledDays come from the real queue; completed/freeze days are demo streak history.
+  // TODO(demo): completedDays / freezeDays in FULL_YEAR_CALENDAR
+  const { posts: queuePosts } = useQueue();
   const proCalendarMonthsData: MonthData[] = useMemo(() => {
-    if (isNewUser) {
-      return FULL_YEAR_CALENDAR.map((m) => ({
-        ...m,
-        completedDays: [],
-        scheduledDays: [],
-        freezeDays: [],
-      }));
-    }
-    return FULL_YEAR_CALENDAR;
-  }, [isNewUser]);
+    const base = isNewUser
+      ? FULL_YEAR_CALENDAR.map((m) => ({ ...m, completedDays: [], freezeDays: [] }))
+      : FULL_YEAR_CALENDAR;
+    return withRealScheduledDays(base, queuePosts);
+  }, [isNewUser, queuePosts]);
 
   const proStreakGrid: ('completed' | 'scheduled' | 'freeze' | 'empty')[][] = isNewUser
     ? [

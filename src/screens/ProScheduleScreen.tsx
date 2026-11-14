@@ -26,6 +26,8 @@ import { TinyGoldCheck } from '../components/CreatorStoryModal';
 import { ProNotificationsModal, ProNotificationItem, DEFAULT_PRO_NOTIFICATIONS } from '../components/ProNotificationsModal';
 import { SocialBrandIcon } from '../components/SocialBrandIcon';
 import { PurpleGoldSwitch } from '../components/PurpleGoldSwitch';
+import { useQueue } from '../hooks/useQueue';
+import { toProQueueItems, toProScheduleItems } from '../api/queueMapping';
 import { sFont, sPadding, isNarrowScreen } from '../utils/responsive';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -44,6 +46,8 @@ interface ProScheduleScreenProps {
 }
 
 interface CalendarDay {
+  /** Local day, YYYY-MM-DD (matches the queue's day keys) */
+  key: string;
   dayName: string;
   dayNum: number;
   monthName: string;
@@ -59,9 +63,9 @@ const MONTH_NAMES_FULL = [
 ];
 const DAY_NAMES_SHORT = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
-const getDynamicWeekData = () => {
+const getDynamicWeekData = (postsPerDay: Record<string, number> = {}) => {
   const now = new Date();
-  const baseDate = new Date(now.getFullYear() === 2026 ? now : new Date(2026, 8, 5));
+  const baseDate = now;
   const currentDayOfWeek = baseDate.getDay(); // 0 = Sun ... 6 = Sat
 
   // 7-day week starting on Sunday
@@ -83,12 +87,14 @@ const getDynamicWeekData = () => {
       todayIndex = i;
     }
 
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     days.push({
+      key,
       dayName: DAY_NAMES_SHORT[d.getDay()],
       dayNum: d.getDate(),
       monthName: MONTH_NAMES_SHORT[d.getMonth()],
       fullDateStr: `${MONTH_NAMES_SHORT[d.getMonth()]} ${d.getDate()}`,
-      dotsCount: isToday ? 2 : (i % 2 === 0 ? 1 : 2),
+      dotsCount: Math.min(3, postsPerDay[key] ?? 0),
       isToday,
     });
   }
@@ -161,101 +167,24 @@ interface FullQueueItem {
   dayLabel: string;
   status: 'AUTOPILOT' | 'READY' | 'QUEUED';
   score: string;
-  iconType: 'tiktok' | 'instagram' | 'youtube' | 'threads';
+  iconType: 'tiktok' | 'instagram' | 'youtube' | 'threads' | 'facebook' | 'linkedin';
 }
-
-const generateInitialFullQueue = (baseDate: Date): FullQueueItem[] => {
-  const getRelativeDayLabel = (offsetDays: number) => {
-    const d = new Date(baseDate);
-    d.setDate(baseDate.getDate() + offsetDays);
-    const dayOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][d.getDay()];
-    const shortMonth = MONTH_NAMES_SHORT[d.getMonth()];
-    if (offsetDays === 1) {
-      return `Tomorrow (${dayOfWeek.slice(0, 3)}, ${shortMonth} ${d.getDate()})`;
-    }
-    return `${dayOfWeek} (${shortMonth} ${d.getDate()})`;
-  };
-
-  return [
-    {
-      id: 'q1',
-      title: 'Shorts Insight: Why 90% of creators fail by Month 2',
-      platformLabel: '▶ Shorts',
-      time: '10:00',
-      period: 'AM',
-      dayLabel: getRelativeDayLabel(1),
-      status: 'AUTOPILOT',
-      score: '96% Audience Fit',
-      iconType: 'youtube',
-    },
-    {
-      id: 'q2',
-      title: 'Instagram Carousel: The 1 iPhone 4K Recording Setup',
-      platformLabel: '📸 IG Reel',
-      time: '06:00',
-      period: 'PM',
-      dayLabel: getRelativeDayLabel(2),
-      status: 'READY',
-      score: '94% Audience Fit',
-      iconType: 'instagram',
-    },
-    {
-      id: 'q3',
-      title: 'TikTok Duet: Unpopular truth about the 2026 algorithm',
-      platformLabel: '≈ TikTok',
-      time: '05:30',
-      period: 'PM',
-      dayLabel: getRelativeDayLabel(3),
-      status: 'AUTOPILOT',
-      score: '98% Audience Fit',
-      iconType: 'tiktok',
-    },
-    {
-      id: 'q4',
-      title: 'YouTube Short: How I batch-film 10 videos in 2 hours',
-      platformLabel: '▶ Shorts',
-      time: '02:00',
-      period: 'PM',
-      dayLabel: getRelativeDayLabel(4),
-      status: 'QUEUED',
-      score: '91% Audience Fit',
-      iconType: 'youtube',
-    },
-    {
-      id: 'q5',
-      title: 'Threads Take: 5 tools that automate my content pipeline',
-      platformLabel: '🧵 Threads',
-      time: '09:30',
-      period: 'AM',
-      dayLabel: getRelativeDayLabel(5),
-      status: 'AUTOPILOT',
-      score: '95% Audience Fit',
-      iconType: 'threads',
-    },
-    {
-      id: 'q6',
-      title: 'Instagram Reel: Behind the scenes of my video workflow',
-      platformLabel: '📸 IG Reel',
-      time: '07:30',
-      period: 'PM',
-      dayLabel: getRelativeDayLabel(6),
-      status: 'READY',
-      score: '96% Audience Fit',
-      iconType: 'instagram',
-    },
-  ];
-};
 
 interface ScheduleItem {
   id: string;
   time: string;
   period: string;
   title: string;
-  platform: 'tiktok' | 'instagram' | 'youtube' | 'threads';
+  platform: 'tiktok' | 'instagram' | 'youtube' | 'threads' | 'facebook' | 'linkedin';
   platformLabel: string;
-  badgeType: 'scheduled' | 'recommended' | 'draft';
+  badgeType: 'scheduled' | 'recommended' | 'draft' | 'posted' | 'failed';
   dayIndex: number;
+  /** Real queue rows only: true when the server can cancel it (status = scheduled) */
+  cancellable?: boolean;
 }
+
+// Demo items created inside this screen (not real posts) use these id prefixes.
+const isDemoId = (id: string) => id.startsWith('sch_');
 
 const parseTimeToMinutes = (timeStr: string, period: string): number => {
   const parts = timeStr.split(':');
@@ -281,51 +210,6 @@ const sortScheduleItemsChronologically = (items: ScheduleItem[]): ScheduleItem[]
     const minB = parseTimeToMinutes(b.time, b.period);
     return minA - minB;
   });
-};
-
-const generateInitialScheduleItems = (todayIndex: number): ScheduleItem[] => {
-  return [
-    {
-      id: 'sch_1',
-      time: '10:00',
-      period: 'AM',
-      title: '5 retention rules that 10x watch time',
-      platform: 'youtube',
-      platformLabel: '▶ Shorts',
-      badgeType: 'scheduled',
-      dayIndex: todayIndex,
-    },
-    {
-      id: 'sch_2',
-      time: '11:30',
-      period: 'AM',
-      title: '3 creator mistakes I stopped making this year',
-      platform: 'tiktok',
-      platformLabel: '≈ TikTok',
-      badgeType: 'scheduled',
-      dayIndex: todayIndex,
-    },
-    {
-      id: 'sch_3',
-      time: '6:00',
-      period: 'PM',
-      title: 'Step-by-step editing workflow in CapCut',
-      platform: 'instagram',
-      platformLabel: '📸 IG Reel',
-      badgeType: 'scheduled',
-      dayIndex: todayIndex,
-    },
-    {
-      id: 'sch_4',
-      time: '7:30',
-      period: 'PM',
-      title: 'Personal lesson Reel • Behind the scenes studio',
-      platform: 'instagram',
-      platformLabel: '📸 IG Reel',
-      badgeType: 'recommended',
-      dayIndex: todayIndex,
-    },
-  ];
 };
 
 const GAP_SUGGESTIONS = [
@@ -379,12 +263,25 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
   userProfile,
   onSaveProfile,
 }) => {
-  const weekData = useMemo(() => getDynamicWeekData(), []);
+  const queue = useQueue('returning');
+  const postsPerDay = useMemo(() => {
+    const counts: Record<string, number> = {};
+    queue.posts.forEach((p) => (counts[p.dayKey] = (counts[p.dayKey] ?? 0) + 1));
+    return counts;
+  }, [queue.posts]);
+  const weekData = useMemo(() => getDynamicWeekData(postsPerDay), [postsPerDay]);
   const [activeTab, setActiveTab] = useState<TabType>('home');
   const [selectedDayIndex, setSelectedDayIndex] = useState<number>(weekData.todayIndex);
-  const [scheduleList, setScheduleList] = useState<ScheduleItem[]>(() =>
-    generateInitialScheduleItems(weekData.todayIndex)
+  // The real queue (this week) + items created in this screen's own modals.
+  // TODO(demo): items created/edited in those modals are local only; the real way to schedule is the post composer.
+  const [scheduleList, setScheduleList] = useState<ScheduleItem[]>([]);
+  const realWeekItems = useMemo(
+    () => toProScheduleItems(queue.posts, weekData.days.map((d) => d.key)),
+    [queue.posts, weekData]
   );
+  useEffect(() => {
+    setScheduleList((prev) => [...prev.filter((i) => isDemoId(i.id)), ...realWeekItems]);
+  }, [realWeekItems]);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [notifications, setNotifications] = useState<ProNotificationItem[]>(DEFAULT_PRO_NOTIFICATIONS);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
@@ -395,9 +292,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
   const [showStrategyModal, setShowStrategyModal] = useState(false);
   const [showAudienceFitModal, setShowAudienceFitModal] = useState(false);
   const [selectedStrategyIds, setSelectedStrategyIds] = useState<string[]>(['strat_1', 'strat_2']);
-  const [fullQueueList, setFullQueueList] = useState<FullQueueItem[]>(() =>
-    generateInitialFullQueue(weekData.baseDate)
-  );
+  const fullQueueList: FullQueueItem[] = useMemo(() => toProQueueItems(queue.posts), [queue.posts]);
   const [selectedQueueFilter, setSelectedQueueFilter] = useState('ALL');
   const [showFillGapModal, setShowFillGapModal] = useState(false);
   const [selectedPostDetail, setSelectedPostDetail] = useState<ScheduleItem | null>(null);
@@ -417,9 +312,9 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
 
   // Dynamic Operating Dashboard Calculations
   const TARGET_WEEKLY_SLOTS = 7;
-  const scheduledCount = scheduleList.length;
-  const draftsCount = 2;
-  const postedCount = 1;
+  const scheduledCount = scheduleList.filter((i) => i.badgeType === 'scheduled' || i.badgeType === 'recommended').length;
+  const draftsCount = scheduleList.filter((i) => i.badgeType === 'draft').length;
+  const postedCount = scheduleList.filter((i) => i.badgeType === 'posted').length;
   const openSlotsCount = Math.max(0, TARGET_WEEKLY_SLOTS - (scheduledCount + postedCount));
   const planCompletionPct = Math.min(
     100,
@@ -982,6 +877,12 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
           </View>
 
           <View style={styles.queueContainerCard}>
+            {fullQueueList.length === 0 && (
+              <View style={styles.emptyScheduleBox}>
+                <Text style={{ fontSize: 22, marginBottom: 4 }}>☕</Text>
+                <Text style={styles.emptyScheduleTitle}>No posts scheduled yet</Text>
+              </View>
+            )}
             {fullQueueList.slice(0, 3).map((item, idx) => (
               <React.Fragment key={item.id}>
                 {idx > 0 && <View style={styles.queueItemDivider} />}
@@ -1978,10 +1879,17 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                     {/* Danger / Dismiss: Delete Button */}
                     <Pressable
                       style={styles.modalDeleteBtn}
-                      onPress={() => {
-                        setScheduleList((prev) => prev.filter((item) => item.id !== selectedPostDetail.id));
+                      onPress={async () => {
+                        const target = selectedPostDetail;
                         setSelectedPostDetail(null);
-                        showToast('Post removed from schedule');
+                        if (isDemoId(target.id)) {
+                          setScheduleList((prev) => prev.filter((item) => item.id !== target.id));
+                          showToast('Post removed from schedule');
+                          return;
+                        }
+                        // Real queue post: cancel on the server, then the store drops it from every screen
+                        const result = await queue.cancelPost(target.id);
+                        showToast(result.ok ? 'Post removed from schedule' : result.error);
                       }}
                     >
                       <Text style={styles.modalDeleteBtnText}>🗑️ Remove from Schedule</Text>
@@ -2198,6 +2106,12 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
 
                 {/* Queue Items List */}
                 <View style={{ gap: 10, marginVertical: 6 }}>
+                  {fullQueueList.length === 0 && (
+                    <View style={styles.emptyScheduleBox}>
+                <Text style={{ fontSize: 22, marginBottom: 4 }}>☕</Text>
+                <Text style={styles.emptyScheduleTitle}>No posts scheduled yet</Text>
+              </View>
+                  )}
                   {fullQueueList
                     .filter((q) => selectedQueueFilter === 'ALL' || q.platformLabel.includes(selectedQueueFilter))
                     .map((item) => (
@@ -2227,6 +2141,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
                               platformLabel: item.platformLabel,
                               badgeType: 'scheduled',
                               dayIndex: selectedDayIndex,
+                              cancellable: !isDemoId(item.id),
                             });
                           }
                         }}
