@@ -438,7 +438,8 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   const [scheduledAt, setScheduledAt] = useState<Date | null>(null);
   const publishingRef = useRef(false);
   // Which platforms are connected comes from the backend
-  const { isConnected, loading: platformsLoading } = usePlatforms();
+  const { isConnected, loading: platformsLoading, platforms: connectedPlatforms } = usePlatforms();
+  const connectedIds = React.useMemo(() => connectedPlatforms.map((p) => p.platform), [connectedPlatforms]);
 
   // Modals
   const [showPlatformsModal, setShowPlatformsModal] = useState(false);
@@ -1007,10 +1008,10 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   const ideaPool = React.useMemo(() => {
     const starter = getStarterIdeas(
       userProfile?.niches?.length ? userProfile.niches : ['lifestyle'],
-      userProfile?.connectedPlatforms?.length ? userProfile.connectedPlatforms : ['tiktok', 'instagram'],
+      connectedIds,
     ).map((i) => i.title);
     return Array.from(new Set([...starter, ...SAMPLE_IDEAS]));
-  }, [userProfile?.niches, userProfile?.connectedPlatforms]);
+  }, [userProfile?.niches, connectedIds]);
   const [ideaThinking, setIdeaThinking] = useState(false);
 
   // Short video: film in TikTok / Reels / Shorts (sounds + filters) or upload
