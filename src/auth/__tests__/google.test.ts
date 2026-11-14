@@ -11,7 +11,8 @@ jest.mock('expo-web-browser', () => ({
 }));
 jest.mock('expo-linking', () => ({ createURL: (path: string) => `poststreak://${path}` }));
 
-import { signInWithGoogle } from '../google';
+import { Platform } from 'react-native';
+import { googleRedirectUrl, signInWithGoogle } from '../google';
 
 // jest-expo's default preset runs as iOS, i.e. the phone flow.
 describe('signInWithGoogle (phone)', () => {
@@ -48,5 +49,22 @@ describe('signInWithGoogle (phone)', () => {
       url: 'poststreak://auth/callback?error=access_denied&error_description=Denied',
     });
     await expect(signInWithGoogle()).resolves.toEqual({ status: 'error', message: 'Denied' });
+  });
+});
+
+describe('googleRedirectUrl', () => {
+  it('is the poststreak:// callback on phones', () => {
+    expect(googleRedirectUrl()).toBe('poststreak://auth/callback');
+  });
+
+  it('is <origin>/auth/callback on web, never the bare origin', () => {
+    jest.replaceProperty(Platform, 'OS', 'web');
+    (globalThis as { window?: unknown }).window = { location: { origin: 'https://app.poststreak.app' } };
+    try {
+      expect(googleRedirectUrl()).toBe('https://app.poststreak.app/auth/callback');
+    } finally {
+      delete (globalThis as { window?: unknown }).window;
+      jest.restoreAllMocks();
+    }
   });
 });
