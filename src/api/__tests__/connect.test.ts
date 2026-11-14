@@ -15,6 +15,9 @@ import {
   connectPlatform,
   finalizeConnect,
   handleWebFinalizeReturn,
+  resumePendingFinalize,
+  webResultMessage,
+  type PendingHandleStore,
   parseFinalizeUrl,
   startConnect,
   type ConnectDeps,
@@ -83,12 +86,17 @@ describe('finalizeConnect', () => {
   it.each([
     [404, { error: 'invalid_handle' }, CONNECT_MESSAGES.invalidHandle],
     [410, { error: 'expired' }, CONNECT_MESSAGES.expired],
-    [401, { error: 'Unauthorized' }, CONNECT_MESSAGES.signedOut],
     [500, {}, CONNECT_MESSAGES.generic],
   ])('maps %s to a message', async (status, body, message) => {
     mockPost.mockRejectedValue(new ApiError(status, body));
     const deps = makeDeps();
     await expect(finalizeConnect('h', deps)).resolves.toEqual({ status: 'error', message });
+    expect(deps.onConnected).not.toHaveBeenCalled();
+  });
+  it('reports a 401 as needsSignIn (not an error)', async () => {
+    mockPost.mockRejectedValue(new ApiError(401, { error: 'Unauthorized' }));
+    const deps = makeDeps();
+    await expect(finalizeConnect('h', deps)).resolves.toEqual({ status: 'needsSignIn' });
     expect(deps.onConnected).not.toHaveBeenCalled();
   });
   it('treats a network failure and an empty handle as errors without throwing', async () => {
@@ -175,6 +183,11 @@ describe('connectPlatform (web)', () => {
   });
 });
 
+function memoryPending(initial: string | null = null): PendingHandleStore & { value: () => string | null } {
+  let v = initial;
+  return { save: (h) => { v = h; }, load: () => v, clear: () => { v = null; }, value: () => v };
+}
+
 describe('handleWebFinalizeReturn', () => {
   function webDeps(pathname: string, search: string, hash = ''): WebLocationDeps & { order: string[]; replaceUrl: jest.Mock } {
     const order: string[] = [];
@@ -184,7 +197,8 @@ describe('handleWebFinalizeReturn', () => {
       order.push('finalize');
       return { ok: true, platform: 'threads' };
     });
-    return { ...base, pathname, search, hash, replaceUrl, order };
+    const pending = memoryPending();
+    return { ...base, pathname, search, hash, replaceUrl, order, pending };
   }
 
   it('ignores any other path and touches nothing', async () => {
@@ -219,5 +233,64 @@ describe('handleWebFinalizeReturn', () => {
     const deps = webDeps('/connect/finalize', '', '#platform=threads&handle=h9');
     await handleWebFinalizeReturn(deps);
     expect(mockPost).toHaveBeenCalledWith('/api/connect/finalize', { handle: 'h9' });
+  });
+});
+
+describe('web 401 keeps the handle until sign-in', () => {
+  const webDeps = (pending: PendingHandleStore) => ({
+    ...makeDeps({ os: 'web' }),
+    pathname: '/connect/finalize',
+    search: '?platform=threads&handle=h1',
+    replaceUrl: jest.fn(),
+    pending,
+  });
+
+  it('saves the handle (and cleans the URL) when finalize returns 401', async () => {
+    const pending = memoryPending();
+    mockPost.mockRejectedValue(new ApiError(401, { error: 'Unauthorized' }));
+    const deps = webDeps(pending);
+    await expect(handleWebFinalizeReturn(deps)).resolves.toEqual({ status: 'needsSignIn' });
+    expect(pending.value()).toBe('h1');
+    expect(deps.replaceUrl).toHaveBeenCalledWith('/');
+  });
+
+  it('finishes the kept handle after sign-in and then forgets it', async () => {
+    const pending = memoryPending('h1');
+    mockPost.mockResolvedValue({ ok: true, platform: 'threads' });
+    const deps = webDeps(pending);
+    await expect(resumePendingFinalize(deps)).resolves.toEqual({ status: 'connected', platform: 'threads' });
+    expect(mockPost).toHaveBeenCalledWith('/api/connect/finalize', { handle: 'h1' });
+    expect(pending.value()).toBeNull();
+    expect(deps.onConnected).toHaveBeenCalled();
+  });
+
+  it('keeps it while still signed out, and drops it once it is expired or invalid', async () => {
+    const pending = memoryPending('h1');
+    mockPost.mockRejectedValue(new ApiError(401, {}));
+    await expect(resumePendingFinalize(webDeps(pending))).resolves.toEqual({ status: 'needsSignIn' });
+    expect(pending.value()).toBe('h1');
+    mockPost.mockRejectedValue(new ApiError(410, { error: 'expired' }));
+    await resumePendingFinalize(webDeps(pending));
+    expect(pending.value()).toBeNull();
+  });
+
+  it('does nothing when no handle is waiting', async () => {
+    await expect(resumePendingFinalize(webDeps(memoryPending()))).resolves.toBeNull();
+    expect(mockPost).not.toHaveBeenCalled();
+  });
+
+  it('a phone 401 during the auth session stays a plain error', async () => {
+    mockGet.mockResolvedValue({ url: 'https://p.test/auth' });
+    mockPost.mockRejectedValue(new ApiError(401, {}));
+    const deps = makeDeps();
+    deps.openAuthSession.mockResolvedValue({ type: 'success', url: 'poststreak://connect/finalize?platform=threads&handle=h' });
+    await expect(connectPlatform('threads', deps)).resolves.toEqual({ status: 'error', message: CONNECT_MESSAGES.signedOut });
+  });
+
+  it('words the toast', () => {
+    expect(webResultMessage({ status: 'needsSignIn' })).toBe('Sign in to finish connecting');
+    expect(webResultMessage({ status: 'connected', platform: 'threads' })).toBe(CONNECT_MESSAGES.connected);
+    expect(webResultMessage({ status: 'error', message: 'x' })).toBe('x');
+    expect(webResultMessage(null)).toBeNull();
   });
 });

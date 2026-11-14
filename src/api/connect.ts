@@ -25,6 +25,8 @@ export const CONNECT_MESSAGES = {
   invalidHandle: 'That connection is not valid. Please try again.',
   expired: 'The connection expired. Please try again.',
   signedOut: 'Please sign in again.',
+  signInToFinish: 'Sign in to finish connecting',
+  connected: 'Account connected',
   generic: 'Could not connect. Please try again.',
 } as const;
 
@@ -35,6 +37,8 @@ export type ConnectResult =
   | { status: 'disabled' }
   /** Web: the page is leaving for the provider; finalize runs when it returns */
   | { status: 'redirecting' }
+  /** Finalize got a 401: nobody is signed in. On web the handle is kept and finalize is retried after sign-in. */
+  | { status: 'needsSignIn' }
   | { status: 'error'; message: string };
 
 export interface ConnectDeps {
@@ -106,7 +110,7 @@ export async function finalizeConnect(handle: string, deps: ConnectDeps): Promis
     if (e instanceof ApiError) {
       if (e.status === 404) return { status: 'error', message: CONNECT_MESSAGES.invalidHandle };
       if (e.status === 410) return { status: 'error', message: CONNECT_MESSAGES.expired };
-      if (e.status === 401) return { status: 'error', message: CONNECT_MESSAGES.signedOut };
+      if (e.status === 401) return { status: 'needsSignIn' };
     }
     return { status: 'error', message: CONNECT_MESSAGES.generic };
   }
@@ -140,8 +144,40 @@ export async function connectPlatform(platform: string, deps: ConnectDeps = defa
 
   const params = parseFinalizeUrl(result.url);
   if (!params) return { status: 'error', message: CONNECT_MESSAGES.unfinished };
-  return finalizeConnect(params.handle, deps);
+  const finalized = await finalizeConnect(params.handle, deps);
+  // Phones: the in-app browser flow can't be resumed later, so a 401 is just an error
+  return finalized.status === 'needsSignIn' ? { status: 'error', message: CONNECT_MESSAGES.signedOut } : finalized;
 }
+
+/** Where the web return keeps a handle that couldn't be finalized yet because nobody was signed in */
+export interface PendingHandleStore {
+  save: (handle: string) => void;
+  load: () => string | null;
+  clear: () => void;
+}
+
+const PENDING_KEY = 'poststreak.pendingConnectHandle';
+
+/** sessionStorage (this tab only; a handle is single-use and expires in 10 minutes). Never throws. */
+export const sessionPendingHandleStore: PendingHandleStore = {
+  save: (handle) => {
+    try {
+      window.sessionStorage.setItem(PENDING_KEY, handle);
+    } catch {}
+  },
+  load: () => {
+    try {
+      return window.sessionStorage.getItem(PENDING_KEY);
+    } catch {
+      return null;
+    }
+  },
+  clear: () => {
+    try {
+      window.sessionStorage.removeItem(PENDING_KEY);
+    } catch {}
+  },
+};
 
 export interface WebLocationDeps extends ConnectDeps {
   pathname: string;
@@ -149,6 +185,7 @@ export interface WebLocationDeps extends ConnectDeps {
   hash?: string;
   /** history.replaceState(null, '', url) */
   replaceUrl: (url: string) => void;
+  pending: PendingHandleStore;
 }
 
 /**
@@ -161,7 +198,28 @@ export async function handleWebFinalizeReturn(deps: WebLocationDeps): Promise<Co
   deps.replaceUrl('/');
   const params = parseFinalizeUrl(`${deps.pathname}${deps.search}${deps.hash ?? ''}`);
   if (!params) return { status: 'error', message: CONNECT_MESSAGES.unfinished };
-  return finalizeConnect(params.handle, deps);
+  return finalizeKeepingHandle(params.handle, deps);
+}
+
+/**
+ * Finalizes; on a 401 the handle is kept (not dropped) so it can be finished after sign-in,
+ * otherwise it is cleared.
+ */
+async function finalizeKeepingHandle(handle: string, deps: ConnectDeps & { pending: PendingHandleStore }): Promise<ConnectResult> {
+  const result = await finalizeConnect(handle, deps);
+  if (result.status === 'needsSignIn') deps.pending.save(handle);
+  else deps.pending.clear();
+  return result;
+}
+
+/**
+ * Web: after sign-in, finish a connection that was kept because finalize got a 401.
+ * Returns null when nothing is waiting.
+ */
+export async function resumePendingFinalize(deps: ConnectDeps & { pending: PendingHandleStore }): Promise<ConnectResult | null> {
+  const handle = deps.pending.load();
+  if (!handle) return null;
+  return finalizeKeepingHandle(handle, deps);
 }
 
 let webReturnStarted = false;
@@ -176,5 +234,21 @@ export function runWebFinalizeReturnOnce(onConnected: () => void | Promise<void>
     search: window.location.search,
     hash: window.location.hash,
     replaceUrl: (url) => window.history.replaceState(null, '', url),
+    pending: sessionPendingHandleStore,
   });
+}
+
+/** Web: finishes a kept handle once the creator is signed in. Resolves null off web or when nothing waits. */
+export function resumePendingFinalizeOnWeb(onConnected: () => void | Promise<void>): Promise<ConnectResult | null> {
+  if (Platform.OS !== 'web' || typeof window === 'undefined') return Promise.resolve(null);
+  return resumePendingFinalize({ ...defaultConnectDeps(), onConnected, pending: sessionPendingHandleStore });
+}
+
+/** The toast text for a web finalize result, or null to say nothing */
+export function webResultMessage(result: ConnectResult | null): string | null {
+  if (!result) return null;
+  if (result.status === 'needsSignIn') return CONNECT_MESSAGES.signInToFinish;
+  if (result.status === 'connected') return CONNECT_MESSAGES.connected;
+  if (result.status === 'error') return result.message;
+  return null;
 }
