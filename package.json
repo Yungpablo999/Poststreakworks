@@ -45,7 +45,8 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "test": "jest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "deploy:web": "bash scripts/deploy-web.sh"
   },
   "private": true,
   "jest": {

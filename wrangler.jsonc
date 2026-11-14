@@ -1,0 +1,11 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "poststreak-app",
+  "compatibility_date": "2026-11-13",
+  "observability": { "enabled": true },
+  "assets": {
+    "directory": "dist",
+    // Any path that isn't a real file (e.g. /connect/finalize) gets index.html, so deep links load the app
+    "not_found_handling": "single-page-application"
+  }
+}
