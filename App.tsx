@@ -13,6 +13,8 @@ import { VerifyCodeScreen } from './src/screens/VerifyCodeScreen';
 import { signInWithGoogle } from './src/auth/google';
 import { sendEmailOtp, verifyEmailOtp } from './src/auth/email';
 import { getCurrentSession, onAuthChange, signOut } from './src/auth/session';
+import { profileFromUser } from './src/auth/profile';
+import type { Session } from '@supabase/supabase-js';
 import { BrandToast } from './src/components/BrandToast';
 import { NicheSelectionScreen } from './src/screens/NicheSelectionScreen';
 import { PlatformConnectScreen } from './src/screens/PlatformConnectScreen';
@@ -243,9 +245,10 @@ export default function App() {
     });
   };
 
+  // Name, handle and photo come from the signed-in Supabase user (see the effect below).
   const [userProfile, setUserProfile] = useState<UserProfileData>({
-    name: 'Pablo',
-    handle: '@pablocreates',
+    name: '',
+    handle: '',
     bio: 'Consistency is my superpower. Building my creator streak with Jarvis AI.',
     niche: 'Tech & Lifestyle Creator • Lagos',
     tier: 'free',
@@ -388,7 +391,7 @@ export default function App() {
       setAuthUsername(_username);
       setAuthEmail(_email);
       setVerifyMode('signup');
-      setUserProfile(prev => ({ ...prev, name: _username || prev.name, tier: 'free' }));
+      setUserProfile(prev => ({ ...prev, tier: 'free' }));
       navigateTo('verify-code');
     } finally {
       emailBusy.current = false;
@@ -505,8 +508,60 @@ export default function App() {
   const handleLogout = () => {
     // End the Supabase session (if any) on this device; mock sign-ins have none
     signOut().catch((err) => console.warn('[auth] sign-out:', err));
+    applySession(null); // clear the profile right away
     navigateTo(Platform.OS === 'web' ? 'signin' : 'welcome');
   };
+
+  // The profile (name, handle, photo) is the signed-in user's: built from the
+  // session at startup and on every auth change, and cleared on sign-out so the
+  // next person never sees the previous one.
+  // TODO(profile-save): edits in the profile modal stay local; persist to Supabase user_metadata.
+  const appliedIdentity = React.useRef<{ id: string; key: string } | null>(null);
+  const applySession = React.useCallback((session: Session | null) => {
+    if (!session) {
+      appliedIdentity.current = null;
+      setUserProfile((prev) => ({
+        ...prev,
+        name: '',
+        handle: '',
+        avatarId: undefined,
+        avatarSource: undefined,
+        customAvatarUri: undefined,
+      }));
+      return;
+    }
+    const identity = profileFromUser(session.user);
+    const key = JSON.stringify(identity);
+    const last = appliedIdentity.current;
+    // Token refreshes keep the same user and details: do not overwrite local edits.
+    if (last && last.id === session.user.id && last.key === key) return;
+    appliedIdentity.current = { id: session.user.id, key };
+    setUserProfile((prev) => ({
+      ...prev,
+      name: identity.name,
+      handle: identity.handle,
+      avatarId: identity.avatarUrl ? 'custom' : undefined,
+      avatarSource: undefined,
+      customAvatarUri: identity.avatarUrl ?? undefined,
+    }));
+  }, []);
+
+  React.useEffect(() => {
+    let cancelled = false;
+    getCurrentSession()
+      .then((session) => {
+        if (cancelled) return;
+        applySession(session);
+      })
+      .catch((err) => console.error('[auth] could not read the profile:', err));
+    const stop = onAuthChange((session) => {
+      if (!cancelled) applySession(session);
+    });
+    return () => {
+      cancelled = true;
+      stop();
+    };
+  }, [applySession]);
 
   // A saved Supabase session (or, on the web, one coming back from Google) skips
   // the welcome / sign-in screens. Without the EXPO_PUBLIC_SUPABASE_* settings this

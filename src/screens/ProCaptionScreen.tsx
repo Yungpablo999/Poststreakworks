@@ -24,6 +24,7 @@ import { BrandToast } from '../components/BrandToast';
 import { TinyGoldCheck } from '../components/CreatorStoryModal';
 import { SocialBrandIcon } from '../components/SocialBrandIcon';
 import { sFont } from '../utils/responsive';
+import { firstNameOf, speak } from '../auth/profile';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -185,7 +186,7 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
     subtitle: `Platform captions and CTA strategy locked in for "${currentIdeaTitle}".`,
     badgeText: '✨ CAPTION READY (+120 XP)',
     xpEarned: 120,
-    speechBubble: 'Captions formatted and engagement-tested, Pablo! Ready to publish! 🚀',
+    speechBubble: speak('Captions formatted and engagement-tested, {name}! Ready to publish! 🚀', firstNameOf(userProfile?.name)),
   });
 
   const flameFloatY = useRef(new Animated.Value(0)).current;
@@ -455,7 +456,7 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
       subtitle: `Caption hook, high-converting CTA & structure calibrated for 94% retention.`,
       badgeText: '✨ JARVIS OPTIMIZED (+50 XP)',
       xpEarned: 50,
-      speechBubble: 'Jarvis calibration complete, Pablo! First 80 characters fit above the fold perfectly! 🚀',
+      speechBubble: speak('Jarvis calibration complete, {name}! First 80 characters fit above the fold perfectly! 🚀', firstNameOf(userProfile?.name)),
     });
     setShowCompletionModal(true);
   };
@@ -502,7 +503,7 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
       subtitle: `"${currentIdeaTitle}" captions and hashtags secured.`,
       badgeText: '✨ CAPTION SECURED (+120 XP)',
       xpEarned: 120,
-      speechBubble: 'Captions stored in your creator vault, Pablo! Ready whenever you are! 📝',
+      speechBubble: speak('Captions stored in your creator vault, {name}! Ready whenever you are! 📝', firstNameOf(userProfile?.name)),
     });
     setShowCompletionModal(true);
   };
@@ -1543,7 +1544,7 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
                       subtitle: `${hashtagList.length} creator tags calibrated for peak reach & discoverability.`,
                       badgeText: '✨ HASHTAGS LOCKED IN (+25 XP)',
                       xpEarned: 25,
-                      speechBubble: 'Hashtag cluster is optimized for algorithm discoverability, Pablo! 🔥',
+                      speechBubble: speak('Hashtag cluster is optimized for algorithm discoverability, {name}! 🔥', firstNameOf(userProfile?.name)),
                     });
                     setTimeout(() => {
                       setShowCompletionModal(true);

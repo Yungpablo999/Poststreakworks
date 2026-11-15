@@ -24,6 +24,7 @@ import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { SocialBrandIcon } from '../components/SocialBrandIcon';
 import { TinyGoldCheck } from '../components/CreatorStoryModal';
 import { sFont } from '../utils/responsive';
+import { firstNameOf, speak } from '../auth/profile';
 
 interface ProRepurposeScreenProps {
   userProfile?: UserProfileData;
@@ -445,7 +446,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
     subtitle: '1 idea converted into 4 platform-optimized posts (+150 XP)',
     badgeText: '✨ 4-PLATFORM MULTI-REPURPOSE (+150 XP)',
     xpEarned: 150,
-    speechBubble: 'All 4 versions are calibrated for peak algorithmic retention, Pablo! 🔥',
+    speechBubble: speak('All 4 versions are calibrated for peak algorithmic retention, {name}! 🔥', firstNameOf(userProfile?.name)),
   });
 
   const modalPopScale = useRef(new Animated.Value(0.9)).current;
@@ -562,7 +563,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
         subtitle: `${selectedPlatforms.length} PostStreak platforms calibrated for multi-channel reach.`,
         badgeText: `✨ ${selectedPlatforms.length}-PLATFORM SYNC (+50 XP)`,
         xpEarned: 50,
-        speechBubble: 'Platform versions are ready to adapt your idea, Pablo! 🔥',
+        speechBubble: speak('Platform versions are ready to adapt your idea, {name}! 🔥', firstNameOf(userProfile?.name)),
       });
 
       setTimeout(() => {
@@ -649,7 +650,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
         subtitle: `Created tailored scripts for ${selectedPlatforms.length} PostStreak platforms.`,
         badgeText: `✨ ${selectedPlatforms.length}-PLATFORM SYNC (+50 XP)`,
         xpEarned: 50,
-        speechBubble: 'Platform versions calibrated for peak reach, Pablo! 🚀',
+        speechBubble: speak('Platform versions calibrated for peak reach, {name}! 🚀', firstNameOf(userProfile?.name)),
       });
       setShowCompletionModal(true);
     }, 900);

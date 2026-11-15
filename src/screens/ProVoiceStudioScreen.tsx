@@ -24,6 +24,7 @@ import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { TinyGoldCheck } from '../components/CreatorStoryModal';
 import { sFont, isNarrowScreen } from '../utils/responsive';
 import { PAYMENTS_ENABLED } from '../config/features';
+import { firstNameOf, speak } from '../auth/profile';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -311,7 +312,7 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
     subtitle: 'Ultra-realistic 4K AI audio synced with your video script draft.',
     badgeText: '🎙️ 4K STUDIO AUDIO READY',
     xpEarned: 50,
-    speechBubble: 'Sounds clean and punchy, Pablo! Ready for Reels & TikTok! 🎧',
+    speechBubble: speak('Sounds clean and punchy, {name}! Ready for Reels & TikTok! 🎧', firstNameOf(userProfile?.name)),
   });
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -458,7 +459,7 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
         subtitle: `Rendered with "${selectedVoiceStyle.name}" (${estimatedSeconds}s • ${estimatedMinutesCost} min cost).`,
         badgeText: '🎙️ 4K STUDIO AUDIO READY',
         xpEarned: 50,
-        speechBubble: 'Sounds clean and punchy, Pablo! Ready for Reels & TikTok! 🎧',
+        speechBubble: speak('Sounds clean and punchy, {name}! Ready for Reels & TikTok! 🎧', firstNameOf(userProfile?.name)),
       });
       setShowCelebrationModal(true);
     }, 1100);
@@ -1049,7 +1050,7 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                       subtitle: `"${scriptTitle}.wav" (Studio Audio) downloaded & ready for your video editor.`,
                       badgeText: '📥 AUDIO EXPORTED (+50 XP)',
                       xpEarned: 50,
-                      speechBubble: 'Studio voiceover ready, Pablo! Ready for your video editor! 🚀',
+                      speechBubble: speak('Studio voiceover ready, {name}! Ready for your video editor! 🚀', firstNameOf(userProfile?.name)),
                     });
                     setShowCelebrationModal(true);
                   }}
@@ -2305,7 +2306,7 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
                                   subtitle: `"${proj.name}.wav" downloaded to your device storage.`,
                                   badgeText: '📥 AUDIO EXPORTED (+50 XP)',
                                   xpEarned: 50,
-                                  speechBubble: 'Studio voiceover ready, Pablo! Ready to create! 🚀',
+                                  speechBubble: speak('Studio voiceover ready, {name}! Ready to create! 🚀', firstNameOf(userProfile?.name)),
                                 });
                                 setShowCelebrationModal(true);
                               }}

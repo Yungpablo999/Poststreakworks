@@ -9,6 +9,7 @@ import { BellButton } from '../home/BellButton';
 import { NotificationsSheet, useUnreadNotifications } from '../notifications/NotificationsSheet';
 import type { UserProfileData } from '../UserProfileModal';
 import { ds } from '../../theme/colors';
+import { firstNameOf } from '../../auth/profile';
 
 // Desktop web app: the bar across the top of every signed-in page. A
 // greeting with today's date on the left (or Back on inner pages), and
@@ -43,7 +44,7 @@ export function WebTopBar({
   const [notesOpen, setNotesOpen] = useState(false);
   const [backHover, setBackHover] = useState(false);
   const unread = useUnreadNotifications(persona, tier);
-  const firstName = (profile?.name || '').trim().split(' ')[0];
+  const firstName = firstNameOf(profile?.name);
   const date = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
 
   return (

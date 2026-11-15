@@ -349,8 +349,8 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ visible, onC
   useEffect(() => {
     if (!visible) return;
     setTab(toTab(initialSubTab));
-    setName(initialProfile?.name ?? 'Pablo');
-    setHandle(initialProfile?.handle ?? '@pablocreates');
+    setName(initialProfile?.name ?? '');
+    setHandle(initialProfile?.handle ?? '');
     setNiche(initialProfile?.niche ?? '');
     setBio(initialProfile?.bio ?? '');
     setAvatarId(initialProfile?.avatarId ?? null);
@@ -378,7 +378,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ visible, onC
 
   const cleanHandle = (h: string) => {
     const t = h.replace(/\s+/g, '').replace(/^@+/, '');
-    return t ? `@${t}` : initialProfile?.handle ?? '@pablocreates';
+    return t ? `@${t}` : initialProfile?.handle ?? '';
   };
 
   const avatarSource = customUri
@@ -389,7 +389,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ visible, onC
 
   const build = (overrides: Partial<UserProfileData> = {}): UserProfileData => ({
     ...(initialProfile as UserProfileData),
-    name: name.trim() || initialProfile?.name || 'Pablo',
+    name: name.trim() || initialProfile?.name || '',
     handle: cleanHandle(handle),
     niche: niche.trim(),
     bio: bio.trim(),
@@ -405,8 +405,8 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ visible, onC
   });
 
   const dirty =
-    name.trim() !== (initialProfile?.name ?? 'Pablo') ||
-    cleanHandle(handle) !== (initialProfile?.handle ?? '@pablocreates') ||
+    name.trim() !== (initialProfile?.name ?? '') ||
+    cleanHandle(handle) !== (initialProfile?.handle ?? '') ||
     niche.trim() !== (initialProfile?.niche ?? '') ||
     bio.trim() !== (initialProfile?.bio ?? '') ||
     (avatarId ?? null) !== (initialProfile?.avatarId ?? null) ||
