@@ -13,6 +13,8 @@ import { VerifyCodeScreen } from './src/screens/VerifyCodeScreen';
 import { signInWithGoogle } from './src/auth/google';
 import { sendEmailOtp, verifyEmailOtp } from './src/auth/email';
 import { getCurrentSession, onAuthChange, signOut } from './src/auth/session';
+import { fetchPlan, type Plan } from './src/api/plan';
+import { requestTierChange } from './src/config/plan';
 import { profileFromUser } from './src/auth/profile';
 import type { Session } from '@supabase/supabase-js';
 import { BrandToast } from './src/components/BrandToast';
@@ -261,6 +263,19 @@ export default function App() {
     niches: ['Lifestyle', 'Tech & AI', 'Storytelling'],
   });
 
+  // The plan is read from the backend (user_plans) when someone signs in. The Free/Pro switches and
+  // upgrade buttons only ask: they never change it (src/config/plan.ts).
+  const [planNotice, setPlanNotice] = useState<string | null>(null);
+  const planNoticeTimer = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const requestTier = (next: Plan) => {
+    const current: Plan = userProfile.tier === 'pro' || userProfile.tier === 'founding' ? 'pro' : 'free';
+    const result = requestTierChange(current, next);
+    if (!result.message) return;
+    setPlanNotice(result.message);
+    if (planNoticeTimer.current) clearTimeout(planNoticeTimer.current);
+    planNoticeTimer.current = setTimeout(() => setPlanNotice(null), 3500);
+  };
+
   // Smart Navigation Handler: Instant (0ms) for bottom tabs & regular screens; Smart AI loader for generation workflows
   // Every page opens straight away. (There used to be a timed "Jarvis is
   // working..." screen before Ideas, Caption, Script and Repurpose; it wasn't
@@ -391,7 +406,6 @@ export default function App() {
       setAuthUsername(_username);
       setAuthEmail(_email);
       setVerifyMode('signup');
-      setUserProfile(prev => ({ ...prev, tier: 'free' }));
       navigateTo('verify-code');
     } finally {
       emailBusy.current = false;
@@ -408,7 +422,6 @@ export default function App() {
     }
     justSignedUp.current = true;
     setVerifyMode('signup');
-    setUserProfile(prev => ({ ...prev, tier: 'free' }));
     navigateTo('dashboard');
   };
 
@@ -424,7 +437,6 @@ export default function App() {
       if (result.status === 'signedIn') {
         if (mode === 'signup') justSignedUp.current = true;
         setVerifyMode(mode);
-        setUserProfile(prev => ({ ...prev, tier: 'free' }));
         navigateTo('dashboard');
       } else if (result.status === 'error') {
         showAuthError(result.message);
@@ -456,7 +468,6 @@ export default function App() {
       if (!(await sendEmailCode(_email))) return;
       setAuthEmail(_email);
       setVerifyMode('signin');
-      setUserProfile(prev => ({ ...prev, tier: 'free' }));
       navigateTo('verify-code');
     } finally {
       emailBusy.current = false;
@@ -500,7 +511,6 @@ export default function App() {
 
   const handleVerifyCodeSuccess = (_email: string) => {
     if (verifyMode === 'signup') justSignedUp.current = true;
-    setUserProfile(prev => ({ ...prev, tier: 'free' }));
     // Sign-up and sign-in both land on Home; Home's day-0 welcome greets new creators
     navigateTo('dashboard');
   };
@@ -527,6 +537,7 @@ export default function App() {
         avatarId: undefined,
         avatarSource: undefined,
         customAvatarUri: undefined,
+        tier: 'free',
       }));
       return;
     }
@@ -536,6 +547,11 @@ export default function App() {
     // Token refreshes keep the same user and details: do not overwrite local edits.
     if (last && last.id === session.user.id && last.key === key) return;
     appliedIdentity.current = { id: session.user.id, key };
+    // The plan comes from the backend; if it cannot be read the creator stays on what they had (free by default)
+    const userId = session.user.id;
+    void fetchPlan(userId).then((plan) => {
+      if (plan && appliedIdentity.current?.id === userId) setUserProfile((prev) => ({ ...prev, tier: plan }));
+    });
     setUserProfile((prev) => ({
       ...prev,
       name: identity.name,
@@ -571,7 +587,6 @@ export default function App() {
     getCurrentSession()
       .then((session) => {
         if (cancelled || !session) return;
-        setUserProfile(prev => ({ ...prev, tier: 'free' }));
         setCurrentScreen(prev => (prev === 'welcome' || prev === 'signin' ? 'dashboard' : prev));
       })
       .catch((err) => console.error('[auth] could not restore the session:', err));
@@ -727,7 +742,7 @@ export default function App() {
       onOpenProfile={() => { close?.(); setShowProfileFromMenu(true); }}
       onOpenPro={() => { close?.(); navigateTo('jarvis-pro'); }}
       persona={desktopPersona}
-      onToggleTier={() => setUserProfile((prev) => ({ ...prev, tier: prev.tier === 'pro' || prev.tier === 'founding' ? 'free' : 'pro' }))}
+      onToggleTier={() => requestTier(desktopTier === 'pro' ? 'free' : 'pro')}
       onTogglePersona={handleTogglePersona}
     />
   );
@@ -806,7 +821,7 @@ export default function App() {
     <SafeAreaProvider initialMetrics={initialWindowMetrics}>
       <View style={styles.container} onStartShouldSetResponderCapture={() => { if (Platform.OS !== 'web') mascotActivity(); return false; }}>
         <StatusBar style="dark" />
-        <BrandToast message={connectNotice} />
+        <BrandToast message={connectNotice ?? planNotice} />
 
         <View style={showSidebar ? styles.desktopRow : styles.fill}>
           {showSidebar && renderMenu()}
@@ -897,7 +912,6 @@ export default function App() {
                 return;
               }
               // Apple: still a mock, goes straight in
-              setUserProfile(prev => ({ ...prev, tier: 'free' }));
               navigateTo('dashboard');
             }}
           />
@@ -936,7 +950,7 @@ export default function App() {
           (
             <DashboardScreen
               tier={userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free'}
-              onSwitchToFree={() => setUserProfile(prev => ({ ...prev, tier: 'free' }))}
+              onSwitchToFree={() => requestTier('free')}
               onOpenVoiceStudio={() => {
                 setVoiceScript(undefined);
                 navigateTo('voice-studio');
@@ -947,14 +961,14 @@ export default function App() {
               onOpenQuest={() => navigateTo('quests')}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onSwitchToPro={() => {
-                setUserProfile(prev => ({ ...prev, tier: 'pro' }));
+                requestTier('pro');
               }}
               userPersona={userPersona}
               onTogglePersona={handleTogglePersona}
               onOpenSchedule={() => navigateTo('schedule')}
               onNavigateTab={handleTabNavigation}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: prev.tier || 'free' }))}
             />
           )
         )}
@@ -963,11 +977,11 @@ export default function App() {
           (
             <MissionDetailScreen
               onBack={() => navigateTo(previousScreen ? previousScreen : 'quests')}
-              onSwitchToFree={() => setUserProfile(prev => ({ ...prev, tier: 'free' }))}
+              onSwitchToFree={() => requestTier('free')}
               userPersona={userPersona}
               onTogglePersona={handleTogglePersona}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-              onSwitchToPro={() => setUserProfile(prev => ({ ...prev, tier: 'pro' }))}
+              onSwitchToPro={() => requestTier('pro')}
               onLogout={handleLogout}
               onOpenCreateIdea={() => navigateTo('create')}
               onOpenScript={(title) => {
@@ -983,7 +997,7 @@ export default function App() {
               }}
               onNavigateTab={handleTabNavigation}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: prev.tier || 'free' }))}
             />
           )
         )}
@@ -1028,13 +1042,13 @@ export default function App() {
               userPersona={userPersona}
               onTogglePersona={handleTogglePersona}
               onSwitchToPro={() => {
-                setUserProfile(prev => ({ ...prev, tier: 'pro' }));
+                requestTier('pro');
               }}
               onSwitchToFree={() => {
-                setUserProfile(prev => ({ ...prev, tier: 'free' }));
+                requestTier('free');
               }}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: prev.tier || 'free' }))}
             />
           )
         )}
@@ -1043,8 +1057,8 @@ export default function App() {
           (
             <ScheduleScreen
               tier={userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free'}
-              onSwitchToPro={() => setUserProfile(prev => ({ ...prev, tier: 'pro' }))}
-              onSwitchToFree={() => setUserProfile(prev => ({ ...prev, tier: 'free' }))}
+              onSwitchToPro={() => requestTier('pro')}
+              onSwitchToFree={() => requestTier('free')}
               userPersona={userPersona}
               onTogglePersona={handleTogglePersona}
               onBack={() => navigateTo(previousScreen ? previousScreen : 'dashboard')}
@@ -1059,7 +1073,7 @@ export default function App() {
               }}
               onNavigateTab={handleTabNavigation}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: prev.tier || 'free' }))}
             />
           )
         )}
@@ -1068,12 +1082,12 @@ export default function App() {
           (
             <GrowthScreen
               tier={userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free'}
-              onSwitchToFree={() => setUserProfile(prev => ({ ...prev, tier: 'free' }))}
+              onSwitchToFree={() => requestTier('free')}
               onBackToDashboard={() => navigateTo('dashboard')}
               onLogout={handleLogout}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onSwitchToPro={() => {
-                setUserProfile(prev => ({ ...prev, tier: 'pro' }));
+                requestTier('pro');
               }}
               userPersona={userPersona}
               onTogglePersona={handleTogglePersona}
@@ -1090,7 +1104,7 @@ export default function App() {
                 navigateTo('repurpose');
               }}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: prev.tier || 'free' }))}
             />
           )
         )}
@@ -1099,13 +1113,13 @@ export default function App() {
           <JarvisProScreen
             onBack={() => navigateTo(previousScreen ? previousScreen : 'growth')}
             onUpgraded={() => {
-              setUserProfile(prev => ({ ...prev, tier: 'pro' }));
+              requestTier('pro');
               navigateTo('dashboard');
             }}
             onLogout={handleLogout}
             onNavigateTab={handleTabNavigation}
             userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
+            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: prev.tier || 'free' }))}
           />
         )}
 
@@ -1118,7 +1132,7 @@ export default function App() {
                 navigateTo('voice-studio');
               }}
               onOpenHookStudio={() => navigateTo('hook-studio')}
-              onSwitchToFree={() => setUserProfile(prev => ({ ...prev, tier: 'free' }))}
+              onSwitchToFree={() => requestTier('free')}
               onBackToDashboard={() => navigateTo('dashboard')}
               onLogout={handleLogout}
               onOpenMissionDetail={() => navigateTo('mission-detail')}
@@ -1126,13 +1140,13 @@ export default function App() {
               onOpenSchedule={() => navigateTo('schedule')}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
               onSwitchToPro={() => {
-                setUserProfile(prev => ({ ...prev, tier: 'pro' }));
+                requestTier('pro');
               }}
               userPersona={userPersona}
               onTogglePersona={handleTogglePersona}
               onNavigateTab={handleTabNavigation}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: prev.tier || 'free' }))}
             />
           )
         )}
@@ -1143,7 +1157,7 @@ export default function App() {
             userPersona={userPersona}
             onTogglePersona={handleTogglePersona}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-            onSwitchToPro={() => setUserProfile(prev => ({ ...prev, tier: 'pro' }))}
+            onSwitchToPro={() => requestTier('pro')}
             onLogout={handleLogout}
             onOpenComposer={(idea?: string, platform?: string, questDraft?: any) => {
               if (idea) setComposerIdeaTitle(idea);
@@ -1158,7 +1172,7 @@ export default function App() {
             }}
             onNavigateTab={handleTabNavigation}
             userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
+            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: prev.tier || 'free' }))}
           />
         )}
 
@@ -1178,7 +1192,7 @@ export default function App() {
             }}
             onNavigateTab={handleTabNavigation}
             userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
+            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: prev.tier || 'free' }))}
           />
         )}
 
@@ -1198,7 +1212,7 @@ export default function App() {
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
             onNavigateTab={handleTabNavigation}
             userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
+            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: prev.tier || 'free' }))}
           />
         )}
 
@@ -1206,7 +1220,7 @@ export default function App() {
           (
             <ContentAngleScreen
               tier={userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free'}
-              onSwitchToFree={() => setUserProfile(prev => ({ ...prev, tier: 'free' }))}
+              onSwitchToFree={() => requestTier('free')}
               onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
               onLogout={handleLogout}
               onOpenSchedule={() => navigateTo('schedule')}
@@ -1214,7 +1228,7 @@ export default function App() {
               onUseIdea={handleUseIdea}
               onNavigateTab={handleTabNavigation}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: prev.tier || 'free' }))}
             />
           )
         )}
@@ -1223,7 +1237,7 @@ export default function App() {
           (
             <ScriptScreen
               tier={userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free'}
-              onSwitchToFree={() => setUserProfile(prev => ({ ...prev, tier: 'free' }))}
+              onSwitchToFree={() => requestTier('free')}
               onOpenVoiceStudio={(script) => {
                 setVoiceScript(script);
                 navigateTo('voice-studio');
@@ -1242,7 +1256,7 @@ export default function App() {
               }}
               onNavigateTab={handleTabNavigation}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: prev.tier || 'free' }))}
             />
           )
         )}
@@ -1251,7 +1265,7 @@ export default function App() {
           (
             <CaptionScreen
               tier={userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free'}
-              onSwitchToFree={() => setUserProfile(prev => ({ ...prev, tier: 'free' }))}
+              onSwitchToFree={() => requestTier('free')}
               ideaTitle={selectedIdeaTitle}
               onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
               onLogout={handleLogout}
@@ -1268,7 +1282,7 @@ export default function App() {
               }}
               onNavigateTab={handleTabNavigation}
               userProfile={userProfile}
-              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
+              onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: prev.tier || 'free' }))}
             />
           )
         )}
@@ -1278,12 +1292,12 @@ export default function App() {
             // Free and Pro share the glass Repurpose studio (Pro: unlimited + plan the order)
             <RepurposeScreen
               tier={userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free'}
-              onSwitchToFree={() => setUserProfile(prev => ({ ...prev, tier: 'free' }))}
+              onSwitchToFree={() => requestTier('free')}
               ideaTitle={selectedIdeaTitle}
               userProfile={userProfile}
               userPersona={userPersona}
               onTogglePersona={handleTogglePersona}
-              onSwitchToPro={() => setUserProfile(prev => ({ ...prev, tier: 'pro' }))}
+              onSwitchToPro={() => requestTier('pro')}
               onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
               onNavigateTab={handleTabNavigation}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
@@ -1324,7 +1338,7 @@ export default function App() {
             }}
             onNavigateTab={handleTabNavigation}
             userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
+            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: prev.tier || 'free' }))}
           />
         )}
 
@@ -1334,7 +1348,7 @@ export default function App() {
             onBack={() => navigateTo(previousScreen ? previousScreen : 'create')}
             onLogout={handleLogout}
             onOpenJarvisPro={() => navigateTo('jarvis-pro')}
-            onSwitchToFree={() => setUserProfile(prev => ({ ...prev, tier: 'free' }))}
+            onSwitchToFree={() => requestTier('free')}
             onUseHook={(title, hook, style) => {
               setComposerQuestDraft(null);
               setComposerIdeaTitle(title);
@@ -1345,7 +1359,7 @@ export default function App() {
             }}
             onNavigateTab={handleTabNavigation}
             userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
+            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: prev.tier || 'free' }))}
           />
         )}
 
@@ -1373,7 +1387,7 @@ export default function App() {
             onOpenContentAngle={() => navigateTo('content-angle')}
             onNavigateTab={handleTabNavigation}
             userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
+            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: prev.tier || 'free' }))}
           />
         )}
 
@@ -1411,7 +1425,7 @@ export default function App() {
             onOpenContentAngle={() => navigateTo('content-angle')}
             onNavigateTab={handleTabNavigation}
             userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
+            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: prev.tier || 'free' }))}
           />
         )}
 
@@ -1439,7 +1453,7 @@ export default function App() {
             }}
             onNavigateTab={handleTabNavigation}
             userProfile={userProfile}
-            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
+            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: prev.tier || 'free' }))}
           />
         )}
           </ScreenTransitionContainer>
@@ -1464,7 +1478,7 @@ export default function App() {
           onClose={() => setShowAccountsFromNote(false)}
           onLogout={handleLogout}
           initialProfile={userProfile}
-          onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
+          onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: prev.tier || 'free' }))}
         />
 
         <UserProfileModal
@@ -1472,7 +1486,7 @@ export default function App() {
           onClose={() => setShowProfileFromMenu(false)}
           onLogout={handleLogout}
           initialProfile={userProfile}
-          onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: updated.tier || prev.tier || 'free' }))}
+          onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: prev.tier || 'free' }))}
         />
 
         {/* Ask Jarvis from anywhere in the app; Ghost does the jobs */}
