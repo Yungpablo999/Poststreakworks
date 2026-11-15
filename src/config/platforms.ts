@@ -41,6 +41,21 @@ const ALL_FORMATS: ComposerFormat[] = ['short_video', 'carousel', 'image', 'text
 /** Platforms that take a text-only post (LinkedIn, Threads, Facebook) */
 export const isTextPlatform = (id: string): boolean => PLATFORM_RULES[id]?.supportsText === true;
 
+/** Whether the backend can attach an image or video for this platform today */
+export const acceptsMedia = (id: string): boolean => {
+  const rule = PLATFORM_RULES[id];
+  return rule?.image === true || rule?.video === true;
+};
+
+/** Platforms that post text only for now (the backend has no media for LinkedIn, Threads, Facebook yet) */
+export const textOnlyPlatforms = (platformIds: string[]): string[] => platformIds.filter((id) => isTextPlatform(id) && !acceptsMedia(id));
+
+/** True when every chosen platform is text-only: no image or video can go out */
+export const isTextOnlySelection = (platformIds: string[]): boolean =>
+  platformIds.length > 0 && textOnlyPlatforms(platformIds).length === platformIds.length;
+
+export const IMAGES_COMING_SOON = 'Images coming soon';
+
 export type MediaRequirement = 'none' | 'image_or_video' | 'video';
 
 /**
@@ -58,8 +73,9 @@ export function mediaRequiredFor(platformIds: string[]): MediaRequirement {
   return need;
 }
 
-/** The formats a post to these platforms can use. Text platforms: anything (text, one image, video). */
+/** The formats a post to these platforms can use. Text-only platforms: text. Media platforms: what they take. */
 export function formatsAllowedFor(platformIds: string[]): ComposerFormat[] {
+  if (isTextOnlySelection(platformIds)) return ['text'];
   switch (mediaRequiredFor(platformIds)) {
     case 'video':
       return ['short_video', 'long_video'];

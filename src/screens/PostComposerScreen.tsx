@@ -51,7 +51,10 @@ import { JarvisOrb } from '../components/JarvisOrb';
 import { isProTier, showAutoPostUpsell } from '../config/features';
 import {
   POST_PLATFORMS,
+  IMAGES_COMING_SOON,
   formatsAllowedFor,
+  isTextOnlySelection,
+  textOnlyPlatforms,
   mediaRequiredFor,
   recommendedFormatFor,
   resolveFormat,
@@ -890,6 +893,8 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   const recommendedFormatId = recommendedFormatFor(selectedPlatforms);
   const allowedFormats = formatsAllowedFor(selectedPlatforms);
   const mediaRequired = mediaRequiredFor(selectedPlatforms);
+  const textOnly = isTextOnlySelection(selectedPlatforms);
+  const textOnlyNames = textOnlyPlatforms(selectedPlatforms).map(labelFor).join(' & ');
   const currentFormatConfig =
     CONTENT_FORMATS.find((f) => f.id === selectedFormat) || CONTENT_FORMATS[0];
   const recommendedFormatConfig =
@@ -1298,6 +1303,8 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
               onRecord={addFromCamera}
               onRemoveRecording={clearMedia}
             />
+          ) : textOnly ? (
+            <Text style={styles.note}>{textOnlyNames} posts are text only for now. {IMAGES_COMING_SOON}.</Text>
           ) : (
           <MediaZone
             isText={selectedFormat === 'text'}
@@ -1312,6 +1319,9 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
             onThumbnail={() => setHasThumbnail(!hasThumbnail)}
             onRemove={clearMedia}
           />
+          )}
+          {!textOnly && textOnlyNames !== '' && (
+            <Text style={styles.note}>{textOnlyNames} will post your caption only. {IMAGES_COMING_SOON}.</Text>
           )}
 
           {attachedAudio && (

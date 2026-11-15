@@ -1,4 +1,4 @@
-import { POST_PLATFORMS, POST_PLATFORM_IDS, formatsAllowedFor, isTextPlatform, mediaRequiredFor, recommendedFormatFor, resolveFormat } from '../platforms';
+import { IMAGES_COMING_SOON, isTextOnlySelection, textOnlyPlatforms, acceptsMedia, POST_PLATFORMS, POST_PLATFORM_IDS, formatsAllowedFor, isTextPlatform, mediaRequiredFor, recommendedFormatFor, resolveFormat } from '../platforms';
 import { STAGE_1_PLATFORMS, canAutoPost, isProTier, isStage1Platform, showAutoPostUpsell } from '../features';
 
 describe('platform list', () => {
@@ -28,10 +28,8 @@ describe('mediaRequiredFor', () => {
 });
 
 describe('formatsAllowedFor', () => {
-  it('allows text and a single image for text platforms', () => {
-    const f = formatsAllowedFor(['linkedin']);
-    expect(f).toContain('text');
-    expect(f).toContain('image');
+  it('allows only text for text platforms (images wait on the backend)', () => {
+    expect(formatsAllowedFor(['linkedin'])).toEqual(['text']);
   });
   it('drops text when a media platform is chosen', () => {
     expect(formatsAllowedFor(['linkedin', 'instagram'])).not.toContain('text');
@@ -54,7 +52,7 @@ describe('recommendedFormatFor / resolveFormat', () => {
   it('moves off a format the selection cannot use', () => {
     expect(resolveFormat('text', ['tiktok'])).toBe('short_video');
     expect(resolveFormat('text', ['linkedin'])).toBe('text');
-    expect(resolveFormat('image', ['linkedin'])).toBe('image');
+    expect(resolveFormat('image', ['linkedin'])).toBe('text');
   });
   it('knows text platforms', () => {
     expect(['linkedin', 'threads', 'facebook'].every(isTextPlatform)).toBe(true);
@@ -79,5 +77,28 @@ describe('beta gate', () => {
     expect(isProTier('founding')).toBe(true);
     expect(isProTier('free')).toBe(false);
     expect(isProTier(undefined)).toBe(false);
+  });
+});
+
+describe('text-only platforms (no media in the backend yet)', () => {
+  it('LinkedIn, Threads and Facebook take no media; the others do', () => {
+    expect(['linkedin', 'threads', 'facebook'].some(acceptsMedia)).toBe(false);
+    expect(['instagram', 'youtube', 'tiktok'].every(acceptsMedia)).toBe(true);
+  });
+  it('a selection of only text platforms is text-only and offers only the text format', () => {
+    expect(isTextOnlySelection(['linkedin'])).toBe(true);
+    expect(isTextOnlySelection(['linkedin', 'threads', 'facebook'])).toBe(true);
+    expect(formatsAllowedFor(['linkedin', 'facebook'])).toEqual(['text']);
+    expect(resolveFormat('image', ['linkedin'])).toBe('text');
+    expect(resolveFormat('short_video', ['threads'])).toBe('text');
+  });
+  it('mixed or empty selections are not text-only, and media still goes to the media platforms', () => {
+    expect(isTextOnlySelection([])).toBe(false);
+    expect(isTextOnlySelection(['linkedin', 'tiktok'])).toBe(false);
+    expect(textOnlyPlatforms(['linkedin', 'tiktok', 'facebook'])).toEqual(['linkedin', 'facebook']);
+    expect(formatsAllowedFor(['linkedin', 'tiktok'])).toEqual(['short_video', 'long_video']);
+  });
+  it('has the note text', () => {
+    expect(IMAGES_COMING_SOON).toBe('Images coming soon');
   });
 });
