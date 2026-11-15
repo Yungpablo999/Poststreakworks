@@ -128,7 +128,7 @@ describe('createAuthFetch', () => {
 
   it('refuses methods the backend CORS does not allow', async () => {
     const { authFetch } = setup();
-    await expect(authFetch('/x', { method: 'DELETE' as never })).rejects.toThrow(/GET and POST only/);
+    await expect(authFetch('/x', { method: 'PUT' as never })).rejects.toThrow(/not allowed by the backend/);
   });
 
   it('fails loudly when the base URL is not configured', async () => {
@@ -152,5 +152,16 @@ describe('fetchJson', () => {
     expect(err).toBeInstanceOf(ApiError);
     expect(err.status).toBe(401);
     expect(err.message).toBe('Unauthorized');
+  });
+});
+
+describe('PATCH and DELETE (drafts)', () => {
+  it('sends them with the Bearer token', async () => {
+    const { authFetch, calls } = setup({ token: 'new' });
+    await authFetch('/api/drafts/1', { method: 'PATCH', body: { content: 'x' } });
+    await authFetch('/api/drafts/1', { method: 'DELETE' });
+    expect(calls[0].init.method).toBe('PATCH');
+    expect(calls[1].init.method).toBe('DELETE');
+    expect(authHeader(calls[1])).toMatch(/^Bearer /);
   });
 });

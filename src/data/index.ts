@@ -26,6 +26,8 @@ export interface CheckInStreak {
   /** Index of today within `week` (0 = Monday). */
   todayIndex: number;
   checkedInToday: boolean;
+  /** True when today already counts toward `currentDays` (a real post today). Defaults to checkedInToday. */
+  countedToday?: boolean;
 }
 
 const mondayFirstIndex = (date: Date) => (date.getDay() + 6) % 7;
@@ -49,7 +51,38 @@ function initialCheckInStreak(persona: Persona): CheckInStreak {
 const checkInStore: Partial<Record<Persona, CheckInStreak>> = {};
 const checkInListeners = new Set<() => void>();
 
+// Real mode: once the signed-in creator's streak is loaded (src/api/streak.ts), it replaces the sample
+// data above. The backend counts days with a PUBLISHED post, so a tap on "check in" without a post only
+// fills today's dot and cheers; it never adds a streak day.
+let real: (CheckInStreak & { today: string }) | null = null;
+let realView: CheckInStreak | null = null;
+let localCheckInDay: string | null = null;
+
+function rebuildRealView() {
+  if (!real) {
+    realView = null;
+    return;
+  }
+  const local = localCheckInDay === real.today && !real.checkedInToday;
+  const week = [...real.week];
+  if (local) week[real.todayIndex] = true;
+  realView = { currentDays: real.currentDays, week, todayIndex: real.todayIndex, checkedInToday: real.checkedInToday || local, countedToday: real.checkedInToday };
+}
+
+export function setRealCheckInStreak(snapshot: CheckInStreak & { today: string }): void;
+export function setRealCheckInStreak(snapshot: null): void;
+export function setRealCheckInStreak(snapshot: (CheckInStreak & { today: string }) | null): void {
+  real = snapshot;
+  if (!snapshot) localCheckInDay = null;
+  rebuildRealView();
+  checkInListeners.forEach((listener) => listener());
+}
+
+/** True once a real streak is loaded (the calendar then shows real days, not sample ones) */
+export const hasRealCheckInStreak = () => real !== null;
+
 export function getCheckInStreak(persona: Persona): CheckInStreak {
+  if (realView) return realView;
   if (!checkInStore[persona]) checkInStore[persona] = initialCheckInStreak(persona);
   return checkInStore[persona]!;
 }
@@ -57,6 +90,13 @@ export function getCheckInStreak(persona: Persona): CheckInStreak {
 export function checkInToday(persona: Persona): CheckInStreak {
   const current = getCheckInStreak(persona);
   if (current.checkedInToday) return current;
+  if (real) {
+    localCheckInDay = real.today;
+    rebuildRealView();
+    checkInListeners.forEach((listener) => listener());
+    react('checkIn');
+    return realView!;
+  }
   const week = [...current.week];
   week[current.todayIndex] = true;
   checkInStore[persona] = { ...current, week, checkedInToday: true, currentDays: current.currentDays + 1 };
@@ -341,7 +381,7 @@ export function getCalendarMonth(persona: Persona, year: number, month: number):
   const daysCount = new Date(year, month + 1, 0).getDate();
   const startOffset = mondayFirstIndex(first);
   // Days before today that count toward the current run of check-ins
-  const priorRun = streak.currentDays - (streak.checkedInToday ? 1 : 0);
+  const priorRun = streak.currentDays - ((streak.countedToday ?? streak.checkedInToday) ? 1 : 0);
 
   const days: CalendarDay[] = [];
   for (let d = 1; d <= daysCount; d++) {
@@ -350,7 +390,7 @@ export function getCalendarMonth(persona: Persona, year: number, month: number):
     const isToday = diff === 0;
     const isPast = diff < 0;
 
-    const checkedIn = isToday ? streak.checkedInToday : isPast && persona === 'returning' && -diff <= priorRun;
+    const checkedIn = isToday ? streak.checkedInToday : isPast && (persona === 'returning' || hasRealCheckInStreak()) && -diff <= priorRun;
 
     const posts: CalendarPost[] = [];
     if (persona === 'returning') {

@@ -8,7 +8,8 @@
 
 import { useSyncExternalStore } from 'react';
 import * as Clipboard from 'expo-clipboard';
-import { checkInToday, saveDraft, type FeedIdea, type Persona } from '../data';
+import { checkInAndSync } from '../api/streak';
+import { saveDraft, type FeedIdea, type Persona } from '../data';
 import { AI_MESSAGES, askJarvis, describeAiError, isSignedOutError, type AgentTurn } from '../api/ai';
 import { express, react } from '../mascot/mascot';
 
@@ -186,7 +187,7 @@ export function runTask(task: GhostTask, opts: { closeAfter?: boolean } = {}) {
         react('copied');
         break;
       case 'checkIn':
-        checkInToday(ctx.persona); // the mascot cheers from inside
+        checkInAndSync(ctx.persona); // the mascot cheers from inside; a check-in is not a post day
         break;
       case 'compose':
         express('excited', 'Let’s make it!', 2200, true);

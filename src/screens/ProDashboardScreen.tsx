@@ -20,6 +20,7 @@ import { BrandLogo } from '../components/BrandLogo';
 import { HomeDayZero } from '../components/home/HomeDayZero';
 import { getVoiceCloneSummary } from '../data';
 import { useQueue } from '../hooks/useQueue';
+import { useLeaderboard } from '../hooks/useLeaderboard';
 import { withRealScheduledDays } from '../api/queueMapping';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
@@ -237,6 +238,8 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
   onSaveProfile,
 }) => {
   const isNewUser = (userPersona || userProfile?.userPersona) === 'new';
+  // Real streak rank from the backend leaderboard (top 50); null when not ranked yet
+  const { myRank } = useLeaderboard();
   const voiceClone = getVoiceCloneSummary(isNewUser ? 'new' : 'returning');
   const streakDays = userProfile?.streakCount && userProfile.streakCount > 1 ? userProfile.streakCount : 48;
   const [activeTab, setActiveTab] = useState<TabType>('home');
@@ -1331,10 +1334,10 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
                       adjustsFontSizeToFit
                       minimumFontScale={0.85}
                     >
-                      {isNewUser ? 'Starter 🚀' : 'Top 1% 👑'}
+                      {myRank ? `#${myRank} 👑` : 'Starter 🚀'}
                     </Text>
                     <Text style={[styles.calendarStatLabel, { color: '#A16207' }]} numberOfLines={1}>
-                      {isNewUser ? 'Rank Tier' : 'Worldwide'}
+                      {myRank ? 'Streak rank' : 'Rank Tier'}
                     </Text>
                   </View>
                   <View style={styles.calendarStatCard}>
