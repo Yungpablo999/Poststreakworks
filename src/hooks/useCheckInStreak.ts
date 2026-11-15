@@ -1,4 +1,5 @@
-import { useCallback, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useSyncExternalStore } from 'react';
+import { refreshStreakIfStale } from '../api/streak';
 import { checkInToday, getCheckInStreak, subscribeToCheckIns, type Persona } from '../data';
 
 // Shared check-in state for any screen (Home, Quests…).
@@ -8,6 +9,10 @@ export function useCheckInStreak(persona: Persona) {
     () => getCheckInStreak(persona),
     () => getCheckInStreak(persona),
   );
+  // The real streak loads when a signed-in creator opens a screen with the card (at most once a minute)
+  useEffect(() => {
+    void refreshStreakIfStale();
+  }, []);
   const checkIn = useCallback(() => checkInToday(persona), [persona]);
   return { streak, checkIn };
 }

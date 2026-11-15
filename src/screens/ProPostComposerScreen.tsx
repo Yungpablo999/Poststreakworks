@@ -39,6 +39,7 @@ import {
   schedulePost,
   type PostSummary,
 } from '../api/posts';
+import { refreshStreak } from '../api/streak';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -385,6 +386,7 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
     }
     if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     const where = summary.succeeded.map(labelFor).join(', ');
+    if (mode === 'now') void refreshStreak();
     // Some platforms failed: say which and why in the subtitle (the toast sits behind the modal)
     const subtitle = summary.allOk
       ? mode === 'now'

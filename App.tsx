@@ -20,6 +20,7 @@ import { NicheSelectionScreen } from './src/screens/NicheSelectionScreen';
 import { PlatformConnectScreen } from './src/screens/PlatformConnectScreen';
 import { resumePendingFinalizeOnWeb, runWebFinalizeReturnOnce, webResultMessage } from './src/api/connect';
 import { platformsStore } from './src/hooks/usePlatforms';
+import { refreshStreak, resetStreak } from './src/api/streak';
 import { PlanPreviewScreen } from './src/screens/PlanPreviewScreen';
 import type { FilmStyle, IdeaGoal, StudioVideo } from './src/data';
 import { DashboardScreen } from './src/screens/DashboardScreen';
@@ -520,6 +521,7 @@ export default function App() {
   const applySession = React.useCallback((session: Session | null) => {
     if (!session) {
       appliedIdentity.current = null;
+      resetStreak();
       setUserProfile((prev) => ({
         ...prev,
         name: '',
@@ -530,6 +532,7 @@ export default function App() {
       }));
       return;
     }
+    void refreshStreak(); // the creator's real streak (the card also loads it on open)
     const identity = profileFromUser(session.user);
     const key = JSON.stringify(identity);
     const last = appliedIdentity.current;
