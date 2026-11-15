@@ -1,0 +1,15 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "poststreak-app",
+  "compatibility_date": "2026-11-13",
+  "observability": { "enabled": true },
+  // Keep the *.workers.dev URL alongside the custom domain (handy for rollback checks)
+  "workers_dev": true,
+  // Serve the app at app.poststreak.app (wrangler creates the DNS record and certificate)
+  "routes": [{ "pattern": "app.poststreak.app", "custom_domain": true }],
+  "assets": {
+    "directory": "dist",
+    // Any path that isn't a real file (e.g. /connect/finalize) gets index.html, so deep links load the app
+    "not_found_handling": "single-page-application"
+  }
+}

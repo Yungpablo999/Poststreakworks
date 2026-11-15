@@ -16,3 +16,8 @@ export const FREE_REPURPOSES_PER_WEEK = 1;
 
 export const isStage1Platform = (id: string): id is Stage1Platform =>
   (STAGE_1_PLATFORMS as readonly string[]).includes(id);
+
+// No payment provider is wired into the app yet, so every "buy" action is off:
+// the buttons stay on screen but can't be pressed, and nothing is credited.
+// TODO(payments): decide web checkout vs in-app purchase before iOS submission, then wire it up and flip this.
+export const PAYMENTS_ENABLED = false;
