@@ -14,6 +14,16 @@ import { signInWithGoogle } from './src/auth/google';
 import { sendEmailOtp, verifyEmailOtp } from './src/auth/email';
 import { getCurrentSession, onAuthChange, signOut } from './src/auth/session';
 import { fetchPlan, type Plan } from './src/api/plan';
+import { apiClient } from './src/api/apiClient';
+import {
+  claimStoredReferral,
+  hasLandingParams,
+  landingNotice,
+  localReferralStore,
+  parseLandingParams,
+  rememberReferral,
+  stripLandingParams,
+} from './src/api/landingParams';
 import { requestTierChange } from './src/config/plan';
 import { profileFromUser } from './src/auth/profile';
 import type { Session } from '@supabase/supabase-js';
@@ -598,6 +608,53 @@ export default function App() {
     };
   }, []);
 
+  // Web: the website and the backend send people here with a note on the address
+  // (?ref= a referral link, ?payment=success / ?cancelled=true from checkout, ?connected= and
+  // ?error= from a connect). Keep the referral code until signup, show one toast, then clean the
+  // address so a refresh does not repeat it. See src/api/landingParams.ts.
+  const [landingToast, setLandingToast] = useState<string | null>(null);
+  React.useEffect(() => {
+    if (Platform.OS !== 'web' || typeof window === 'undefined') return;
+    const params = parseLandingParams(window.location.search);
+    if (!hasLandingParams(params)) return;
+    rememberReferral(params.ref, localReferralStore);
+    const here = window.location.pathname + window.location.search + window.location.hash;
+    window.history.replaceState(null, '', stripLandingParams(here, params));
+    const text = landingNotice(params);
+    if (text) {
+      setLandingToast(text);
+      setTimeout(() => setLandingToast(null), 4500);
+    }
+    // The plan arrives through the billing webhook, a moment after checkout: look again a few times
+    if (params.payment === 'success') {
+      [0, 4000, 10000].forEach((delay) =>
+        setTimeout(() => {
+          void getCurrentSession()
+            .then((session) => (session ? fetchPlan(session.user.id) : null))
+            .then((plan) => {
+              if (plan) setUserProfile((prev) => ({ ...prev, tier: plan }));
+            })
+            .catch(() => undefined);
+        }, delay),
+      );
+    }
+  }, []);
+
+  // A referral code kept from the link is claimed once the creator is signed in (the backend
+  // links it to the referrer). It stays kept if that fails, and is tried again at the next sign-in.
+  React.useEffect(() => {
+    if (Platform.OS !== 'web') return;
+    const claim = () =>
+      void claimStoredReferral({
+        store: localReferralStore,
+        post: (code) => apiClient.post('/api/referral/claim', { code }),
+      });
+    getCurrentSession().then((session) => session && claim()).catch(() => undefined);
+    return onAuthChange((session) => {
+      if (session) claim();
+    });
+  }, []);
+
   const getTransitionType = (screen: Screen): ScreenTransitionType => {
     if (
       screen === 'dashboard' ||
@@ -824,7 +881,7 @@ export default function App() {
     <SafeAreaProvider initialMetrics={initialWindowMetrics}>
       <View style={styles.container} onStartShouldSetResponderCapture={() => { if (Platform.OS !== 'web') mascotActivity(); return false; }}>
         <StatusBar style="dark" />
-        <BrandToast message={connectNotice ?? planNotice} />
+        <BrandToast message={connectNotice ?? planNotice ?? landingToast} />
 
         <View style={showSidebar ? styles.desktopRow : styles.fill}>
           {showSidebar && renderMenu()}
