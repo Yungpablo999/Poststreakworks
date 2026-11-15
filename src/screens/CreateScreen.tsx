@@ -15,6 +15,9 @@ import {
 } from 'react-native';
 import { Text, TextInput } from '../components/ui/AppText';
 import { useQueue } from '../hooks/useQueue';
+import { useDrafts } from '../hooks/useDrafts';
+import { draftTitle } from '../api/drafts';
+import { labelFor } from '../api/posts';
 import { getVoiceCloneSummary, getRepurposeAllowance, getDrafts, subscribeToDrafts, draftAgo } from '../data';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
@@ -248,8 +251,18 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
   const [drafts, setDrafts] = useState<DraftItem[]>(INITIAL_DRAFTS);
   // Drafts saved from Script / the composer (shared store) come first
   const storeDrafts = React.useSyncExternalStore(subscribeToDrafts, getDrafts, getDrafts);
+  // Drafts saved to the backend from the post composer come first
+  const { drafts: backendDrafts } = useDrafts();
   const localDrafts = isNewUser ? drafts : drafts.length > 0 ? drafts : RETURNING_DRAFTS;
   const displayedDrafts = [
+    ...backendDrafts.map((d) => ({
+      id: d.id,
+      title: draftTitle(d),
+      platform: d.platforms.length > 0 ? labelFor(d.platforms[0]) : 'Draft',
+      editedTime: draftAgo(Date.parse(d.updated_at) || Date.now()),
+      imageSource: undefined,
+      isScript: false,
+    })),
     ...storeDrafts.map((d) => ({
       id: d.id,
       title: d.title,
@@ -370,7 +383,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
     if (draft.isScript && onOpenScript) {
       onOpenScript(draft.title);
     } else if (onOpenPostComposer) {
-      onOpenPostComposer(draft.title, draft.platform.toLowerCase());
+      onOpenPostComposer(draft.title, draft.platform === 'Draft' ? undefined : draft.platform.toLowerCase());
     } else if (onOpenIdeaDetail) {
       onOpenIdeaDetail(draft.title);
     } else {
