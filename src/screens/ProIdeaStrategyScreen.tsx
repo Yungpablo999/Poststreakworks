@@ -24,6 +24,7 @@ import { UserProfileModal, UserProfileData } from '../components/UserProfileModa
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { TinyGoldCheck } from '../components/CreatorStoryModal';
 import { sFont } from '../utils/responsive';
+import { firstNameOf, speak } from '../auth/profile';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -844,7 +845,7 @@ export const ProIdeaStrategyScreen: React.FC<ProIdeaStrategyScreenProps> = ({
                     subtitle: `AI calibrated ${selectedNiche} + ${selectedGoal}: "${audiencePrompt.slice(0, 35)}..."`,
                     badgeText: '✨ 94 QUALITY SCORE RE-CALIBRATED',
                     xpEarned: 50,
-                    speechBubble: 'Strategy locked and re-scored, Pablo! Fresh viral angles ready! 🔥',
+                    speechBubble: speak('Strategy locked and re-scored, {name}! Fresh viral angles ready! 🔥', firstNameOf(userProfile?.name)),
                   });
                   setTimeout(() => {
                     setShowCompletionModal(true);

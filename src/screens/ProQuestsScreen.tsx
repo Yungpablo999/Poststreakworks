@@ -1612,12 +1612,12 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
                       </View>
                     </View>
 
-                    {/* Pablo (You) */}
+                    {/* You */}
                     <View style={[styles.sqmMemberRow, styles.sqmMemberRowMine]}>
-                      <Image source={require('../../assets/images/elena-avatar.jpg')} style={styles.sqmMemberAvatar} />
+                      <Image source={userProfile?.customAvatarUri ? { uri: userProfile.customAvatarUri } : userProfile?.avatarSource ?? require('../../assets/images/jarvis-ghost-clean.png')} style={styles.sqmMemberAvatar} />
                       <View style={{ flex: 1 }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-                          <Text style={styles.sqmMemberName}>{userProfile?.name || 'Pablo'} (You)</Text>
+                          <Text style={styles.sqmMemberName}>{userProfile?.name ? `${userProfile.name} (You)` : 'You'}</Text>
                           <View style={styles.sqmTopBadge}>
                             <Text style={styles.sqmTopBadgeText}>⭐ TOP</Text>
                           </View>

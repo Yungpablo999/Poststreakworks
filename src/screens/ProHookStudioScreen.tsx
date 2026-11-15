@@ -25,6 +25,7 @@ import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { TinyGoldCheck } from '../components/CreatorStoryModal';
 import { SocialBrandIcon } from '../components/SocialBrandIcon';
 import { sFont } from '../utils/responsive';
+import { firstNameOf, speak } from '../auth/profile';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -398,7 +399,7 @@ export const ProHookStudioScreen: React.FC<ProHookStudioScreenProps> = ({
     subtitle: `"${currentIdeaTitle}" optimized with viral 3-second opening hook (+50 XP).`,
     badgeText: '⚡ VIRAL HOOK LOCKED IN (+50 XP)',
     xpEarned: 50,
-    speechBubble: 'Hook calibrated for peak thumbstop retention, Pablo! 🔥',
+    speechBubble: speak('Hook calibrated for peak thumbstop retention, {name}! 🔥', firstNameOf(userProfile?.name)),
   });
 
   // Mascot Float Animation & Modal Scale
@@ -765,7 +766,7 @@ export const ProHookStudioScreen: React.FC<ProHookStudioScreenProps> = ({
                       subtitle: `"${currentIdeaTitle}" optimized with AI retention pacing & viral hook multiplier.`,
                       badgeText: '⚡ PRO HOOK ACCELERATED',
                       xpEarned: 50,
-                      speechBubble: 'Maximum thumbstop rate unlocked, Pablo! Pacing & retention boosted to 98%! 🔥',
+                      speechBubble: speak('Maximum thumbstop rate unlocked, {name}! Pacing & retention boosted to 98%! 🔥', firstNameOf(userProfile?.name)),
                     });
                     setShowCompletionModal(true);
                   } else {
