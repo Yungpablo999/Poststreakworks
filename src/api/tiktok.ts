@@ -252,6 +252,17 @@ export function parseCreatorInfo(body: unknown): TikTokCreatorInfo | null {
 
 export const TIKTOK_CREATOR_INFO_ERROR = "Couldn't load your TikTok account. Reconnect TikTok or try again."
 
+/**
+ * The text to show when GET /api/tiktok/creator-info fails. The backend answers
+ * { success: false, error: <message for the user>, code } (e.g. "TikTok isn't letting this account post right now. Try again later."),
+ * so that message is used when there is one; anything else gets the generic text.
+ */
+export function creatorInfoErrorMessage(e: unknown): string {
+  const body = (e as { body?: unknown } | null)?.body;
+  const message = body && typeof body === 'object' ? (body as { error?: unknown }).error : undefined;
+  return typeof message === 'string' && message.trim() ? message.trim() : TIKTOK_CREATOR_INFO_ERROR;
+}
+
 /** Initials for the avatar fallback: "@yourhandle" -> "YH"-style, at most two letters */
 export function nicknameInitials(nickname: string): string {
   const words = nickname.replace(/^@/, '').split(/[\s._-]+/).filter(Boolean)

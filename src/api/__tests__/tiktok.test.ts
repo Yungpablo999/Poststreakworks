@@ -1,8 +1,10 @@
 import {
   TIKTOK_BRANDED_CONTENT_POLICY_URL,
+  TIKTOK_CREATOR_INFO_ERROR,
   TIKTOK_MUSIC_USAGE_URL,
   emptyTikTokForm,
   nicknameInitials,
+  creatorInfoErrorMessage,
   parseCreatorInfo,
   parseTikTokPostOptions,
   privacyLevelDisabledReason,
@@ -145,5 +147,35 @@ describe('nicknameInitials', () => {
     expect(nicknameInitials('@yourhandle')).toBe('YO');
     expect(nicknameInitials('Jane Doe')).toBe('JD');
     expect(nicknameInitials('')).toBe('?');
+  });
+});
+
+describe('creator-info wire contract (poststreak-web GET /api/tiktok/creator-info)', () => {
+  // Same shape the backend sends: { success: true, data: TikTokCreatorInfo }
+  const backendBody = {
+    success: true,
+    data: {
+      nickname: 'yourhandle',
+      avatarUrl: 'https://p16.tiktokcdn.com/a.jpg',
+      privacyLevelOptions: ['PUBLIC_TO_EVERYONE', 'MUTUAL_FOLLOW_FRIENDS', 'SELF_ONLY'],
+      commentDisabled: false,
+      duetDisabled: true,
+      stitchDisabled: false,
+      maxVideoPostDurationSec: 600,
+    },
+  };
+
+  it('reads every field the backend sends', () => {
+    expect(parseCreatorInfo(backendBody)).toEqual(backendBody.data);
+  });
+
+  it('shows the backend message for a failed lookup, else the generic text', () => {
+    const apiError = (error: string) => ({ status: 502, body: { success: false, error, code: 'provider_temporary_error' } });
+    expect(creatorInfoErrorMessage(apiError("TikTok isn't letting this account post right now. Try again later."))).toBe(
+      "TikTok isn't letting this account post right now. Try again later.",
+    );
+    expect(creatorInfoErrorMessage(new Error('offline'))).toBe(TIKTOK_CREATOR_INFO_ERROR);
+    expect(creatorInfoErrorMessage({ body: { error: '  ' } })).toBe(TIKTOK_CREATOR_INFO_ERROR);
+    expect(creatorInfoErrorMessage(null)).toBe(TIKTOK_CREATOR_INFO_ERROR);
   });
 });

@@ -3,6 +3,7 @@ import { api } from '../api/authFetch';
 import {
   TIKTOK_CREATOR_INFO_ERROR,
   emptyTikTokForm,
+  creatorInfoErrorMessage,
   parseCreatorInfo,
   tiktokFormProblem,
   toTikTokPostOptions,
@@ -47,8 +48,8 @@ export function useTikTokSettings({ active, videoDurationSec }: { active: boolea
       const creator = parseCreatorInfo(body);
       if (!alive.current) return;
       setCreatorInfo(creator ? { status: 'ready', creator } : { status: 'error', message: TIKTOK_CREATOR_INFO_ERROR });
-    } catch {
-      if (alive.current) setCreatorInfo({ status: 'error', message: TIKTOK_CREATOR_INFO_ERROR });
+    } catch (e) {
+      if (alive.current) setCreatorInfo({ status: 'error', message: creatorInfoErrorMessage(e) });
     }
   }, []);
 
