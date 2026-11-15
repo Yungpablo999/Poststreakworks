@@ -21,6 +21,7 @@ import { UserProfileModal, UserProfileData } from '../components/UserProfileModa
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { FreeAppHeader } from '../components/FreeAppHeader';
 import { sFont, sPadding, isNarrowScreen } from '../utils/responsive';
+import { JarvisOrb } from '../components/JarvisOrb';
 
 interface IdeaDetailScreenProps {
   ideaTitle?: string;
@@ -557,11 +558,7 @@ export const IdeaDetailScreen: React.FC<IdeaDetailScreenProps> = ({
                     { transform: [{ translateY: flameFloatY }] },
                   ]}
                 >
-                  <Image
-                    source={require('../../assets/images/jarvis-core-flame.png')}
-                    style={styles.jarvisFlameImage}
-                    resizeMode="contain"
-                  />
+                  <JarvisOrb size={16} />
                 </Animated.View>
                 <View style={styles.jarvisInsightBadge}>
                   <Text style={styles.jarvisInsightTag}>⚡ JARVIS INSIGHT</Text>

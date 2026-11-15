@@ -25,6 +25,7 @@ import { UserProfileModal, UserProfileData } from '../components/UserProfileModa
 import { ProNotificationsModal, ProNotificationItem, DEFAULT_PRO_NOTIFICATIONS } from '../components/ProNotificationsModal';
 import { HeaderDualModePills, UserPersona } from '../components/HeaderDualModePills';
 import { sFont } from '../utils/responsive';
+import { JarvisOrb } from '../components/JarvisOrb';
 
 export const TinyGoldCheck = ({ size = 13 }: { size?: number }) => (
   <View
@@ -1112,11 +1113,7 @@ export const ProQuestsScreen: React.FC<ProQuestsScreenProps> = ({
               {/* CARD 9: JARVIS REPUTATION RECOMMENDATION (Hidden for new users) */}
               {!isNewUser && (
                 <View style={styles.jarvisRepCard}>
-                  <Image
-                    source={require('../../assets/images/jarvis-core-flame.png')}
-                    style={{ width: 32, height: 32, alignSelf: 'center', marginBottom: 10 }}
-                    resizeMode="contain"
-                  />
+                  <View style={{ alignSelf: 'center', marginBottom: 10 }}><JarvisOrb size={32} /></View>
                   <Text style={styles.jarvisRepQuote}>
                     &ldquo;Your strongest momentum is in high-retention storytelling clips. Complete 2 more milestone sprints to level up your Creator Tier.&rdquo;
                   </Text>

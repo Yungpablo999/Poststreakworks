@@ -25,6 +25,7 @@ import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { TinyGoldCheck } from '../components/CreatorStoryModal';
 import { SocialBrandIcon } from '../components/SocialBrandIcon';
 import { sFont } from '../utils/responsive';
+import { JarvisOrb } from '../components/JarvisOrb';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -1216,11 +1217,7 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
               <View style={styles.jarvisCoachIconBox}>
-                <Image
-                  source={require('../../assets/images/jarvis-core-flame.png')}
-                  style={{ width: 28, height: 28 }}
-                  resizeMode="contain"
-                />
+                <JarvisOrb size={28} />
               </View>
               <Text style={styles.jarvisCoachTitle}>JARVIS CREATOR COACH</Text>
             </View>

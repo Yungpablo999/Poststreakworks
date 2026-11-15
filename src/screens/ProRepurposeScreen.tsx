@@ -24,6 +24,7 @@ import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { SocialBrandIcon } from '../components/SocialBrandIcon';
 import { TinyGoldCheck } from '../components/CreatorStoryModal';
 import { sFont } from '../utils/responsive';
+import { JarvisOrb } from '../components/JarvisOrb';
 
 interface ProRepurposeScreenProps {
   userProfile?: UserProfileData;
@@ -1202,11 +1203,7 @@ export const ProRepurposeScreen: React.FC<ProRepurposeScreenProps> = ({
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
               <View style={styles.jarvisIconHaloBox}>
-                <Image
-                  source={require('../../assets/images/jarvis-core-flame.png')}
-                  style={{ width: 26, height: 26 }}
-                  resizeMode="contain"
-                />
+                <JarvisOrb size={26} />
               </View>
               <View>
                 <Text style={styles.jarvisHeroTitle}>Jarvis Insight</Text>
