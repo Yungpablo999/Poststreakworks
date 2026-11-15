@@ -1,4 +1,5 @@
 import * as ImagePicker from 'expo-image-picker';
+import { Platform } from 'react-native';
 
 // Real camera + camera-roll access for the composer (works in Expo Go).
 // Returns null when the creator cancels or declines permission.
@@ -65,4 +66,16 @@ export async function pickPhotos(limit = 10): Promise<string[]> {
   });
   if (res.canceled || !res.assets?.length) return [];
   return res.assets.map((a) => a.uri);
+}
+
+/** Web only: a video's length in whole seconds, read from its metadata (undefined if the browser can't tell) */
+export function readWebVideoDuration(url: string): Promise<number | undefined> {
+  if (Platform.OS !== 'web' || typeof document === 'undefined') return Promise.resolve(undefined);
+  return new Promise((resolve) => {
+    const v = document.createElement('video');
+    v.preload = 'metadata';
+    v.onloadedmetadata = () => resolve(Number.isFinite(v.duration) ? Math.round(v.duration) : undefined);
+    v.onerror = () => resolve(undefined);
+    v.src = url;
+  });
 }

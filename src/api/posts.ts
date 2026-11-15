@@ -1,4 +1,5 @@
 import { ApiError, api } from './authFetch';
+import { parseTikTokPostOptions, type TikTokPostOptions } from './tiktok';
 import { MediaUploadError, blobFromUri, checkMedia, uploadMedia } from './media';
 
 // Real publishing for the composers (no UI in here).
@@ -12,8 +13,8 @@ import { MediaUploadError, blobFromUri, checkMedia, uploadMedia } from './media'
 // A platform that can't take that kind of media but takes text (e.g. LinkedIn with a
 // video) gets the caption alone; one that needs media and can't take it fails.
 //
-// TODO(tiktok-settings): TikTok needs `publishOptions` (privacy level etc.) from a settings
-// UI that is not built yet, so nothing sends publishOptions today.
+// TikTok takes `publishOptions: { tiktok }` (privacy level, comment/duet/stitch, disclosure; all
+// required, see src/api/tiktok.ts) from the composer's TikTok card. Only the TikTok call carries it.
 
 export interface PlatformRule {
   label: string;
@@ -45,6 +46,7 @@ export const POST_MESSAGES = {
   noContent: 'Add a caption first.',
   pastTime: 'Pick a time in the future.',
   notScheduled: "Couldn't be scheduled.",
+  tiktokSettings: 'Choose your TikTok settings first.',
 } as const;
 
 export class PostInputError extends Error {
@@ -176,14 +178,33 @@ export interface PublishInput {
   content: string;
   platforms: string[];
   media?: LocalMedia | null;
+  /** TikTok settings from the composer card; required for a TikTok post (it has no defaults) */
+  tiktok?: TikTokPostOptions | null;
 }
 
-function validateInput(input: PublishInput): { content: string; platforms: string[]; media: LocalMedia | null } {
+/** Body fields that belong to one platform's call: TikTok's publishOptions */
+function optionsFor(platform: string, tiktok: TikTokPostOptions | null): { publishOptions?: { tiktok: TikTokPostOptions } } {
+  return platform === 'tiktok' && tiktok ? { publishOptions: { tiktok } } : {};
+}
+
+/** Why TikTok can't be sent yet (settings missing or invalid), or null; same check the backend runs */
+function checkTikTok(platform: string, tiktok: TikTokPostOptions | null): string | null {
+  if (platform !== 'tiktok') return null;
+  const parsed = parseTikTokPostOptions(tiktok);
+  return parsed.ok ? null : POST_MESSAGES.tiktokSettings;
+}
+
+function validateInput(input: PublishInput): {
+  content: string;
+  platforms: string[];
+  media: LocalMedia | null;
+  tiktok: TikTokPostOptions | null;
+} {
   const content = input.content.trim();
   const platforms = Array.from(new Set(input.platforms));
   if (!platforms.length) throw new PostInputError(POST_MESSAGES.noPlatform);
   if (!content) throw new PostInputError(POST_MESSAGES.noContent);
-  return { content, platforms, media: input.media ?? null };
+  return { content, platforms, media: input.media ?? null, tiktok: input.tiktok ?? null };
 }
 
 /** Reads the file once and checks it against the upload rules; returns the type to upload as */
@@ -211,7 +232,7 @@ async function uploadFor(
  * (no platform, no caption, or the file itself is unusable).
  */
 export async function publishNow(input: PublishInput, deps: PostDeps = defaultDeps): Promise<PostSummary> {
-  const { content, platforms, media } = validateInput(input);
+  const { content, platforms, media, tiktok } = validateInput(input);
   let loaded: { blob: Blob; contentType: string } | null = null;
   if (media && platforms.some((p) => takesMedia(p, media))) loaded = await loadMedia(media, deps);
 
@@ -222,7 +243,7 @@ export async function publishNow(input: PublishInput, deps: PostDeps = defaultDe
       outcomes.push({ platform, ok: false, message: POST_MESSAGES.signedOut });
       continue;
     }
-    const problem = checkPlatformPost(platform, content, media);
+    const problem = checkPlatformPost(platform, content, media) ?? checkTikTok(platform, tiktok);
     if (problem) {
       outcomes.push({ platform, ok: false, message: problem });
       continue;
@@ -233,6 +254,7 @@ export async function publishNow(input: PublishInput, deps: PostDeps = defaultDe
         content,
         platform,
         ...(mediaKey ? { mediaKey } : {}),
+        ...optionsFor(platform, tiktok),
       });
       outcomes.push({ platform, ok: true, postId: res?.postId });
     } catch (e) {
@@ -255,7 +277,7 @@ const MIN_LEAD_MS = 30_000;
  * with media (or one platform) each platform is scheduled by itself.
  */
 export async function schedulePost(input: ScheduleInput, deps: PostDeps = defaultDeps): Promise<PostSummary> {
-  const { content, platforms, media } = validateInput(input);
+  const { content, platforms, media, tiktok } = validateInput(input);
   const when = input.scheduledAt;
   if (!(when instanceof Date) || Number.isNaN(when.getTime()) || when.getTime() < deps.now().getTime() + MIN_LEAD_MS) {
     throw new PostInputError(POST_MESSAGES.pastTime);
@@ -265,7 +287,7 @@ export async function schedulePost(input: ScheduleInput, deps: PostDeps = defaul
   const outcomes: PostOutcome[] = [];
   const sendable: string[] = [];
   for (const platform of platforms) {
-    const problem = checkPlatformPost(platform, content, media);
+    const problem = checkPlatformPost(platform, content, media) ?? checkTikTok(platform, tiktok);
     if (problem) outcomes.push({ platform, ok: false, message: problem });
     else sendable.push(platform);
   }
@@ -321,6 +343,7 @@ export async function schedulePost(input: ScheduleInput, deps: PostDeps = defaul
         platform,
         scheduledAt,
         ...(mediaKey ? { mediaKey } : {}),
+        ...optionsFor(platform, tiktok),
       });
       outcomes.push({ platform, ok: true, postId: res?.postId });
     } catch (e) {

@@ -25,7 +25,9 @@ import { TinyGoldCheck } from '../components/CreatorStoryModal';
 import { SocialBrandIcon } from '../components/SocialBrandIcon';
 import { sFont } from '../utils/responsive';
 import { usePlatforms } from '../hooks/usePlatforms';
-import { pickFromLibrary } from '../utils/media';
+import { pickFromLibrary, readWebVideoDuration } from '../utils/media';
+import { useTikTokSettings } from '../hooks/useTikTokSettings';
+import { TikTokSettingsCard } from '../components/composer/TikTokSettingsCard';
 import {
   describePostError,
   describeSummary,
@@ -165,7 +167,12 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
     /** Kept from the picker so the file can be uploaded */
     mimeType?: string;
     sizeBytes?: number;
+    /** Video length in seconds when known (TikTok's per-account limit) */
+    duration?: number;
   } | null>(null);
+  // TikTok settings: the card shows only with TikTok selected and a video attached
+  const tiktokActive = selectedPlatforms.includes('tiktok') && uploadedMedia?.type === 'video';
+  const tiktok = useTikTokSettings({ active: tiktokActive, videoDurationSec: uploadedMedia?.duration ?? null });
   const { isConnected, loading: platformsLoading } = usePlatforms();
   const publishingRef = useRef(false);
   const [localAttachedAudio, setLocalAttachedAudio] = useState<AttachedAudioData | null>(
@@ -304,6 +311,9 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
         if (file) {
           const url = URL.createObjectURL(file);
           const isVideo = file.type.startsWith('video') || file.name.endsWith('.mp4') || file.name.endsWith('.mov');
+          const setDuration = (duration?: number) =>
+            setUploadedMedia((m) => (m && m.uri === url ? { ...m, duration } : m));
+          if (isVideo) void readWebVideoDuration(url).then(setDuration);
           setUploadedMedia({
             uri: url,
             name: file.name,
@@ -327,6 +337,7 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
           type: m.kind,
           mimeType: m.mimeType,
           sizeBytes: m.sizeBytes,
+          duration: m.duration,
         });
         showToast('Media attached!');
       });
@@ -346,6 +357,10 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
       showToast(`Connect ${selectedPlatforms.filter((p) => !isConnected(p)).map(labelFor).join(' and ')} first, or remove it from this post.`, 4000);
       return;
     }
+    if (tiktokActive && tiktok.problem) {
+      showToast(tiktok.problem, 4500);
+      return;
+    }
     // The Autopilot button reads 7:30 PM: the next one
     const when = mode === 'schedule' ? nextOccurrence(19, 30, new Date()) : null;
 
@@ -359,6 +374,7 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
         media: uploadedMedia
           ? { uri: uploadedMedia.uri, kind: uploadedMedia.type, mimeType: uploadedMedia.mimeType, sizeBytes: uploadedMedia.sizeBytes }
           : null,
+        tiktok: tiktokActive ? tiktok.options : null,
       };
       summary = when ? await schedulePost({ ...input, scheduledAt: when }) : await publishNow(input);
     } catch (e) {
@@ -672,6 +688,12 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
           <Text style={styles.platformDisclaimerText}>
             👑 Pro Multi-Sync active. Your content is automatically tailored to each platform&apos;s optimal algorithm format.
           </Text>
+
+          {tiktokActive && (
+            <View style={{ marginTop: 18 }}>
+              <TikTokSettingsCard settings={tiktok} />
+            </View>
+          )}
 
           {/* ============================================================ */}
           {/* ATTACHED STUDIO VOICEOVER CARD (SEAMLESS PRO WORKFLOW)       */}

@@ -39,6 +39,8 @@ import { ScheduleSheet } from '../components/composer/ScheduleSheet';
 import { PlatformLogo } from '../components/onboarding/PlatformLogo';
 import { FilmMethodPicker, FilmPlanCard, PostedCheck, type FilmMethod } from '../components/composer/FilmBlocks';
 import { handOffToPlatform, isHandoffPlatform, HANDOFF_NAMES, type HandoffPlatform } from '../utils/handoff';
+import { useTikTokSettings } from '../hooks/useTikTokSettings';
+import { TikTokSettingsCard } from '../components/composer/TikTokSettingsCard';
 import { captureWithCamera, pickFromLibrary, type PickedMedia } from '../utils/media';
 import { AppState } from 'react-native';
 import { GlassBackdrop } from '../components/glass/GlassBackdrop';
@@ -751,6 +753,9 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
 
   // Real camera / camera roll (expo-image-picker)
   const [pickedMedia, setPickedMedia] = useState<PickedMedia | null>(null);
+  // TikTok settings: the card shows only with TikTok selected and a video attached
+  const tiktokActive = selectedPlatforms.includes('tiktok') && pickedMedia?.kind === 'video';
+  const tiktok = useTikTokSettings({ active: tiktokActive, videoDurationSec: pickedMedia?.duration ?? null });
   const wantsVideo = selectedFormat === 'short_video' || selectedFormat === 'long_video';
   const acceptMedia = (m: PickedMedia | null) => {
     if (!m) return;
@@ -845,6 +850,12 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
       navigateToSection('media');
       return;
     }
+    if (tiktokActive && tiktok.problem) {
+      // The TikTok card sits right under the platforms step and says what's missing
+      showToastNotice(tiktok.problem);
+      navigateToSection('platforms');
+      return;
+    }
     let when: Date | null = null;
     if (publishMode === 'schedule') {
       const now = new Date();
@@ -867,6 +878,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
         media: pickedMedia
           ? { uri: pickedMedia.uri, kind: pickedMedia.kind, mimeType: pickedMedia.mimeType, sizeBytes: pickedMedia.sizeBytes }
           : null,
+        tiktok: tiktokActive ? tiktok.options : null,
       };
       summary = when ? await schedulePost({ ...input, scheduledAt: when }) : await publishNow(input);
     } catch (e) {
@@ -953,7 +965,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   const isFormatReady = Boolean(selectedFormat);
   const isCaptionReady = caption.trim().length >= 10;
   const isNativeFilm = selectedFormat === 'short_video' && filmMethod === 'native';
-  const isPlatformsReady = selectedPlatforms.some((p) => isNativeFilm || isConnected(p));
+  const isPlatformsReady = selectedPlatforms.some((p) => isNativeFilm || isConnected(p)) && !(tiktokActive && tiktok.problem);
   const isCameraFilm = selectedFormat === 'short_video' && filmMethod === 'camera';
   const isMediaReady = selectedFormat === 'text' || hasMedia || isNativeFilm;
   const isScheduleReady =
@@ -1247,6 +1259,8 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
               ? 'Pro posts to each platform for you at the time you pick.'
               : 'Free plans prepare posts for each platform. Auto-posting is part of Pro.'}
           </Text>
+
+          {tiktokActive && <TikTokSettingsCard settings={tiktok} />}
 
           {/* 2. FORMAT */}
           <StepHeader
