@@ -1,4 +1,4 @@
-import { IMAGES_COMING_SOON, isTextOnlySelection, textOnlyPlatforms, acceptsMedia, POST_PLATFORMS, POST_PLATFORM_IDS, formatsAllowedFor, isTextPlatform, mediaRequiredFor, recommendedFormatFor, resolveFormat } from '../platforms';
+import { TEXT_ONLY_NOTE, joinNames, mixedTextOnlyNote, IMAGES_COMING_SOON, isTextOnlySelection, textOnlyPlatforms, acceptsMedia, POST_PLATFORMS, POST_PLATFORM_IDS, formatsAllowedFor, isTextPlatform, mediaRequiredFor, recommendedFormatFor, resolveFormat } from '../platforms';
 import { STAGE_1_PLATFORMS, canAutoPost, isProTier, isStage1Platform, showAutoPostUpsell } from '../features';
 
 describe('platform list', () => {
@@ -100,5 +100,19 @@ describe('text-only platforms (no media in the backend yet)', () => {
   });
   it('has the note text', () => {
     expect(IMAGES_COMING_SOON).toBe('Images coming soon');
+  });
+});
+
+describe('text-only notes', () => {
+  it('joins names naturally', () => {
+    expect(joinNames(['LinkedIn'])).toBe('LinkedIn');
+    expect(joinNames(['LinkedIn', 'Threads'])).toBe('LinkedIn and Threads');
+    expect(joinNames(['LinkedIn', 'Threads', 'Facebook'])).toBe('LinkedIn, Threads and Facebook');
+  });
+  it('the text-only note always names Facebook too', () => {
+    expect(TEXT_ONLY_NOTE).toBe('LinkedIn, Threads and Facebook are text only for now. Images coming soon.');
+  });
+  it('the mixed note names the chosen ones', () => {
+    expect(mixedTextOnlyNote(['Facebook', 'LinkedIn'])).toBe('Facebook and LinkedIn will post your caption only. Images coming soon.');
   });
 });
