@@ -15,6 +15,7 @@ import { sendEmailOtp, verifyEmailOtp } from './src/auth/email';
 import { getCurrentSession, onAuthChange, signOut } from './src/auth/session';
 import { fetchPlan, type Plan } from './src/api/plan';
 import { apiClient } from './src/api/apiClient';
+import { requestWelcome } from './src/api/welcome';
 import {
   claimStoredReferral,
   hasLandingParams,
@@ -560,6 +561,8 @@ export default function App() {
     // Token refreshes keep the same user and details: do not overwrite local edits.
     if (last && last.id === session.user.id && last.key === key) return;
     appliedIdentity.current = { id: session.user.id, key };
+    // A brand-new creator gets the welcome email and the start of the email sequence (the backend sends it at most once)
+    void requestWelcome(session.user, { post: () => apiClient.post<{ welcomed?: boolean }>('/api/onboarding/welcome') });
     // The plan comes from the backend; if it cannot be read the creator stays on what they had (free by default)
     const userId = session.user.id;
     void fetchPlan(userId).then((plan) => {
