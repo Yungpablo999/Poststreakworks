@@ -27,6 +27,7 @@ import { ProNotificationsModal, ProNotificationItem, DEFAULT_PRO_NOTIFICATIONS }
 import { SocialBrandIcon } from '../components/SocialBrandIcon';
 import { PurpleGoldSwitch } from '../components/PurpleGoldSwitch';
 import { sFont, sPadding, isNarrowScreen } from '../utils/responsive';
+import { JarvisOrb } from '../components/JarvisOrb';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -1445,11 +1446,7 @@ export const ProScheduleScreen: React.FC<ProScheduleScreenProps> = ({
             style={styles.jarvisInsightCard}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-              <Image
-                source={require('../../assets/images/jarvis-core-flame.png')}
-                style={{ width: 28, height: 28 }}
-                resizeMode="contain"
-              />
+              <JarvisOrb size={28} />
               <Text style={styles.jarvisInsightHeader}>Jarvis Insight</Text>
             </View>
 

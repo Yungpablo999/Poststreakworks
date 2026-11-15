@@ -36,6 +36,7 @@ import { BrandToast } from '../components/BrandToast';
 import { sFont, sPadding, moderateScale, isNarrowScreen } from '../utils/responsive';
 import { HeaderDualModePills, UserPersona } from '../components/HeaderDualModePills';
 import { NotificationsSheet, useUnreadNotifications } from '../components/notifications/NotificationsSheet';
+import { JarvisOrb } from '../components/JarvisOrb';
 
 interface DashboardScreenProps {
   onLogout?: () => void;
@@ -1808,11 +1809,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                   },
                 ]}
               >
-                <Image
-                  source={require('../../assets/images/jarvis-core-flame.png')}
-                  style={styles.modalPureStarImage}
-                  resizeMode="contain"
-                />
+                <JarvisOrb size={56} />
               </Animated.View>
 
               <Text style={styles.modalTitle}>Mission 1: The Reel Hook 🚀</Text>

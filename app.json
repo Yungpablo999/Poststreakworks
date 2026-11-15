@@ -22,7 +22,9 @@
           "cameraPermission": "PostStreak uses your camera so you can film posts without leaving the app.",
           "microphonePermission": "PostStreak uses your microphone to record sound with your videos."
         }
-      ]
+      ],
+      "expo-secure-store",
+      "expo-web-browser"
     ],
     "ios": {
       "supportsTablet": true,

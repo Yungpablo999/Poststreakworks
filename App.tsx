@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Platform, useWindowDimensions } from 'react-native';
+import { View, StyleSheet, Platform, useWindowDimensions, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
 
@@ -10,6 +10,8 @@ import { WelcomeScreen } from './src/screens/WelcomeScreen';
 import { SignUpScreen } from './src/screens/SignUpScreen';
 import { SignInScreen } from './src/screens/SignInScreen';
 import { VerifyCodeScreen } from './src/screens/VerifyCodeScreen';
+import { signInWithGoogle } from './src/auth/google';
+import { getCurrentSession, signOut } from './src/auth/session';
 import { NicheSelectionScreen } from './src/screens/NicheSelectionScreen';
 import { PlatformConnectScreen } from './src/screens/PlatformConnectScreen';
 import { PlanPreviewScreen } from './src/screens/PlanPreviewScreen';
@@ -242,6 +244,12 @@ export default function App() {
     setCurrentScreen(nextScreen);
   };
 
+  // Alert.alert does nothing on react-native-web, so the web uses window.alert
+  const showAuthError = (message: string) => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined') window.alert(`Sign-in failed: ${message}`);
+    else Alert.alert('Sign-in failed', message);
+  };
+
   // Notifications that involve doing something open the right place
   const [showAccountsFromNote, setShowAccountsFromNote] = useState(false);
   // The profile sheet opened from the desktop side menu
@@ -335,13 +343,45 @@ export default function App() {
     navigateTo('verify-code');
   };
 
-  // One-tap Apple / Google sign-up (mock): the provider has already verified the
-  // person, so skip the email code and go straight to Home
-  const handleSocialSignUp = (_provider: 'apple' | 'google') => {
+  // One-tap sign-up. Google is real (Supabase); Apple is still a mock: the
+  // provider has already verified the person, so skip the email code and go
+  // straight to Home
+  const handleSocialSignUp = (provider: 'apple' | 'google') => {
+    if (provider === 'google') {
+      void handleGoogleSignIn('signup');
+      return;
+    }
     justSignedUp.current = true;
     setVerifyMode('signup');
     setUserProfile(prev => ({ ...prev, tier: 'free' }));
     navigateTo('dashboard');
+  };
+
+  // Google sign-in / sign-up through Supabase (src/auth/google.ts). On the web the
+  // page leaves for Google and the session is picked up when it comes back (see
+  // the session check below); on phones it finishes here.
+  const googleBusy = React.useRef(false);
+  const handleGoogleSignIn = async (mode: 'signup' | 'signin') => {
+    if (googleBusy.current) return;
+    googleBusy.current = true;
+    try {
+      const result = await signInWithGoogle();
+      if (result.status === 'signedIn') {
+        if (mode === 'signup') justSignedUp.current = true;
+        setVerifyMode(mode);
+        setUserProfile(prev => ({ ...prev, tier: 'free' }));
+        navigateTo('dashboard');
+      } else if (result.status === 'error') {
+        showAuthError(result.message);
+      }
+      // 'redirecting' (web) and 'cancelled': nothing to do
+    } catch (err) {
+      // e.g. EXPO_PUBLIC_SUPABASE_URL / _ANON_KEY not set: say so loudly
+      console.error('[auth] Google sign-in failed:', err);
+      showAuthError(err instanceof Error ? err.message : 'Google sign-in failed.');
+    } finally {
+      googleBusy.current = false;
+    }
   };
 
   // Sign In Screen actions
@@ -386,8 +426,27 @@ export default function App() {
   };
 
   const handleLogout = () => {
+    // End the Supabase session (if any) on this device; mock sign-ins have none
+    signOut().catch((err) => console.warn('[auth] sign-out:', err));
     navigateTo(Platform.OS === 'web' ? 'signin' : 'welcome');
   };
+
+  // A saved Supabase session (or, on the web, one coming back from Google) skips
+  // the welcome / sign-in screens. Without the EXPO_PUBLIC_SUPABASE_* settings this
+  // logs the error and the app carries on with its sample-data sign-in.
+  React.useEffect(() => {
+    let cancelled = false;
+    getCurrentSession()
+      .then((session) => {
+        if (cancelled || !session) return;
+        setUserProfile(prev => ({ ...prev, tier: 'free' }));
+        setCurrentScreen(prev => (prev === 'welcome' || prev === 'signin' ? 'dashboard' : prev));
+      })
+      .catch((err) => console.error('[auth] could not restore the session:', err));
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const getTransitionType = (screen: Screen): ScreenTransitionType => {
     if (
@@ -699,7 +758,12 @@ export default function App() {
             onBack={Platform.OS === 'web' ? undefined : handleBackFromSignIn}
             onCreateAccount={handleCreateAccountFromSignIn}
             onSubmit={handleSignInSubmit}
-            onSocialSignIn={() => {
+            onSocialSignIn={(provider) => {
+              if (provider === 'google') {
+                void handleGoogleSignIn('signin');
+                return;
+              }
+              // Apple: still a mock, goes straight in
               setUserProfile(prev => ({ ...prev, tier: 'free' }));
               navigateTo('dashboard');
             }}

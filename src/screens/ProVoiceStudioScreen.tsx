@@ -23,6 +23,7 @@ import { UserProfileModal, UserProfileData } from '../components/UserProfileModa
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { TinyGoldCheck } from '../components/CreatorStoryModal';
 import { sFont, isNarrowScreen } from '../utils/responsive';
+import { JarvisOrb } from '../components/JarvisOrb';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -1361,11 +1362,7 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
             style={styles.jarvisInsightGradientCard}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-              <Image
-                source={require('../../assets/images/jarvis-core-flame.png')}
-                style={{ width: 24, height: 24 }}
-                resizeMode="contain"
-              />
+              <JarvisOrb size={24} />
               <Text style={styles.jarvisInsightTitle}>Jarvis Strategy Insight</Text>
             </View>
             <Text style={styles.jarvisInsightBody}>
