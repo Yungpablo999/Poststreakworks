@@ -1,6 +1,6 @@
 import { api } from './authFetch';
 import { getSupabase } from '../auth/supabase';
-import { setRealCheckInStreak } from '../data';
+import { checkInToday, getCheckInStreak, hasRealCheckInStreak, setRealCheckInStreak, type CheckInStreak, type Persona } from '../data';
 import { mapStreakRow, STREAK_COLUMNS, type StreakRow, type StreakSnapshot } from './streakMapping';
 
 export * from './streakMapping';
@@ -8,8 +8,8 @@ export * from './streakMapping';
 // The creator's real streak. The backend counts a day when a post is PUBLISHED (post now, or the
 // scheduler publishing one): it updates the streak itself, so the app never calls
 // /api/streak/update after a post. The app only reads the row (Row Level Security limits it to the
-// signed-in user) and refreshes after a post. The one POST is recordManualPost(), for a post the
-// creator says they made by hand in another app.
+// signed-in user) and refreshes after a post. The app never adds a streak day itself: a check-in is a
+// separate record (sendCheckIn) and does not count as a post day.
 
 export interface StreakState {
   loaded: boolean;
@@ -76,18 +76,29 @@ export function refreshStreakIfStale(maxAgeMs = 60_000): Promise<void> {
   return refreshStreak();
 }
 
-export type ManualPostResult = { ok: true } | { ok: false; error: string };
+export type CheckInSyncResult = { ok: true } | { ok: false; error: string };
 
 /**
- * The creator confirms they posted by hand in another app. That is a post, so it counts a streak day
- * (POST /api/streak/update, the same count a published post gets). Not for check-ins: a check-in is not a post.
+ * Tells the backend the creator checked in today (POST /api/checkin). A check-in is NOT a post: the
+ * backend records it separately and it never adds a streak day. Never throws: an older backend
+ * without the route (404) or a dropped connection just leaves the local cheer as it is.
  */
-export async function recordManualPost(): Promise<ManualPostResult> {
+export async function sendCheckIn(): Promise<CheckInSyncResult> {
   try {
-    await api.post('/api/streak/update', {});
-    await refreshStreak();
+    await api.post('/api/checkin', {});
     return { ok: true };
   } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : 'Could not update your streak' };
+    return { ok: false, error: e instanceof Error ? e.message : 'Could not save your check-in' };
   }
+}
+
+/**
+ * The check-in tap: the local cheer first (instant), then the backend record for a signed-in creator
+ * with real data. Signed-out and demo mode stay fully local. Already checked in today does nothing.
+ */
+export function checkInAndSync(persona: Persona): CheckInStreak {
+  const alreadyDone = getCheckInStreak(persona).checkedInToday;
+  const result = checkInToday(persona);
+  if (!alreadyDone && hasRealCheckInStreak()) void sendCheckIn();
+  return result;
 }

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useSyncExternalStore } from 'react';
-import { refreshStreakIfStale } from '../api/streak';
-import { checkInToday, getCheckInStreak, subscribeToCheckIns, type Persona } from '../data';
+import { checkInAndSync, refreshStreakIfStale } from '../api/streak';
+import { getCheckInStreak, subscribeToCheckIns, type Persona } from '../data';
 
 // Shared check-in state for any screen (Home, Quests…).
 export function useCheckInStreak(persona: Persona) {
@@ -13,6 +13,6 @@ export function useCheckInStreak(persona: Persona) {
   useEffect(() => {
     void refreshStreakIfStale();
   }, []);
-  const checkIn = useCallback(() => checkInToday(persona), [persona]);
+  const checkIn = useCallback(() => checkInAndSync(persona), [persona]);
   return { streak, checkIn };
 }

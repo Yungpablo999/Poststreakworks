@@ -14,7 +14,7 @@ jest.mock('../authFetch', () => ({
 jest.mock('../../mascot/mascot', () => ({ react: jest.fn() }));
 
 import { getCheckInStreak, checkInToday, hasRealCheckInStreak } from '../../data';
-import { getStreakState, recordManualPost, refreshStreak, refreshStreakIfStale, resetStreak, watDate } from '../streak';
+import { checkInAndSync, getStreakState, sendCheckIn, refreshStreak, refreshStreakIfStale, resetStreak, watDate } from '../streak';
 
 function mockRow(data: unknown, error: { message: string } | null = null) {
   mockMaybeSingle.mockResolvedValue({ data, error });
@@ -109,18 +109,44 @@ describe('check-in without a post', () => {
   });
 });
 
-describe('recordManualPost', () => {
-  it('counts a hand-posted day through /api/streak/update, then refreshes', async () => {
-    mockPost.mockResolvedValue({ current_streak: 1 });
-    mockRow(todayRow(1));
-    const res = await recordManualPost();
-    expect(mockPost).toHaveBeenCalledWith('/api/streak/update', {});
-    expect(res).toEqual({ ok: true });
-    expect(getCheckInStreak('new').currentDays).toBe(1);
+describe('check-in (separate from a post day)', () => {
+  it('sendCheckIn posts to /api/checkin and never to /api/streak/update', async () => {
+    mockPost.mockResolvedValue({ success: true });
+    expect(await sendCheckIn()).toEqual({ ok: true });
+    expect(mockPost).toHaveBeenCalledWith('/api/checkin', {});
+    expect(mockPost).not.toHaveBeenCalledWith('/api/streak/update', expect.anything());
   });
 
-  it('reports a failed update without throwing', async () => {
-    mockPost.mockRejectedValue(new Error('Unauthorized'));
-    expect(await recordManualPost()).toEqual({ ok: false, error: 'Unauthorized' });
+  it('sendCheckIn never throws: an older backend (404) or an offline phone keeps the local cheer', async () => {
+    mockPost.mockRejectedValue(new Error('Request failed with status 404'));
+    expect(await sendCheckIn()).toEqual({ ok: false, error: 'Request failed with status 404' });
+  });
+
+  it('a signed-in tap cheers locally, sends the check-in once, and adds no streak day', async () => {
+    mockRow(yesterdayRow(5));
+    await refreshStreak();
+    mockPost.mockResolvedValue({ success: true });
+    checkInAndSync('new');
+    checkInAndSync('new'); // second tap the same day: nothing more is sent
+    expect(mockPost).toHaveBeenCalledTimes(1);
+    expect(mockPost).toHaveBeenCalledWith('/api/checkin', {});
+    const s = getCheckInStreak('new');
+    expect(s.checkedInToday).toBe(true);
+    expect(s.countedToday).toBe(false);
+    expect(s.currentDays).toBe(5);
+  });
+
+  it('signed out or demo mode stays fully local', () => {
+    checkInAndSync('new');
+    expect(mockPost).not.toHaveBeenCalled();
+    expect(getCheckInStreak('new').checkedInToday).toBe(true);
+  });
+
+  it('a failed backend call does not throw at the tap', async () => {
+    mockRow(yesterdayRow(2));
+    await refreshStreak();
+    mockPost.mockRejectedValue(new Error('offline'));
+    expect(() => checkInAndSync('new')).not.toThrow();
+    await Promise.resolve();
   });
 });

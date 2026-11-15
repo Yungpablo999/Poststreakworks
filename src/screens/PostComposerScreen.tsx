@@ -27,7 +27,6 @@ import {
   getStarterIdeas,
   getFilmPlan,
   getSoundIdeas,
-  checkInToday,
   getDefaultFilmStyle,
   getGoalCaption,
   saveDraft as saveDraftToStore,
@@ -62,7 +61,7 @@ import {
 } from '../config/platforms';
 import { usePlatforms } from '../hooks/usePlatforms';
 import { useConnect } from '../hooks/useConnect';
-import { recordManualPost, refreshStreak } from '../api/streak';
+import { checkInAndSync, refreshStreak } from '../api/streak';
 import { describePostError, describeSummary, labelFor, publishNow, schedulePost, type PostSummary } from '../api/posts';
 import {
   StepHeader,
@@ -1048,9 +1047,8 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   const confirmPosted = () => {
     setShowPostedCheck(false);
     setPendingHandoff(null);
-    checkInToday(userProfile?.userPersona === 'returning' ? 'returning' : 'new');
-    // Posting by hand in another app is a post the backend can't see: the creator's confirmation counts it
-    void recordManualPost();
+    // A check-in, not a post day: the backend counts a streak day only for a post it publishes itself
+    checkInAndSync(userProfile?.userPersona === 'returning' ? 'returning' : 'new');
     if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setCelebrationTitle('Nice work!');
     setCelebrationSubtitle(`Your ${pendingHandoff ? HANDOFF_NAMES[pendingHandoff] : ''} post counts toward today's check-in.`);
