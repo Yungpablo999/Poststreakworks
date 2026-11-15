@@ -63,6 +63,7 @@ export const TinyGoldCheck = ({ size = 13 }: { size?: number }) => (
 
 
 import { HeaderDualModePills, UserPersona } from '../components/HeaderDualModePills';
+import { firstNameOf } from '../auth/profile';
 
 interface ProDashboardScreenProps {
   onLogout?: () => void;
@@ -660,7 +661,7 @@ export const ProDashboardScreen: React.FC<ProDashboardScreenProps> = ({
           {isNewUser ? (
             <HomeDayZero
               tier="pro"
-              firstName={userProfile?.name?.split(' ')[0]}
+              firstName={firstNameOf(userProfile?.name) || undefined}
               onPlanFirstPost={() => onOpenCreate?.()}
               onOpenSchedule={onOpenSchedule}
               onOpenGrowth={onOpenGrowth}

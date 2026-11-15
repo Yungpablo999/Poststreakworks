@@ -25,6 +25,7 @@ import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { TinyGoldCheck } from '../components/CreatorStoryModal';
 import { SocialBrandIcon } from '../components/SocialBrandIcon';
 import { sFont } from '../utils/responsive';
+import { firstNameOf, speak } from '../auth/profile';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -224,7 +225,7 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
     subtitle: `"${currentIdeaTitle}" is ready for Voice Studio or immediate posting.`,
     badgeText: '✨ SCRIPT READY (+50 XP)',
     xpEarned: 50,
-    speechBubble: 'Script polished to perfection, Pablo! Ready to record! 🎙️',
+    speechBubble: speak('Script polished to perfection, {name}! Ready to record! 🎙️', firstNameOf(userProfile?.name)),
   });
 
   const handleToggleStructureRow = (index: number) => {
@@ -392,7 +393,7 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
       subtitle: `"${currentIdeaTitle}" is secured in your production pipeline.`,
       badgeText: '✨ SCRIPT SECURED (+50 XP)',
       xpEarned: 50,
-      speechBubble: 'Draft locked in, Pablo! Ready to record whenever you are! 🎙️',
+      speechBubble: speak('Draft locked in, {name}! Ready to record whenever you are! 🎙️', firstNameOf(userProfile?.name)),
     });
     setShowCompletionModal(true);
   };
@@ -632,7 +633,7 @@ export const ProScriptScreen: React.FC<ProScriptScreenProps> = ({
                       subtitle: `"${currentIdeaTitle}" optimized with AI retention pacing & viral hook multiplier.`,
                       badgeText: '⚡ PRO SCRIPT ACCELERATED',
                       xpEarned: 50,
-                      speechBubble: 'Maximum velocity unlocked, Pablo! Pacing & retention boosted to 94%! 🔥',
+                      speechBubble: speak('Maximum velocity unlocked, {name}! Pacing & retention boosted to 94%! 🔥', firstNameOf(userProfile?.name)),
                     });
                     setShowCompletionModal(true);
                   } else {

@@ -38,6 +38,7 @@ import { BrandToast } from '../components/BrandToast';
 import { sFont, sPadding, moderateScale, isNarrowScreen } from '../utils/responsive';
 import { HeaderDualModePills, UserPersona } from '../components/HeaderDualModePills';
 import { NotificationsSheet, useUnreadNotifications } from '../components/notifications/NotificationsSheet';
+import { firstNameOf } from '../auth/profile';
 
 interface DashboardScreenProps {
   onLogout?: () => void;
@@ -1031,7 +1032,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
             <HomeDayZero
               tier={tier}
               onOpenVoiceStudio={onOpenVoiceStudio}
-              firstName={userProfile?.name?.split(' ')[0]}
+              firstName={firstNameOf(userProfile?.name) || undefined}
               isDark={isDark}
               onPlanFirstPost={() => (onNavigateTab ? onNavigateTab('create') : undefined)}
               onOpenSchedule={onOpenSchedule}
@@ -1040,7 +1041,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
             />
           ) : (
             <HomeReturning
-              firstName={userProfile?.name?.split(' ')[0]}
+              firstName={firstNameOf(userProfile?.name) || undefined}
               onPlanPost={() => onNavigateTab?.('create')}
               onOpenSchedule={onOpenSchedule}
               onOpenGrowth={() => onNavigateTab?.('growth')}
