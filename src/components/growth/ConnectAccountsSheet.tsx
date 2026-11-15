@@ -9,13 +9,16 @@ import { Text } from '../ui/AppText';
 import { AppButton } from '../ui/AppButton';
 import { PlatformRow } from '../onboarding/PlatformRow';
 import { PlatformLogo, type PlatformLogoType } from '../onboarding/PlatformLogo';
+import { BrandToast } from '../BrandToast';
+import { usePlatforms } from '../../hooks/usePlatforms';
+import { useConnect } from '../../hooks/useConnect';
 import { ds } from '../../theme/colors';
 
 // "Your accounts": connect or disconnect the Stage 1 platforms. Glides up
 // from the bottom (no bounce). Each row does its own connect (spinner, then a
 // green tick), so there's nothing to save: "Done" just closes.
-// (Mock: a real build opens each platform's own sign-in; we never ask for
-// passwords or usernames here.)
+// Connecting opens the platform's own sign-in (src/api/connect.ts); we never ask
+// for passwords or usernames here.
 
 export interface SheetPlatform {
   id: string;
@@ -29,6 +32,8 @@ interface ConnectAccountsSheetProps {
   onClose: () => void;
   platforms: SheetPlatform[];
   onToggle: (id: string) => void;
+  /** Plain-text notice (e.g. "Connecting is not available yet."), shown with the app's toast */
+  message?: string | null;
 }
 
 function LogoDot({ id, on }: { id: string; on: boolean }) {
@@ -44,7 +49,7 @@ function LogoDot({ id, on }: { id: string; on: boolean }) {
   );
 }
 
-export function ConnectAccountsSheet({ visible, onClose, platforms, onToggle }: ConnectAccountsSheetProps) {
+export function ConnectAccountsSheet({ visible, onClose, platforms, onToggle, message }: ConnectAccountsSheetProps) {
   const insets = useSafeAreaInsets();
   const { height: screenH } = useWindowDimensions();
   const [mounted, setMounted] = useState(visible);
@@ -146,6 +151,7 @@ export function ConnectAccountsSheet({ visible, onClose, platforms, onToggle }: 
             <AppButton title="Done" size="lg" onPress={onClose} />
           </View>
         </Animated.View>
+        <BrandToast message={message ?? null} bottom={insets.bottom + 96} />
       </View>
     </Modal>
   );
@@ -194,7 +200,7 @@ const styles = StyleSheet.create({
   footer: { paddingHorizontal: 20, paddingTop: 10 },
 });
 
-// ─── Shared connected-accounts state (reads / saves the profile) ────────────
+// ─── Shared connected-accounts state (real connections from the backend) ────
 const STAGE1: { id: string; name: string }[] = [
   { id: 'tiktok', name: 'TikTok' },
   { id: 'instagram', name: 'Instagram' },
@@ -205,21 +211,27 @@ const STAGE1: { id: string; name: string }[] = [
 
 type ProfileLike = { connectedPlatforms?: string[] } & Partial<Record<`${'tiktok' | 'instagram' | 'youtube' | 'facebook' | 'threads'}Handle`, string>>;
 
-/** Connected accounts from the creator's profile; toggling saves it back. */
-export function useConnectedAccounts<P extends ProfileLike>(profile: P | undefined, onSave?: (p: P) => void, fallback: string[] = ['tiktok', 'instagram', 'youtube']) {
-  const [local, setLocal] = useState<string[]>(profile?.connectedPlatforms ?? fallback);
-  useEffect(() => {
-    if (profile?.connectedPlatforms) setLocal(profile.connectedPlatforms);
-  }, [profile?.connectedPlatforms]);
+/**
+ * Connected accounts come from the backend (usePlatforms). Toggling a connected one disconnects it,
+ * a disconnected one starts the connect flow. The profile's connectedPlatforms is kept in sync
+ * (via onSave) because other screens still read it.
+ */
+export function useConnectedAccounts<P extends ProfileLike>(profile: P | undefined, onSave?: (p: P) => void) {
+  const { isConnected, platforms: connectedList } = usePlatforms();
+  const connect = useConnect(isConnected);
+  const connectedIds = STAGE1.filter((p) => isConnected(p.id)).map((p) => p.id);
+  // `connectedList` is only read so the result re-renders when the list changes
+  void connectedList;
   const platforms: SheetPlatform[] = STAGE1.map((p) => ({
     ...p,
-    connected: local.includes(p.id),
+    connected: connectedIds.includes(p.id),
     handle: (profile as Record<string, string | undefined> | undefined)?.[`${p.id}Handle`],
   }));
-  const toggle = (id: string) => {
-    const next = local.includes(id) ? local.filter((x) => x !== id) : [...local, id];
-    setLocal(next);
-    if (profile && onSave) onSave({ ...profile, connectedPlatforms: next });
+  const toggle = async (id: string) => {
+    const outcome = await connect.toggle(id);
+    if (outcome === 'none' || !profile || !onSave) return;
+    const next = outcome === 'connected' ? [...new Set([...(profile.connectedPlatforms ?? []), id])] : (profile.connectedPlatforms ?? []).filter((x) => x !== id);
+    onSave({ ...profile, connectedPlatforms: next });
   };
-  return { platforms, connectedIds: local, toggle };
+  return { platforms, connectedIds, toggle, message: connect.message };
 }
