@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { captionBrief, composePost, describeAiError, platformIdFor } from '../api/ai';
 import {
   StyleSheet,
   View,
@@ -444,16 +445,32 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
     }
   };
 
-  const handleApplyJarvisRecommendation = () => {
+  // Jarvis writes (POST /api/ai/compose). One request at a time; the buttons ignore taps meanwhile.
+  const [jarvisBusy, setJarvisBusy] = useState(false);
+  const askJarvisToWrite = async (instruction: string, platform?: string): Promise<string | null> => {
+    if (jarvisBusy) return null;
+    setJarvisBusy(true);
+    try {
+      const base = mainCaption.trim() ? `${currentIdeaTitle}. Current caption: "${mainCaption.trim()}".` : currentIdeaTitle;
+      return await composePost(captionBrief(base, { instruction }), platform);
+    } catch (e) {
+      showToast(describeAiError(e));
+      return null;
+    } finally {
+      setJarvisBusy(false);
+    }
+  };
+
+  const handleApplyJarvisRecommendation = async () => {
+    const text = await askJarvisToWrite('Rewrite it as the best version for retention: a strong first 80 characters, clear structure, and a closing question.', platformIdFor(activeEditingPlatform));
+    if (!text) return;
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
-    setMainCaption(
-      'Stop making these 3 mistakes if you want to grow as a creator:\n\n1. Waiting for the "perfect" idea\n2. Over-editing for 6 hours\n3. Zero repeatable workflow\n\nWhich one is slowing you down the most? Let me know below.'
-    );
+    setMainCaption(text);
     setCompletionData({
       title: 'Jarvis Recommendation Applied!',
-      subtitle: `Caption hook, high-converting CTA & structure calibrated for 94% retention.`,
+      subtitle: `Jarvis rewrote your caption for "${currentIdeaTitle}".`,
       badgeText: '✨ JARVIS OPTIMIZED (+50 XP)',
       xpEarned: 50,
       speechBubble: speak('Jarvis calibration complete, {name}! First 80 characters fit above the fold perfectly! 🚀', firstNameOf(userProfile?.name)),
@@ -461,26 +478,21 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
     setShowCompletionModal(true);
   };
 
-  const handleApplyJarvisChip = (chipType: string) => {
+  const JARVIS_CHIPS: Record<string, { instruction: string; toast: string }> = {
+    'DIRECT HOOK': { instruction: 'Rewrite it so the first line states the viewer\'s problem directly.', toast: '⚡ Added a direct problem hook' },
+    'COMMENT CTA': { instruction: 'Keep it, and end with one question that makes people comment.', toast: '💬 Added a comment prompt' },
+    'SAVEABLE BULLETS': { instruction: 'Rewrite it as short bullet points worth saving.', toast: '📌 Rewrote it as saveable bullets' },
+  };
+  const handleApplyJarvisChip = async (chipType: string) => {
+    const chip = JARVIS_CHIPS[chipType];
+    if (!chip) return;
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-    if (chipType === 'DIRECT HOOK') {
-      setMainCaption(
-        'Stop waiting for perfect ideas—it is costing you 10,000 views. Here are the 3 mistakes slowing you down and how to fix them today.'
-      );
-      showToast('⚡ Injected Direct Problem Hook');
-    } else if (chipType === 'COMMENT CTA') {
-      setMainCaption(
-        `${mainCaption}\n\n👉 Which of these 3 is your biggest roadblock today? Drop 1, 2, or 3 below.`
-      );
-      showToast('💬 Injected High-Conversion Comment CTA');
-    } else if (chipType === 'SAVEABLE BULLETS') {
-      setMainCaption(
-        '3 creator mistakes to avoid:\n\n• Waiting for the "perfect" idea\n• Over-editing for 6 hours\n• Zero repeatable workflow\n\nSave this for your next filming day.'
-      );
-      showToast('📌 Injected Saveable Bullet Structure');
-    }
+    const text = await askJarvisToWrite(chip.instruction, platformIdFor(activeEditingPlatform));
+    if (!text) return;
+    setMainCaption(text);
+    showToast(chip.toast);
   };
 
   const handleAddToPost = () => {
@@ -508,14 +520,14 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
     setShowCompletionModal(true);
   };
 
-  const handleRegenerate = () => {
+  const handleRegenerate = async () => {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-    setMainCaption(
-      'The #1 thing that keeps new creators stuck is not the algorithm—it is perfectionism. 3 mistakes to stop making today:\n\n1. Over-polishing drafts\n2. Waiting days to post\n3. Not studying retention drops\n\nSave this for your next filming day.'
-    );
-    showToast('🔄 Regenerated platform captions with Jarvis');
+    const text = await askJarvisToWrite('Write a fresh version with a different angle.', platformIdFor(activeEditingPlatform));
+    if (!text) return;
+    setMainCaption(text);
+    showToast('🔄 Jarvis wrote a new caption');
   };
 
   return (
