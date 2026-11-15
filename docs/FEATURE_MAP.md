@@ -97,6 +97,8 @@ Backend changes are likely not needed in Wave 1 (everything exists); any that tu
 
 **Wave 2: daily-use data.** Streak and check-in, leaderboard, plan, drafts, hooks, captions, Jarvis chat (all A, mostly S/M, all parallel).
 
+**Wave 2 also: image posting for LinkedIn, Threads and Facebook.** Needs poststreak-web first (`PLATFORM_META` media rules in the web app plus the adapters for each platform), then the app: set `image: true` for those three in `PLATFORM_RULES` (`src/api/posts.ts`) and remove the text-only handling (`isTextOnlySelection`, the "Images coming soon" notes) in `src/config/platforms.ts` and the two composers. Until then the composer posts text only for these three.
+
 **Wave 3: backend plus wiring.** Repurpose and idea AI routes, quests, notifications, preferences (B, M).
 
 **Wave 4: analytics.** `post_metrics` and `account_snapshots` with their crons, then Post performance, Growth, Audience (B, L). Depends on each platform's insights permissions, which may need app review.
