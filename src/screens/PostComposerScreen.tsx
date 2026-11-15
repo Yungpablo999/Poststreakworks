@@ -30,7 +30,6 @@ import {
   checkInToday,
   getDefaultFilmStyle,
   getGoalCaption,
-  saveDraft as saveDraftToStore,
   IDEA_GOALS,
   type FilmStyle,
   type IdeaGoal,
@@ -60,6 +59,7 @@ import {
   resolveFormat,
   type ComposerFormat,
 } from '../config/platforms';
+import { useDrafts } from '../hooks/useDrafts';
 import { usePlatforms } from '../hooks/usePlatforms';
 import { useConnect } from '../hooks/useConnect';
 import { describePostError, describeSummary, labelFor, publishNow, schedulePost, type PostSummary } from '../api/posts';
@@ -403,6 +403,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   const connectedIds = React.useMemo(() => connectedPlatforms.map((p) => p.platform), [connectedPlatforms]);
   // Connecting: the real provider flow; the list refreshes when it finishes so the chip becomes selectable
   const connect = useConnect(isConnected);
+  const { save: saveDraftToBackend } = useDrafts();
 
   // Modals
   const [showPlatformsModal, setShowPlatformsModal] = useState(false);
@@ -762,15 +763,8 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
 
   const handlePublishOrSchedule = async () => {
     // 1. Allow saving draft anytime without restriction
-    // TODO(demo): drafts are local; see FEATURE_MAP
     if (publishMode === 'draft') {
-      if (Platform.OS !== 'web') {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      }
-      setCelebrationTitle('Draft Saved!');
-      setCelebrationSubtitle('Your post draft with full media & tags is saved in your queue.');
-      setCelebrationSpeech('Great work preparing ahead!');
-      setShowCelebrationModal(true);
+      await persistDraft();
       return;
     }
 
@@ -1073,19 +1067,33 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
     }, 550);
   };
 
-  const saveDraft = () => {
-    saveDraftToStore({
-      id: `post-${currentIdea}`,
-      title: currentIdea ?? 'Untitled post',
-      kind: 'post',
-      format: currentFormatConfig.title,
-      platform: selectedPlatforms[0],
-    });
+  // Saves the caption, platforms and format to the backend (media is not saved with a draft yet)
+  const savingDraft = useRef(false);
+  const persistDraft = async () => {
+    if (savingDraft.current) return;
+    if (!caption.trim() && selectedPlatforms.length === 0) {
+      showToastNotice('Add a caption or pick a platform first');
+      return;
+    }
+    savingDraft.current = true;
+    const result = await saveDraftToBackend({ content: caption, platforms: selectedPlatforms, format: selectedFormat });
+    savingDraft.current = false;
+    if (!result.ok) {
+      showToastNotice(result.message);
+      return;
+    }
     if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setCelebrationTitle('Draft saved!');
-    setCelebrationSubtitle('Your draft with media and tags is saved. Pick it up any time.');
+    setCelebrationSubtitle(
+      hasMedia
+        ? 'Your caption and platforms are saved. Add your media again when you pick it up.'
+        : 'Your caption and platforms are saved. Pick it up any time.',
+    );
     setCelebrationSpeech('Nice work getting ahead!');
     setShowCelebrationModal(true);
+  };
+  const saveDraft = () => {
+    void persistDraft();
   };
   const captionTones: ('Helpful' | 'Viral' | 'Story')[] = ['Helpful', 'Viral', 'Story'];
   const captionCtas: ('Ask Question' | 'Save Post' | 'Share Thoughts')[] = ['Ask Question', 'Save Post', 'Share Thoughts'];

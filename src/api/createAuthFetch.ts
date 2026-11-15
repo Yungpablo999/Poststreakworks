@@ -2,7 +2,8 @@
 //
 // - Every request carries `Authorization: Bearer <access token>` and never cookies
 //   (the backend's CORS allows no credentials).
-// - Only GET and POST: the backend's CORS allows no other methods.
+// - Only GET, POST, PATCH and DELETE: those are the methods the backend's CORS allows (PATCH and
+//   DELETE arrived with /api/drafts).
 // - On a 401 the session is refreshed ONCE and the request retried ONCE.
 //   The refresh is single-flight: when several requests get a 401 at the same
 //   time they all wait for the same refresh instead of each starting their own.
@@ -12,7 +13,7 @@
 // This file has no app imports so it can be unit-tested with fakes
 // (see __tests__/createAuthFetch.test.ts); src/api/authFetch.ts wires it to Supabase.
 
-export type ApiMethod = 'GET' | 'POST';
+export type ApiMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE';
 
 export interface AuthFetchDeps {
   /** Backend base URL with no trailing slash. Called per request; may throw if unconfigured. */
@@ -58,8 +59,8 @@ export function createAuthFetch(deps: AuthFetchDeps): AuthFetch {
 
   return async function authFetch(path, options = {}) {
     const method = options.method ?? 'GET';
-    if (method !== 'GET' && method !== 'POST') {
-      throw new Error(`authFetch: ${method as string} is not allowed by the backend (GET and POST only)`);
+    if (method !== 'GET' && method !== 'POST' && method !== 'PATCH' && method !== 'DELETE') {
+      throw new Error(`authFetch: ${method as string} is not allowed by the backend (GET, POST, PATCH and DELETE only)`);
     }
     const url = `${deps.baseUrl()}${path.startsWith('/') ? path : `/${path}`}`;
     const body = options.body === undefined ? undefined : JSON.stringify(options.body);

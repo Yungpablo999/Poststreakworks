@@ -23,4 +23,8 @@ export const api = {
     fetchJson<T>(authFetch, path, { ...options, method: 'GET' }),
   post: <T>(path: string, body?: unknown, options?: Omit<AuthFetchOptions, 'method' | 'body'>) =>
     fetchJson<T>(authFetch, path, { ...options, method: 'POST', body: body ?? {} }),
+  patch: <T>(path: string, body: unknown, options?: Omit<AuthFetchOptions, 'method' | 'body'>) =>
+    fetchJson<T>(authFetch, path, { ...options, method: 'PATCH', body }),
+  delete: <T>(path: string, options?: Omit<AuthFetchOptions, 'method' | 'body'>) =>
+    fetchJson<T>(authFetch, path, { ...options, method: 'DELETE' }),
 };
