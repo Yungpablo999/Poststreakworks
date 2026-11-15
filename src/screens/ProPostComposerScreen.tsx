@@ -26,7 +26,7 @@ import { SocialBrandIcon } from '../components/SocialBrandIcon';
 import { sFont } from '../utils/responsive';
 import { usePlatforms } from '../hooks/usePlatforms';
 import { useConnect } from '../hooks/useConnect';
-import { POST_PLATFORMS, TEXT_ONLY_NOTE, isTextOnlySelection, mediaRequiredFor } from '../config/platforms';
+import { POST_PLATFORMS, mediaRequiredFor } from '../config/platforms';
 import { pickFromLibrary, readWebVideoDuration } from '../utils/media';
 import { useTikTokSettings } from '../hooks/useTikTokSettings';
 import { captionBrief, composePost, describeAiError, platformIdFor } from '../api/ai';
@@ -152,9 +152,8 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
     /** Video length in seconds when known (TikTok's per-account limit) */
     duration?: number;
   } | null>(null);
-  // TikTok settings: the card shows only with TikTok selected and a video attached
   const [polishing, setPolishing] = useState(false);
-  const textOnly = isTextOnlySelection(selectedPlatforms);
+  // TikTok settings: the card shows only with TikTok selected and a video attached
   const tiktokActive = selectedPlatforms.includes('tiktok') && uploadedMedia?.type === 'video';
   const tiktok = useTikTokSettings({ active: tiktokActive, videoDurationSec: uploadedMedia?.duration ?? null });
   const { isConnected, loading: platformsLoading } = usePlatforms();
@@ -788,10 +787,6 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
           </View>
 
           <View style={styles.mediaStudioCard}>
-            {textOnly ? (
-              <Text style={styles.mediaSubHeading}>{TEXT_ONLY_NOTE}</Text>
-            ) : (
-            <>
             {!uploadedMedia ? (
               /* Empty Dashed Upload Box */
               <Pressable
@@ -873,8 +868,6 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
                 <Text style={styles.mediaActionBtnText}>Add Thumbnail</Text>
               </Pressable>
             </View>
-            </>
-            )}
           </View>
 
           {/* ============================================================ */}

@@ -41,37 +41,6 @@ const ALL_FORMATS: ComposerFormat[] = ['short_video', 'carousel', 'image', 'text
 /** Platforms that take a text-only post (LinkedIn, Threads, Facebook) */
 export const isTextPlatform = (id: string): boolean => PLATFORM_RULES[id]?.supportsText === true;
 
-/** Whether the backend can attach an image or video for this platform today */
-export const acceptsMedia = (id: string): boolean => {
-  const rule = PLATFORM_RULES[id];
-  return rule?.image === true || rule?.video === true;
-};
-
-/** Platforms that post text only for now (the backend has no media for LinkedIn, Threads, Facebook yet) */
-export const textOnlyPlatforms = (platformIds: string[]): string[] => platformIds.filter((id) => isTextPlatform(id) && !acceptsMedia(id));
-
-/** True when every chosen platform is text-only: no image or video can go out */
-export const isTextOnlySelection = (platformIds: string[]): boolean =>
-  platformIds.length > 0 && textOnlyPlatforms(platformIds).length === platformIds.length;
-
-export const IMAGES_COMING_SOON = 'Images coming soon'
-
-/** "LinkedIn", "LinkedIn and Threads", "LinkedIn, Threads and Facebook" */
-export function joinNames(names: string[]): string {
-  if (names.length <= 1) return names.join('');
-  return `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
-}
-
-const TEXT_ONLY_NAMES = ['LinkedIn', 'Threads', 'Facebook'];
-
-/** Note when only text-only platforms are chosen: always names all three, so none is left out */
-export const TEXT_ONLY_NOTE = `${joinNames(TEXT_ONLY_NAMES)} are text only for now. ${IMAGES_COMING_SOON}.`;
-
-/** Note when text-only platforms are mixed with media platforms: names the ones chosen */
-export function mixedTextOnlyNote(names: string[]): string {
-  return `${joinNames(names)} will post your caption only. ${IMAGES_COMING_SOON}.`;
-};
-
 export type MediaRequirement = 'none' | 'image_or_video' | 'video';
 
 /**
@@ -89,9 +58,10 @@ export function mediaRequiredFor(platformIds: string[]): MediaRequirement {
   return need;
 }
 
-/** The formats a post to these platforms can use. Text-only platforms: text. Media platforms: what they take. */
+/** The formats a post to these platforms can use. Text platforms: anything (text, one image, video). */
 export function formatsAllowedFor(platformIds: string[]): ComposerFormat[] {
-  if (isTextOnlySelection(platformIds)) return ['text'];
+  // Text platforms take a caption with at most one photo (no video yet)
+  if (platformIds.length > 0 && platformIds.every(isTextPlatform)) return ['text', 'image'];
   switch (mediaRequiredFor(platformIds)) {
     case 'video':
       return ['short_video', 'long_video'];

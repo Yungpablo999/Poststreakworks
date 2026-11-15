@@ -49,11 +49,7 @@ import { JarvisOrb } from '../components/JarvisOrb';
 import { isProTier, showAutoPostUpsell } from '../config/features';
 import {
   POST_PLATFORMS,
-  TEXT_ONLY_NOTE,
-  mixedTextOnlyNote,
   formatsAllowedFor,
-  isTextOnlySelection,
-  textOnlyPlatforms,
   mediaRequiredFor,
   recommendedFormatFor,
   resolveFormat,
@@ -890,8 +886,6 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   const recommendedFormatId = recommendedFormatFor(selectedPlatforms);
   const allowedFormats = formatsAllowedFor(selectedPlatforms);
   const mediaRequired = mediaRequiredFor(selectedPlatforms);
-  const textOnly = isTextOnlySelection(selectedPlatforms);
-  const textOnlyNames = textOnlyPlatforms(selectedPlatforms).map(labelFor);
   const currentFormatConfig =
     CONTENT_FORMATS.find((f) => f.id === selectedFormat) || CONTENT_FORMATS[0];
   const recommendedFormatConfig =
@@ -1315,8 +1309,6 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
               onRecord={addFromCamera}
               onRemoveRecording={clearMedia}
             />
-          ) : textOnly ? (
-            <Text style={styles.note}>{TEXT_ONLY_NOTE}</Text>
           ) : (
           <MediaZone
             isText={selectedFormat === 'text'}
@@ -1331,9 +1323,6 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
             onThumbnail={() => setHasThumbnail(!hasThumbnail)}
             onRemove={clearMedia}
           />
-          )}
-          {!textOnly && textOnlyNames.length > 0 && (
-            <Text style={styles.note}>{mixedTextOnlyNote(textOnlyNames)}</Text>
           )}
 
           {attachedAudio && (

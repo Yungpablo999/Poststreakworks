@@ -111,7 +111,7 @@ describe('publishNow', () => {
     expect(deps.post).toHaveBeenCalledTimes(1);
   });
 
-  it('uploads once per media platform and sends its own mediaKey; text platforms get no media', async () => {
+  it('uploads once per media platform and sends its own mediaKey; a text platform gets no video', async () => {
     const { deps, calls } = makeDeps();
     const r = await publishNow({ content: 'hi', platforms: ['youtube', 'tiktok', 'linkedin'], media: video, tiktok }, deps);
     expect(r.allOk).toBe(true);
@@ -122,6 +122,30 @@ describe('publishNow', () => {
     expect(keys[1]).toBeDefined();
     expect(keys[0]).not.toBe(keys[1]);
     expect(keys[2]).toBeUndefined();
+  });
+
+  it('sends a photo to LinkedIn, Threads and Facebook (one upload each) but never a video', async () => {
+    const { deps, calls } = makeDeps();
+    const r = await publishNow({ content: 'hi', platforms: ['linkedin', 'threads', 'facebook'], media: image }, deps);
+    expect(r.allOk).toBe(true);
+    expect(deps.upload).toHaveBeenCalledTimes(3);
+    expect(calls.every((c) => typeof c.body.mediaKey === 'string')).toBe(true);
+
+    const second = makeDeps();
+    const v = await publishNow({ content: 'hi', platforms: ['linkedin', 'threads', 'facebook'], media: video }, second.deps);
+    expect(v.allOk).toBe(true);
+    expect(second.deps.upload).not.toHaveBeenCalled();
+    expect(second.calls.every((c) => c.body.mediaKey === undefined)).toBe(true);
+  });
+
+  it('refuses a WebP photo on a text platform before sending anything', async () => {
+    const { deps } = makeDeps();
+    const r = await publishNow(
+      { content: 'hi', platforms: ['linkedin'], media: { uri: 'x', kind: 'image', mimeType: 'image/webp' } },
+      deps,
+    );
+    expect(r.failed).toEqual([{ platform: 'linkedin', message: 'LinkedIn photos must be JPEG or PNG.' }]);
+    expect(deps.post).not.toHaveBeenCalled();
   });
 
   it('sends publishOptions.tiktok on the TikTok call only', async () => {
