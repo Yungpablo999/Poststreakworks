@@ -23,6 +23,7 @@ import { UserProfileModal, UserProfileData } from '../components/UserProfileModa
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { TinyGoldCheck } from '../components/CreatorStoryModal';
 import { sFont, isNarrowScreen } from '../utils/responsive';
+import { JarvisOrb } from '../components/JarvisOrb';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -586,11 +587,7 @@ export const ProMissionDetailScreen: React.FC<ProMissionDetailScreenProps> = ({
             style={styles.jarvisBriefCard}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-              <Image
-                source={require('../../assets/images/jarvis-core-flame.png')}
-                style={{ width: 30, height: 30 }}
-                resizeMode="contain"
-              />
+              <JarvisOrb size={30} />
               <Text style={styles.jarvisBriefHeader}>Jarvis Pro Brief</Text>
             </View>
 

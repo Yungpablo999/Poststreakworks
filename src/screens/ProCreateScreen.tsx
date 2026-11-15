@@ -24,6 +24,7 @@ import { UserProfileModal, UserProfileData } from '../components/UserProfileModa
 import { SocialBrandIcon } from '../components/SocialBrandIcon';
 import { HeaderDualModePills, UserPersona } from '../components/HeaderDualModePills';
 import { sFont } from '../utils/responsive';
+import { JarvisOrb } from '../components/JarvisOrb';
 
 export const TinyGoldCheck = ({ size = 13 }: { size?: number }) => (
   <View
@@ -764,11 +765,7 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
             <View style={styles.voiceWaveformBox}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                 <Text style={styles.voiceWaveformWatermark}>Voice Studio</Text>
-                <Image
-                  source={require('../../assets/images/jarvis-core-flame.png')}
-                  style={{ width: 28, height: 28, opacity: 0.8 }}
-                  resizeMode="contain"
-                />
+                <View style={{ opacity: 0.8 }}><JarvisOrb size={28} /></View>
               </View>
 
               {/* HIGH DENSITY CONTINUOUS WAVELENGTH */}
@@ -981,11 +978,7 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
           <View style={styles.jarvisSuggestionCard}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
               <View style={styles.jarvisFlameIconBox}>
-                <Image
-                  source={require('../../assets/images/jarvis-core-flame.png')}
-                  style={{ width: 22, height: 22 }}
-                  resizeMode="contain"
-                />
+                <JarvisOrb size={22} />
               </View>
 
               <View style={{ flex: 1 }}>

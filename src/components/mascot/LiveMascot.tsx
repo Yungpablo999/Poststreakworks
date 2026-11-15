@@ -18,6 +18,23 @@ import * as Haptics from 'expo-haptics';
 import { Text } from '../ui/AppText';
 import { ds } from '../../theme/colors';
 import { react, useMascot, type Emotion } from '../../mascot/mascot';
+import { Bloub, type BloubExpression, type BloubState } from '../Bloub';
+
+// The app's moods, as Bloub states and faces (face="bloub")
+const BLOUB_FOR: Record<Emotion, { state: BloubState; expression: BloubExpression }> = {
+  wave: { state: 'wink', expression: 'heureux' },
+  happy: { state: 'idle', expression: 'heureux' },
+  excited: { state: 'idle', expression: 'excite' },
+  party: { state: 'wide', expression: 'hilare' },
+  love: { state: 'idle', expression: 'heureux' },
+  cool: { state: 'wink', expression: 'fier' },
+  thinking: { state: 'thinking', expression: 'curieux' },
+  idea: { state: 'exclaim', expression: 'excite' },
+  working: { state: 'orbit', expression: 'attentif' },
+  determined: { state: 'idle', expression: 'fier' },
+  sleepy: { state: 'sleep', expression: 'somnolent' },
+  calm: { state: 'idle', expression: 'attentif' },
+};
 
 // The live mascot. Always a little alive: it floats, breathes and now and
 // then leans as if looking around. When something happens it cross-fades to
@@ -96,6 +113,7 @@ export function LiveMascot({
   bubbleWidth = 200,
   interactive = true,
   confetti = true,
+  face = 'ghost',
 }: {
   size?: number;
   /** Show this emotion instead of following the app's mood */
@@ -105,6 +123,8 @@ export function LiveMascot({
   bubbleWidth?: number;
   interactive?: boolean;
   confetti?: boolean;
+  /** 'bloub': Jarvis's face (it breathes and blinks on its own) instead of the ghost */
+  face?: 'ghost' | 'bloub';
 }) {
   const reduce = useReducedMotion();
   const mood = useMascot();
@@ -119,7 +139,7 @@ export function LiveMascot({
 
   // Idle: float and breathe, and every few seconds lean as if looking around
   useEffect(() => {
-    if (reduce) return;
+    if (reduce || face === 'bloub') return;
     float.value = withRepeat(withTiming(1, { duration: 2600, easing: glide }), -1, true);
     let alive = true;
     const fidget = () => {
@@ -134,7 +154,7 @@ export function LiveMascot({
       clearTimeout(timer);
       cancelAnimation(float);
     };
-  }, [reduce, float, tilt]);
+  }, [reduce, float, tilt, face]);
 
   // A reaction: hop up and settle (and pop slightly), once per new reaction
   useEffect(() => {
@@ -196,16 +216,21 @@ export function LiveMascot({
 
   const content = (
     <View style={{ width: size, height: size }}>
-      <Animated.View style={[styles.shadow, { width: size * 0.5, left: size * 0.32, top: size * 0.93 }, shadow]} />
+      {face === 'bloub' ? null : <Animated.View style={[styles.shadow, { width: size * 0.5, left: size * 0.32, top: size * 0.93 }, shadow]} />}
       {confetti && !reduce && Array.from({ length: 14 }).map((_, i) => (
         <View key={i} pointerEvents="none" style={[styles.burstOrigin, { left: size / 2, top: size / 2 }]}>
           <Piece i={i} go={fixed ? 0 : mood.burst} size={size} />
         </View>
       ))}
       <Animated.View style={[StyleSheet.absoluteFill, body]}>
-        <Animated.View key={emotion} entering={FadeIn.duration(200)} exiting={FadeOut.duration(200)} style={StyleSheet.absoluteFill}>
-          <Image source={MASCOT_IMAGES[emotion]} style={styles.img} resizeMode="contain" accessibilityIgnoresInvertColors />
-        </Animated.View>
+        {face === 'bloub' ? (
+          // Bloub morphs between moods itself, so no cross-fade
+          <Bloub size={size} framed={128} state={BLOUB_FOR[emotion].state} expression={BLOUB_FOR[emotion].expression} />
+        ) : (
+          <Animated.View key={emotion} entering={FadeIn.duration(200)} exiting={FadeOut.duration(200)} style={StyleSheet.absoluteFill}>
+            <Image source={MASCOT_IMAGES[emotion]} style={styles.img} resizeMode="contain" accessibilityIgnoresInvertColors />
+          </Animated.View>
+        )}
       </Animated.View>
     </View>
   );
@@ -218,7 +243,7 @@ export function LiveMascot({
           onHoverIn={() => setHover(true)}
           onHoverOut={() => setHover(false)}
           accessibilityRole="button"
-          accessibilityLabel={`PostStreak mascot, feeling ${emotion}. Tap to say hi`}
+          accessibilityLabel={`${face === 'bloub' ? 'Jarvis' : 'PostStreak mascot'}, feeling ${emotion}. Tap to say hi`}
           style={[Platform.OS === 'web' ? ({ cursor: 'pointer' } as object) : null, hover && { transform: [{ scale: 1.04 }] }]}
         >
           {content}

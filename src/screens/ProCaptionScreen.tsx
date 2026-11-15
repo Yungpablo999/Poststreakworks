@@ -26,6 +26,7 @@ import { TinyGoldCheck } from '../components/CreatorStoryModal';
 import { SocialBrandIcon } from '../components/SocialBrandIcon';
 import { sFont } from '../utils/responsive';
 import { firstNameOf, speak } from '../auth/profile';
+import { JarvisOrb } from '../components/JarvisOrb';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -1334,11 +1335,7 @@ export const ProCaptionScreen: React.FC<ProCaptionScreenProps> = ({
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                 <View style={styles.jarvisHeroIconBox}>
-                  <Image
-                    source={require('../../assets/images/jarvis-core-flame.png')}
-                    style={{ width: 26, height: 26 }}
-                    resizeMode="contain"
-                  />
+                  <JarvisOrb size={26} />
                 </View>
                 <View>
                   <Text style={styles.jarvisHeroTitle}>Jarvis Insight</Text>
