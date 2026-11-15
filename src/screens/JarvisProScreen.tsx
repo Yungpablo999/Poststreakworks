@@ -26,6 +26,7 @@ import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { ds, goldTokens } from '../theme/colors';
+import { PAYMENTS_ENABLED } from '../config/features';
 
 // Jarvis Pro, for free creators. Light glass like the rest of the app; gold
 // only marks Pro. One upgrade button (in the plan card); the hero's button
@@ -193,6 +194,8 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({ onLogout, onNa
   const enter = (d: number) => FadeInUp.delay(d).duration(500).easing(Easing.out(Easing.cubic));
 
   const start = () => {
+    // TODO(payments): no payment is wired yet, so this must not unlock Pro
+    if (!PAYMENTS_ENABLED) return;
     if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setWelcome(true);
   };
@@ -339,7 +342,7 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({ onLogout, onNa
                   </View>
                 ))}
               </View>
-              <AppButton title="Start Jarvis Pro" variant="gold" size="lg" onPress={start} />
+              <AppButton title="Start Jarvis Pro" variant="gold" size="lg" disabled={!PAYMENTS_ENABLED} onPress={start} />
               <Text style={styles.planNote}>Cancel any time from your profile.</Text>
             </GlassCard>
           </Animated.View>

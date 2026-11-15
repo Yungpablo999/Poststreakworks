@@ -23,6 +23,7 @@ import { UserProfileModal, UserProfileData } from '../components/UserProfileModa
 import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { TinyGoldCheck } from '../components/CreatorStoryModal';
 import { sFont, isNarrowScreen } from '../utils/responsive';
+import { PAYMENTS_ENABLED } from '../config/features';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -1837,7 +1838,9 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
 
                   {/* Dynamic Action Button */}
                   <Pressable
-                    style={({ pressed }) => [styles.refillContinueBtn, pressed && styles.btnPressed]}
+                    // TODO(payments): no payment is wired yet, so packs can't be bought
+                    disabled={!PAYMENTS_ENABLED}
+                    style={({ pressed }) => [styles.refillContinueBtn, pressed && styles.btnPressed, !PAYMENTS_ENABLED && { opacity: 0.5 }]}
                     onPress={() => {
                       if (Platform.OS !== 'web') {
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -1944,8 +1947,11 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
 
                   {/* Final Confirm Button */}
                   <Pressable
-                    style={({ pressed }) => [styles.refillContinueBtn, pressed && styles.btnPressed]}
+                    // TODO(payments): no payment is wired yet, so nothing is credited
+                    disabled={!PAYMENTS_ENABLED}
+                    style={({ pressed }) => [styles.refillContinueBtn, pressed && styles.btnPressed, !PAYMENTS_ENABLED && { opacity: 0.5 }]}
                     onPress={() => {
+                      if (!PAYMENTS_ENABLED) return;
                       if (Platform.OS !== 'web') {
                         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                       }
