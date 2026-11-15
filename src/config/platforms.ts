@@ -54,7 +54,23 @@ export const textOnlyPlatforms = (platformIds: string[]): string[] => platformId
 export const isTextOnlySelection = (platformIds: string[]): boolean =>
   platformIds.length > 0 && textOnlyPlatforms(platformIds).length === platformIds.length;
 
-export const IMAGES_COMING_SOON = 'Images coming soon';
+export const IMAGES_COMING_SOON = 'Images coming soon'
+
+/** "LinkedIn", "LinkedIn and Threads", "LinkedIn, Threads and Facebook" */
+export function joinNames(names: string[]): string {
+  if (names.length <= 1) return names.join('');
+  return `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
+}
+
+const TEXT_ONLY_NAMES = ['LinkedIn', 'Threads', 'Facebook'];
+
+/** Note when only text-only platforms are chosen: always names all three, so none is left out */
+export const TEXT_ONLY_NOTE = `${joinNames(TEXT_ONLY_NAMES)} are text only for now. ${IMAGES_COMING_SOON}.`;
+
+/** Note when text-only platforms are mixed with media platforms: names the ones chosen */
+export function mixedTextOnlyNote(names: string[]): string {
+  return `${joinNames(names)} will post your caption only. ${IMAGES_COMING_SOON}.`;
+};
 
 export type MediaRequirement = 'none' | 'image_or_video' | 'video';
 

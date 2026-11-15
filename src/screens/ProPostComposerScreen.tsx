@@ -26,7 +26,7 @@ import { SocialBrandIcon } from '../components/SocialBrandIcon';
 import { sFont } from '../utils/responsive';
 import { usePlatforms } from '../hooks/usePlatforms';
 import { useConnect } from '../hooks/useConnect';
-import { IMAGES_COMING_SOON, POST_PLATFORMS, isTextOnlySelection, mediaRequiredFor, textOnlyPlatforms } from '../config/platforms';
+import { POST_PLATFORMS, TEXT_ONLY_NOTE, isTextOnlySelection, mediaRequiredFor } from '../config/platforms';
 import { pickFromLibrary, readWebVideoDuration } from '../utils/media';
 import { useTikTokSettings } from '../hooks/useTikTokSettings';
 import { TikTokSettingsCard } from '../components/composer/TikTokSettingsCard';
@@ -152,7 +152,6 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
   } | null>(null);
   // TikTok settings: the card shows only with TikTok selected and a video attached
   const textOnly = isTextOnlySelection(selectedPlatforms);
-  const textOnlyNames = textOnlyPlatforms(selectedPlatforms).map(labelFor).join(' & ');
   const tiktokActive = selectedPlatforms.includes('tiktok') && uploadedMedia?.type === 'video';
   const tiktok = useTikTokSettings({ active: tiktokActive, videoDurationSec: uploadedMedia?.duration ?? null });
   const { isConnected, loading: platformsLoading } = usePlatforms();
@@ -786,7 +785,7 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
 
           <View style={styles.mediaStudioCard}>
             {textOnly ? (
-              <Text style={styles.mediaSubHeading}>{textOnlyNames} posts are text only for now. {IMAGES_COMING_SOON}.</Text>
+              <Text style={styles.mediaSubHeading}>{TEXT_ONLY_NOTE}</Text>
             ) : (
             <>
             {!uploadedMedia ? (
