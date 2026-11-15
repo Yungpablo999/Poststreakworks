@@ -24,6 +24,17 @@ import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { TinyGoldCheck } from '../components/CreatorStoryModal';
 import { SocialBrandIcon } from '../components/SocialBrandIcon';
 import { sFont } from '../utils/responsive';
+import { usePlatforms } from '../hooks/usePlatforms';
+import { pickFromLibrary } from '../utils/media';
+import {
+  describePostError,
+  describeSummary,
+  labelFor,
+  nextOccurrence,
+  publishNow,
+  schedulePost,
+  type PostSummary,
+} from '../api/posts';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -89,6 +100,7 @@ const PRO_PLATFORMS: PlatformOption[] = [
   },
 ];
 
+// TODO(demo): sample ideas are static demo content; see FEATURE_MAP
 const SAMPLE_IDEAS = [
   '3 creator mistakes I stopped making this year',
   'How I batch-film 10 videos in 2 hours without burn out',
@@ -141,6 +153,7 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
     initialPlatform ? [initialPlatform] : []
   );
   const [selectedCategoryChip, setSelectedCategoryChip] = useState('Personal Lesson');
+  // TODO(demo): the time slot is fixed at 7:30 PM (no picker in this screen yet)
   const [selectedTimeSlot, setSelectedTimeSlot] = useState('7:30 PM (Peak Reach)');
   const [showAllPlatformsModal, setShowAllPlatformsModal] = useState(false);
   const [showChangeIdeaModal, setShowChangeIdeaModal] = useState(false);
@@ -149,7 +162,12 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
     name: string;
     size: string;
     type: 'video' | 'image';
+    /** Kept from the picker so the file can be uploaded */
+    mimeType?: string;
+    sizeBytes?: number;
   } | null>(null);
+  const { isConnected, loading: platformsLoading } = usePlatforms();
+  const publishingRef = useRef(false);
   const [localAttachedAudio, setLocalAttachedAudio] = useState<AttachedAudioData | null>(
     attachedAudio || null
   );
@@ -234,14 +252,14 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
     }
   }, [questDraft]);
 
-  const showToast = (msg: string) => {
+  const showToast = (msg: string, ms = 2500) => {
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
     setToastMessage(msg);
     setTimeout(() => {
       setToastMessage(null);
-    }, 2500);
+    }, ms);
   };
 
   const triggerModalPop = () => {
@@ -260,6 +278,11 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
   const togglePlatform = (id: string) => {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    // Only connected platforms can be posted to
+    if (!selectedPlatforms.includes(id) && !isConnected(id)) {
+      showToast(platformsLoading ? 'Checking your connected platforms. Try again in a moment.' : `Connect ${labelFor(id)} first to post there.`, 3500);
+      return;
     }
     if (selectedPlatforms.includes(id)) {
       setSelectedPlatforms(selectedPlatforms.filter((p) => p !== id));
@@ -286,49 +309,99 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
             name: file.name,
             size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
             type: isVideo ? 'video' : 'image',
+            mimeType: file.type || undefined,
+            sizeBytes: file.size,
           });
           showToast(`📁 ${file.name} attached!`);
         }
       };
       input.click();
     } else {
-      setUploadedMedia({
-        uri: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800',
-        name: type === 'thumbnail' ? '4K_Thumbnail_HighCTR.png' : '4K_Reel_Master_60FPS.mp4',
-        size: '18.4 MB',
-        type: type === 'thumbnail' ? 'image' : 'video',
+      // Real camera roll (expo-image-picker); the thumbnail slot takes an image only
+      void pickFromLibrary(type === 'thumbnail' ? 'image' : 'any').then((m) => {
+        if (!m) return;
+        setUploadedMedia({
+          uri: m.uri,
+          name: m.fileName ?? (m.kind === 'video' ? 'Video' : 'Image'),
+          size: m.sizeBytes ? `${(m.sizeBytes / (1024 * 1024)).toFixed(1)} MB` : '',
+          type: m.kind,
+          mimeType: m.mimeType,
+          sizeBytes: m.sizeBytes,
+        });
+        showToast('Media attached!');
       });
-      showToast('4K Media attached!');
     }
   };
 
-  const handlePublishNow = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  // Posts now or schedules through the backend (src/api/posts.ts); the celebration shows only on real success
+  const runPublish = async (mode: 'now' | 'schedule') => {
+    if (publishingRef.current) return;
+    if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (!selectedPlatforms.some((p) => isConnected(p))) {
+      showToast('Select at least one platform before scheduling', 3500);
+      return;
     }
-    setCompletionData({
-      title: 'Post Published Successfully!',
-      subtitle: `Your content is live on ${selectedPlatforms.map((p) => p.toUpperCase()).join(', ')}.`,
-      badgeText: '👑 PRO INSTANT PUBLISH',
-      xpEarned: 50,
-      speechBubble: 'Boom! Algorithmic reach multiplier engaged! 🚀',
-    });
+    const connected = selectedPlatforms.filter((p) => isConnected(p));
+    if (connected.length < selectedPlatforms.length) {
+      showToast(`Connect ${selectedPlatforms.filter((p) => !isConnected(p)).map(labelFor).join(' and ')} first, or remove it from this post.`, 4000);
+      return;
+    }
+    // The Autopilot button reads 7:30 PM: the next one
+    const when = mode === 'schedule' ? nextOccurrence(19, 30, new Date()) : null;
+
+    publishingRef.current = true;
+    showToast(uploadedMedia ? 'Uploading your media...' : mode === 'now' ? 'Posting...' : 'Scheduling...', 4000);
+    let summary: PostSummary;
+    try {
+      const input = {
+        content: captionText,
+        platforms: connected,
+        media: uploadedMedia
+          ? { uri: uploadedMedia.uri, kind: uploadedMedia.type, mimeType: uploadedMedia.mimeType, sizeBytes: uploadedMedia.sizeBytes }
+          : null,
+      };
+      summary = when ? await schedulePost({ ...input, scheduledAt: when }) : await publishNow(input);
+    } catch (e) {
+      publishingRef.current = false;
+      showToast(describePostError(e), 4500);
+      return;
+    }
+    publishingRef.current = false;
+    const verb = mode === 'now' ? 'Posted' : 'Scheduled';
+    if (!summary.anyOk) {
+      showToast(describeSummary(summary, verb), 5000);
+      return;
+    }
+    if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    const where = summary.succeeded.map(labelFor).join(', ');
+    // Some platforms failed: say which and why in the subtitle (the toast sits behind the modal)
+    const subtitle = summary.allOk
+      ? mode === 'now'
+        ? `Your content is live on ${where}.`
+        : `Scheduled for ${selectedTimeSlot} on ${where}.`
+      : describeSummary(summary, verb);
+    setCompletionData(
+      mode === 'now'
+        ? {
+            title: 'Post Published Successfully!',
+            subtitle,
+            badgeText: '👑 PRO INSTANT PUBLISH',
+            xpEarned: 50,
+            speechBubble: 'Boom! Algorithmic reach multiplier engaged! 🚀',
+          }
+        : {
+            title: 'Queued to Pro Autopilot!',
+            subtitle,
+            badgeText: '✨ AUTOPILOT SECURED',
+            xpEarned: 75,
+            speechBubble: 'Peak window locked! Relax while Jarvis distributes. 🗓️',
+          },
+    );
     setShowCompletionModal(true);
   };
 
-  const handleScheduleAutopilot = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
-    setCompletionData({
-      title: 'Queued to Pro Autopilot!',
-      subtitle: `Scheduled for ${selectedTimeSlot} across ${selectedPlatforms.length} platforms.`,
-      badgeText: '✨ AUTOPILOT SECURED',
-      xpEarned: 75,
-      speechBubble: 'Peak window locked! Relax while Jarvis distributes. 🗓️',
-    });
-    setShowCompletionModal(true);
-  };
+  const handlePublishNow = () => void runPublish('now');
+  const handleScheduleAutopilot = () => void runPublish('schedule');
 
   return (
     <SafeAreaView style={styles.safeArea}>
