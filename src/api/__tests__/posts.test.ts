@@ -1,5 +1,6 @@
 import { ApiError } from '../createAuthFetch';
 import { MediaUploadError } from '../media';
+import type { TikTokPostOptions } from '../tiktok';
 import {
   POST_MESSAGES,
   PostInputError,
@@ -16,6 +17,14 @@ import {
 const NOW = new Date('2030-01-01T12:00:00Z');
 const FUTURE = new Date('2030-01-02T12:00:00Z');
 const video: LocalMedia = { uri: 'file:///v.mp4', kind: 'video', mimeType: 'video/mp4' };
+const tiktok: TikTokPostOptions = {
+  privacyLevel: 'PUBLIC_TO_EVERYONE',
+  allowComment: false,
+  allowDuet: false,
+  allowStitch: false,
+  yourBrand: false,
+  brandedContent: false,
+};
 const image: LocalMedia = { uri: 'file:///i.jpg', kind: 'image', mimeType: 'image/jpeg' };
 
 function makeDeps(over: Partial<PostDeps> = {}) {
@@ -104,7 +113,7 @@ describe('publishNow', () => {
 
   it('uploads once per media platform and sends its own mediaKey; text platforms get no media', async () => {
     const { deps, calls } = makeDeps();
-    const r = await publishNow({ content: 'hi', platforms: ['youtube', 'tiktok', 'linkedin'], media: video }, deps);
+    const r = await publishNow({ content: 'hi', platforms: ['youtube', 'tiktok', 'linkedin'], media: video, tiktok }, deps);
     expect(r.allOk).toBe(true);
     expect(deps.readBlob).toHaveBeenCalledTimes(1);
     expect(deps.upload).toHaveBeenCalledTimes(2);
@@ -113,6 +122,26 @@ describe('publishNow', () => {
     expect(keys[1]).toBeDefined();
     expect(keys[0]).not.toBe(keys[1]);
     expect(keys[2]).toBeUndefined();
+  });
+
+  it('sends publishOptions.tiktok on the TikTok call only', async () => {
+    const { deps, calls } = makeDeps();
+    await publishNow({ content: 'hi', platforms: ['youtube', 'tiktok'], media: video, tiktok }, deps);
+    expect(calls[0].body.publishOptions).toBeUndefined();
+    expect(calls[1].body.publishOptions).toEqual({ tiktok });
+  });
+
+  it('does not post to TikTok (or upload) without valid TikTok settings', async () => {
+    const { deps, calls } = makeDeps();
+    const r = await publishNow({ content: 'hi', platforms: ['youtube', 'tiktok'], media: video }, deps);
+    expect(r.succeeded).toEqual(['youtube']);
+    expect(r.failed).toEqual([{ platform: 'tiktok', message: POST_MESSAGES.tiktokSettings }]);
+    expect(calls).toHaveLength(1);
+    const bad = await publishNow(
+      { content: 'hi', platforms: ['tiktok'], media: video, tiktok: { ...tiktok, privacyLevel: 'SELF_ONLY', brandedContent: true } },
+      makeDeps().deps,
+    );
+    expect(bad.failed[0].message).toBe(POST_MESSAGES.tiktokSettings);
   });
 
   it('fails a video-only platform given an image', async () => {
@@ -236,10 +265,19 @@ describe('schedulePost', () => {
 
   it('with media schedules each platform separately with its own upload', async () => {
     const { deps, calls } = makeDeps();
-    const r = await schedulePost({ content: 'hi', platforms: ['youtube', 'tiktok'], scheduledAt: FUTURE, media: video }, deps);
+    const r = await schedulePost({ content: 'hi', platforms: ['youtube', 'tiktok'], scheduledAt: FUTURE, media: video, tiktok }, deps);
     expect(r.allOk).toBe(true);
     expect(calls.map((c) => c.path)).toEqual(['/api/post/schedule', '/api/post/schedule']);
     expect(calls[0].body.mediaKey).not.toBe(calls[1].body.mediaKey);
+    expect(calls[0].body.publishOptions).toBeUndefined();
+    expect(calls[1].body.publishOptions).toEqual({ tiktok });
+  });
+
+  it('does not schedule TikTok without settings', async () => {
+    const { deps, calls } = makeDeps();
+    const r = await schedulePost({ content: 'hi', platforms: ['tiktok'], scheduledAt: FUTURE, media: video }, deps);
+    expect(r.failed[0].message).toBe(POST_MESSAGES.tiktokSettings);
+    expect(calls).toHaveLength(0);
   });
 
   it('media required but missing fails that platform only', async () => {
