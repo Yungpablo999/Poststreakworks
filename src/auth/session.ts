@@ -1,6 +1,7 @@
 import type { Session } from '@supabase/supabase-js';
 import { getSupabase } from './supabase';
 import { resetQueue } from '../api/queue';
+import { resetStreak } from '../api/streak';
 
 // Small helpers over the Supabase session for App.tsx.
 
@@ -20,4 +21,5 @@ export function onAuthChange(fn: (session: Session | null) => void): () => void 
 export async function signOut(): Promise<void> {
   await getSupabase().auth.signOut({ scope: 'local' });
   resetQueue(); // the next person to sign in must not see this creator's posts
+  resetStreak(); // ...or this creator's streak
 }

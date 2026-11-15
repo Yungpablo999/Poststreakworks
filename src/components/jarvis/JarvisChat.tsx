@@ -111,7 +111,7 @@ function Chat({ docked }: { docked: boolean }) {
   useEffect(() => {
     const id = setTimeout(() => scroll.current?.scrollToEnd({ animated: true }), 60);
     return () => clearTimeout(id);
-  }, [messages.length, thinking]);
+  }, [messages.length, messages[messages.length - 1]?.text.length, thinking]);
 
   const send = (q = text) => {
     if (!q.trim()) return;

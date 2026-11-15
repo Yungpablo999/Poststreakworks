@@ -36,6 +36,7 @@ import { CaptionOptionCard } from '../components/caption/CaptionBlocks';
 import { ComposerToast } from '../components/composer/ComposerBlocks';
 import { getCaptionOptions, describeCaptionShape, saveDraft, removeDraft, IDEA_GOALS, CAPTION_TONES, type IdeaGoal } from '../data';
 import { ds } from '../theme/colors';
+import { captionBrief, composeCaptionOptions, composePost, describeAiError, splitCaption } from '../api/ai';
 
 interface CaptionScreenProps {
   ideaTitle?: string;
@@ -346,7 +347,10 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
   const [tones, setTones] = useState<string[]>(['Helpful', 'Honest']);
   const [round, setRound] = useState(0);
   const [thinking, setThinking] = useState(false);
-  const options = React.useMemo(() => getCaptionOptions(postTopic, goal, tones, round), [postTopic, goal, tones, round]);
+  // The first three are a starter until Jarvis's own arrive (and stay if Jarvis can't be reached)
+  const starterOptions = React.useMemo(() => getCaptionOptions(postTopic, goal, tones, round), [postTopic, goal, tones, round]);
+  const [aiOptions, setAiOptions] = useState<ReturnType<typeof getCaptionOptions> | null>(null);
+  const options = aiOptions ?? starterOptions;
   const [pickedId, setPickedId] = useState<string | null>(null);
   const [body, setBody] = useState(options[0].body);
   const [ending, setEnding] = useState(options[0].ending);
@@ -369,46 +373,54 @@ export const CaptionScreen: React.FC<CaptionScreenProps> = ({
     setEnding(o.ending);
     setTags(o.hashtags);
   };
-  // New goal / tone: show Jarvis rewriting for a beat, then the reshaped
-  // options arrive and the first one fills the editor
-  const firstShape = useRef(true);
+  // New goal / tone / "New options": Jarvis writes three captions (POST /api/ai/compose, one call each).
+  // An answer that arrives after a newer request was made is dropped.
+  const latestWrite = useRef(0);
   useEffect(() => {
-    applyOption(options[0]);
-    if (firstShape.current) {
-      firstShape.current = false;
-      return;
-    }
+    const mine = ++latestWrite.current;
     setThinking(true);
-    const id = setTimeout(() => setThinking(false), 500);
-    return () => clearTimeout(id);
+    composeCaptionOptions(postTopic, { goal, tones, idPrefix: `${goal}-${round}` })
+      .then((written) => {
+        if (mine !== latestWrite.current) return;
+        // The route writes no hashtags, so the starter tags stay
+        const withTags = written.map((o) => (o.hashtags ? o : { ...o, hashtags: starterOptions[0].hashtags }));
+        setAiOptions(withTags);
+        applyOption(withTags[0]);
+      })
+      .catch((e) => {
+        if (mine === latestWrite.current) showToast(describeAiError(e));
+      })
+      .finally(() => {
+        if (mine === latestWrite.current) setThinking(false);
+      });
+    // applyOption and showToast are stable for this screen
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [goal, tones.join('|')]);
-  useEffect(() => {
-    applyOption(options[0]);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [round]);
+  }, [goal, tones.join('|'), round]);
 
   const newOptions = () => {
     if (thinking) return;
     if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     spin.value = withTiming(spin.value + 1, { duration: 500, easing: Easing.out(Easing.cubic) });
-    setThinking(true);
-    setTimeout(() => {
-      setRound((r) => r + 1);
-      setThinking(false);
-    }, 650);
+    setRound((r) => r + 1);
   };
 
   // Quick Jarvis touches on the caption, with a short thinking beat
+  const TOUCH_ASK: Record<'short' | 'personal' | 'opening', string> = {
+    short: 'Make it much shorter, one or two sentences.',
+    personal: 'Make it more personal, in first person, like it happened to me.',
+    opening: 'Give it a stronger opening line that stops the scroll.',
+  };
   const touch = (kind: 'short' | 'personal' | 'opening') => {
+    if (touching) return;
     setTouching(kind);
-    setTimeout(() => {
-      if (kind === 'short') setBody((b) => b.match(/^[^.!?\n]*[.!?]?/)?.[0]?.trim() || b);
-      if (kind === 'personal') setBody((b) => `When I started, this was me. ${b}`);
-      if (kind === 'opening') setBody((b) => `Stop scrolling if this is you. ${b}`);
-      setTouching(null);
-      if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }, 600);
+    composePost(captionBrief(postTopic, { instruction: `${TOUCH_ASK[kind]} Rewrite this caption, keep its meaning: "${body}"` }))
+      .then((text) => {
+        const next = splitCaption(text);
+        setBody(next.body || text);
+        if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      })
+      .catch((e) => showToast(describeAiError(e)))
+      .finally(() => setTouching(null));
   };
 
   const fullCaption = [body.trim(), ending.trim()].filter(Boolean).join('\n\n');

@@ -29,6 +29,7 @@ import { useConnect } from '../hooks/useConnect';
 import { POST_PLATFORMS, mediaRequiredFor } from '../config/platforms';
 import { pickFromLibrary, readWebVideoDuration } from '../utils/media';
 import { useTikTokSettings } from '../hooks/useTikTokSettings';
+import { captionBrief, composePost, describeAiError, platformIdFor } from '../api/ai';
 import { TikTokSettingsCard } from '../components/composer/TikTokSettingsCard';
 import {
   describePostError,
@@ -39,6 +40,7 @@ import {
   schedulePost,
   type PostSummary,
 } from '../api/posts';
+import { refreshStreak } from '../api/streak';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -150,6 +152,7 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
     /** Video length in seconds when known (TikTok's per-account limit) */
     duration?: number;
   } | null>(null);
+  const [polishing, setPolishing] = useState(false);
   // TikTok settings: the card shows only with TikTok selected and a video attached
   const tiktokActive = selectedPlatforms.includes('tiktok') && uploadedMedia?.type === 'video';
   const tiktok = useTikTokSettings({ active: tiktokActive, videoDurationSec: uploadedMedia?.duration ?? null });
@@ -383,6 +386,7 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
     }
     if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     const where = summary.succeeded.map(labelFor).join(', ');
+    if (mode === 'now') void refreshStreak();
     // Some platforms failed: say which and why in the subtitle (the toast sits behind the modal)
     const subtitle = summary.allOk
       ? mode === 'now'
@@ -873,14 +877,29 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
             <Text style={[styles.sectionHeaderTitle, { marginTop: 18 }]}>CAPTION WRITING</Text>
             <Pressable
               style={styles.polishJarvisBtn}
-              onPress={() => {
-                setCaptionText(
-                  'Stop waiting for the "perfect" idea.\n\nConsistency and honest execution outperform polished perfection every single time. Here are 3 habits that changed everything.\n\nSave this for your next creative sprint. 🚀\n\n#CreatorTips #ViralReels #PoststreakPro'
-                );
-                showToast('🪄 Polished with Jarvis AI!');
+              disabled={polishing}
+              onPress={async () => {
+                const draft = captionText.trim();
+                if (!draft) {
+                  showToast('Write a caption first, then Jarvis can polish it', 3000);
+                  return;
+                }
+                setPolishing(true);
+                try {
+                  const polished = await composePost(
+                    captionBrief(draft, { instruction: 'Polish this caption. Keep the meaning and voice, tighten it, strengthen the first line.' }),
+                    platformIdFor(selectedPlatforms[0] ? labelFor(selectedPlatforms[0]) : undefined),
+                  );
+                  setCaptionText(polished);
+                  showToast('🪄 Polished with Jarvis');
+                } catch (e) {
+                  showToast(describeAiError(e), 3500);
+                } finally {
+                  setPolishing(false);
+                }
               }}
             >
-              <Text style={styles.polishJarvisBtnText}>🪄 Polish with Jarvis</Text>
+              <Text style={styles.polishJarvisBtnText}>{polishing ? 'Polishing…' : '🪄 Polish with Jarvis'}</Text>
             </Pressable>
           </View>
 

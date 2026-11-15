@@ -27,10 +27,8 @@ import {
   getStarterIdeas,
   getFilmPlan,
   getSoundIdeas,
-  checkInToday,
   getDefaultFilmStyle,
   getGoalCaption,
-  saveDraft as saveDraftToStore,
   IDEA_GOALS,
   type FilmStyle,
   type IdeaGoal,
@@ -57,8 +55,10 @@ import {
   resolveFormat,
   type ComposerFormat,
 } from '../config/platforms';
+import { useDrafts } from '../hooks/useDrafts';
 import { usePlatforms } from '../hooks/usePlatforms';
 import { useConnect } from '../hooks/useConnect';
+import { checkInAndSync, refreshStreak } from '../api/streak';
 import { describePostError, describeSummary, labelFor, publishNow, schedulePost, type PostSummary } from '../api/posts';
 import {
   StepHeader,
@@ -400,6 +400,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   const connectedIds = React.useMemo(() => connectedPlatforms.map((p) => p.platform), [connectedPlatforms]);
   // Connecting: the real provider flow; the list refreshes when it finishes so the chip becomes selectable
   const connect = useConnect(isConnected);
+  const { save: saveDraftToBackend } = useDrafts();
 
   // Modals
   const [showPlatformsModal, setShowPlatformsModal] = useState(false);
@@ -759,15 +760,8 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
 
   const handlePublishOrSchedule = async () => {
     // 1. Allow saving draft anytime without restriction
-    // TODO(demo): drafts are local; see FEATURE_MAP
     if (publishMode === 'draft') {
-      if (Platform.OS !== 'web') {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      }
-      setCelebrationTitle('Draft Saved!');
-      setCelebrationSubtitle('Your post draft with full media & tags is saved in your queue.');
-      setCelebrationSpeech('Great work preparing ahead!');
-      setShowCelebrationModal(true);
+      await persistDraft();
       return;
     }
 
@@ -872,6 +866,8 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
     }
     if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     const where = summary.succeeded.map(labelFor).join(', ');
+    // The backend counts the streak day itself when a post is published; just show the new number
+    if (publishMode === 'now') void refreshStreak();
     if (publishMode === 'now') {
       setCelebrationTitle('Published Live!');
       setCelebrationSubtitle(`Your content is live on ${where}.`);
@@ -1040,7 +1036,8 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   const confirmPosted = () => {
     setShowPostedCheck(false);
     setPendingHandoff(null);
-    checkInToday(userProfile?.userPersona === 'returning' ? 'returning' : 'new');
+    // A check-in, not a post day: the backend counts a streak day only for a post it publishes itself
+    checkInAndSync(userProfile?.userPersona === 'returning' ? 'returning' : 'new');
     if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setCelebrationTitle('Nice work!');
     setCelebrationSubtitle(`Your ${pendingHandoff ? HANDOFF_NAMES[pendingHandoff] : ''} post counts toward today's check-in.`);
@@ -1068,19 +1065,33 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
     }, 550);
   };
 
-  const saveDraft = () => {
-    saveDraftToStore({
-      id: `post-${currentIdea}`,
-      title: currentIdea ?? 'Untitled post',
-      kind: 'post',
-      format: currentFormatConfig.title,
-      platform: selectedPlatforms[0],
-    });
+  // Saves the caption, platforms and format to the backend (media is not saved with a draft yet)
+  const savingDraft = useRef(false);
+  const persistDraft = async () => {
+    if (savingDraft.current) return;
+    if (!caption.trim() && selectedPlatforms.length === 0) {
+      showToastNotice('Add a caption or pick a platform first');
+      return;
+    }
+    savingDraft.current = true;
+    const result = await saveDraftToBackend({ content: caption, platforms: selectedPlatforms, format: selectedFormat });
+    savingDraft.current = false;
+    if (!result.ok) {
+      showToastNotice(result.message);
+      return;
+    }
     if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setCelebrationTitle('Draft saved!');
-    setCelebrationSubtitle('Your draft with media and tags is saved. Pick it up any time.');
+    setCelebrationSubtitle(
+      hasMedia
+        ? 'Your caption and platforms are saved. Add your media again when you pick it up.'
+        : 'Your caption and platforms are saved. Pick it up any time.',
+    );
     setCelebrationSpeech('Nice work getting ahead!');
     setShowCelebrationModal(true);
+  };
+  const saveDraft = () => {
+    void persistDraft();
   };
   const captionTones: ('Helpful' | 'Viral' | 'Story')[] = ['Helpful', 'Viral', 'Story'];
   const captionCtas: ('Ask Question' | 'Save Post' | 'Share Thoughts')[] = ['Ask Question', 'Save Post', 'Share Thoughts'];

@@ -20,12 +20,13 @@ import { UserProfileModal, UserProfileData } from '../components/UserProfileModa
 import { FILM_STYLES, getDefaultFilmStyle, getSavedHooks, isHookSaved, subscribeToSavedHooks, toggleSavedHook, type FilmStyle } from '../data';
 import { AppToast } from '../components/ui/AppToast';
 import { ds, goldTokens } from '../theme/colors';
+import { describeAiError, generateHooks, hookBrief } from '../api/ai';
 
 // Hook Studio (Pro): the first 3 seconds. Pick the kind of video and the kind
 // of opening, get 3 hooks, preview each one playing out over 3 seconds, and
 // send the one you like to your post. For dance, skits and silent videos the
 // hook is on-screen text (they already know their moves); for talking videos
-// it's the first line said to camera. Mock lines until Jarvis writes them.
+// it's the first line said to camera. Jarvis writes them for real (POST /api/ai/hooks).
 
 const pointer = Platform.OS === 'web' ? ({ cursor: 'pointer' } as object) : null;
 const tick = () => {
@@ -41,22 +42,6 @@ const ANGLES: { id: Angle; label: string }[] = [
   { id: 'result', label: 'A result' },
 ];
 
-const SPOKEN: Record<Angle, string[]> = {
-  question: ['Why does nobody talk about this?', 'Ever wonder why this feels so hard?', 'What if it’s easier than you think?', 'Can I tell you what finally worked?', 'Why did it take me so long to try this?', 'Is this the thing holding you back?'],
-  mistake: ['Stop doing this. Seriously.', 'The mistake I made for a whole year.', 'You’re doing this wrong, and it’s not your fault.', 'I wish someone had warned me about this.', 'This one habit cost me months.', 'Please don’t make the mistake I made.'],
-  story: ['Six months ago, I almost quit.', 'Here’s what happened when I tried this for a week.', 'Nobody believed me until this happened.', 'This started as a joke.', 'The day everything changed was a Tuesday.', 'I wasn’t going to post this.'],
-  bold: ['This is the only tip you need.', 'Unpopular opinion: you don’t need more ideas.', 'Most advice about this is wrong.', 'I’ll say it: this changed everything.', 'You don’t need better gear. You need this.', 'Hot take, and I’ll stand by it.'],
-  result: ['One change, and here’s the difference.', 'Here’s the before and after.', 'This took five minutes, and it worked.', 'Watch what happens at the end.', 'Same me, completely different results.', 'Here’s what a month of this did.'],
-};
-
-const ON_SCREEN: Record<Angle, string[]> = {
-  question: ['Why didn’t anyone tell me?', 'Is it just me…?', 'Wait, it’s this easy?', 'Okay but why does this work?', 'Who else does this?', 'Am I the only one?'],
-  mistake: ['Stop doing this.', 'My biggest mistake:', 'Don’t do what I did', 'Never again.', 'I did this for a year…', 'Learn from me'],
-  story: ['6 months ago vs now', 'I almost quit. Then this.', 'Day 1 of trying this', 'This was supposed to be a joke', 'Wait for it', 'Didn’t plan to post this'],
-  bold: ['The only tip you need', 'Unpopular opinion:', 'Nobody does this. They should.', 'Trust me on this one', 'Hot take:', 'You’ve been told wrong'],
-  result: ['Before / after', 'One change. Big difference.', '5 minutes. That’s it.', 'Watch till the end', 'A month of this:', 'Same me, new results'],
-};
-
 const CUE: Record<FilmStyle, string> = {
   talking: 'Say it straight to camera in the first second. No hello first.',
   text: 'Put it as big text on the very first frame.',
@@ -68,11 +53,6 @@ interface Hook {
   id: string;
   line: string;
   angle: Angle;
-}
-
-function makeHooks(style: FilmStyle, angle: Angle, round: number): Hook[] {
-  const pool = style === 'talking' ? SPOKEN[angle] : ON_SCREEN[angle];
-  return [0, 1, 2].map((i) => ({ id: `${style}-${angle}-${round}-${i}`, line: pool[(round * 3 + i) % pool.length], angle }));
 }
 
 // ─── 3-second preview: the hook plays out word by word in a phone frame ─────
@@ -214,7 +194,9 @@ export const HookStudioScreen: React.FC<HookStudioScreenProps> = ({
   const [style, setStyle] = useState<FilmStyle>(() => getDefaultFilmStyle(userProfile?.niches));
   const [angle, setAngle] = useState<Angle>('mistake');
   const [round, setRound] = useState(0);
-  const [thinking, setThinking] = useState(false);
+  const [thinking, setThinking] = useState(true);
+  const [lines, setLines] = useState<string[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
   useMascotThinking(thinking);
   const [open, setOpen] = useState<string | null>(null);
   const saved = useSyncExternalStore(subscribeToSavedHooks, getSavedHooks);
@@ -231,19 +213,36 @@ export const HookStudioScreen: React.FC<HookStudioScreenProps> = ({
     if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     onUseHook?.(idea.trim() || ideaTitle, line, st);
   };
-  const hooks = useMemo(() => makeHooks(style, angle, round), [style, angle, round]);
+  const hooks: Hook[] = useMemo(
+    () => lines.slice(0, 3).map((line, i) => ({ id: `${style}-${angle}-${round}-${i}`, line, angle })),
+    [lines, style, angle, round],
+  );
 
-  // Changing the video type or angle reshapes the hooks, with a short beat
-  const first = useRef(true);
+  // Jarvis writes the hooks: on open, and again when the video type or angle changes or "New hooks" is tapped.
+  // An answer that arrives after a newer request was made is dropped.
+  const latest = useRef(0);
+  const ideaRef = useRef(idea);
+  ideaRef.current = idea;
   useEffect(() => {
-    if (first.current) {
-      first.current = false;
-      return;
-    }
+    const mine = ++latest.current;
     setOpen(null);
     setThinking(true);
-    const id = setTimeout(() => setThinking(false), 450);
-    return () => clearTimeout(id);
+    setLoadError(null);
+    generateHooks(hookBrief(ideaRef.current.trim() || ideaTitle, ANGLES.find((a) => a.id === angle)?.label ?? angle, style === 'talking'))
+      .then((next) => {
+        if (mine === latest.current) setLines(next);
+      })
+      .catch((e) => {
+        if (mine !== latest.current) return;
+        const msg = describeAiError(e);
+        setLoadError(msg);
+        showToast(msg);
+      })
+      .finally(() => {
+        if (mine === latest.current) setThinking(false);
+      });
+    // showToast and ideaTitle are stable for this screen; the idea is read when the request starts
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [style, angle, round]);
 
   const enter = (d: number) => FadeInUp.delay(d).duration(500).easing(Easing.out(Easing.cubic));
@@ -324,6 +323,8 @@ export const HookStudioScreen: React.FC<HookStudioScreenProps> = ({
                 <JarvisOrb size={26} />
                 <Text style={styles.thinkingText}>Jarvis is writing…</Text>
               </Animated.View>
+            ) : hooks.length === 0 ? (
+              <Text style={styles.thinkingText}>{loadError ?? 'No hooks yet.'} Tap New hooks to try again.</Text>
             ) : (
               <View key={`${style}-${angle}-${round}`} style={styles.stack}>
                 {hooks.map((h, i) => (
