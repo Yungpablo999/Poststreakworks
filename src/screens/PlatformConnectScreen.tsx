@@ -28,13 +28,14 @@ interface PlatformItem {
   logo: PlatformLogoType;
 }
 
-// The five Stage 1 platforms, most popular first
+// The six platforms you can connect, most popular first
 const PLATFORMS: PlatformItem[] = [
   { id: 'tiktok', name: 'TikTok', description: 'Videos and growth insights', logo: 'tiktok' },
   { id: 'instagram', name: 'Instagram', description: 'Posts, Reels and insights', logo: 'instagram' },
   { id: 'youtube', name: 'YouTube', description: 'Shorts and channel growth', logo: 'youtube' },
   { id: 'facebook', name: 'Facebook', description: 'Pages and groups', logo: 'facebook' },
   { id: 'threads', name: 'Threads', description: 'Text posts and replies', logo: 'threads' },
+  { id: 'linkedin', name: 'LinkedIn', description: 'Posts for your network', logo: 'linkedin' },
 ];
 
 interface PlatformConnectScreenProps {

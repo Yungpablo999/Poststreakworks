@@ -25,6 +25,8 @@ import { TinyGoldCheck } from '../components/CreatorStoryModal';
 import { SocialBrandIcon } from '../components/SocialBrandIcon';
 import { sFont } from '../utils/responsive';
 import { usePlatforms } from '../hooks/usePlatforms';
+import { useConnect } from '../hooks/useConnect';
+import { POST_PLATFORMS, mediaRequiredFor } from '../config/platforms';
 import { pickFromLibrary, readWebVideoDuration } from '../utils/media';
 import { useTikTokSettings } from '../hooks/useTikTokSettings';
 import { TikTokSettingsCard } from '../components/composer/TikTokSettingsCard';
@@ -68,39 +70,17 @@ interface PlatformOption {
   name: string;
   shortName: string;
   format: string;
-  platformType: 'tiktok' | 'instagram' | 'youtube' | 'threads';
+  platformType: string;
 }
 
-const PRO_PLATFORMS: PlatformOption[] = [
-  {
-    id: 'tiktok',
-    name: 'TikTok',
-    shortName: 'TikTok',
-    format: '9:16 Video / Reels',
-    platformType: 'tiktok',
-  },
-  {
-    id: 'instagram',
-    name: 'Instagram',
-    shortName: 'Instagram',
-    format: 'Reels & Carousels',
-    platformType: 'instagram',
-  },
-  {
-    id: 'youtube',
-    name: 'YouTube',
-    shortName: 'YouTube',
-    format: 'Shorts & Community',
-    platformType: 'youtube',
-  },
-  {
-    id: 'threads',
-    name: 'Threads',
-    shortName: 'Threads',
-    format: 'Text & Visuals',
-    platformType: 'threads',
-  },
-];
+// Built from the shared platform list (src/config/platforms.ts), the same for every screen
+const PRO_PLATFORMS: PlatformOption[] = POST_PLATFORMS.map((p) => ({
+  id: p.id,
+  name: p.name,
+  shortName: p.shortName,
+  format: p.format,
+  platformType: p.id,
+}));
 
 // TODO(demo): sample ideas are static demo content; see FEATURE_MAP
 const SAMPLE_IDEAS = [
@@ -174,6 +154,8 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
   const tiktokActive = selectedPlatforms.includes('tiktok') && uploadedMedia?.type === 'video';
   const tiktok = useTikTokSettings({ active: tiktokActive, videoDurationSec: uploadedMedia?.duration ?? null });
   const { isConnected, loading: platformsLoading } = usePlatforms();
+  // Connecting: the real provider flow; the list refreshes when it finishes so the card becomes selectable
+  const connect = useConnect(isConnected);
   const publishingRef = useRef(false);
   const [localAttachedAudio, setLocalAttachedAudio] = useState<AttachedAudioData | null>(
     attachedAudio || null
@@ -286,9 +268,10 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
-    // Only connected platforms can be posted to
+    // Only connected platforms can be picked; tapping any other starts its connect flow
     if (!selectedPlatforms.includes(id) && !isConnected(id)) {
-      showToast(platformsLoading ? 'Checking your connected platforms. Try again in a moment.' : `Connect ${labelFor(id)} first to post there.`, 3500);
+      if (platformsLoading) showToast('Checking your connected platforms. Try again in a moment.', 3500);
+      else void connect.toggle(id);
       return;
     }
     if (selectedPlatforms.includes(id)) {
@@ -297,6 +280,12 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
       setSelectedPlatforms([...selectedPlatforms, id]);
     }
   };
+
+  useEffect(() => {
+    if (connect.message) showToast(connect.message, 3500);
+    // showToast only sets state
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connect.message]);
 
   const openFilePicker = (type: 'media' | 'thumbnail') => {
     if (Platform.OS !== 'web') {
@@ -355,6 +344,10 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
     const connected = selectedPlatforms.filter((p) => isConnected(p));
     if (connected.length < selectedPlatforms.length) {
       showToast(`Connect ${selectedPlatforms.filter((p) => !isConnected(p)).map(labelFor).join(' and ')} first, or remove it from this post.`, 4000);
+      return;
+    }
+    if (mediaRequiredFor(selectedPlatforms) !== 'none' && !uploadedMedia) {
+      showToast('Add your media before scheduling', 3500);
       return;
     }
     if (tiktokActive && tiktok.problem) {
@@ -658,7 +651,7 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
           </View>
 
           <View style={styles.platformsGridRow}>
-            {PRO_PLATFORMS.slice(0, 2).map((platform) => {
+            {[...PRO_PLATFORMS].sort((x, y) => Number(isConnected(y.id)) - Number(isConnected(x.id))).slice(0, 2).map((platform) => {
               const isSelected = selectedPlatforms.includes(platform.id);
               return (
                 <Pressable
@@ -673,6 +666,9 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
                     <SocialBrandIcon platform={platform.platformType} size={24} />
                   </View>
                   <Text style={styles.platformCardName}>{platform.name}</Text>
+                  <Text style={[styles.platformStateText, isConnected(platform.id) ? styles.platformStateOn : styles.platformStateOff]}>
+                    {connect.busy === platform.id ? 'Connecting…' : isConnected(platform.id) ? 'Connected' : 'Connect'}
+                  </Text>
                   <View style={[styles.platformCheckCircle, isSelected && styles.platformCheckCircleActive]}>
                     {isSelected && (
                       <Svg width={10} height={10} viewBox="0 0 12 12" fill="none">
@@ -1012,6 +1008,9 @@ export const ProPostComposerScreen: React.FC<ProPostComposerScreenProps> = ({
                         <SocialBrandIcon platform={plat.platformType} size={22} />
                         <View>
                           <Text style={styles.platformModalName}>{plat.name}</Text>
+                          <Text style={[styles.platformStateText, isConnected(plat.id) ? styles.platformStateOn : styles.platformStateOff]}>
+                            {connect.busy === plat.id ? 'Connecting…' : isConnected(plat.id) ? 'Connected' : 'Connect'}
+                          </Text>
                           <Text style={styles.platformModalFormat}>{plat.format}</Text>
                         </View>
                       </View>
@@ -1392,6 +1391,12 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#171420',
   },
+  platformStateText: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  platformStateOn: { color: '#15803D' },
+  platformStateOff: { color: '#582CDB' },
   platformCheckCircle: {
     width: 18,
     height: 18,

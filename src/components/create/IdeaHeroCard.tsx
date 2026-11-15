@@ -31,7 +31,7 @@ export function IdeaHeroCard({ isNewUser, niches, platforms, onUseIdea }: IdeaHe
   useMascotThinking(thinking);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const idea = ideas[index % ideas.length];
-  const shown = platforms.filter((p) => ['tiktok', 'instagram', 'youtube', 'threads', 'facebook'].includes(p)).slice(0, 3);
+  const shown = platforms.filter((p) => ['tiktok', 'instagram', 'youtube', 'threads', 'facebook', 'linkedin'].includes(p)).slice(0, 3);
 
   const spin = useSharedValue(0);
   const spinStyle = useAnimatedStyle(() => ({ transform: [{ rotate: `${spin.value * 360}deg` }] }));

@@ -202,6 +202,7 @@ const styles = StyleSheet.create({
 
 // ─── Shared connected-accounts state (real connections from the backend) ────
 const STAGE1: { id: string; name: string }[] = [
+  { id: 'linkedin', name: 'LinkedIn' },
   { id: 'tiktok', name: 'TikTok' },
   { id: 'instagram', name: 'Instagram' },
   { id: 'youtube', name: 'YouTube' },
@@ -209,7 +210,7 @@ const STAGE1: { id: string; name: string }[] = [
   { id: 'threads', name: 'Threads' },
 ];
 
-type ProfileLike = { connectedPlatforms?: string[] } & Partial<Record<`${'tiktok' | 'instagram' | 'youtube' | 'facebook' | 'threads'}Handle`, string>>;
+type ProfileLike = { connectedPlatforms?: string[] } & Partial<Record<`${'tiktok' | 'instagram' | 'youtube' | 'facebook' | 'threads' | 'linkedin'}Handle`, string>>;
 
 /**
  * Connected accounts come from the backend (usePlatforms). Toggling a connected one disconnects it,

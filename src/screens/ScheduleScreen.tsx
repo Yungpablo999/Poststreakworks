@@ -28,6 +28,7 @@ import { GlassBackdrop } from '../components/glass/GlassBackdrop';
 import { FitLines } from '../components/ui/FitLines';
 import { JarvisOrb } from '../components/JarvisOrb';
 import { CalendarSheet } from '../components/home/CalendarSheet';
+import { showAutoPostUpsell } from '../config/features';
 import { TodayCard, WeekStrip, PostRow, EmptyDay, PlatformMixCard, BestTimeCard, AutoPostCard } from '../components/schedule/ScheduleBlocks';
 import { useQueue } from '../hooks/useQueue';
 import type { UserPersona } from '../components/HeaderDualModePills';
@@ -483,11 +484,14 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
               <AutoPostCard isNewUser={isNewUser} />
             </Reanimated.View>
           ) : (
-            <Pressable onPress={onOpenJarvisPro} hitSlop={6} style={styles.proNote} accessibilityRole="button">
-              <Text style={styles.proNoteText}>
-                Free plans let you plan and track posts. <Text style={styles.proNoteLink}>Pro posts for you at the best time.</Text>
-              </Text>
-            </Pressable>
+            // Beta: everyone can post and schedule, so the Pro note shows only once payments are on
+            showAutoPostUpsell(false) && (
+              <Pressable onPress={onOpenJarvisPro} hitSlop={6} style={styles.proNote} accessibilityRole="button">
+                <Text style={styles.proNoteText}>
+                  Free plans let you plan and track posts. <Text style={styles.proNoteLink}>Pro posts for you at the best time.</Text>
+                </Text>
+              </Pressable>
+            )
           )}
 
           {/* Bottom Space for Floating Tab Bar */}

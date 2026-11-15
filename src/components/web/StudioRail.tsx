@@ -28,7 +28,7 @@ export type StudioKind = 'repurpose' | 'hook' | 'voice';
 const pointer = Platform.OS === 'web' ? ({ cursor: 'pointer' } as object) : null;
 const ease = Easing.out(Easing.cubic);
 
-const PLATFORM_NAMES: Record<string, string> = { tiktok: 'TikTok', instagram: 'Instagram', youtube: 'YouTube', threads: 'Threads', facebook: 'Facebook' };
+const PLATFORM_NAMES: Record<string, string> = { tiktok: 'TikTok', instagram: 'Instagram', youtube: 'YouTube', threads: 'Threads', facebook: 'Facebook', linkedin: 'LinkedIn' };
 
 // ─── Repurpose ──────────────────────────────────────────────────────────────
 function Allowance({ persona, tier }: { persona: 'new' | 'returning'; tier: 'free' | 'pro' }) {
