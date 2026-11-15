@@ -27,7 +27,6 @@ import {
   getStarterIdeas,
   getFilmPlan,
   getSoundIdeas,
-  checkInToday,
   getDefaultFilmStyle,
   getGoalCaption,
   saveDraft as saveDraftToStore,
@@ -63,6 +62,7 @@ import {
 } from '../config/platforms';
 import { usePlatforms } from '../hooks/usePlatforms';
 import { useConnect } from '../hooks/useConnect';
+import { checkInAndSync, refreshStreak } from '../api/streak';
 import { describePostError, describeSummary, labelFor, publishNow, schedulePost, type PostSummary } from '../api/posts';
 import {
   StepHeader,
@@ -876,6 +876,8 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
     }
     if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     const where = summary.succeeded.map(labelFor).join(', ');
+    // The backend counts the streak day itself when a post is published; just show the new number
+    if (publishMode === 'now') void refreshStreak();
     if (publishMode === 'now') {
       setCelebrationTitle('Published Live!');
       setCelebrationSubtitle(`Your content is live on ${where}.`);
@@ -1046,7 +1048,8 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   const confirmPosted = () => {
     setShowPostedCheck(false);
     setPendingHandoff(null);
-    checkInToday(userProfile?.userPersona === 'returning' ? 'returning' : 'new');
+    // A check-in, not a post day: the backend counts a streak day only for a post it publishes itself
+    checkInAndSync(userProfile?.userPersona === 'returning' ? 'returning' : 'new');
     if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setCelebrationTitle('Nice work!');
     setCelebrationSubtitle(`Your ${pendingHandoff ? HANDOFF_NAMES[pendingHandoff] : ''} post counts toward today's check-in.`);
