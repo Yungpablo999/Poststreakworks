@@ -14,7 +14,8 @@ import {
   Modal,
 } from 'react-native';
 import { Text, TextInput } from '../components/ui/AppText';
-import { getVoiceCloneSummary, getRepurposeAllowance, getScheduleSummary, getDrafts, subscribeToDrafts, draftAgo } from '../data';
+import { useQueue } from '../hooks/useQueue';
+import { getVoiceCloneSummary, getRepurposeAllowance, getDrafts, subscribeToDrafts, draftAgo } from '../data';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
@@ -238,7 +239,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
   const tourScroll = useTourScroll();
   const isDark = false;
   const isNewUser = (userPersona || userProfile?.userPersona || 'new') === 'new';
-  const schedule = getScheduleSummary(isNewUser ? 'new' : 'returning');
+  const schedule = useQueue(isNewUser ? 'new' : 'returning').summary;
   const isPro = tier === 'pro';
   const repurpose = getRepurposeAllowance(isNewUser ? 'new' : 'returning', 'free');
   const voice = getVoiceCloneSummary(isNewUser ? 'new' : 'returning');

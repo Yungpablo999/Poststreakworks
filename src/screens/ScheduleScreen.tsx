@@ -29,7 +29,7 @@ import { FitLines } from '../components/ui/FitLines';
 import { JarvisOrb } from '../components/JarvisOrb';
 import { CalendarSheet } from '../components/home/CalendarSheet';
 import { TodayCard, WeekStrip, PostRow, EmptyDay, PlatformMixCard, BestTimeCard, AutoPostCard } from '../components/schedule/ScheduleBlocks';
-import { getWeekSchedule } from '../data';
+import { useQueue } from '../hooks/useQueue';
 import type { UserPersona } from '../components/HeaderDualModePills';
 import { ds } from '../theme/colors';
 
@@ -224,7 +224,8 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
   const tourScroll = useTourScroll();
   const isDark = false;
   const isNewUser = (userPersona || userProfile?.userPersona || 'new') === 'new';
-  const week = getWeekSchedule(isNewUser ? 'new' : 'returning');
+  // The creator's real queue (posts table). Empty queue -> the existing empty states below.
+  const { week } = useQueue(isNewUser ? 'new' : 'returning');
   const [dayIndex, setDayIndex] = useState(week.todayIndex);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const selectedDayData = week.days[dayIndex];
@@ -247,6 +248,7 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
   const [activeTab, setActiveTab] = useState<TabType>('create');
   const [selectedDay, setSelectedDay] = useState<number>(15);
   const [calendarSelectedDay, setCalendarSelectedDay] = useState<number>(15);
+  // TODO(demo): legacy in-screen modals (not reachable from the current layout) still use INITIAL_POSTS
   const [posts, setPosts] = useState<ScheduledPost[]>(INITIAL_POSTS);
 
   // Modals

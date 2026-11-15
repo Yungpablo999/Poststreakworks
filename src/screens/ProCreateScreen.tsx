@@ -13,7 +13,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { Text, TextInput } from '../components/ui/AppText';
-import { getScheduleSummary } from '../data';
+import { useQueue } from '../hooks/useQueue';
 import { BrandLogo } from '../components/BrandLogo';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
@@ -202,7 +202,7 @@ export const ProCreateScreen: React.FC<ProCreateScreenProps> = ({
   onSaveProfile,
 }) => {
   const isNewUser = (userPersona || userProfile?.userPersona) === 'new';
-  const schedule = getScheduleSummary(isNewUser ? 'new' : 'returning');
+  const schedule = useQueue(isNewUser ? 'new' : 'returning').summary;
   const [activeTab, setActiveTab] = useState<TabType>('create');
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);

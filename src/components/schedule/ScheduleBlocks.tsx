@@ -29,6 +29,7 @@ const PLATFORM_NAMES: Record<string, string> = {
   youtube: 'YouTube',
   threads: 'Threads',
   facebook: 'Facebook',
+  linkedin: 'LinkedIn',
 };
 const WEEKDAY = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -177,8 +178,10 @@ export function PostRow({ post, onPress }: { post: CalendarPost; onPress: () => 
       ? { label: 'Posted', bg: ds.greenBg, fg: ds.greenFill }
       : post.status === 'draft'
       ? { label: 'Draft', bg: ds.cream, fg: ds.text2 }
+      : post.status === 'failed'
+      ? { label: 'Failed', bg: ds.cream, fg: ds.text2 }
       : { label: 'Scheduled', bg: ds.lavender, fg: ds.purple };
-  const action = post.status === 'draft' ? 'Finish' : post.status === 'posted' ? 'View' : 'Open';
+  const action = post.status === 'draft' || post.status === 'failed' ? 'Finish' : post.status === 'posted' ? 'View' : 'Open';
   return (
     <PressableCard onPress={onPress} accessibilityLabel={`${post.title}. ${PLATFORM_NAMES[post.platform]} at ${post.time}. ${chip.label}. ${action}`}>
       <GlassCard strong radius={20} padding={14}>
