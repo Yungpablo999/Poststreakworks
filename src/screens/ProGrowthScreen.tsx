@@ -25,6 +25,7 @@ import { BrandToast } from '../components/BrandToast';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
 import { HeaderDualModePills, UserPersona } from '../components/HeaderDualModePills';
 import { sFont, isNarrowScreen } from '../utils/responsive';
+import { JarvisOrb } from '../components/JarvisOrb';
 
 interface GrowthPlatformAccount {
   id: string;
@@ -1754,11 +1755,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
           {/* ============================================================ */}
           <View style={styles.jarvisIntelligenceCard}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-              <Image
-                source={require('../../assets/images/jarvis-core-flame.png')}
-                style={{ width: 22, height: 22 }}
-                resizeMode="contain"
-              />
+              <JarvisOrb size={22} />
               <Text style={styles.jarvisIntelligenceTag}>JARVIS INTELLIGENCE</Text>
             </View>
 
@@ -2689,11 +2686,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                 {/* AUDIENCE & BRAND READINESS CALLOUT */}
                 <View style={styles.reportJarvisSummaryCard}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                    <Image
-                      source={require('../../assets/images/jarvis-core-flame.png')}
-                      style={{ width: 18, height: 18 }}
-                      resizeMode="contain"
-                    />
+                    <JarvisOrb size={18} />
                     <Text style={styles.reportJarvisTag}>JARVIS AUDIT VERDICT</Text>
                   </View>
                   <Text style={styles.reportJarvisText}>
@@ -3067,11 +3060,7 @@ export const ProGrowthScreen: React.FC<ProGrowthScreenProps> = ({
                 {/* JARVIS STRATEGIC AUDIT */}
                 <View style={styles.postJarvisAuditCard}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                    <Image
-                      source={require('../../assets/images/jarvis-core-flame.png')}
-                      style={{ width: 20, height: 20 }}
-                      resizeMode="contain"
-                    />
+                    <JarvisOrb size={20} />
                     <Text style={styles.postJarvisAuditTag}>JARVIS RETENTION AUDIT</Text>
                   </View>
                   <Text style={styles.postJarvisAuditText}>{selectedPost.jarvisAudit}</Text>

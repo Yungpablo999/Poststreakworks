@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { TourTarget } from '../tour/GhostTour';
 import { LiveMascot } from '../mascot/LiveMascot';
+import { Bloub } from '../Bloub';
 import { Image, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { BlurView } from 'expo-blur';
@@ -193,9 +194,7 @@ export function AppSidebar({
         {!isPro ? (
           <Pressable onPress={onOpenPro} accessibilityRole="button" style={({ pressed }) => [styles.proCard, pointer, pressed && { transform: [{ scale: 0.98 }] }]}>
             <View style={styles.proCardHead}>
-              <Svg width={16} height={16} viewBox="0 0 24 24">
-                <Path d="M12 3l2.6 5.6 6.1.7-4.5 4.1 1.2 6L12 16.4 6.6 19.4l1.2-6L3.3 9.3l6.1-.7L12 3z" fill={goldTokens.primary} />
-              </Svg>
+              <Bloub size={22} expression="heureux" />
               <Text style={styles.proCardTitle}>Jarvis Pro</Text>
             </View>
             <Text style={styles.proCardBody}>Unlimited ideas, Repurpose and Voice Studio.</Text>
@@ -210,7 +209,7 @@ export function AppSidebar({
       {/* The live mascot keeps you company, next to the preview switches */}
       <View style={styles.buddyRow}>
         <TourTarget id="ghost" style={styles.buddy}>
-          <LiveMascot size={64} bubble="top" bubbleWidth={220} />
+          <LiveMascot size={64} bubble="top" bubbleWidth={220} face="bloub" />
         </TourTarget>
         <View style={[styles.preview, styles.flex]}>
           <Text style={styles.previewLabel}>Preview as</Text>
