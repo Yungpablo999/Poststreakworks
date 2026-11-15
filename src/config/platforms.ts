@@ -60,6 +60,8 @@ export function mediaRequiredFor(platformIds: string[]): MediaRequirement {
 
 /** The formats a post to these platforms can use. Text platforms: anything (text, one image, video). */
 export function formatsAllowedFor(platformIds: string[]): ComposerFormat[] {
+  // Text platforms take a caption with at most one photo (no video yet)
+  if (platformIds.length > 0 && platformIds.every(isTextPlatform)) return ['text', 'image'];
   switch (mediaRequiredFor(platformIds)) {
     case 'video':
       return ['short_video', 'long_video'];

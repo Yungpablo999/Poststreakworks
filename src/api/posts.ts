@@ -29,9 +29,9 @@ export interface PlatformRule {
 
 // Mirrors poststreak-web's PLATFORM_META (src/lib/platforms/meta.ts)
 export const PLATFORM_RULES: Record<string, PlatformRule> = {
-  linkedin: { label: 'LinkedIn', textLimit: 3000, supportsText: true, image: false, video: false },
-  threads: { label: 'Threads', textLimit: 500, emojiAsBytes: true, supportsText: true, image: false, video: false },
-  facebook: { label: 'Facebook', textLimit: 63206, supportsText: true, image: false, video: false },
+  linkedin: { label: 'LinkedIn', textLimit: 3000, supportsText: true, image: true, video: false },
+  threads: { label: 'Threads', textLimit: 500, emojiAsBytes: true, supportsText: true, image: true, video: false },
+  facebook: { label: 'Facebook', textLimit: 63206, supportsText: true, image: true, video: false },
   instagram: { label: 'Instagram', textLimit: 2200, supportsText: false, image: true, video: true },
   youtube: { label: 'YouTube', textLimit: 5000, supportsText: false, image: false, video: true },
   tiktok: { label: 'TikTok', textLimit: 2200, supportsText: false, image: false, video: true },
@@ -155,6 +155,10 @@ export function checkPlatformPost(platform: string, content: string, media: Loca
   if (!media && !rule.supportsText) return `${rule.label} posts need a ${rule.video && rule.image ? 'photo or video' : 'video'}.`;
   if (media && !rule[media.kind]) {
     if (!rule.supportsText) return `${rule.label} can't post ${media.kind === 'image' ? 'a photo' : 'a video'}.`;
+  }
+  // LinkedIn, Threads and Facebook take JPEG or PNG only (the backend refuses WebP)
+  if (media?.kind === 'image' && rule.supportsText && media.mimeType && !/^image\/(jpeg|jpg|png)$/i.test(media.mimeType)) {
+    return `${rule.label} photos must be JPEG or PNG.`;
   }
   return null;
 }
