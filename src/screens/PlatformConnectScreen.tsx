@@ -16,6 +16,9 @@ import { OnboardingProgress } from '../components/onboarding/OnboardingProgress'
 import { PlatformRow } from '../components/onboarding/PlatformRow';
 import type { PlatformLogoType } from '../components/onboarding/PlatformLogo';
 import { JarvisOrb } from '../components/JarvisOrb';
+import { BrandToast } from '../components/BrandToast';
+import { usePlatforms } from '../hooks/usePlatforms';
+import { useConnect } from '../hooks/useConnect';
 import { ds } from '../theme/colors';
 
 interface PlatformItem {
@@ -44,18 +47,28 @@ interface PlatformConnectScreenProps {
 export const PlatformConnectScreen: React.FC<PlatformConnectScreenProps> = ({ onBack, onContinue }) => {
   const webFrame = useWebFrame();
   const wideFrame = useWideFrame();
-  const [connected, setConnected] = React.useState<string[]>([]);
+  const { isConnected } = usePlatforms();
+  // Connected state is the real one from the backend (only the platforms listed here count)
+  const connected = PLATFORMS.filter((p) => isConnected(p.id)).map((p) => p.id);
   const count = connected.length;
 
   // Counter pill bumps on every connect / disconnect
   const counterScale = useSharedValue(1);
   const counterStyle = useAnimatedStyle(() => ({ transform: [{ scale: counterScale.value }] }));
 
+  const connect = useConnect(isConnected, () => react('connected'));
   const togglePlatform = (id: string) => {
-    if (!connected.includes(id)) react('connected');
-    setConnected((prev) => (prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]));
-    counterScale.value = withSequence(withTiming(1.12, { duration: 110 }), withSpring(1, { damping: 10 }));
+    void connect.toggle(id);
   };
+
+  // Bump the pill whenever a connect / disconnect really changes the count
+  const lastCount = React.useRef(count);
+  React.useEffect(() => {
+    if (lastCount.current !== count) {
+      lastCount.current = count;
+      counterScale.value = withSequence(withTiming(1.12, { duration: 110 }), withSpring(1, { damping: 10 }));
+    }
+  }, [count, counterScale]);
 
   const handleContinue = () => {
     if (count === 0) return;
@@ -158,6 +171,8 @@ export const PlatformConnectScreen: React.FC<PlatformConnectScreenProps> = ({ on
           </Animated.View>
           {wideFrame && <View style={webStyles.cta}>{cta}</View>}
         </ScrollView>
+
+        <BrandToast message={connect.message} />
 
         {/* Sticky glass footer with the one clear action */}
         {!wideFrame && (

@@ -12,9 +12,12 @@ import { SignInScreen } from './src/screens/SignInScreen';
 import { VerifyCodeScreen } from './src/screens/VerifyCodeScreen';
 import { signInWithGoogle } from './src/auth/google';
 import { sendEmailOtp, verifyEmailOtp } from './src/auth/email';
-import { getCurrentSession, signOut } from './src/auth/session';
+import { getCurrentSession, onAuthChange, signOut } from './src/auth/session';
+import { BrandToast } from './src/components/BrandToast';
 import { NicheSelectionScreen } from './src/screens/NicheSelectionScreen';
 import { PlatformConnectScreen } from './src/screens/PlatformConnectScreen';
+import { resumePendingFinalizeOnWeb, runWebFinalizeReturnOnce, webResultMessage } from './src/api/connect';
+import { platformsStore } from './src/hooks/usePlatforms';
 import { PlanPreviewScreen } from './src/screens/PlanPreviewScreen';
 import type { FilmStyle, IdeaGoal, StudioVideo } from './src/data';
 import { DashboardScreen } from './src/screens/DashboardScreen';
@@ -116,6 +119,30 @@ export default function App() {
   const [showSplash, setShowSplash] = useState(!webStart);
   const [currentScreen, setCurrentScreen] = useState<Screen>(webStart ?? 'welcome');
   const [previousScreen, setPreviousScreen] = useState<Screen>('welcome');
+
+  // Web: the provider sends the browser back to /connect/finalize?platform=&handle=.
+  // Finish the connection, clean the URL, and refresh the connected list. Renders nothing.
+  // If nobody was signed in yet (401), the handle is kept and finished right after sign-in.
+  const [connectNotice, setConnectNotice] = useState<string | null>(null);
+  React.useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const show = (result: Parameters<typeof webResultMessage>[0]) => {
+      const text = webResultMessage(result);
+      if (!text) return;
+      setConnectNotice(text);
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => setConnectNotice(null), 4500);
+    };
+    const refresh = () => platformsStore.refresh();
+    void runWebFinalizeReturnOnce(refresh).then(show);
+    const stopWatching = onAuthChange((session) => {
+      if (session) void resumePendingFinalizeOnWeb(refresh).then(show);
+    });
+    return () => {
+      stopWatching();
+      if (timer) clearTimeout(timer);
+    };
+  }, []);
 
   // Lock horizontal shift/pan on web/mobile browsers to keep layout fixed and centralized
   React.useEffect(() => {
@@ -724,6 +751,7 @@ export default function App() {
     <SafeAreaProvider initialMetrics={initialWindowMetrics}>
       <View style={styles.container} onStartShouldSetResponderCapture={() => { if (Platform.OS !== 'web') mascotActivity(); return false; }}>
         <StatusBar style="dark" />
+        <BrandToast message={connectNotice} />
 
         <View style={showSidebar ? styles.desktopRow : styles.fill}>
           {showSidebar && renderMenu()}

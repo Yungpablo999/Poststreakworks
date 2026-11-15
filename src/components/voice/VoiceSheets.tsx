@@ -20,6 +20,7 @@ import { Text } from '../ui/AppText';
 import { AppButton } from '../ui/AppButton';
 import { JarvisOrb } from '../JarvisOrb';
 import { ds, goldTokens } from '../../theme/colors';
+import { PAYMENTS_ENABLED } from '../../config/features';
 
 // Voice Studio sheets: the voice library (browse, filter, preview, pick) and
 // buying extra minutes. Both glide up from the bottom, no bounce.
@@ -329,8 +330,10 @@ export function BuyMinutesSheet({ visible, onClose, minutesLeft, onBuy }: { visi
             title={buying ? 'Adding minutes…' : `Buy ${pack.minutes} minutes · ${pack.price}`}
             variant="gold"
             size="lg"
-            disabled={buying}
+            // TODO(payments): no payment is wired yet, so no minutes can be bought
+            disabled={buying || !PAYMENTS_ENABLED}
             onPress={() => {
+              if (!PAYMENTS_ENABLED) return;
               if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
               setBuying(true);
               setTimeout(() => onBuy(pack.minutes), 900);

@@ -791,6 +791,7 @@ export const GrowthScreen: React.FC<GrowthScreenProps> = ({
 
         
         {/* Connect accounts: glass sheet */}
+        {/* TODO(demo): still the local fake connect (handleConnectSinglePlatform); wire to useConnectedAccounts */}
         <ConnectAccountsSheet
           visible={showConnectPlatformModal}
           onClose={() => setShowConnectPlatformModal(false)}

@@ -8,9 +8,16 @@ export type PickedMedia = {
   kind: 'video' | 'image';
   /** Seconds, for videos when the picker reports it. */
   duration?: number;
+  /** What the picker reported, kept so the file can be uploaded (src/api/posts.ts) */
+  mimeType?: string;
+  sizeBytes?: number;
+  fileName?: string;
 };
 
-type Want = 'video' | 'image';
+type Want = 'video' | 'image' | 'any';
+
+const typesFor = (want: Want): ImagePicker.MediaType[] =>
+  want === 'video' ? ['videos'] : want === 'image' ? ['images'] : ['images', 'videos'];
 
 const toPicked = (res: ImagePicker.ImagePickerResult): PickedMedia | null => {
   if (res.canceled || !res.assets?.length) return null;
@@ -19,6 +26,9 @@ const toPicked = (res: ImagePicker.ImagePickerResult): PickedMedia | null => {
     uri: a.uri,
     kind: a.type === 'video' ? 'video' : 'image',
     duration: a.duration ? Math.round(a.duration / 1000) : undefined,
+    mimeType: a.mimeType ?? undefined,
+    sizeBytes: a.fileSize ?? undefined,
+    fileName: a.fileName ?? undefined,
   };
 };
 
@@ -26,7 +36,7 @@ export async function captureWithCamera(want: Want): Promise<PickedMedia | null>
   const perm = await ImagePicker.requestCameraPermissionsAsync();
   if (!perm.granted) return null;
   const res = await ImagePicker.launchCameraAsync({
-    mediaTypes: want === 'video' ? ['videos'] : ['images'],
+    mediaTypes: typesFor(want),
     videoMaxDuration: 180,
     quality: 1,
   });
@@ -37,7 +47,7 @@ export async function pickFromLibrary(want: Want): Promise<PickedMedia | null> {
   const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
   if (!perm.granted) return null;
   const res = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: want === 'video' ? ['videos'] : ['images'],
+    mediaTypes: typesFor(want),
     quality: 1,
   });
   return toPicked(res);

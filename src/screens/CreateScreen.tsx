@@ -28,6 +28,7 @@ import Reanimated, { FadeInUp } from 'react-native-reanimated';
 import { GlassBackdrop } from '../components/glass/GlassBackdrop';
 import { FitLines } from '../components/ui/FitLines';
 import { IdeaHeroCard } from '../components/create/IdeaHeroCard';
+import { usePlatforms } from '../hooks/usePlatforms';
 import { ToolTile, GlassRow, AllowanceMeter, DraftRow, DraftsEmpty, VoiceStudioProCard, VoiceStudioCard, UnlimitedChip, ProTag } from '../components/create/CreateBlocks';
 import { ds } from '../theme/colors';
 
@@ -232,6 +233,8 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
   userProfile,
   onSaveProfile,
 }) => {
+  const { platforms: connectedPlatforms } = usePlatforms();
+  const connectedIds = React.useMemo(() => connectedPlatforms.map((p) => p.platform), [connectedPlatforms]);
   // Lets Ghost's tour scroll this page
   const tourScroll = useTourScroll();
   const isDark = false;
@@ -509,7 +512,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
             <IdeaHeroCard
               isNewUser={isNewUser}
               niches={userProfile?.niches?.length ? userProfile.niches : ['lifestyle']}
-              platforms={userProfile?.connectedPlatforms?.length ? userProfile.connectedPlatforms : ['tiktok', 'instagram']}
+              platforms={connectedIds}
               onUseIdea={(idea) => {
                 if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                 if (onOpenPostComposer) onOpenPostComposer(idea.title);

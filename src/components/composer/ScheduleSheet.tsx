@@ -74,8 +74,8 @@ const dayName = (d: Date, today: Date) => {
 interface ScheduleSheetProps {
   visible: boolean;
   onClose: () => void;
-  /** Receives a readable label like "Today, 7:30 PM" or "Fri 2 Oct, 6:00 PM". */
-  onConfirm: (label: string) => void;
+  /** Receives a readable label like "Today, 7:30 PM" or "Fri 2 Oct, 6:00 PM", and that moment as a Date. */
+  onConfirm: (label: string, at: Date) => void;
   /** 'remind' when the creator will film in TikTok etc. */
   mode?: 'schedule' | 'remind';
 }
@@ -331,7 +331,8 @@ export function ScheduleSheet({ visible, onClose, onConfirm, mode = 'schedule' }
               disabled={selectedPast}
               onPress={() => {
                 if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                onConfirm(chosenLabel);
+                const day = days[dayIndex];
+                onConfirm(chosenLabel, new Date(day.getFullYear(), day.getMonth(), day.getDate(), Math.floor(minutes / 60), minutes % 60, 0, 0));
                 react('scheduled');
               }}
             />

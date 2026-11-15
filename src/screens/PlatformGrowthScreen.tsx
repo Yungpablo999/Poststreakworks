@@ -331,7 +331,7 @@ export const PlatformGrowthScreen: React.FC<PlatformGrowthScreenProps> = ({
       </SafeAreaView>
 
       <FloatingTabBar activeTab="growth" onTabPress={(t) => onNavigateTab?.(t)} />
-      <ConnectAccountsSheet visible={showAccounts} onClose={() => setShowAccounts(false)} platforms={accounts.platforms} onToggle={accounts.toggle} />
+      <ConnectAccountsSheet visible={showAccounts} onClose={() => setShowAccounts(false)} platforms={accounts.platforms} onToggle={accounts.toggle} message={accounts.message} />
       <UserProfileModal visible={showProfile} onClose={() => setShowProfile(false)} onLogout={onLogout} initialProfile={userProfile} onSaveProfile={onSaveProfile} />
     </View>
   );
