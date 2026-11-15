@@ -48,8 +48,20 @@ import { GlassCard } from '../components/glass/GlassCard';
 import { FitLines } from '../components/ui/FitLines';
 import { AppButton } from '../components/ui/AppButton';
 import { JarvisOrb } from '../components/JarvisOrb';
-import { STAGE_1_PLATFORMS } from '../config/features';
+import { isProTier, showAutoPostUpsell } from '../config/features';
+import {
+  POST_PLATFORMS,
+  IMAGES_COMING_SOON,
+  formatsAllowedFor,
+  isTextOnlySelection,
+  textOnlyPlatforms,
+  mediaRequiredFor,
+  recommendedFormatFor,
+  resolveFormat,
+  type ComposerFormat,
+} from '../config/platforms';
 import { usePlatforms } from '../hooks/usePlatforms';
+import { useConnect } from '../hooks/useConnect';
 import { describePostError, describeSummary, labelFor, publishNow, schedulePost, type PostSummary } from '../api/posts';
 import {
   StepHeader,
@@ -120,7 +132,7 @@ interface PlatformOption {
   multiplier: string;
   bgColor: string;
   gradient?: string[];
-  iconType: 'tiktok' | 'instagram' | 'youtube' | 'threads' | 'pinterest' | 'facebook';
+  iconType: 'tiktok' | 'instagram' | 'youtube' | 'threads' | 'pinterest' | 'facebook' | 'linkedin';
 }
 
 const NOTIFICATIONS: NotificationItem[] = [
@@ -154,65 +166,10 @@ const SAMPLE_IDEAS = [
   'How I batch-film 10 videos in 2 hours',
 ];
 
-const ALL_AVAILABLE_PLATFORMS: PlatformOption[] = [
-  {
-    id: 'tiktok',
-    name: 'TikTok',
-    shortName: 'TikTok',
-    format: '9:16 Video / Reels',
-    multiplier: 'Best Fit',
-    bgColor: '#000000',
-    iconType: 'tiktok',
-  },
-  {
-    id: 'instagram',
-    name: 'Instagram',
-    shortName: 'IG',
-    format: 'Reels & Carousel',
-    multiplier: 'Recommended',
-    bgColor: '#833AB4',
-    gradient: ['#833AB4', '#FD1D1D', '#FCAF45'],
-    iconType: 'instagram',
-  },
-  {
-    id: 'youtube',
-    name: 'YouTube',
-    shortName: 'YT',
-    format: 'Shorts & Longform',
-    multiplier: 'High Retention',
-    bgColor: '#FF0000',
-    iconType: 'youtube',
-  },
-  {
-    id: 'threads',
-    name: 'Threads',
-    shortName: 'Threads',
-    format: 'Quotes & Insights',
-    multiplier: 'Strong Fit',
-    bgColor: '#000000',
-    iconType: 'threads',
-  },
-  {
-    id: 'pinterest',
-    name: 'Pinterest',
-    shortName: 'Pinterest',
-    format: 'Idea Pins & Saves',
-    multiplier: 'Visual Saves',
-    bgColor: '#E60023',
-    iconType: 'pinterest',
-  },
-  {
-    id: 'facebook',
-    name: 'Facebook',
-    shortName: 'FB',
-    format: 'Reels & Groups',
-    multiplier: 'Community',
-    bgColor: '#1877F2',
-    iconType: 'facebook',
-  },
-];
+// Built from the shared platform list (src/config/platforms.ts), the same for every screen
+const ALL_AVAILABLE_PLATFORMS: PlatformOption[] = POST_PLATFORMS.map((p) => ({ ...p, iconType: p.id }));
 
-export type ContentFormatType = 'short_video' | 'carousel' | 'image' | 'text' | 'long_video';
+export type ContentFormatType = ComposerFormat;
 
 export interface ContentFormatOption {
   id: ContentFormatType;
@@ -266,7 +223,7 @@ export const CONTENT_FORMATS: ContentFormatOption[] = [
     mediaLabel: 'Add high-res visual',
     mediaSub: '4:5 portrait or 9:16 vertical recommended',
     primaryMediaActionText: 'Add Image',
-    supportedPlatformIds: ['instagram', 'pinterest', 'facebook', 'threads'],
+    supportedPlatformIds: ['instagram', 'pinterest', 'facebook', 'threads', 'linkedin'],
   },
   {
     id: 'text',
@@ -279,7 +236,7 @@ export const CONTENT_FORMATS: ContentFormatOption[] = [
     mediaLabel: 'Media is optional for text posts',
     mediaSub: 'Attach an optional visual or write your post below',
     primaryMediaActionText: 'Add Optional Visual',
-    supportedPlatformIds: ['threads', 'facebook'],
+    supportedPlatformIds: ['linkedin', 'threads', 'facebook'],
   },
   {
     id: 'long_video',
@@ -300,6 +257,7 @@ export const CONTENT_FORMATS: ContentFormatOption[] = [
 
 // Official Real Social Media SVG Logos
 const PlatformIcon = ({ iconType, size = 38 }: { iconType: string; size?: number }) => {
+  if (iconType === 'linkedin') return <PlatformLogo type="linkedin" size={size} />;
   if (iconType === 'tiktok') {
     return (
       <View style={[styles.officialIconContainer, { width: size, height: size, backgroundColor: '#000000' }]}>
@@ -407,6 +365,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   // Content Format State (Intelligent Content Type)
   const [selectedFormat, setSelectedFormat] = useState<ContentFormatType>(initialFormat || 'short_video');
   // Short video only: film in TikTok / Reels / Shorts, or upload a finished video
+  const formatChosen = useRef(false);
   const [filmMethod, setFilmMethod] = useState<FilmMethod>('native');
 
   // Media State
@@ -442,6 +401,8 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   // Which platforms are connected comes from the backend
   const { isConnected, loading: platformsLoading, platforms: connectedPlatforms } = usePlatforms();
   const connectedIds = React.useMemo(() => connectedPlatforms.map((p) => p.platform), [connectedPlatforms]);
+  // Connecting: the real provider flow; the list refreshes when it finishes so the chip becomes selectable
+  const connect = useConnect(isConnected);
 
   // Modals
   const [showPlatformsModal, setShowPlatformsModal] = useState(false);
@@ -547,9 +508,19 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
 
   useEffect(() => {
     if (initialFormat) {
+      formatChosen.current = true;
       setSelectedFormat(initialFormat);
     }
   }, [initialFormat]);
+
+  // The format follows the platforms: text platforms (LinkedIn, Threads, Facebook) default to a text post,
+  // video-only platforms (YouTube, TikTok) force a video format. A format the creator picked is kept when allowed.
+  useEffect(() => {
+    if (selectedPlatforms.length === 0) return;
+    setSelectedFormat((cur) =>
+      formatChosen.current ? resolveFormat(cur, selectedPlatforms) : resolveFormat(recommendedFormatFor(selectedPlatforms), selectedPlatforms),
+    );
+  }, [selectedPlatforms]);
 
   useEffect(() => {
     if (initialPlatform) {
@@ -600,18 +571,20 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
-    // Filming in the platform's own app needs no connection; posting from here does
-    if (!selectedPlatforms.includes(id) && !isConnected(id) && !isNativeFilm) {
-      showToastNotice(
-        platformsLoading ? 'Checking your connected platforms. Try again in a moment.' : `Connect ${labelFor(id)} first to post there.`,
-      );
-      return;
-    }
     if (selectedPlatforms.includes(id)) {
       setSelectedPlatforms(selectedPlatforms.filter((p) => p !== id));
-    } else {
-      setSelectedPlatforms([...selectedPlatforms, id]);
+      return;
     }
+    // Only connected platforms can be picked; tapping any other starts its connect flow
+    if (!isConnected(id)) {
+      if (platformsLoading) {
+        showToastNotice('Checking your connected platforms. Try again in a moment.');
+      } else {
+        void connect.toggle(id);
+      }
+      return;
+    }
+    setSelectedPlatforms([...selectedPlatforms, id]);
   };
 
   // AI Prompt actions
@@ -781,6 +754,12 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
     }, 3200);
   };
 
+  useEffect(() => {
+    if (connect.message) showToastNotice(connect.message);
+    // showToastNotice only sets state
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connect.message]);
+
   const handlePublishOrSchedule = async () => {
     // 1. Allow saving draft anytime without restriction
     // TODO(demo): drafts are local; see FEATURE_MAP
@@ -845,7 +824,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
       navigateToSection('platforms');
       return;
     }
-    if (selectedFormat !== 'text' && !pickedMedia) {
+    if (mediaRequired !== 'none' && !pickedMedia) {
       showToastNotice('Add your media before scheduling');
       navigateToSection('media');
       return;
@@ -911,18 +890,16 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   };
 
   // Content Format Resolution & Intelligence
-  const getRecommendedFormatId = (platforms: string[]): ContentFormatType => {
-    if (platforms.length === 1 && platforms[0] === 'threads') return 'text';
-    if (platforms.length === 1 && platforms[0] === 'pinterest') return 'carousel';
-    return 'short_video';
-  };
-
-  const recommendedFormatId = getRecommendedFormatId(selectedPlatforms);
+  const recommendedFormatId = recommendedFormatFor(selectedPlatforms);
+  const allowedFormats = formatsAllowedFor(selectedPlatforms);
+  const mediaRequired = mediaRequiredFor(selectedPlatforms);
+  const textOnly = isTextOnlySelection(selectedPlatforms);
+  const textOnlyNames = textOnlyPlatforms(selectedPlatforms).map(labelFor).join(' & ');
   const currentFormatConfig =
     CONTENT_FORMATS.find((f) => f.id === selectedFormat) || CONTENT_FORMATS[0];
   const recommendedFormatConfig =
     CONTENT_FORMATS.find((f) => f.id === recommendedFormatId) || CONTENT_FORMATS[0];
-  const otherFormats = CONTENT_FORMATS.filter((f) => f.id !== recommendedFormatId);
+  const otherFormats = CONTENT_FORMATS.filter((f) => f.id !== recommendedFormatId && allowedFormats.includes(f.id));
 
   // Platform-Aware Dynamic Media Subtitle
   const getDynamicMediaSub = (formatId: ContentFormatType, platforms: string[]): string => {
@@ -967,7 +944,7 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   const isNativeFilm = selectedFormat === 'short_video' && filmMethod === 'native';
   const isPlatformsReady = selectedPlatforms.some((p) => isNativeFilm || isConnected(p)) && !(tiktokActive && tiktok.problem);
   const isCameraFilm = selectedFormat === 'short_video' && filmMethod === 'camera';
-  const isMediaReady = selectedFormat === 'text' || hasMedia || isNativeFilm;
+  const isMediaReady = mediaRequired === 'none' || selectedFormat === 'text' || hasMedia || isNativeFilm;
   const isScheduleReady =
     publishMode === 'now' ||
     publishMode === 'draft' ||
@@ -1112,7 +1089,6 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
   };
   const captionTones: ('Helpful' | 'Viral' | 'Story')[] = ['Helpful', 'Viral', 'Story'];
   const captionCtas: ('Ask Question' | 'Save Post' | 'Share Thoughts')[] = ['Ask Question', 'Save Post', 'Share Thoughts'];
-  const stage1Platforms = ALL_AVAILABLE_PLATFORMS.filter((p) => (STAGE_1_PLATFORMS as readonly string[]).includes(p.id));
   const readinessSteps = [
     { key: 'platforms', label: 'Platforms', done: isPlatformsReady },
     { key: 'format', label: 'Format', done: isFormatReady },
@@ -1244,21 +1220,24 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
             viewRef={(v) => (sectionRefs.current.platforms = v)}
           />
           <View style={styles.chipsWrap}>
-            {stage1Platforms.map((plat) => (
+            {ALL_AVAILABLE_PLATFORMS.map((plat) => (
               <PlatformChip
                 key={plat.id}
                 id={plat.id}
                 name={plat.name}
                 selected={selectedPlatforms.includes(plat.id)}
+                connected={isConnected(plat.id)}
+                busy={connect.busy === plat.id}
                 onPress={() => togglePlatform(plat.id)}
               />
             ))}
           </View>
-          <Text style={styles.note}>
-            {userProfile?.tier === 'pro' || userProfile?.tier === 'founding'
-              ? 'Pro posts to each platform for you at the time you pick.'
-              : 'Free plans prepare posts for each platform. Auto-posting is part of Pro.'}
-          </Text>
+          {isProTier(userProfile?.tier) && (
+            <Text style={styles.note}>Pro posts to each platform for you at the time you pick.</Text>
+          )}
+          {showAutoPostUpsell(isProTier(userProfile?.tier)) && (
+            <Text style={styles.note}>Free plans prepare posts for each platform. Auto-posting is part of Pro.</Text>
+          )}
 
           {tiktokActive && <TikTokSettingsCard settings={tiktok} />}
 
@@ -1275,7 +1254,10 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
             badge={recommendedFormatConfig.badge}
             description={recommendedFormatConfig.recommendedDescription}
             selected={selectedFormat === recommendedFormatConfig.id}
-            onPress={() => setSelectedFormat(recommendedFormatConfig.id)}
+            onPress={() => {
+              formatChosen.current = true;
+              setSelectedFormat(recommendedFormatConfig.id);
+            }}
           />
           <View style={styles.tilesGrid}>
             {otherFormats.map((f) => (
@@ -1285,7 +1267,10 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
                 title={f.title}
                 badge={f.badge}
                 selected={selectedFormat === f.id}
-                onPress={() => setSelectedFormat(f.id)}
+                onPress={() => {
+                  formatChosen.current = true;
+                  setSelectedFormat(f.id);
+                }}
               />
             ))}
           </View>
@@ -1318,6 +1303,8 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
               onRecord={addFromCamera}
               onRemoveRecording={clearMedia}
             />
+          ) : textOnly ? (
+            <Text style={styles.note}>{textOnlyNames} posts are text only for now. {IMAGES_COMING_SOON}.</Text>
           ) : (
           <MediaZone
             isText={selectedFormat === 'text'}
@@ -1332,6 +1319,9 @@ export const PostComposerScreen: React.FC<PostComposerScreenProps> = ({
             onThumbnail={() => setHasThumbnail(!hasThumbnail)}
             onRemove={clearMedia}
           />
+          )}
+          {!textOnly && textOnlyNames !== '' && (
+            <Text style={styles.note}>{textOnlyNames} will post your caption only. {IMAGES_COMING_SOON}.</Text>
           )}
 
           {attachedAudio && (

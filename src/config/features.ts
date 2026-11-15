@@ -1,13 +1,13 @@
 // Product stage flags. Stage 2 features stay in the codebase but are hidden
 // until launch — wrap any Stage 2 UI in `STAGE_2_ENABLED && (...)` instead of deleting it.
 //
-// Stage 1 (live): Studio, analytics (YouTube, Threads, Instagram, Facebook, TikTok),
+// Stage 1 (live): Studio, analytics (LinkedIn, YouTube, Threads, Instagram, Facebook, TikTok),
 //   insights, scheduling, quests, check-in streak.
 // Stage 2 (hidden): Creator Match, Creator Passport, Squads / Duels, Brand campaigns.
 export const STAGE_2_ENABLED = false;
 
 // Platforms with Stage 1 analytics support.
-export const STAGE_1_PLATFORMS = ['youtube', 'threads', 'instagram', 'facebook', 'tiktok'] as const;
+export const STAGE_1_PLATFORMS = ['linkedin', 'youtube', 'threads', 'instagram', 'facebook', 'tiktok'] as const;
 export type Stage1Platform = (typeof STAGE_1_PLATFORMS)[number];
 
 // Free-tier limits.
@@ -21,3 +21,15 @@ export const isStage1Platform = (id: string): id is Stage1Platform =>
 // the buttons stay on screen but can't be pressed, and nothing is credited.
 // TODO(payments): decide web checkout vs in-app purchase before iOS submission, then wire it up and flip this.
 export const PAYMENTS_ENABLED = false;
+
+// Beta: while payments are off, every creator can post now and schedule. The Pro gate stays in
+// code behind PAYMENTS_ENABLED, so flipping the flag brings it back with no other change.
+export const isProTier = (tier?: string | null): boolean => tier === 'pro' || tier === 'founding';
+
+/** Whether this creator may post for real and schedule (everyone during the beta) */
+export const canAutoPost = (isPro: boolean, paymentsEnabled: boolean = PAYMENTS_ENABLED): boolean =>
+  isPro || !paymentsEnabled;
+
+/** Whether to show the "auto-posting is part of Pro" upsell copy (never during the beta) */
+export const showAutoPostUpsell = (isPro: boolean, paymentsEnabled: boolean = PAYMENTS_ENABLED): boolean =>
+  paymentsEnabled && !isPro;

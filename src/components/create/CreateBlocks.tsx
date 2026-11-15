@@ -141,7 +141,7 @@ export function DraftRow({
   onPress: () => void;
 }) {
   const logo = platform ? (platform.toLowerCase() as PlatformLogoType) : null;
-  const isPlatform = !!logo && ['tiktok', 'instagram', 'youtube', 'threads', 'facebook'].includes(logo);
+  const isPlatform = !!logo && ['tiktok', 'instagram', 'youtube', 'threads', 'facebook', 'linkedin'].includes(logo);
   return (
     <PressableCard onPress={onPress} accessibilityLabel={`Draft: ${title}`}>
       {(hover) => (

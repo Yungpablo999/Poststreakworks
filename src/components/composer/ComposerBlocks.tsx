@@ -70,7 +70,23 @@ export function StepHeader({
 }
 
 // ─── Platform chip (multi-select) ───────────────────────────────────────────
-export function PlatformChip({ id, name, selected, onPress }: { id: string; name: string; selected: boolean; onPress: () => void }) {
+export function PlatformChip({
+  id,
+  name,
+  selected,
+  onPress,
+  connected,
+  busy,
+}: {
+  id: string;
+  name: string;
+  selected: boolean;
+  onPress: () => void;
+  /** When given, a small "Connected" / "Connect" line sits under the name (omit it for no line) */
+  connected?: boolean;
+  /** Connecting right now */
+  busy?: boolean;
+}) {
   const on = useSharedValue(selected ? 1 : 0);
   useEffect(() => {
     on.value = withTiming(selected ? 1 : 0, { duration: 200, easing: Easing.out(Easing.cubic) });
@@ -87,7 +103,7 @@ export function PlatformChip({ id, name, selected, onPress }: { id: string; name
       }}
       accessibilityRole="checkbox"
       accessibilityState={{ checked: selected }}
-      accessibilityLabel={name}
+      accessibilityLabel={connected === false ? `Connect ${name}` : name}
       style={[styles.platSlot, Platform.OS === 'web' && ({ cursor: 'pointer' } as object)]}
     >
       {({ pressed }) => (
@@ -101,9 +117,16 @@ export function PlatformChip({ id, name, selected, onPress }: { id: string; name
               </Animated.View>
             )}
           </View>
-          <Text style={[styles.platName, selected && { color: ds.purple }]} numberOfLines={1}>
-            {name}
-          </Text>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.platName, selected && { color: ds.purple }]} numberOfLines={1}>
+              {name}
+            </Text>
+            {connected !== undefined && (
+              <Text style={[styles.platState, connected ? { color: ds.green } : { color: ds.purple }]} numberOfLines={1}>
+                {busy ? 'Connecting…' : connected ? 'Connected' : 'Connect'}
+              </Text>
+            )}
+          </View>
         </Animated.View>
       )}
     </Pressable>
@@ -607,7 +630,8 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     borderWidth: 1.5,
   },
-  platName: { flex: 1, fontSize: 14, fontWeight: '800', color: ds.ink },
+  platName: { fontSize: 14, fontWeight: '800', color: ds.ink },
+  platState: { fontSize: 11, fontWeight: '700', marginTop: -1 },
   platCheck: {
     position: 'absolute',
     right: -5,

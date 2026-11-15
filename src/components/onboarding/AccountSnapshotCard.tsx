@@ -21,6 +21,7 @@ const PLATFORM_NAMES: Record<string, string> = {
   youtube: 'YouTube',
   facebook: 'Facebook',
   threads: 'Threads',
+  linkedin: 'LinkedIn',
 };
 
 export function AccountSnapshotCard({ snapshots }: { snapshots: AccountSnapshot[] }) {
