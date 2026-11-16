@@ -23,6 +23,7 @@ import { PlatformRow } from './onboarding/PlatformRow';
 import { PlatformLogo, type PlatformLogoType } from './onboarding/PlatformLogo';
 import { ds, goldTokens } from '../theme/colors';
 import { STAGE_2_ENABLED } from '../config/features';
+import { describeEmailPrefError, getProductEmails, setProductEmails } from '../api/emailPreferences';
 
 // "Your profile": one glass sheet for every creator (free or Pro, new or
 // returning). Tabs: Profile (photo, name, what you make, topics), Accounts
@@ -341,6 +342,8 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ visible, onC
   const [connected, setConnected] = useState<string[]>([]);
   const [toast, setToast] = useState<string | null>(null);
   const [confirmOut, setConfirmOut] = useState(false);
+  // null until the backend answers; the row stays hidden if it cannot be loaded
+  const [productEmails, setProductEmailsState] = useState<boolean | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const outTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const settings = useSyncExternalStore(subscribePrefs, () => prefs, () => prefs);
@@ -361,6 +364,22 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ visible, onC
     setToast(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
+
+  useEffect(() => {
+    if (!visible) return;
+    let live = true;
+    getProductEmails().then((v) => live && setProductEmailsState(v)).catch(() => {});
+    return () => { live = false; };
+  }, [visible]);
+
+  const changeProductEmails = (next: boolean) => {
+    const before = productEmails;
+    setProductEmailsState(next);
+    setProductEmails(next).then(setProductEmailsState).catch((e) => {
+      setProductEmailsState(before);
+      showToast(describeEmailPrefError(e));
+    });
+  };
 
   useEffect(
     () => () => {
@@ -661,6 +680,12 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ visible, onC
         <SettingRow title="Best time to post" body="When most of your audience is online" value={settings.bestTime} onChange={(v) => setPrefs({ ...settings, bestTime: v })} />
         <View style={styles.setLine} />
         <SettingRow title="Weekly recap" body="A short look at your week, every Monday" value={settings.weekly} onChange={(v) => setPrefs({ ...settings, weekly: v })} />
+        {productEmails !== null ? (
+          <>
+            <View style={styles.setLine} />
+            <SettingRow title="Product emails" body="Tips and updates from PostStreak. Account and payment emails always come through" value={productEmails} onChange={changeProductEmails} />
+          </>
+        ) : null}
       </GlassCard>
 
       {Platform.OS !== 'web' ? (
