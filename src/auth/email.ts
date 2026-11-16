@@ -71,7 +71,7 @@ function mapError(err: unknown, fallback: string): string {
 }
 
 /** Emails a one-time sign-in code. `username` is saved on the account when it is created. */
-export async function sendEmailOtp(email: string, opts: { username?: string } = {}): Promise<SendEmailOtpResult> {
+export async function sendEmailOtp(email: string, opts: { username?: string; extraData?: Record<string, unknown> } = {}): Promise<SendEmailOtpResult> {
   const normalized = normalizeEmail(email);
   if (!normalized) return { status: 'error', message: EMAIL_OTP_MESSAGES.invalidEmail };
 
@@ -80,7 +80,7 @@ export async function sendEmailOtp(email: string, opts: { username?: string } = 
   try {
     const { error } = await supabase.auth.signInWithOtp({
       email: normalized,
-      options: { shouldCreateUser: true, ...(username ? { data: { username } } : {}) },
+      options: { shouldCreateUser: true, ...(username || opts.extraData ? { data: { ...(username ? { username } : {}), ...opts.extraData } } : {}) },
     });
     if (error) return { status: 'error', message: mapError(error, EMAIL_OTP_MESSAGES.sendFailed) };
     return { status: 'sent' };

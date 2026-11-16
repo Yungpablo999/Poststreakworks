@@ -16,6 +16,12 @@ import { getCurrentSession, onAuthChange, signOut } from './src/auth/session';
 import { fetchPlan, type Plan } from './src/api/plan';
 import { apiClient } from './src/api/apiClient';
 import { requestWelcome } from './src/api/welcome';
+import { ConsentBanner } from './src/components/consent/ConsentBanner';
+import { consentStore } from './src/consent/consentStore';
+import { ageConfirmationData } from './src/compliance/age';
+import { applyPendingAge, savePendingAge } from './src/compliance/pendingAge';
+import { authStorage } from './src/auth/storage';
+import { getSupabase } from './src/auth/supabase';
 import {
   claimStoredReferral,
   hasLandingParams,
@@ -396,9 +402,11 @@ export default function App() {
   // Email code sign-up / sign-in through Supabase (src/auth/email.ts): the code
   // is emailed first, and the code screen only opens once it has been sent.
   const emailBusy = React.useRef(false);
+  // The age they confirmed on the sign-up screen, sent with every code for this sign-up (a resend too)
+  const signUpAge = React.useRef<Record<string, unknown> | undefined>(undefined);
   const sendEmailCode = async (email: string, username?: string): Promise<boolean> => {
     try {
-      const result = await sendEmailOtp(email, { username });
+      const result = await sendEmailOtp(email, { username, extraData: username ? signUpAge.current : undefined });
       if (result.status === 'sent') return true;
       showAuthError(result.message);
       return false;
@@ -410,10 +418,11 @@ export default function App() {
     }
   };
 
-  const handleSignUpSubmit = async (_username: string, _email: string) => {
+  const handleSignUpSubmit = async (_username: string, _email: string, age?: number) => {
     if (emailBusy.current) return;
     emailBusy.current = true;
     try {
+      if (age) signUpAge.current = ageConfirmationData(age);
       if (!(await sendEmailCode(_email, _username))) return;
       setAuthUsername(_username);
       setAuthEmail(_email);
@@ -427,9 +436,10 @@ export default function App() {
   // One-tap sign-up. Google is real (Supabase); Apple is still a mock: the
   // provider has already verified the person, so skip the email code and go
   // straight to Home
-  const handleSocialSignUp = (provider: 'apple' | 'google') => {
+  const handleSocialSignUp = (provider: 'apple' | 'google', age?: number) => {
     if (provider === 'google') {
-      void handleGoogleSignIn('signup');
+      // The page may leave for Google: keep the confirmation until the session is back
+      void (age ? savePendingAge({ storage: authStorage }, age) : Promise.resolve()).then(() => handleGoogleSignIn('signup'));
       return;
     }
     justSignedUp.current = true;
@@ -555,6 +565,14 @@ export default function App() {
       return;
     }
     void refreshStreak(); // the creator's real streak (the card also loads it on open)
+    // A sign-up that went through Google: record the age they confirmed on the account
+    void applyPendingAge(
+      {
+        storage: authStorage,
+        updateUserData: async (data) => !(await getSupabase().auth.updateUser({ data })).error,
+      },
+      session.user.user_metadata,
+    );
     const identity = profileFromUser(session.user);
     const key = JSON.stringify(identity);
     const last = appliedIdentity.current;
@@ -576,6 +594,10 @@ export default function App() {
       avatarSource: undefined,
       customAvatarUri: identity.avatarUrl ?? undefined,
     }));
+  }, []);
+
+  React.useEffect(() => {
+    void consentStore.load();
   }, []);
 
   React.useEffect(() => {
@@ -885,6 +907,7 @@ export default function App() {
       <View style={styles.container} onStartShouldSetResponderCapture={() => { if (Platform.OS !== 'web') mascotActivity(); return false; }}>
         <StatusBar style="dark" />
         <BrandToast message={connectNotice ?? planNotice ?? landingToast} />
+        <ConsentBanner />
 
         <View style={showSidebar ? styles.desktopRow : styles.fill}>
           {showSidebar && renderMenu()}

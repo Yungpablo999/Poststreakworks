@@ -28,6 +28,15 @@ describe('normalizeEmail / normalizeCode', () => {
 describe('sendEmailOtp', () => {
   beforeEach(() => jest.clearAllMocks());
 
+  it('sends the age confirmation with the new account data', async () => {
+    mockSignInWithOtp.mockResolvedValue({ data: {}, error: null });
+    await sendEmailOtp('ada@example.com', { username: 'ada', extraData: { age_confirmed_at: 'T', age_confirmed_min: 13 } });
+    expect(mockSignInWithOtp).toHaveBeenCalledWith({
+      email: 'ada@example.com',
+      options: { shouldCreateUser: true, data: { username: 'ada', age_confirmed_at: 'T', age_confirmed_min: 13 } },
+    });
+  });
+
   it('asks Supabase to email a code, creating the account if needed', async () => {
     mockSignInWithOtp.mockResolvedValue({ data: {}, error: null });
     await expect(sendEmailOtp(' Ada@Example.com', { username: 'ada' })).resolves.toEqual({ status: 'sent' });
