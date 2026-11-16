@@ -1945,30 +1945,12 @@ export const ProVoiceStudioScreen: React.FC<ProVoiceStudioScreenProps> = ({
 
                   {/* Final Confirm Button */}
                   <Pressable
-                    // TODO(payments): no payment is wired yet, so nothing is credited
-                    disabled={!PAYMENTS_ENABLED}
-                    style={({ pressed }) => [styles.refillContinueBtn, pressed && styles.btnPressed, !PAYMENTS_ENABLED && { opacity: 0.5 }]}
-                    onPress={() => {
-                      if (!PAYMENTS_ENABLED) return;
-                      if (Platform.OS !== 'web') {
-                        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                      }
-                      const newBal = remainingMinutes + selectedRefillPack.minutes;
-                      setRemainingMinutes(newBal);
-                      setShowRefillMinutesModal(false);
-                      setRefillStep('select');
-                      setCelebrationData({
-                        title: `${selectedRefillPack.name} Credited!`,
-                        subtitle: `Your Studio Voice balance is now ${newBal} minutes. Extra minutes never expire.`,
-                        badgeText: '⚡ REFILL COMPLETE (+50 XP)',
-                        xpEarned: 50,
-                        speechBubble: "Extra voice minutes unlocked! Ready to record studio masters! 🎙️",
-                      });
-                      setShowCelebrationModal(true);
-                    }}
+                    // Not available yet: nothing is credited
+                    disabled
+                    style={[styles.refillContinueBtn, { opacity: 0.5 }]}
                   >
                     <Text style={styles.refillContinueBtnText}>
-                      ⚡ Confirm &amp; Pay {selectedRefillPack.price} →
+                      Coming soon
                     </Text>
                   </Pressable>
 

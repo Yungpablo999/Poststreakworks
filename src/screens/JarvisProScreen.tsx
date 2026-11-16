@@ -1,4 +1,3 @@
-import { react } from '../mascot/mascot';
 import React, { useEffect, useRef, useState } from 'react';
 import { usePageWidth } from '../hooks/useBreakpoint';
 import { View, ScrollView, Pressable, StyleSheet, Platform } from 'react-native';
@@ -24,9 +23,7 @@ import { JarvisOrb } from '../components/JarvisOrb';
 import { FreeAppHeader } from '../components/FreeAppHeader';
 import { FloatingTabBar, TabType } from '../components/FloatingTabBar';
 import { UserProfileModal, UserProfileData } from '../components/UserProfileModal';
-import { AnimatedCompletionModal } from '../components/AnimatedCompletionModal';
 import { ds, goldTokens } from '../theme/colors';
-import { PAYMENTS_ENABLED } from '../config/features';
 
 // Jarvis Pro, for free creators. Light glass like the rest of the app; gold
 // only marks Pro. One upgrade button (in the plan card); the hero's button
@@ -189,16 +186,8 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({ onLogout, onNa
   const [openStep, setOpenStep] = useState<string | null>('hook');
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [view, setView] = useState<'free' | 'pro'>('pro');
-  const [welcome, setWelcome] = useState(false);
 
   const enter = (d: number) => FadeInUp.delay(d).duration(500).easing(Easing.out(Easing.cubic));
-
-  const start = () => {
-    // TODO(payments): no payment is wired yet, so this must not unlock Pro
-    if (!PAYMENTS_ENABLED) return;
-    if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    setWelcome(true);
-  };
 
   return (
     <View style={styles.root}>
@@ -342,7 +331,7 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({ onLogout, onNa
                   </View>
                 ))}
               </View>
-              <AppButton title="Start Jarvis Pro" variant="gold" size="lg" disabled={!PAYMENTS_ENABLED} onPress={start} />
+              <AppButton title="Coming soon" variant="gold" size="lg" disabled />
               <Text style={styles.planNote}>Cancel any time from your profile.</Text>
             </GlassCard>
           </Animated.View>
@@ -382,18 +371,6 @@ export const JarvisProScreen: React.FC<JarvisProScreenProps> = ({ onLogout, onNa
 
       <FloatingTabBar activeTab="growth" onTabPress={(t) => onNavigateTab?.(t)} />
 
-      <AnimatedCompletionModal
-        visible={welcome}
-        title="Welcome to Jarvis Pro"
-        subtitle="Your daily brief, Voice Studio and unlimited repurposing are ready."
-        badgeText="PRO UNLOCKED"
-        actionText="Start exploring"
-        onDismiss={() => {
-          setWelcome(false);
-          onUpgraded?.();
-          react('pro');
-        }}
-      />
       <UserProfileModal visible={showProfile} onClose={() => setShowProfile(false)} onLogout={onLogout} initialProfile={userProfile} onSaveProfile={onSaveProfile} />
     </View>
   );

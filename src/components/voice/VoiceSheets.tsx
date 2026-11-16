@@ -20,7 +20,6 @@ import { Text } from '../ui/AppText';
 import { AppButton } from '../ui/AppButton';
 import { JarvisOrb } from '../JarvisOrb';
 import { ds, goldTokens } from '../../theme/colors';
-import { PAYMENTS_ENABLED } from '../../config/features';
 
 // Voice Studio sheets: the voice library (browse, filter, preview, pick) and
 // buying extra minutes. Both glide up from the bottom, no bounce.
@@ -311,13 +310,9 @@ export const MINUTE_PACKS = [
   { minutes: 150, price: '$19.99', note: 'Best value' },
 ];
 
-export function BuyMinutesSheet({ visible, onClose, minutesLeft, onBuy }: { visible: boolean; onClose: () => void; minutesLeft: number; onBuy: (minutes: number) => void }) {
+export function BuyMinutesSheet({ visible, onClose, minutesLeft }: { visible: boolean; onClose: () => void; minutesLeft: number; onBuy?: (minutes: number) => void }) {
   const [pick, setPick] = useState(60);
-  const [buying, setBuying] = useState(false);
   const pack = MINUTE_PACKS.find((p) => p.minutes === pick)!;
-  useEffect(() => {
-    if (visible) setBuying(false);
-  }, [visible]);
   return (
     <Sheet
       visible={visible}
@@ -326,19 +321,8 @@ export function BuyMinutesSheet({ visible, onClose, minutesLeft, onBuy }: { visi
       subtitle={`You have ${minutesLeft} left this month`}
       footer={
         <>
-          <AppButton
-            title={buying ? 'Adding minutes…' : `Buy ${pack.minutes} minutes · ${pack.price}`}
-            variant="gold"
-            size="lg"
-            // TODO(payments): no payment is wired yet, so no minutes can be bought
-            disabled={buying || !PAYMENTS_ENABLED}
-            onPress={() => {
-              if (!PAYMENTS_ENABLED) return;
-              if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-              setBuying(true);
-              setTimeout(() => onBuy(pack.minutes), 900);
-            }}
-          />
+          {/* Buying minutes is not available yet: nothing is credited */}
+          <AppButton title="Coming soon" variant="gold" size="lg" disabled />
           <Text style={styles.buyNote}>Extra minutes stay until you use them. Your monthly minutes still reset as usual.</Text>
         </>
       }
