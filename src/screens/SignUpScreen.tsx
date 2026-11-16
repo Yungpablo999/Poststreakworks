@@ -15,7 +15,7 @@ import { GlassCard } from '../components/glass/GlassCard';
 import { OnboardingProgress } from '../components/onboarding/OnboardingProgress';
 import { ds } from '../theme/colors';
 import { SocialButton, type SocialProvider } from '../components/auth/SocialButton';
-import { detectRegion, requiredAge } from '../compliance/age';
+import { MIN_AGE } from '../compliance/age';
 
 // Onboarding step 4: create an account to save the plan they just made.
 // One-tap Apple / Google first; email-only as the fallback (name comes later).
@@ -48,7 +48,7 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
   const [touched, setTouched] = useState(false);
   const [ageOk, setAgeOk] = useState(false);
   const [ageHint, setAgeHint] = useState(false);
-  const age = React.useMemo(() => requiredAge(detectRegion()), []);
+  const age = MIN_AGE;
 
   const trimmed = email.trim();
   const valid = EMAIL_RE.test(trimmed);
@@ -59,11 +59,9 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
     setAgeHint(false);
   };
 
+  // Google and Apple do not need the box here: a signed-in account with no age confirmation is
+  // stopped by the age screen right after sign-in (see AgeGate in App.tsx)
   const handleSocial = (provider: SocialProvider) => {
-    if (!ageOk) {
-      setAgeHint(true);
-      return;
-    }
     if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     onSocialSignUp?.(provider, age);
   };

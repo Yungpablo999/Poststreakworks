@@ -18,9 +18,8 @@ import { apiClient } from './src/api/apiClient';
 import { requestWelcome } from './src/api/welcome';
 import { ConsentBanner } from './src/components/consent/ConsentBanner';
 import { consentStore } from './src/consent/consentStore';
-import { ageConfirmationData } from './src/compliance/age';
-import { applyPendingAge, savePendingAge } from './src/compliance/pendingAge';
-import { authStorage } from './src/auth/storage';
+import { ageConfirmationData, confirmAge, declineAge, needsAgeGate } from './src/compliance/age';
+import { AgeGate } from './src/components/AgeGate';
 import { getSupabase } from './src/auth/supabase';
 import {
   claimStoredReferral,
@@ -438,8 +437,8 @@ export default function App() {
   // straight to Home
   const handleSocialSignUp = (provider: 'apple' | 'google', age?: number) => {
     if (provider === 'google') {
-      // The page may leave for Google: keep the confirmation until the session is back
-      void (age ? savePendingAge({ storage: authStorage }, age) : Promise.resolve()).then(() => handleGoogleSignIn('signup'));
+      // The age screen asks right after sign-in if the account has no confirmation
+      void handleGoogleSignIn('signup');
       return;
     }
     justSignedUp.current = true;
@@ -548,9 +547,11 @@ export default function App() {
   // session at startup and on every auth change, and cleared on sign-out so the
   // next person never sees the previous one.
   // TODO(profile-save): edits in the profile modal stay local; persist to Supabase user_metadata.
+  const [ageGate, setAgeGate] = React.useState(false);
   const appliedIdentity = React.useRef<{ id: string; key: string } | null>(null);
   const applySession = React.useCallback((session: Session | null) => {
     if (!session) {
+      setAgeGate(false);
       appliedIdentity.current = null;
       resetStreak();
       setUserProfile((prev) => ({
@@ -565,14 +566,8 @@ export default function App() {
       return;
     }
     void refreshStreak(); // the creator's real streak (the card also loads it on open)
-    // A sign-up that went through Google: record the age they confirmed on the account
-    void applyPendingAge(
-      {
-        storage: authStorage,
-        updateUserData: async (data) => !(await getSupabase().auth.updateUser({ data })).error,
-      },
-      session.user.user_metadata,
-    );
+    // Any account without an age confirmation (first Google sign-in, or an older account) waits on the age screen
+    setAgeGate(needsAgeGate(session.user.user_metadata));
     const identity = profileFromUser(session.user);
     const key = JSON.stringify(identity);
     const last = appliedIdentity.current;
@@ -908,6 +903,19 @@ export default function App() {
         <StatusBar style="dark" />
         <BrandToast message={connectNotice ?? planNotice ?? landingToast} />
         <ConsentBanner />
+        {ageGate ? (
+          <AgeGate
+            onConfirm={async () => {
+              const ok = await confirmAge({
+                updateUserData: async (data) => !(await getSupabase().auth.updateUser({ data })).error,
+                signOut,
+              });
+              if (ok) setAgeGate(false);
+              return ok;
+            }}
+            onDecline={() => void declineAge({ signOut }).then(() => { applySession(null); navigateTo(Platform.OS === 'web' ? 'signin' : 'welcome'); })}
+          />
+        ) : null}
 
         <View style={showSidebar ? styles.desktopRow : styles.fill}>
           {showSidebar && renderMenu()}
