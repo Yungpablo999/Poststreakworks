@@ -33,3 +33,22 @@ export const canAutoPost = (isPro: boolean, paymentsEnabled: boolean = PAYMENTS_
 /** Whether to show the "auto-posting is part of Pro" upsell copy (never during the beta) */
 export const showAutoPostUpsell = (isPro: boolean, paymentsEnabled: boolean = PAYMENTS_ENABLED): boolean =>
   paymentsEnabled && !isPro;
+
+// Screens that still run on sample data (not the creator's real numbers). While this is false they
+// render exactly as before, with a "Coming soon" cover on top that blocks interaction.
+// Flip to true (or remove an id from DEMO_SCREENS) to bring a screen back; nothing else changes.
+export const DEMO_SCREENS_ENABLED = false;
+
+/** Screen ids (as used by App.tsx navigation) that show sample data */
+export const DEMO_SCREENS = [
+  'quests',
+  'challenge-detail',
+  'growth',
+  'audience-breakdown',
+  'platform-growth',
+  'post-performance',
+  'voice-studio',
+] as const;
+
+export const isComingSoonScreen = (screen: string, demoEnabled: boolean = DEMO_SCREENS_ENABLED): boolean =>
+  !demoEnabled && (DEMO_SCREENS as readonly string[]).includes(screen);

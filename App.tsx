@@ -26,6 +26,8 @@ import {
   stripLandingParams,
 } from './src/api/landingParams';
 import { requestTierChange } from './src/config/plan';
+import { isComingSoonScreen } from './src/config/features';
+import { ComingSoon } from './src/components/ComingSoon';
 import { profileFromUser } from './src/auth/profile';
 import type { Session } from '@supabase/supabase-js';
 import { BrandToast } from './src/components/BrandToast';
@@ -1519,6 +1521,7 @@ export default function App() {
             onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: prev.tier || 'free' }))}
           />
         )}
+          {isComingSoonScreen(currentScreen) && <ComingSoon onBack={() => navigateTo('dashboard')} />}
           </ScreenTransitionContainer>
         </EdgeSwipeBackWrapper>
             </View>
