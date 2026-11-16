@@ -13,11 +13,14 @@ describe('LinkedIn connect buttons', () => {
 
   it('is in the profile Accounts tab, which uses the real connection state', () => {
     const src = read('components/UserProfileModal.tsx');
-    expect(src).toMatch(/const ACCOUNTS[^;]*id: 'linkedin'/s);
+    const list = src.slice(src.indexOf('const ACCOUNTS'), src.indexOf('const BIO_MAX'));
+    expect(list).toContain("id: 'linkedin'");
     expect(src).toMatch(/useConnect\(isConnected\)/);
   });
 
   it('is in the connect-accounts sheet', () => {
-    expect(read('components/growth/ConnectAccountsSheet.tsx')).toMatch(/STAGE1[^;]*id: 'linkedin'/s);
+    const src = read('components/growth/ConnectAccountsSheet.tsx');
+    const list = src.slice(src.indexOf('const STAGE1'), src.indexOf('type ProfileLike'));
+    expect(list).toContain("id: 'linkedin'");
   });
 });
