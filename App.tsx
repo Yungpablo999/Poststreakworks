@@ -70,6 +70,7 @@ import { ProVoiceStudioScreen } from './src/screens/ProVoiceStudioScreen';
 import { VoiceStudioScreen } from './src/screens/VoiceStudioScreen';
 import { ProHookStudioScreen } from './src/screens/ProHookStudioScreen';
 import { HookStudioScreen } from './src/screens/HookStudioScreen';
+import { AutopilotScreen } from './src/screens/AutopilotScreen';
 import { ScreenTransitionContainer, ScreenTransitionType } from './src/components/ScreenTransitionContainer';
 import { EdgeSwipeBackWrapper } from './src/components/EdgeSwipeBackWrapper';
 import { TabType } from './src/components/FloatingTabBar';
@@ -119,7 +120,8 @@ type Screen =
   | 'post-performance'
   | 'platform-growth'
   | 'voice-studio'
-  | 'hook-studio';
+  | 'hook-studio'
+  | 'autopilot';
 
 export default function App() {
   // Brand fonts (Plus Jakarta Sans + Playfair Display italic for "Earn.").
@@ -726,6 +728,8 @@ export default function App() {
         return 'create';
       case 'hook-studio':
         return 'create';
+      case 'autopilot':
+        return 'create';
       case 'schedule':
         return 'dashboard';
       default:
@@ -737,7 +741,7 @@ export default function App() {
   const breakpoint = useBreakpoint();
   const SIDEBAR_FOR: Partial<Record<Screen, SidebarId>> = {
     dashboard: 'home', 'mission-detail': 'home', 'jarvis-pro': 'home',
-    create: 'create', 'idea-detail': 'create', composer: 'create', 'content-angle': 'create', script: 'create', caption: 'create',
+    create: 'create', autopilot: 'create', 'idea-detail': 'create', composer: 'create', 'content-angle': 'create', script: 'create', caption: 'create',
     quests: 'quests', 'challenge-detail': 'quests',
     growth: 'growth', 'audience-breakdown': 'growth', 'post-performance': 'growth', 'platform-growth': 'growth',
     schedule: 'schedule', repurpose: 'repurpose', 'hook-studio': 'hook-studio', 'voice-studio': 'voice-studio',
@@ -779,7 +783,7 @@ export default function App() {
   const studioRail = showSidebar && wideEnough ? STUDIO_FOR[currentScreen] : undefined;
   const PAGE_TITLE: Partial<Record<Screen, string>> = {
     composer: 'New post', 'idea-detail': 'Idea', 'content-angle': 'Ideas', script: 'Script', caption: 'Caption',
-    'mission-detail': 'Today’s quest', 'challenge-detail': 'Weekly challenge', 'jarvis-pro': 'Jarvis Pro',
+    autopilot: 'Autopilot', 'mission-detail': 'Today’s quest', 'challenge-detail': 'Weekly challenge', 'jarvis-pro': 'Jarvis Pro',
     'audience-breakdown': 'Your audience', 'post-performance': 'Post performance', 'platform-growth': 'Platform growth',
   };
   const innerBack = MAIN_PAGES.includes(currentScreen) ? null : getBackScreen(currentScreen);
@@ -1076,6 +1080,7 @@ export default function App() {
                 navigateTo('voice-studio');
               }}
               onOpenHookStudio={() => navigateTo('hook-studio')}
+              onOpenAutopilot={() => navigateTo('autopilot')}
               onLogout={handleLogout}
               onOpenSchedule={() => navigateTo('schedule')}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
@@ -1422,6 +1427,18 @@ export default function App() {
               setComposerFilmStyle(style);
               navigateTo('composer');
             }}
+            onNavigateTab={handleTabNavigation}
+            userProfile={userProfile}
+            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: prev.tier || 'free' }))}
+          />
+        )}
+
+        {currentScreen === 'autopilot' && (
+          <AutopilotScreen
+            onBack={() => navigateTo('create')}
+            onLogout={handleLogout}
+            onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+            onSwitchToFree={() => requestTier('free')}
             onNavigateTab={handleTabNavigation}
             userProfile={userProfile}
             onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: prev.tier || 'free' }))}
