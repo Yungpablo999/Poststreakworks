@@ -24,6 +24,7 @@ import { PlatformLogo, type PlatformLogoType } from './onboarding/PlatformLogo';
 import { ds, goldTokens } from '../theme/colors';
 import { isDeleteConfirmed } from '../api/account';
 import { STAGE_2_ENABLED } from '../config/features';
+import { consentStore, useConsent } from '../consent/consentStore';
 import { describeEmailPrefError, getProductEmails, setProductEmails } from '../api/emailPreferences';
 
 // "Your profile": one glass sheet for every creator (free or Pro, new or
@@ -353,6 +354,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ visible, onC
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const outTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const settings = useSyncExternalStore(subscribePrefs, () => prefs, () => prefs);
+  const consent = useConsent();
 
   // Fresh copy of the profile each time the sheet opens
   useEffect(() => {
@@ -715,6 +717,16 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ visible, onC
           </GlassCard>
         </>
       ) : null}
+
+      <Text style={styles.section}>Privacy</Text>
+      <GlassCard strong radius={22} padding={0}>
+        <SettingRow
+          title="Usage analytics"
+          body="Help us improve PostStreak by measuring which screens get used. Off until you allow it."
+          value={consent.state === 'granted'}
+          onChange={(v) => void consentStore.set(v ? 'granted' : 'denied')}
+        />
+      </GlassCard>
 
       <Text style={styles.section}>Your plan</Text>
       <GlassCard strong radius={22} padding={14}>

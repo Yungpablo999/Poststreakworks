@@ -15,6 +15,7 @@ import { GlassCard } from '../components/glass/GlassCard';
 import { OnboardingProgress } from '../components/onboarding/OnboardingProgress';
 import { ds } from '../theme/colors';
 import { SocialButton, type SocialProvider } from '../components/auth/SocialButton';
+import { MIN_AGE } from '../compliance/age';
 
 // Onboarding step 4: create an account to save the plan they just made.
 // One-tap Apple / Google first; email-only as the fallback (name comes later).
@@ -25,9 +26,10 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 interface SignUpScreenProps {
   onBack: () => void;
   onSignIn?: () => void;
-  onSubmit?: (username: string, email: string) => void;
+  /** `age` is the minimum age they confirmed (the box is required before this runs) */
+  onSubmit?: (username: string, email: string, age: number) => void;
   /** One-tap sign-up (mock: continues straight on; a real app runs the provider's sign-in). */
-  onSocialSignUp?: (provider: SocialProvider) => void;
+  onSocialSignUp?: (provider: SocialProvider, age: number) => void;
   /** The idea they kept on the "Your plan" step, shown as what they're saving. */
   savedIdeaTitle?: string;
 }
@@ -44,17 +46,31 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
   const [email, setEmail] = useState('');
   const [focused, setFocused] = useState(false);
   const [touched, setTouched] = useState(false);
+  const [ageOk, setAgeOk] = useState(false);
+  const [ageHint, setAgeHint] = useState(false);
+  const age = MIN_AGE;
 
   const trimmed = email.trim();
   const valid = EMAIL_RE.test(trimmed);
   const showHint = touched && trimmed.length > 0 && !valid;
 
+  const toggleAge = () => {
+    setAgeOk((v) => !v);
+    setAgeHint(false);
+  };
+
+  // Google and Apple do not need the box here: a signed-in account with no age confirmation is
+  // stopped by the age screen right after sign-in (see AgeGate in App.tsx)
   const handleSocial = (provider: SocialProvider) => {
     if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    onSocialSignUp?.(provider);
+    onSocialSignUp?.(provider, age);
   };
 
   const handleCreate = () => {
+    if (!ageOk) {
+      setAgeHint(true);
+      return;
+    }
     if (!valid) {
       setTouched(true);
       return;
@@ -62,7 +78,7 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
     if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     // Name is picked later; use the part before the @ for now
     const handle = trimmed.split('@')[0];
-    onSubmit?.(handle, trimmed);
+    onSubmit?.(handle, trimmed, age);
   };
 
   const showLegal = (which: 'Terms' | 'Privacy') => {
@@ -118,6 +134,21 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
               </Animated.View>
             ) : null}
 
+            {/* Age confirmation: needed before any way of signing up */}
+            <Animated.View entering={FadeIn.delay(280).duration(450)} style={styles.ageRow}>
+              <Pressable onPress={toggleAge} accessibilityRole="checkbox" accessibilityState={{ checked: ageOk }} accessibilityLabel={`I confirm I am at least ${age} years old`} hitSlop={8} style={styles.ageHit}>
+                <View style={[styles.ageBox, ageOk && styles.ageBoxOn]}>
+                  {ageOk ? (
+                    <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+                      <Path d="M5 12.5l4.5 4.5L19 7.5" stroke="#FFFFFF" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
+                    </Svg>
+                  ) : null}
+                </View>
+                <Text style={styles.ageText}>I confirm I am at least {age} years old.</Text>
+              </Pressable>
+              {ageHint && !ageOk ? <Text style={styles.hint}>Please confirm your age to continue.</Text> : null}
+            </Animated.View>
+
             {/* One tap first */}
             <Animated.View entering={FadeInUp.delay(320).duration(500)} style={styles.socialStack}>
               <SocialButton provider="apple" onPress={() => handleSocial('apple')} />
@@ -168,7 +199,7 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
                   </Animated.View>
                 )}
                 <View style={styles.createBtn}>
-                  <AppButton title="Create account" onPress={handleCreate} disabled={!valid} />
+                  <AppButton title="Create account" onPress={handleCreate} disabled={!valid || !ageOk} />
                 </View>
               </GlassCard>
             </Animated.View>
@@ -249,6 +280,11 @@ const styles = StyleSheet.create({
   // The glass field's purple border shows focus; drop the browser's own outline on web
   input: { flex: 1, fontSize: 16, color: ds.ink, height: '100%', ...(Platform.OS === 'web' ? ({ outlineStyle: 'none' } as object) : {}) },
   hint: { fontSize: 12.5, lineHeight: 17, color: ds.purple, marginTop: 8, fontWeight: '600' },
+  ageRow: { marginTop: 18 },
+  ageHit: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  ageBox: { width: 22, height: 22, borderRadius: 7, borderWidth: 1.5, borderColor: ds.line, backgroundColor: 'rgba(255, 255, 255, 0.9)', alignItems: 'center', justifyContent: 'center' },
+  ageBoxOn: { backgroundColor: ds.purple, borderColor: ds.purple },
+  ageText: { flex: 1, fontSize: 13.5, fontWeight: '600', color: ds.ink },
   createBtn: { marginTop: 14 },
   signInRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 20 },
   signInText: { fontSize: 14, color: ds.text2 },
