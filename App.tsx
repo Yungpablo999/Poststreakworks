@@ -16,6 +16,7 @@ import { getCurrentSession, onAuthChange, signOut } from './src/auth/session';
 import { fetchPlan, type Plan } from './src/api/plan';
 import { apiClient } from './src/api/apiClient';
 import { requestWelcome } from './src/api/welcome';
+import { deleteMyAccount } from './src/api/account';
 import {
   claimStoredReferral,
   hasLandingParams,
@@ -536,6 +537,14 @@ export default function App() {
     signOut().catch((err) => console.warn('[auth] sign-out:', err));
     applySession(null); // clear the profile right away
     navigateTo(Platform.OS === 'web' ? 'signin' : 'welcome');
+  };
+
+  // Permanent deletion: the backend removes the data and the sign-in; then this device signs out like a normal logout
+  const handleDeleteAccount = async (typed: string): Promise<string | null> => {
+    const result = await deleteMyAccount(typed, { post: (endpoint, body) => apiClient.post(endpoint, body) });
+    if (!result.ok) return result.message;
+    handleLogout();
+    return null;
   };
 
   // The profile (name, handle, photo) is the signed-in user's: built from the
@@ -1560,6 +1569,7 @@ export default function App() {
           initialSubTab="accounts"
           onClose={() => setShowAccountsFromNote(false)}
           onLogout={handleLogout}
+          onDeleteAccount={handleDeleteAccount}
           initialProfile={userProfile}
           onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: prev.tier || 'free' }))}
         />
@@ -1568,6 +1578,7 @@ export default function App() {
           visible={showProfileFromMenu}
           onClose={() => setShowProfileFromMenu(false)}
           onLogout={handleLogout}
+          onDeleteAccount={handleDeleteAccount}
           initialProfile={userProfile}
           onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: prev.tier || 'free' }))}
         />

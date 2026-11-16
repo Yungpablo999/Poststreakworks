@@ -22,6 +22,7 @@ import { GlassCard } from './glass/GlassCard';
 import { PlatformRow } from './onboarding/PlatformRow';
 import { PlatformLogo, type PlatformLogoType } from './onboarding/PlatformLogo';
 import { ds, goldTokens } from '../theme/colors';
+import { isDeleteConfirmed } from '../api/account';
 import { STAGE_2_ENABLED } from '../config/features';
 import { describeEmailPrefError, getProductEmails, setProductEmails } from '../api/emailPreferences';
 
@@ -311,6 +312,8 @@ export interface UserProfileModalProps {
   visible: boolean;
   onClose: () => void;
   onLogout?: () => void;
+  /** Permanently deletes the account; resolves to an error message, or null when it worked */
+  onDeleteAccount?: (typed: string) => Promise<string | null>;
   initialProfile?: Partial<UserProfileData>;
   /** Older callers pass 'socials' / 'verification'; they map to Accounts / Badge. */
   initialSubTab?: 'profile' | 'socials' | 'verification' | 'settings' | 'accounts';
@@ -326,7 +329,7 @@ const toTab = (t?: UserProfileModalProps['initialSubTab']): Tab => {
   return 'profile';
 };
 
-export const UserProfileModal: React.FC<UserProfileModalProps> = ({ visible, onClose, onLogout, initialProfile, initialSubTab, onSaveProfile }) => {
+export const UserProfileModal: React.FC<UserProfileModalProps> = ({ visible, onClose, onLogout, onDeleteAccount, initialProfile, initialSubTab, onSaveProfile }) => {
   const isPro = initialProfile?.tier === 'pro' || initialProfile?.tier === 'founding';
   const isNew = (initialProfile?.userPersona ?? 'new') === 'new';
   const tabs: Tab[] = STAGE_2_ENABLED ? ['profile', 'accounts', 'badge', 'settings'] : ['profile', 'accounts', 'settings'];
@@ -342,6 +345,9 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ visible, onC
   const [connected, setConnected] = useState<string[]>([]);
   const [toast, setToast] = useState<string | null>(null);
   const [confirmOut, setConfirmOut] = useState(false);
+  const [deleting, setDeleting] = useState<'idle' | 'confirm' | 'busy'>('idle');
+  const [deleteTyped, setDeleteTyped] = useState('');
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   // null until the backend answers; the row stays hidden if it cannot be loaded
   const [productEmails, setProductEmailsState] = useState<boolean | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -506,6 +512,19 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ visible, onC
     if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     onClose();
     onLogout?.();
+  };
+
+  const submitDelete = async () => {
+    if (!onDeleteAccount || deleting === 'busy' || !isDeleteConfirmed(deleteTyped)) return;
+    setDeleting('busy');
+    setDeleteError(null);
+    const error = await onDeleteAccount(deleteTyped);
+    if (error) {
+      setDeleteError(error);
+      setDeleting('confirm');
+      return;
+    }
+    onClose();
   };
 
   const posts = initialProfile?.postsCount ?? 0;
@@ -722,6 +741,31 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ visible, onC
           </Animated.View>
         </Pressable>
       ) : null}
+
+      {onDeleteAccount ? (
+        deleting === 'idle' ? (
+          <Pressable onPress={() => { tick(); setDeleting('confirm'); }} accessibilityRole="button" style={({ pressed }) => [styles.deleteLink, pointer, pressed && { opacity: 0.7 }]}>
+            <Text style={styles.deleteLinkText}>Delete account</Text>
+          </Pressable>
+        ) : (
+          <GlassCard radius={20} padding={16} style={styles.deleteCard}>
+            <Text style={styles.setTitle}>Delete your account?</Text>
+            <Text style={styles.setBody}>This permanently removes your posts, connected accounts, drafts, streaks and settings. It cannot be undone. Type DELETE to confirm.</Text>
+            <View style={{ marginTop: 10 }}>
+              <Input value={deleteTyped} onChangeText={setDeleteTyped} placeholder="DELETE" autoCapitalize="none" label="Type DELETE to confirm" />
+            </View>
+            {deleteError ? <Text style={styles.deleteError}>{deleteError}</Text> : null}
+            <View style={styles.deleteRow}>
+              <Pressable onPress={() => { setDeleting('idle'); setDeleteTyped(''); setDeleteError(null); }} accessibilityRole="button" disabled={deleting === 'busy'} style={[styles.deleteCancel, pointer]}>
+                <Text style={styles.deleteCancelText}>Cancel</Text>
+              </Pressable>
+              <Pressable onPress={submitDelete} accessibilityRole="button" disabled={deleting === 'busy' || !isDeleteConfirmed(deleteTyped)} style={[styles.deleteConfirm, (deleting === 'busy' || !isDeleteConfirmed(deleteTyped)) && { opacity: 0.45 }, pointer]}>
+                <Text style={styles.deleteConfirmText}>{deleting === 'busy' ? 'Deleting…' : 'Delete forever'}</Text>
+              </Pressable>
+            </View>
+          </GlassCard>
+        )
+      ) : null}
     </>
   );
 
@@ -857,5 +901,14 @@ const styles = StyleSheet.create({
   signOut: { marginTop: 20, height: 50, borderRadius: 16, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(254, 242, 242, 0.9)', borderWidth: 1, borderColor: '#FECACA' },
   signOutConfirm: { backgroundColor: '#DC2626', borderColor: '#DC2626' },
   signOutInner: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  deleteLink: { marginTop: 14, alignItems: 'center', paddingVertical: 8 },
+  deleteLinkText: { fontSize: 13, fontWeight: '700', color: ds.text3, textDecorationLine: 'underline' },
+  deleteCard: { marginTop: 14 },
+  deleteError: { marginTop: 8, fontSize: 12.5, fontWeight: '700', color: '#B91C1C' },
+  deleteRow: { flexDirection: 'row', gap: 10, marginTop: 12 },
+  deleteCancel: { flex: 1, height: 46, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.7)', borderWidth: 1, borderColor: ds.line },
+  deleteCancelText: { fontSize: 14.5, fontWeight: '800', color: ds.ink },
+  deleteConfirm: { flex: 1, height: 46, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: '#DC2626' },
+  deleteConfirmText: { fontSize: 14.5, fontWeight: '800', color: '#FFFFFF' },
   signOutText: { fontSize: 15, fontWeight: '800', color: '#B91C1C' },
 });
