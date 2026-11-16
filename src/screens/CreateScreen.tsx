@@ -130,6 +130,7 @@ interface CreateScreenProps {
   tier?: 'free' | 'pro';
   onOpenVoiceStudio?: () => void;
   onOpenHookStudio?: () => void;
+  onOpenAutopilot?: () => void;
   userProfile?: UserProfileData;
   onSaveProfile?: (updated: UserProfileData) => void;
 }
@@ -233,6 +234,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
   tier = 'free',
   onOpenVoiceStudio,
   onOpenHookStudio,
+  onOpenAutopilot,
   userProfile,
   onSaveProfile,
 }) => {
@@ -610,6 +612,18 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({
                 icon={
                   <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
                     <Path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z" stroke={ds.purple} strokeWidth={2.1} strokeLinejoin="round" />
+                  </Svg>
+                }
+              />
+            )}
+            {onOpenAutopilot && (
+              <GlassRow
+                title="Autopilot"
+                subtitle="Pick topics and let Jarvis write your posts"
+                onPress={onOpenAutopilot}
+                icon={
+                  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                    <Path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z" stroke={ds.purple} strokeWidth={2.1} strokeLinejoin="round" />
                   </Svg>
                 }
               />

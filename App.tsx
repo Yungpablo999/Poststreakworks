@@ -21,6 +21,7 @@ import { consentStore } from './src/consent/consentStore';
 import { ageConfirmationData, confirmAge, declineAge, needsAgeGate } from './src/compliance/age';
 import { AgeGate } from './src/components/AgeGate';
 import { getSupabase } from './src/auth/supabase';
+import { deleteMyAccount } from './src/api/account';
 import {
   claimStoredReferral,
   hasLandingParams,
@@ -31,6 +32,8 @@ import {
   stripLandingParams,
 } from './src/api/landingParams';
 import { requestTierChange } from './src/config/plan';
+import { isComingSoonScreen } from './src/config/features';
+import { ComingSoon } from './src/components/ComingSoon';
 import { profileFromUser } from './src/auth/profile';
 import type { Session } from '@supabase/supabase-js';
 import { BrandToast } from './src/components/BrandToast';
@@ -73,6 +76,7 @@ import { ProVoiceStudioScreen } from './src/screens/ProVoiceStudioScreen';
 import { VoiceStudioScreen } from './src/screens/VoiceStudioScreen';
 import { ProHookStudioScreen } from './src/screens/ProHookStudioScreen';
 import { HookStudioScreen } from './src/screens/HookStudioScreen';
+import { AutopilotScreen } from './src/screens/AutopilotScreen';
 import { ScreenTransitionContainer, ScreenTransitionType } from './src/components/ScreenTransitionContainer';
 import { EdgeSwipeBackWrapper } from './src/components/EdgeSwipeBackWrapper';
 import { TabType } from './src/components/FloatingTabBar';
@@ -122,7 +126,8 @@ type Screen =
   | 'post-performance'
   | 'platform-growth'
   | 'voice-studio'
-  | 'hook-studio';
+  | 'hook-studio'
+  | 'autopilot';
 
 export default function App() {
   // Brand fonts (Plus Jakarta Sans + Playfair Display italic for "Earn.").
@@ -543,6 +548,14 @@ export default function App() {
     navigateTo(Platform.OS === 'web' ? 'signin' : 'welcome');
   };
 
+  // Permanent deletion: the backend removes the data and the sign-in; then this device signs out like a normal logout
+  const handleDeleteAccount = async (typed: string): Promise<string | null> => {
+    const result = await deleteMyAccount(typed, { post: (endpoint, body) => apiClient.post(endpoint, body) });
+    if (!result.ok) return result.message;
+    handleLogout();
+    return null;
+  };
+
   // The profile (name, handle, photo) is the signed-in user's: built from the
   // session at startup and on every auth change, and cleared on sign-out so the
   // next person never sees the previous one.
@@ -741,6 +754,8 @@ export default function App() {
         return 'create';
       case 'hook-studio':
         return 'create';
+      case 'autopilot':
+        return 'create';
       case 'schedule':
         return 'dashboard';
       default:
@@ -752,7 +767,7 @@ export default function App() {
   const breakpoint = useBreakpoint();
   const SIDEBAR_FOR: Partial<Record<Screen, SidebarId>> = {
     dashboard: 'home', 'mission-detail': 'home', 'jarvis-pro': 'home',
-    create: 'create', 'idea-detail': 'create', composer: 'create', 'content-angle': 'create', script: 'create', caption: 'create',
+    create: 'create', autopilot: 'create', 'idea-detail': 'create', composer: 'create', 'content-angle': 'create', script: 'create', caption: 'create',
     quests: 'quests', 'challenge-detail': 'quests',
     growth: 'growth', 'audience-breakdown': 'growth', 'post-performance': 'growth', 'platform-growth': 'growth',
     schedule: 'schedule', repurpose: 'repurpose', 'hook-studio': 'hook-studio', 'voice-studio': 'voice-studio',
@@ -794,7 +809,7 @@ export default function App() {
   const studioRail = showSidebar && wideEnough ? STUDIO_FOR[currentScreen] : undefined;
   const PAGE_TITLE: Partial<Record<Screen, string>> = {
     composer: 'New post', 'idea-detail': 'Idea', 'content-angle': 'Ideas', script: 'Script', caption: 'Caption',
-    'mission-detail': 'Today’s quest', 'challenge-detail': 'Weekly challenge', 'jarvis-pro': 'Jarvis Pro',
+    autopilot: 'Autopilot', 'mission-detail': 'Today’s quest', 'challenge-detail': 'Weekly challenge', 'jarvis-pro': 'Jarvis Pro',
     'audience-breakdown': 'Your audience', 'post-performance': 'Post performance', 'platform-growth': 'Platform growth',
   };
   const innerBack = MAIN_PAGES.includes(currentScreen) ? null : getBackScreen(currentScreen);
@@ -1105,6 +1120,7 @@ export default function App() {
                 navigateTo('voice-studio');
               }}
               onOpenHookStudio={() => navigateTo('hook-studio')}
+              onOpenAutopilot={() => navigateTo('autopilot')}
               onLogout={handleLogout}
               onOpenSchedule={() => navigateTo('schedule')}
               onOpenJarvisPro={() => navigateTo('jarvis-pro')}
@@ -1457,6 +1473,18 @@ export default function App() {
           />
         )}
 
+        {currentScreen === 'autopilot' && (
+          <AutopilotScreen
+            onBack={() => navigateTo('create')}
+            onLogout={handleLogout}
+            onOpenJarvisPro={() => navigateTo('jarvis-pro')}
+            onSwitchToFree={() => requestTier('free')}
+            onNavigateTab={handleTabNavigation}
+            userProfile={userProfile}
+            onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: prev.tier || 'free' }))}
+          />
+        )}
+
         {currentScreen === 'platform-growth' && (
           <PlatformGrowthScreen
             tier={userProfile?.tier === 'pro' || userProfile?.tier === 'founding' ? 'pro' : 'free'}
@@ -1550,6 +1578,7 @@ export default function App() {
             onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: prev.tier || 'free' }))}
           />
         )}
+          {isComingSoonScreen(currentScreen) && <ComingSoon onBack={() => navigateTo('dashboard')} />}
           </ScreenTransitionContainer>
         </EdgeSwipeBackWrapper>
             </View>
@@ -1571,6 +1600,7 @@ export default function App() {
           initialSubTab="accounts"
           onClose={() => setShowAccountsFromNote(false)}
           onLogout={handleLogout}
+          onDeleteAccount={handleDeleteAccount}
           initialProfile={userProfile}
           onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: prev.tier || 'free' }))}
         />
@@ -1579,6 +1609,7 @@ export default function App() {
           visible={showProfileFromMenu}
           onClose={() => setShowProfileFromMenu(false)}
           onLogout={handleLogout}
+          onDeleteAccount={handleDeleteAccount}
           initialProfile={userProfile}
           onSaveProfile={(updated) => setUserProfile(prev => ({ ...prev, ...updated, tier: prev.tier || 'free' }))}
         />
