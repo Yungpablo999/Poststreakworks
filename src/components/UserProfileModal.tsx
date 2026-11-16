@@ -25,6 +25,8 @@ import { ds, goldTokens } from '../theme/colors';
 import { isDeleteConfirmed } from '../api/account';
 import { STAGE_2_ENABLED } from '../config/features';
 import { consentStore, useConsent } from '../consent/consentStore';
+import { usePlatforms } from '../hooks/usePlatforms';
+import { useConnect } from '../hooks/useConnect';
 import { describeEmailPrefError, getProductEmails, setProductEmails } from '../api/emailPreferences';
 
 // "Your profile": one glass sheet for every creator (free or Pro, new or
@@ -91,6 +93,7 @@ export const ALL_NICHES = [
 ];
 
 const ACCOUNTS: { id: PlatformLogoType; name: string }[] = [
+  { id: 'linkedin', name: 'LinkedIn' },
   { id: 'tiktok', name: 'TikTok' },
   { id: 'instagram', name: 'Instagram' },
   { id: 'youtube', name: 'YouTube' },
@@ -403,6 +406,14 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ visible, onC
     toastTimer.current = setTimeout(() => setToast(null), 2200);
   };
 
+  // Accounts are the real connections from the backend, the same as the onboarding connect screen
+  const { isConnected } = usePlatforms();
+  const connect = useConnect(isConnected);
+  useEffect(() => {
+    if (connect.message) showToast(connect.message);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connect.message]);
+
   const cleanHandle = (h: string) => {
     const t = h.replace(/\s+/g, '').replace(/^@+/, '');
     return t ? `@${t}` : initialProfile?.handle ?? '';
@@ -424,7 +435,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ visible, onC
     avatarSource: avatarSource ?? undefined,
     customAvatarUri: customUri ?? undefined,
     niches,
-    connectedPlatforms: connected,
+    connectedPlatforms: ACCOUNTS.filter((a) => isConnected(a.id)).map((a) => a.id),
     streakCount: initialProfile?.streakCount ?? 1,
     level: initialProfile?.level ?? 1,
     xp: initialProfile?.xp ?? 0,
@@ -449,12 +460,11 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ visible, onC
   };
 
   // Accounts connect on the spot (nothing to save)
-  const toggleAccount = (id: string) => {
-    const next = connected.includes(id) ? connected.filter((x) => x !== id) : [...connected, id];
-    setConnected(next);
+  const toggleAccount = async (id: string) => {
     const n = ACCOUNTS.find((a) => a.id === id)?.name ?? id;
-    showToast(connected.includes(id) ? `${n} removed` : `${n} connected`);
-    onSaveProfile?.({ ...(initialProfile as UserProfileData), connectedPlatforms: next });
+    const outcome = await connect.toggle(id);
+    if (outcome === 'connected') showToast(`${n} connected`);
+    else if (outcome === 'disconnected') showToast(`${n} removed`);
   };
 
   const pickAvatar = (id: string) => {
@@ -629,13 +639,13 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ visible, onC
     </>
   );
 
-  const nConnected = ACCOUNTS.filter((a) => connected.includes(a.id)).length;
+  const nConnected = ACCOUNTS.filter((a) => isConnected(a.id)).length;
   const accountsTab = (
     <>
       <GlassCard strong radius={22} padding={14}>
         <View style={styles.logoRow}>
           {ACCOUNTS.map((a) => (
-            <View key={a.id} style={{ opacity: connected.includes(a.id) ? 1 : 0.3 }}>
+            <View key={a.id} style={{ opacity: isConnected(a.id) ? 1 : 0.3 }}>
               <PlatformLogo type={a.id} size={26} />
             </View>
           ))}
@@ -645,9 +655,9 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ visible, onC
       </GlassCard>
       <View style={styles.list}>
         {ACCOUNTS.map((a) => {
-          const on = connected.includes(a.id);
+          const on = isConnected(a.id);
           const h = (initialProfile as Record<string, unknown> | undefined)?.[`${a.id}Handle`];
-          return <PlatformRow key={a.id} name={a.name} logo={a.id} description={on ? (typeof h === 'string' && h) || 'Connected' : `Sign in with ${a.name}`} connected={on} onToggle={() => toggleAccount(a.id)} />;
+          return <PlatformRow key={a.id} name={a.name} logo={a.id} description={on ? (typeof h === 'string' && h) || 'Connected' : `Sign in with ${a.name}`} connected={on} onToggle={() => { void toggleAccount(a.id); }} />;
         })}
       </View>
       <View style={styles.privacy}>

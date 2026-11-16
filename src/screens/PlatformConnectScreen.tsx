@@ -28,14 +28,14 @@ interface PlatformItem {
   logo: PlatformLogoType;
 }
 
-// The six platforms you can connect, most popular first
+// The six platforms you can connect. LinkedIn is first: it is the one that posts text from the app today
 const PLATFORMS: PlatformItem[] = [
+  { id: 'linkedin', name: 'LinkedIn', description: 'Posts for your network', logo: 'linkedin' },
   { id: 'tiktok', name: 'TikTok', description: 'Videos and growth insights', logo: 'tiktok' },
   { id: 'instagram', name: 'Instagram', description: 'Posts, Reels and insights', logo: 'instagram' },
   { id: 'youtube', name: 'YouTube', description: 'Shorts and channel growth', logo: 'youtube' },
   { id: 'facebook', name: 'Facebook', description: 'Pages and groups', logo: 'facebook' },
   { id: 'threads', name: 'Threads', description: 'Text posts and replies', logo: 'threads' },
-  { id: 'linkedin', name: 'LinkedIn', description: 'Posts for your network', logo: 'linkedin' },
 ];
 
 interface PlatformConnectScreenProps {
